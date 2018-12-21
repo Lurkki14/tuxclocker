@@ -28,16 +28,19 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     qcustomplot.cpp \
-    editprofile.cpp
+    editprofile.cpp \
+    newprofile.cpp
 
 HEADERS += \
         mainwindow.h \
     qcustomplot.h \
-    editprofile.h
+    editprofile.h \
+    newprofile.h
 
 FORMS += \
         mainwindow.ui \
-    editprofile.ui
+    editprofile.ui \
+    newprofile.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

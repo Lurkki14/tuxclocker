@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="3">
     <widget class="QCustomPlot" name="curvePlot" native="true">
      <property name="whatsThis">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This graph defines the relation of fan speed to the GPU temperature.&lt;/p&gt;&lt;p&gt;To add a point, double click on the area.&lt;/p&gt;&lt;p&gt;To remove a point, click on it,&lt;/p&gt;&lt;p&gt;To move a point, drag it.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This graph defines the relation of fan speed to the GPU temperature.&lt;/p&gt;&lt;p&gt;To add a point, double click on the area.&lt;/p&gt;&lt;p&gt;To remove a point, click on it.&lt;/p&gt;&lt;p&gt;To move a point, drag it.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>

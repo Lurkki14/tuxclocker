@@ -25,7 +25,6 @@ public:
     QVector<double> qv_x, qv_y;
     QVector<int> cpoints_x, cpoints_y;
 
-
 signals:
     void on_clickedPoint(QMouseEvent *event);
     void on_dragPoint(bool);
@@ -39,7 +38,8 @@ private slots:
     void clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event);
     //void getDataPoints();
     void on_saveButton_clicked();
-    void drawCoordtext(int index_x, int index_y);
+    void drawCoordtext();
+
     double getPixelLength(QMouseEvent *event);
     bool initializeDragging(QMouseEvent *event);
     bool detectMove(QMouseEvent *event);

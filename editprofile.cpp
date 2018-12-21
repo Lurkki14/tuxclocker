@@ -44,6 +44,14 @@ editProfile::editProfile(QWidget *parent) :
     connect(ui->curvePlot, SIGNAL(mouseRelease(QMouseEvent*)), SLOT(detectRelease(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getYcoordValue(QMouseEvent*)));
 
+    // Load the existing points to the graph
+    MainWindow mw;
+    for (int i=0; i<mw.xCurvePoints.length(); i++) {
+        qv_x.append(mw.xCurvePoints[i]);
+        qv_y.append(mw.yCurvePoints[i]);
+    }
+    ui->curvePlot->graph(0)->setData(qv_x, qv_y);
+    drawFillerLines();
 
 }
 
@@ -56,7 +64,9 @@ void editProfile::addPoint(double x, double y)
 {
     y = round(y);
     x = round(x);
+    if (qv_x.length() != 0) {
     checkForDuplicatePoint(x, y);
+    }
     if ((x_lower<=x) && (x<=x_upper) && (y_lower<=y) && (y<=y_upper) && !duplicatePoint) {
         qv_x.append(x);
         qv_y.append(y);
@@ -79,11 +89,9 @@ void editProfile::clickedGraph(QMouseEvent *event)
 void editProfile::clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event)
 {
     checkForNearbyPoints(event);
-    //double ycoord = ui->curvePlot->graph(0)->dataMainValue(dataIndex);
-    //double xcoord = ui->curvePlot->graph(0)->dataSortKey(dataIndex);
     ycoord = round(ycoord);
     xcoord = round(xcoord);
-    if (isNearbyPoint) {
+    if (isNearbyPoint && qv_x.length() != 0) {
             for (int i=0; i<qv_y.length(); i++ ) {
                 qv_y[i] = round(qv_y[i]);
                 qv_x[i] = round(qv_x[i]);
@@ -102,6 +110,7 @@ void editProfile::clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, Q
 
 bool editProfile::checkForNearbyPoints(QMouseEvent *event)
 {
+    if (qv_x.length() != 0) {
     QPoint point = event->pos();
     double pointerxcoord = ui->curvePlot->xAxis->pixelToCoord(point.x());
     double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(point.y());
@@ -115,6 +124,7 @@ bool editProfile::checkForNearbyPoints(QMouseEvent *event)
         }
     }
     return isNearbyPoint;
+    }
 }
 
 int editProfile::getDataIndex(QCPAbstractPlottable *plottable, int dataIndex)
@@ -145,6 +155,7 @@ int editProfile::getXcoordValue(int xcoord)
 
 int editProfile::getYcoordValue(QMouseEvent *event)
 {
+    if (qv_x.length() != 0) {
     //Gets the indices of points that match the current cursor location
     QPoint point = event->pos();
     double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(point.y());
@@ -155,6 +166,7 @@ int editProfile::getYcoordValue(QMouseEvent *event)
             ycoord = qv_y[i];
             break;
         }
+    }
     }
     getXcoordValue(xcoord);
     return ycoord;
@@ -218,7 +230,7 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     // Sleep here so we don't take up so much CPU time
     QThread::msleep(10);
     ui->curvePlot->clearItems();
-    drawCoordtext(index_x, index_y);
+    drawCoordtext();
     QPoint point = event->pos();
     qv_y[index_y] = round(ui->curvePlot->yAxis->pixelToCoord(point.y()));
     qv_x[index_x] = round(ui->curvePlot->xAxis->pixelToCoord(point.x()));
@@ -240,7 +252,7 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     drawFillerLines();
 }
 
-void editProfile::drawCoordtext(int index_x, int index_y)
+void editProfile::drawCoordtext()
 {
     QCPItemText *coordText = new QCPItemText(ui->curvePlot);
     if (draggingPoint) {
@@ -263,8 +275,10 @@ void editProfile::drawCoordtext(int index_x, int index_y)
     coordText->setText(xString + ", " + yString);
     }
 
-    if (!mouseDragging) {
+    if (!draggingPoint) {
         ui->curvePlot->clearItems();
+        coordText->position->setCoords(100, 100);
+        coordText->setText("");
     }
 }
 
@@ -295,7 +309,7 @@ bool editProfile::detectRelease(QMouseEvent *event)
     resetMouseDragging();
     draggedIndicesUnset();
     draggingPointUnset();
-    drawCoordtext(index_x, index_y);
+    //drawCoordtext(index_x, index_y);
     return mousePressed;
 }
 
@@ -343,58 +357,12 @@ double editProfile::getPixelLength(QMouseEvent *event)
 
 void editProfile::on_pushButton_clicked()
 {
-    MainWindow mw;
     ui->curvePlot->clearItems();
-    qDebug() << mw.voltInt;
+    qDebug() << index_x << index_y;
 }
 
 void editProfile::on_saveButton_clicked()
 {
-
-    /*QFile file("C:/Users/Gnometech/Documents/rojekti/test.xml");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))  {
-
-    document.setContent(&file);
-    file.close();
-        // Remove existing xpoints and ypoints attributes
-        QDomElement root = document.firstChildElement();
-        QDomNodeList ypoints =root.elementsByTagName("ypoints");
-        QDomNode ypntnode = ypoints.item(0);
-        QDomNodeList xpoints =root.elementsByTagName("xpoints");
-        QDomNode xpntnode = xpoints.item(0);
-
-        QString xString;
-            QString yString;
-            // Add the curve points to strings
-            for (int i=0; i<qv_x.length(); i++) {
-                QString x = QString::number(ui->curvePlot->graph(0)->dataSortKey(i));
-                QString y = QString::number(ui->curvePlot->graph(0)->dataMainValue(i));
-                xString.append(x + ", ");
-                yString.append(y + ", ");
-
-        if (ypntnode.isElement()) {
-            QDomElement elem = ypntnode.toElement();
-            if (elem.hasAttribute("ypoints")) {
-            elem.removeAttribute("ypoints");
-            elem.setAttribute("ypoints", yString);
-            }
-        }
-
-        if (xpntnode.isElement()) {
-            QDomElement elem = xpntnode.toElement();
-            elem.removeAttribute("xpoints");
-            elem.setAttribute("xpoints", xString);
-        }
-    }
-
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream stream(&file);
-        stream << document.toString();
-        file.close();
-        qDebug() << "valmis";
-    }
-    } */
-
     QString xString;
     QString yString;
     for (int i=0; i<qv_x.length(); i++) {
@@ -404,13 +372,17 @@ void editProfile::on_saveButton_clicked()
         yString.append(y + ", ");
 
     }
+    MainWindow mw;
     QVariant xarray = xString;
     QVariant yarray = yString;
     qDebug() << xarray.toString() << yarray.toString();
     QSettings settings("nvfancurve");
-
-    settings.setValue("profile/curveXpoints", xarray);
-    settings.setValue("profile/curveYpoints", yarray);
+    QString xsetting = mw.currentProfile;
+    QString ysetting = mw.currentProfile;
+    ysetting.append("/ypoints");
+    xsetting.append("/xpoints");
+    settings.setValue(xsetting, xarray);
+    settings.setValue(ysetting, yarray);
 
 }
 
