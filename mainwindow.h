@@ -59,8 +59,8 @@ public:
     int minCoreClkOfsInt;
     int maxCoreClkOfsInt;
     int curMaxClkInt;
-    int minMemClkOfsInt;
-    int maxMemClkOfsInt;
+    int minMemClkOfsInt = 0;
+    int maxMemClkOfsInt = 0;
     int minVoltOfsInt = 0;
     int maxVoltOfsInt = 0;
     int curMaxMemClkInt;
@@ -124,6 +124,8 @@ private slots:
     void enableFanControl();
     void resetChanges();
     void resetTimer();
+    void on_fanModeComboBox_currentTextChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
@@ -131,5 +133,4 @@ private:
 
     QTimer *resettimer = new QTimer(this);
 };
-
 #endif // MAINWINDOW_H

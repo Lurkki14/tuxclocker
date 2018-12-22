@@ -73,7 +73,8 @@ void MainWindow::on_pushButton_clicked()
     //loadProfileSettings();
    // checkForProfiles();
     //getGPUDriver();
-    checkForRoot();
+    //checkForRoot();
+    qDebug() << minMemClkOfsInt << maxMemClkOfsInt;
 }
 
 void MainWindow::checkForRoot()
@@ -155,7 +156,6 @@ void MainWindow::fanSpeedUpdater()
     fanSpeed = process.readLine().toInt();
     ui->fanSlider->setValue(fanSpeed);
     ui->fanSpinBox->setValue(fanSpeed);
-
 }
 void MainWindow::tempUpdater()
 {
@@ -216,14 +216,13 @@ void MainWindow::queryGPUSettings()
             maxVoltOfsInt = process.readLine().toInt()/1000;
         }
     }
-    qDebug() << "maxvolt on" << maxVoltOfsInt;
 
     QString coreFreqOfs;
     process.start(nvCoreClkOfsQ);
     process.waitForFinished(-1);
-    coreFreqOfs = process.readLine();
-    coreFreqOfs.chop(1);
-    coreFreqOfsInt = coreFreqOfs.toInt();
+    //coreFreqOfs = process.readLine();
+    //coreFreqOfs.chop(1);
+    coreFreqOfsInt = process.readLine().toInt();
     latestClkOfs = coreFreqOfsInt;
 
     process.start(nvCurMaxClkQ);
@@ -246,25 +245,26 @@ void MainWindow::queryGPUSettings()
 
     process.start(nvClockLimQ);
     process.waitForFinished(-1);
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<process.size(); i++) {
         QString line = process.readLine();
-        if (line.contains("-")) {
-            minCoreClkOfsInt = line.toInt();
-        } else {
-            maxCoreClkOfsInt = line.toInt();
+        if (line.toInt()/2 > maxCoreClkOfsInt) {
+            maxCoreClkOfsInt = line.toInt()/2;
+        }
+        if (line.toInt()/2 <= minCoreClkOfsInt) {
+            minCoreClkOfsInt = line.toInt()/2;
         }
     }
-    qDebug() << minCoreClkOfsInt << maxCoreClkOfsInt;
 
     // This gets the transfer rate, the clock speed is rate/2
     process.start(nvMemClkLimQ);
     process.waitForFinished(-1);
-    for (int i=0; i<2; i++) {
+    for (int i=0; i<process.size(); i++) {
         QString line = process.readLine();
-        if (line.contains("-")) {
-            minMemClkOfsInt = line.toInt()/2;
-        } else {
+        if (line.toInt()/2 > maxMemClkOfsInt) {
             maxMemClkOfsInt = line.toInt()/2;
+        }
+        if (line.toInt()/2 <= minMemClkOfsInt) {
+            minMemClkOfsInt = line.toInt()/2;
         }
     }
 
@@ -488,4 +488,9 @@ void MainWindow::on_fanSpinBox_valueChanged(int arg1)
 void MainWindow::on_applyButton_clicked()
 {
     applyGPUSettings();
+}
+
+void MainWindow::on_fanModeComboBox_currentTextChanged(const QString &arg1)
+{
+
 }

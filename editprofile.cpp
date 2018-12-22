@@ -52,7 +52,6 @@ editProfile::editProfile(QWidget *parent) :
     }
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
-
 }
 
 editProfile::~editProfile()
@@ -273,12 +272,9 @@ void editProfile::drawCoordtext()
     QString xString = QString::number(qv_x[index_x]);
     QString yString = QString::number(qv_y[index_y]);
     coordText->setText(xString + ", " + yString);
-    }
 
-    if (!draggingPoint) {
-        ui->curvePlot->clearItems();
-        coordText->position->setCoords(100, 100);
-        coordText->setText("");
+    } else {
+        ui->curvePlot->removeItem(coordText);
     }
 }
 
@@ -309,7 +305,7 @@ bool editProfile::detectRelease(QMouseEvent *event)
     resetMouseDragging();
     draggedIndicesUnset();
     draggingPointUnset();
-    //drawCoordtext(index_x, index_y);
+    drawCoordtext();
     return mousePressed;
 }
 
@@ -357,8 +353,8 @@ double editProfile::getPixelLength(QMouseEvent *event)
 
 void editProfile::on_pushButton_clicked()
 {
-    ui->curvePlot->clearItems();
-    qDebug() << index_x << index_y;
+    qDebug() << draggingPoint;
+    drawCoordtext();
 }
 
 void editProfile::on_saveButton_clicked()
