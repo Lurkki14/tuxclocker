@@ -26,8 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->memClkSlider->setRange(defMemClk + minMemClkOfsInt, defMemClk + maxMemClkOfsInt);
     ui->memClkSpinBox->setRange(defMemClk + minMemClkOfsInt, defMemClk + maxMemClkOfsInt);
-    ui->memClkSlider->setValue(curMaxMemClkInt);
-    ui->memClkSpinBox->setValue(curMaxMemClkInt);
+    ui->memClkSlider->setValue(defMemClk + memClkOfsInt);
+    ui->memClkSpinBox->setValue(defMemClk + memClkOfsInt);
 
     ui->voltageSlider->setRange(voltInt + minVoltOfsInt, voltInt + maxVoltOfsInt);
     ui->voltageSpinBox->setRange(voltInt + minVoltOfsInt, voltInt + maxVoltOfsInt);
@@ -41,8 +41,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QTimer *fanUpdateTimer = new QTimer(this);
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
-    connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+    //connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
     fanUpdateTimer->start(2000);
+
+    connect(ui->frequencySpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
+    connect(ui->powerLimSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
+    connect(ui->memClkSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
+    connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
 }
 
 MainWindow::~MainWindow()
@@ -162,22 +167,44 @@ void MainWindow::tempUpdater()
         generateFanPoint();
     }
 }
+void MainWindow::resetTimer()
+{
+    // If a value has been changed this timer will start. When the apply button has been pressed, this gets cancelled
+    connect(resettimer, SIGNAL(timeout()), SLOT(resetChanges()));
+    resettimer->stop();
+    resettimer->setSingleShot(true);
+    resettimer->start(10000);
+}
+void MainWindow::resetChanges()
+{
+    // If the settings haven't been applied in 10 seconds, reset all values to their latest values
+    ui->frequencySlider->setValue(defCoreClk + latestClkOfs);
+    ui->frequencySpinBox->setValue(defCoreClk + latestClkOfs);
+
+    ui->powerLimSlider->setValue(latestPowerLim);
+    ui->powerLimSpinBox->setValue(latestPowerLim);
+
+    ui->voltageSlider->setValue(voltInt + latestVoltOfs);
+    ui->voltageSpinBox->setValue(voltInt + latestVoltOfs);
+
+    ui->memClkSlider->setValue(curMaxMemClkInt);
+    ui->memClkSpinBox->setValue(curMaxMemClkInt);
+
+    ui->memClkSlider->setValue(defMemClk + latestMemClkOfs);
+    ui->memClkSpinBox->setValue(defMemClk + latestMemClkOfs);
+    qDebug() << "timer";
+}
 void MainWindow::queryGPUSettings()
 {
-    QString volt;
     QProcess process;
     process.start(nvVoltQ);
     process.waitForFinished(-1);
-    volt = process.readLine();
-    volt.chop(1);
-    voltInt = volt.toInt()/1000;
+    voltInt = process.readLine().toInt()/1000;
 
-    QString voltOfs;
     process.start(nvVoltOfsQ);
     process.waitForFinished(-1);
-    voltOfs = process.readLine();
-    voltOfs.chop(1);
-    voltOfsInt = voltOfs.toInt()/1000;
+    voltOfsInt = process.readLine().toInt()/1000;
+    latestVoltOfs = voltOfsInt;
 
     defVolt = voltInt - voltOfsInt;
 
@@ -197,56 +224,26 @@ void MainWindow::queryGPUSettings()
     coreFreqOfs = process.readLine();
     coreFreqOfs.chop(1);
     coreFreqOfsInt = coreFreqOfs.toInt();
+    latestClkOfs = coreFreqOfsInt;
 
-    QString curMaxClk;
     process.start(nvCurMaxClkQ);
     process.waitForFinished(-1);
     curMaxClkInt = process.readLine().toInt();
     qDebug() << curMaxClkInt;
 
-    QString maxPowerLim;
     process.start(nvMaxPowerLimQ);
     process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        QString output = process.readLine();
-        if (!output.contains("power")) {
-            maxPowerLim = output;
-            break;
-        }
-    }
-    maxPowerLim.chop(3);
-    maxPowerLimInt = maxPowerLim.toDouble();
-    qDebug() << maxPowerLimInt;
+    maxPowerLimInt = process.readLine().toInt();
 
-    QString minPowerLim;
     process.start(nvMinPowerLimQ);
     process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        QString output = process.readLine();
-        if (!output.contains("power")) {
-            minPowerLim = output;
-            break;
-        }
-    }
-    minPowerLim.chop(3);
-    minPowerLimInt = minPowerLim.toDouble();
-    qDebug() << minPowerLimInt;
+    minPowerLimInt = process.readLine().toInt();
 
-    QString curPowerLim;
     process.start(nvCurPowerLimQ);
     process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        QString output = process.readLine();
-        if (!output.contains("power")) {
-            curPowerLim = output;
-            break;
-        }
-    }
-    curPowerLim.chop(3);
-    curPowerLimInt = curPowerLim.toDouble();
-    qDebug() << curPowerLimInt;
+    curPowerLimInt = process.readLine().toInt();
+    latestPowerLim = curPowerLimInt;
 
-    QString clockLimits;
     process.start(nvClockLimQ);
     process.waitForFinished(-1);
     for (int i=0; i<2; i++) {
@@ -270,22 +267,15 @@ void MainWindow::queryGPUSettings()
             maxMemClkOfsInt = line.toInt()/2;
         }
     }
-    qDebug() << minMemClkOfsInt << maxMemClkOfsInt;
 
     process.start(nvCurMaxMemClkQ);
     process.waitForFinished(-1);
     curMaxMemClkInt = process.readLine().toInt();
-    qDebug() << curMaxMemClkInt;
 
     process.start(nvCurMemClkOfsQ);
     process.waitForFinished(-1);
     memClkOfsInt = process.readLine().toInt()/2;
-    qDebug() << memClkOfsInt;
-
-    process.start(nvFanQ);
-    process.waitForFinished(-1);
-    fanSpeed = process.readLine().toInt();
-    qDebug() << fanSpeed;
+    latestMemClkOfs = memClkOfsInt;
 
     // Since the maximum core clock reported is the same on negative offsets as on 0 offset add a check here
     if (0 >= coreFreqOfsInt) {
@@ -298,40 +288,56 @@ void MainWindow::queryGPUSettings()
 void MainWindow::applyGPUSettings()
 {
     QProcess process;
-    int offsetValue = ui->frequencySlider->value() - defCoreClk;
+    int offsetValue;
+    int powerLimit;
     QString input = nvCoreClkSet;
-    input.append(QString::number(offsetValue));
-    qDebug() << input;
-    process.start(input);
-    process.waitForFinished(-1);
-
-    offsetValue = ui->memClkSlider->value() - defMemClk;
-    input = nvMemClkSet;
-    input.append(QString::number(offsetValue*2));
-    qDebug() << input;
-    process.start(input);
-    process.waitForFinished(-1);
-
-    int powerLimit = ui->powerLimSlider->value();
-    input = nvPowerLimSet;
-    if (!isRoot) {
-        input.append(QString::number(powerLimit) +"'\"");
-        input.prepend("/bin/sh -c \"kdesu -c ");
+    if (latestClkOfs != ui->frequencySlider->value() - defCoreClk) {
+        offsetValue = ui->frequencySlider->value() - defCoreClk;
+        QString input = nvCoreClkSet;
+        input.append(QString::number(offsetValue));
+        qDebug() << input;
         process.start(input);
         process.waitForFinished(-1);
-    } else {
-        input.append(QString::number(powerLimit));
-        process.start(input);
-        process.waitForFinished(-1);
-        qDebug() << "ran as root";
+        latestClkOfs = ui->frequencySlider->value() - defCoreClk;
     }
 
-    offsetValue = ui->voltageSlider->value() - defVolt;
-    input = nvVoltageSet;
-    input.append(QString::number(offsetValue*1000));
-    qDebug() << input;
-    process.start(input);
-    process.waitForFinished(-1);
+    if (latestMemClkOfs != ui->memClkSlider->value() - defMemClk) {
+        offsetValue = ui->memClkSlider->value() - defMemClk;
+        input = nvMemClkSet;
+        input.append(QString::number(offsetValue*2));
+        qDebug() << input;
+        process.start(input);
+        process.waitForFinished(-1);
+        latestMemClkOfs = ui->memClkSlider->value() - defMemClk;
+    }
+
+    if (latestPowerLim != ui->powerLimSlider->value()) {
+        powerLimit = ui->powerLimSlider->value();
+        input = nvPowerLimSet;
+        if (!isRoot) {
+            input.append(QString::number(powerLimit) +"'\"");
+            input.prepend("/bin/sh -c \"kdesu -c ");
+            process.start(input);
+            process.waitForFinished(-1);
+        } else {
+            input.append(QString::number(powerLimit));
+            process.start(input);
+            process.waitForFinished(-1);
+            qDebug() << "ran as root";
+        }
+        latestPowerLim = ui->powerLimSlider->value();
+    }
+
+    if (latestVoltOfs != ui->voltageSlider->value() - defVolt) {
+        offsetValue = ui->voltageSlider->value() - defVolt;
+        input = nvVoltageSet;
+        input.append(QString::number(offsetValue*1000));
+        qDebug() << input;
+        process.start(input);
+        process.waitForFinished(-1);
+        latestVoltOfs = ui->voltageSlider->value() - defVolt;
+    }
+    resettimer->stop();
 }
 void MainWindow::loadProfileSettings()
 {
@@ -380,8 +386,8 @@ void MainWindow::on_newProfile_closed()
 }
 void MainWindow::saveProfileSettings()
 {
-    QSettings settings;
-
+    QSettings settings("nvfancurve");
+    settings.beginGroup(currentProfile);
 
 }
 

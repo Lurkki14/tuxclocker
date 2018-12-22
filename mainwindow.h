@@ -20,20 +20,20 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QString currentProfile;
-    QString nvFanQ = "nvidia-settings -q GPUCurrentFanSpeed -t";
+    QString nvFanQ = "/bin/sh -c \"nvidia-smi --query-gpu=fan.speed --format=csv | egrep -o '[1-9]{1,4}'\"";
     QString nvVoltQ = "nvidia-settings -q GPUCurrentCoreVoltage -t";
     QString nvVoltOfsQ = "nvidia-settings -q GPUOverVoltageOffset -t";
     QString nvVoltOfsLimQ = "/bin/sh -c \"nvidia-settings -a GPUOverVoltageOffset=99999999 | egrep -o '[0-9]{1,9}'\"";
     QString nvCoreClkOfsQ = "nvidia-settings -q GPUGraphicsClockOffset[3] -t";
     QString nvCurMaxClkQ = "/bin/sh -c \"nvidia-smi --query-supported-clocks=gr --format=csv | egrep -o '[0-9]{2,9}'\"";
-    QString nvMaxPowerLimQ = "nvidia-smi --query-gpu=power.max_limit --format=csv";
-    QString nvMinPowerLimQ = "nvidia-smi --query-gpu=power.min_limit --format=csv";
-    QString nvCurPowerLimQ = "nvidia-smi --query-gpu=power.limit --format=csv";
+    QString nvMaxPowerLimQ = "/bin/sh -c \"nvidia-smi --query-gpu=power.max_limit --format=csv | egrep -o '[0-9]{1,7}'\"";
+    QString nvMinPowerLimQ = "/bin/sh -c \"nvidia-smi --query-gpu=power.min_limit --format=csv | egrep -o '[0-9]{1,7}'\"";
+    QString nvCurPowerLimQ = "/bin/sh -c \"nvidia-smi --query-gpu=power.limit --format=csv | egrep -o '[0-9]{1,7}'\"";
     QString nvClockLimQ = "/bin/sh -c \"nvidia-settings -a GPUGraphicsClockOffset[3]=999999 | egrep -o '[-0-9]{2,9}'\"";
     QString nvMemClkLimQ = "/bin/sh -c \"nvidia-settings -a GPUMemoryTransferRateOffset[3]=999999 | egrep -o '[-0-9]{2,9}'\"";
     QString nvCurMaxMemClkQ = "/bin/sh -c \"nvidia-smi --query-supported-clocks=mem --format=csv | egrep -o '[0-9]{2,9}'\"";
     QString nvCurMemClkOfsQ = "nvidia-settings -q GPUMemoryTransferRateOffset[3] -t";
-    QString nvTempQ = "nvidia-settings -q ThermalSensorReading -t";
+    QString nvTempQ = "/bin/sh -c \"nvidia-smi --query-gpu=temperature.gpu --format=csv | egrep -o '[1-9]{1,4}'\"";
 
     QString nvCoreClkSet = "nvidia-settings -a GPUGraphicsClockOffset[3]=";
     QString nvMemClkSet = "nvidia-settings -a GPUMemoryTransferRateOffset[3]=";
@@ -72,6 +72,11 @@ public:
     int defCoreClk;
     int defMemClk;
     int defVolt;
+
+    int latestClkOfs;
+    int latestPowerLim;
+    int latestMemClkOfs;
+    int latestVoltOfs;
 
     bool isRoot;
 public slots:
@@ -117,10 +122,14 @@ private slots:
     void checkForRoot();
     void tempUpdater();
     void enableFanControl();
+    void resetChanges();
+    void resetTimer();
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
     QVector <int> compXPoints, compYPoints;
+
+    QTimer *resettimer = new QTimer(this);
 };
 
 #endif // MAINWINDOW_H
