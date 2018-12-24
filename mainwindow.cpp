@@ -10,9 +10,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     checkForProfiles();
-    loadProfileSettings();
     queryGPUSettings();
-    enableFanControl();
+    loadProfileSettings();
+    queryDriverSettings();
+    getGPUName();
 
     ui->frequencySlider->setRange(defCoreClk + minCoreClkOfsInt, defCoreClk + maxCoreClkOfsInt);
     ui->frequencySpinBox->setRange(defCoreClk + minCoreClkOfsInt, defCoreClk + maxCoreClkOfsInt);
@@ -29,17 +30,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->memClkSlider->setValue(defMemClk + memClkOfsInt);
     ui->memClkSpinBox->setValue(defMemClk + memClkOfsInt);
 
-    ui->voltageSlider->setRange(voltInt + minVoltOfsInt, voltInt + maxVoltOfsInt);
-    ui->voltageSpinBox->setRange(voltInt + minVoltOfsInt, voltInt + maxVoltOfsInt);
-    ui->voltageSlider->setValue(voltInt + voltOfsInt);
-    ui->voltageSpinBox->setValue(voltInt + voltOfsInt);
+    ui->voltageSlider->setRange(minVoltOfsInt, maxVoltOfsInt);
+    ui->voltageSpinBox->setRange(minVoltOfsInt, maxVoltOfsInt);
+    ui->voltageSlider->setValue(voltOfsInt);
+    ui->voltageSpinBox->setValue(voltOfsInt);
 
     ui->fanSlider->setValue(fanSpeed);
     ui->fanSpinBox->setValue(fanSpeed);
     ui->fanSlider->setRange(0, 100);
     ui->fanSpinBox->setRange(0, 100);
 
-    QTimer *fanUpdateTimer = new QTimer(this);
+    //QTimer *fanUpdateTimer = new QTimer(this);
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
     //connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
     fanUpdateTimer->start(2000);
@@ -68,13 +69,12 @@ void MainWindow::on_actionEdit_current_profile_triggered(bool)
 
 void MainWindow::on_pushButton_clicked()
 {
-    qDebug() << currentProfile;
+    qDebug() << xCurvePoints;
     //queryGPUSettings();
     //loadProfileSettings();
    // checkForProfiles();
     //getGPUDriver();
     //checkForRoot();
-    qDebug() << minMemClkOfsInt << maxMemClkOfsInt;
 }
 
 void MainWindow::checkForRoot()
@@ -137,15 +137,13 @@ void MainWindow::getGPUDriver()
         gpuDriver = "nvidia";
     }
 }
-void MainWindow::enableFanControl()
+
+void MainWindow::getGPUName()
 {
     QProcess process;
-    process.start("nvidia-settings -a GPUFanControlState=1");
+    process.start(queryGPUName);
     process.waitForFinished(-1);
-}
-void MainWindow::getGPUInfo()
-{
-
+    ui->GPUNameLabel->setText(process.readLine());
 }
 
 void MainWindow::fanSpeedUpdater()
@@ -175,6 +173,10 @@ void MainWindow::resetTimer()
     resettimer->setSingleShot(true);
     resettimer->start(10000);
 }
+void MainWindow::resetStatusLabel()
+{
+    ui->statusLabel->clear();
+}
 void MainWindow::resetChanges()
 {
     // If the settings haven't been applied in 10 seconds, reset all values to their latest values
@@ -184,8 +186,8 @@ void MainWindow::resetChanges()
     ui->powerLimSlider->setValue(latestPowerLim);
     ui->powerLimSpinBox->setValue(latestPowerLim);
 
-    ui->voltageSlider->setValue(voltInt + latestVoltOfs);
-    ui->voltageSpinBox->setValue(voltInt + latestVoltOfs);
+    ui->voltageSlider->setValue(latestVoltOfs);
+    ui->voltageSpinBox->setValue(latestVoltOfs);
 
     ui->memClkSlider->setValue(curMaxMemClkInt);
     ui->memClkSpinBox->setValue(curMaxMemClkInt);
@@ -193,6 +195,50 @@ void MainWindow::resetChanges()
     ui->memClkSlider->setValue(defMemClk + latestMemClkOfs);
     ui->memClkSpinBox->setValue(defMemClk + latestMemClkOfs);
     qDebug() << "timer";
+}
+void MainWindow::queryDriverSettings()
+{
+    QProcess process;
+    process.start(nvFanCtlStateQ);
+    process.waitForFinished(-1);
+    if (process.readLine().toInt() == 1) {
+        manualFanCtl = true;
+        ui->fanModeComboBox->setCurrentIndex(1);
+    } else {
+        manualFanCtl = false;
+        ui->fanModeComboBox->setCurrentIndex(0);
+    }
+}
+void MainWindow::applyFanMode()
+{
+    QProcess process;
+    switch (ui->fanModeComboBox->currentIndex()) {
+        case 0:
+            // Driver controlled mode
+            process.start(nvFanCtlStateSet + "0");
+            process.waitForFinished(-1);
+            ui->fanSlider->setEnabled(false);
+            ui->fanSpinBox->setEnabled(false);
+            break;
+        case 1:
+           // Static mode
+            process.start(nvFanCtlStateSet + "1");
+            process.waitForFinished(-1);
+            disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+            process.start(nvFanSpeedSet + QString::number(ui->fanSlider->value()));
+            process.waitForFinished(-1);
+            ui->fanSlider->setEnabled(true);
+            ui->fanSpinBox->setEnabled(true);
+            break;
+        case 2:
+            // Custom mode
+            process.start(nvFanCtlStateSet + "1");
+            process.waitForFinished(-1);
+            connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+            ui->fanSlider->setEnabled(false);
+            ui->fanSpinBox->setEnabled(false);
+            break;
+    }
 }
 void MainWindow::queryGPUSettings()
 {
@@ -217,11 +263,8 @@ void MainWindow::queryGPUSettings()
         }
     }
 
-    QString coreFreqOfs;
     process.start(nvCoreClkOfsQ);
     process.waitForFinished(-1);
-    //coreFreqOfs = process.readLine();
-    //coreFreqOfs.chop(1);
     coreFreqOfsInt = process.readLine().toInt();
     latestClkOfs = coreFreqOfsInt;
 
@@ -247,11 +290,11 @@ void MainWindow::queryGPUSettings()
     process.waitForFinished(-1);
     for (int i=0; i<process.size(); i++) {
         QString line = process.readLine();
-        if (line.toInt()/2 > maxCoreClkOfsInt) {
-            maxCoreClkOfsInt = line.toInt()/2;
+        if (line.toInt() > maxCoreClkOfsInt) {
+            maxCoreClkOfsInt = line.toInt();
         }
-        if (line.toInt()/2 <= minCoreClkOfsInt) {
-            minCoreClkOfsInt = line.toInt()/2;
+        if (line.toInt() <= minCoreClkOfsInt) {
+            minCoreClkOfsInt = line.toInt();
         }
     }
 
@@ -328,14 +371,14 @@ void MainWindow::applyGPUSettings()
         latestPowerLim = ui->powerLimSlider->value();
     }
 
-    if (latestVoltOfs != ui->voltageSlider->value() - defVolt) {
-        offsetValue = ui->voltageSlider->value() - defVolt;
+    if (latestVoltOfs != ui->voltageSlider->value()) {
+        offsetValue = ui->voltageSlider->value();
         input = nvVoltageSet;
         input.append(QString::number(offsetValue*1000));
         qDebug() << input;
         process.start(input);
         process.waitForFinished(-1);
-        latestVoltOfs = ui->voltageSlider->value() - defVolt;
+        latestVoltOfs = ui->voltageSlider->value();
     }
     resettimer->stop();
 }
@@ -346,24 +389,48 @@ void MainWindow::loadProfileSettings()
     settings.beginGroup(currentProfile);
     // Check for existance of the setting so zeroes don't get appended to curve point vectors
     if (settings.contains("xpoints")) {
-        QString xPointStr = settings.value("xpoints").toString();
-        QString yPointStr = settings.value("ypoints").toString();
-        xPointStr.prepend("/bin/sh -c \"echo ");
-        xPointStr.append(grepStringToInt);
+        QString xPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
+        QString yPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
         QProcess process;
         process.start(xPointStr);
         process.waitForFinished(-1);
         for (int i=0; i<process.size() +1; i++) {
             xCurvePoints.append(process.readLine().toInt());
         }
-        yPointStr.prepend("/bin/sh -c \"echo ");
-        yPointStr.append(grepStringToInt);
         process.start(yPointStr);
         process.waitForFinished(-1);
         for (int i=0; i<process.size() +1; i++) {
             yCurvePoints.append(process.readLine().toInt());
         }
+        QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
+        QModelIndex customModeIndex = model->index(2, ui->fanModeComboBox->modelColumn());
+        QStandardItem *customMode = model->itemFromIndex(customModeIndex);
+        customMode->setEnabled(true);
+        customMode->setToolTip("Use your own fan curve");
+    } else {
+        // Set fan mode "Custom" unselectable if there are no custom curve points
+        QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
+        QModelIndex customModeIndex = model->index(2, ui->fanModeComboBox->modelColumn());
+        QStandardItem *customMode = model->itemFromIndex(customModeIndex);
+        customMode->setEnabled(false);
+        customMode->setToolTip("To use this mode you must make a fan curve first");
     }
+    if (settings.contains("voltageOffset")) {
+        latestVoltOfs = settings.value("voltageOffset").toInt();
+    }
+    if (settings.contains("powerLimit")) {
+        latestPowerLim = settings.value("powerLimit").toInt();
+    }
+    if (settings.contains("clockFrequencyOffset")) {
+        latestClkOfs = settings.value("clockFrequencyOffset").toInt();
+    }
+    if (settings.contains("memoryClockOffset")) {
+        latestMemClkOfs=settings.value("memoryClockOffset").toInt();
+    }
+    ui->statusLabel->setText("Profile settings loaded.");
+    statusLabelResetTimer->start(7000);
+    statusLabelResetTimer->setSingleShot(true);
+    connect(statusLabelResetTimer, SIGNAL(timeout()), SLOT(resetStatusLabel()));
     qDebug() << xCurvePoints << yCurvePoints;
 }
 
@@ -388,7 +455,10 @@ void MainWindow::saveProfileSettings()
 {
     QSettings settings("nvfancurve");
     settings.beginGroup(currentProfile);
-
+    settings.setValue("voltageOffset", latestVoltOfs);
+    settings.setValue("powerLimit", latestPowerLim);
+    settings.setValue("clockFrequencyOffset", latestClkOfs);
+    settings.setValue("memoryClockOffset", latestMemClkOfs);
 }
 
 void MainWindow::generateFanPoint()
@@ -416,11 +486,9 @@ void MainWindow::generateFanPoint()
             targetFanSpeed = (((yCurvePoints[index + 1] - yCurvePoints[index]) * (temp - xCurvePoints[index])) / (xCurvePoints[index + 1] - xCurvePoints[index])) + yCurvePoints[index];
         }
     }
-    qDebug() << targetFanSpeed << index << xCurvePoints << yCurvePoints;
     QProcess process;
     QString input = nvFanSpeedSet;
     input.append(QString::number(targetFanSpeed));
-    qDebug() << input;
     process.start(input);
     process.waitForFinished(-1);
 }
@@ -449,48 +517,53 @@ void MainWindow::on_powerLimSlider_valueChanged(int value)
 {
     ui->powerLimSpinBox->setValue(value);
 }
-
 void MainWindow::on_powerLimSpinBox_valueChanged(int arg1)
 {
     ui->powerLimSlider->setValue(arg1);
 }
-
 void MainWindow::on_memClkSlider_valueChanged(int value)
 {
     ui->memClkSpinBox->setValue(value);
 }
-
 void MainWindow::on_memClkSpinBox_valueChanged(int arg1)
 {
     ui->memClkSlider->setValue(arg1);
 }
-
 void MainWindow::on_voltageSlider_valueChanged(int value)
 {
     ui->voltageSpinBox->setValue(value);
 }
-
 void MainWindow::on_voltageSpinBox_valueChanged(int arg1)
 {
     ui->voltageSlider->setValue(arg1);
 }
-
 void MainWindow::on_fanSlider_valueChanged(int value)
 {
     ui->fanSpinBox->setValue(value);
 }
-
 void MainWindow::on_fanSpinBox_valueChanged(int arg1)
 {
     ui->fanSlider->setValue(arg1);
 }
-
 void MainWindow::on_applyButton_clicked()
 {
     applyGPUSettings();
+    saveProfileSettings();
+    applyFanMode();
 }
-
-void MainWindow::on_fanModeComboBox_currentTextChanged(const QString &arg1)
+void MainWindow::on_editFanCurveButton_pressed()
 {
-
+    editProfile *editProf = new editProfile(this);
+    editProf->setAttribute(Qt::WA_DeleteOnClose);
+    connect(editProf, SIGNAL(destroyed(QObject*)), SLOT(on_editProfile_closed()));
+    editProf->setModal(true);
+    editProf->exec();
+}
+void MainWindow::on_editProfile_closed()
+{
+    qDebug() << "fancurve dialog closed";
+    // Clear the existing curve points and load the new ones
+    xCurvePoints.clear();
+    yCurvePoints.clear();
+    loadProfileSettings();
 }

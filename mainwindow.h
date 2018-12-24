@@ -6,7 +6,8 @@
 #include <QFileInfo>
 #include "editprofile.h"
 #include <QProcess>
-#include <NVCtrl/NVCtrl.h>
+//#include "/opt/cuda/include/nvml.h"
+//#include <NVCtrl/NVCtrl.h>
 
 namespace Ui {
 class MainWindow;
@@ -20,7 +21,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     QString currentProfile;
-    QString nvFanQ = "/bin/sh -c \"nvidia-smi --query-gpu=fan.speed --format=csv | egrep -o '[1-9]{1,4}'\"";
+    QString nvFanQ = "/bin/sh -c \"nvidia-smi --query-gpu=fan.speed --format=csv | egrep -o '[0-9]{1,4}'\"";
     QString nvVoltQ = "nvidia-settings -q GPUCurrentCoreVoltage -t";
     QString nvVoltOfsQ = "nvidia-settings -q GPUOverVoltageOffset -t";
     QString nvVoltOfsLimQ = "/bin/sh -c \"nvidia-settings -a GPUOverVoltageOffset=99999999 | egrep -o '[0-9]{1,9}'\"";
@@ -41,9 +42,14 @@ public:
     QString nvFanSpeedSet = "nvidia-settings -a GPUTargetFanSpeed=";
     QString nvVoltageSet = "nvidia-settings -a GPUOverVoltageOffset=";
 
+    QString nvFanCtlStateSet = "nvidia-settings -a GPUFanControlState=";
+
+    QString nvFanCtlStateQ = "nvidia-settings -q GPUFanControlState -t";
+
     QString grepStringToInt = " | egrep -o '[0-9]{0,100}'\"";
 
     QString queryForNvidiaProp = "/bin/sh -c \"lspci -vnn | grep -c 'Kernel driver in use: nvidia'\"";
+    QString queryGPUName = "/bin/sh -c \"nvidia-smi --query-gpu=gpu_name --format=csv | grep '[0-9]'\"";
 
     QString gpuDriver;
     QVector <int> xCurvePoints, yCurvePoints;
@@ -79,6 +85,7 @@ public:
     int latestVoltOfs;
 
     bool isRoot;
+    bool manualFanCtl;
 public slots:
     void saveProfileSettings();
     void loadProfileSettings();
@@ -90,7 +97,7 @@ private slots:
 
     void on_profileComboBox_activated(const QString &arg1);
     void queryGPUSettings();
-    void getGPUInfo();
+    void getGPUName();
     void on_frequencySlider_valueChanged(int value);
     void on_frequencySpinBox_valueChanged(int arg1);
 
@@ -121,16 +128,22 @@ private slots:
     void generateFanPoint();
     void checkForRoot();
     void tempUpdater();
-    void enableFanControl();
     void resetChanges();
     void resetTimer();
-    void on_fanModeComboBox_currentTextChanged(const QString &arg1);
 
+    void queryDriverSettings();
+    void on_editFanCurveButton_pressed();
+
+    void on_editProfile_closed();
+    void applyFanMode();
+    void resetStatusLabel();
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
     QVector <int> compXPoints, compYPoints;
 
     QTimer *resettimer = new QTimer(this);
+    QTimer *fanUpdateTimer = new QTimer(this);
+    QTimer *statusLabelResetTimer = new QTimer(this);
 };
 #endif // MAINWINDOW_H
