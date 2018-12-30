@@ -4,12 +4,7 @@
 #include <QDialog>
 #include <QVector>
 #include "qcustomplot.h"
-#include <QFile>
-#include <QDomNode>
 #include <QString>
-#include <QTextStream>
-#include <QPainter>
-#include <QLine>
 
 namespace Ui {
 class editProfile;
@@ -64,7 +59,6 @@ private slots:
 
 private:
     Ui::editProfile *ui;
-    QDomDocument document;
     //QVector<double> qv_x, qv_y;
     QVector<double> leftLineX;
     QVector<double> leftLineY;

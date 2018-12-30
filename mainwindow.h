@@ -2,9 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QDir>
-#include <QFileInfo>
 #include "editprofile.h"
+#include "monitor.h"
 #include <QProcess>
 //#include "/opt/cuda/include/nvml.h"
 //#include <NVCtrl/NVCtrl.h>
@@ -34,11 +33,11 @@ public:
     QString nvMemClkLimQ = "/bin/sh -c \"nvidia-settings -a GPUMemoryTransferRateOffset[3]=999999 | egrep -o '[-0-9]{2,9}'\"";
     QString nvCurMaxMemClkQ = "/bin/sh -c \"nvidia-smi --query-supported-clocks=mem --format=csv | egrep -o '[0-9]{2,9}'\"";
     QString nvCurMemClkOfsQ = "nvidia-settings -q GPUMemoryTransferRateOffset[3] -t";
-    QString nvTempQ = "/bin/sh -c \"nvidia-smi --query-gpu=temperature.gpu --format=csv | egrep -o '[1-9]{1,4}'\"";
+    QString nvTempQ = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits";
 
     QString nvCoreClkSet = "nvidia-settings -a GPUGraphicsClockOffset[3]=";
     QString nvMemClkSet = "nvidia-settings -a GPUMemoryTransferRateOffset[3]=";
-    QString nvPowerLimSet = "'nvidia-smi -pl ";
+    QString nvPowerLimSet = "nvidia-smi -pl ";
     QString nvFanSpeedSet = "nvidia-settings -a GPUTargetFanSpeed=";
     QString nvVoltageSet = "nvidia-settings -a GPUOverVoltageOffset=";
 
@@ -51,6 +50,8 @@ public:
     QString queryForNvidiaProp = "/bin/sh -c \"lspci -vnn | grep -c 'Kernel driver in use: nvidia'\"";
     QString queryGPUName = "/bin/sh -c \"nvidia-smi --query-gpu=gpu_name --format=csv | grep '[0-9]'\"";
 
+    QString errorText = "Failed to apply these settings: ";
+
     QString gpuDriver;
     QVector <int> xCurvePoints, yCurvePoints;
 
@@ -62,8 +63,8 @@ public:
     int minPowerLimInt;
     int curPowerLimInt;
 
-    int minCoreClkOfsInt;
-    int maxCoreClkOfsInt;
+    int minCoreClkOfsInt=0;
+    int maxCoreClkOfsInt=0;
     int curMaxClkInt;
     int minMemClkOfsInt = 0;
     int maxMemClkOfsInt = 0;
@@ -74,6 +75,7 @@ public:
     int fanSpeed;
     int temp;
     int targetFanSpeed;
+    int fanControlMode;
 
     int defCoreClk;
     int defMemClk;
@@ -87,9 +89,7 @@ public:
     bool isRoot;
     bool manualFanCtl;
 public slots:
-    void saveProfileSettings();
-    void loadProfileSettings();
-    void checkForProfiles();
+
 private slots:
 
     void on_actionEdit_current_profile_triggered(bool checked);
@@ -137,6 +137,14 @@ private slots:
     void on_editProfile_closed();
     void applyFanMode();
     void resetStatusLabel();
+    void enableFanUpdater();
+    void setupMonitorTab();
+    void updateMonitor();
+    void saveProfileSettings();
+    void loadProfileSettings();
+    void checkForProfiles();
+    void on_fanModeComboBox_currentIndexChanged(int index);
+    void tabHandler(int index);
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
@@ -145,5 +153,20 @@ private:
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);
     QTimer *statusLabelResetTimer = new QTimer(this);
+    QTimer *fanUpdaterDisablerTimer = new QTimer(this);
+    QTimer *monitorUpdater = new QTimer(this);
+
+
+    QTreeWidgetItem *gputemp = new QTreeWidgetItem;
+    QTreeWidgetItem *powerdraw = new QTreeWidgetItem;
+    QTreeWidgetItem *voltage = new QTreeWidgetItem;
+    QTreeWidgetItem *coreclock = new QTreeWidgetItem;
+    QTreeWidgetItem *memclock = new QTreeWidgetItem;
+    QTreeWidgetItem *coreutil = new QTreeWidgetItem;
+    QTreeWidgetItem *memutil = new QTreeWidgetItem;
+    QTreeWidgetItem *fanspeed = new QTreeWidgetItem;
+    QTreeWidgetItem *memusage = new QTreeWidgetItem;
+    QTreeWidgetItem *curmaxclk = new QTreeWidgetItem;
+    QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
 };
 #endif // MAINWINDOW_H

@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include <QApplication>
-#include "editprofile.h"
 
 int main(int argc, char *argv[])
 {

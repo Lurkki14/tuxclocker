@@ -29,13 +29,15 @@ SOURCES += \
         mainwindow.cpp \
     qcustomplot.cpp \
     editprofile.cpp \
-    newprofile.cpp
+    newprofile.cpp \
+    monitor.cpp
 
 HEADERS += \
         mainwindow.h \
     qcustomplot.h \
     editprofile.h \
-    newprofile.h
+    newprofile.h \
+    monitor.h
 
 FORMS += \
         mainwindow.ui \

@@ -3,6 +3,7 @@
 #include "editprofile.h"
 #include "ui_editprofile.h"
 #include "newprofile.h"
+#include "monitor.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,21 +15,23 @@ MainWindow::MainWindow(QWidget *parent) :
     loadProfileSettings();
     queryDriverSettings();
     getGPUName();
+    setupMonitorTab();
+    tabHandler(ui->tabWidget->currentIndex());
 
-    ui->frequencySlider->setRange(defCoreClk + minCoreClkOfsInt, defCoreClk + maxCoreClkOfsInt);
-    ui->frequencySpinBox->setRange(defCoreClk + minCoreClkOfsInt, defCoreClk + maxCoreClkOfsInt);
-    ui->frequencySlider->setValue(defCoreClk + coreFreqOfsInt);
-    ui->frequencySpinBox->setValue(defCoreClk + coreFreqOfsInt);
+    ui->frequencySlider->setRange(minCoreClkOfsInt, maxCoreClkOfsInt);
+    ui->frequencySpinBox->setRange(minCoreClkOfsInt, maxCoreClkOfsInt);
+    ui->frequencySlider->setValue(coreFreqOfsInt);
+    ui->frequencySpinBox->setValue(coreFreqOfsInt);
 
     ui->powerLimSlider->setRange(minPowerLimInt, maxPowerLimInt);
     ui->powerLimSpinBox->setRange(minPowerLimInt, maxPowerLimInt);
     ui->powerLimSlider->setValue(curPowerLimInt);
     ui->powerLimSpinBox->setValue(curPowerLimInt);
 
-    ui->memClkSlider->setRange(defMemClk + minMemClkOfsInt, defMemClk + maxMemClkOfsInt);
-    ui->memClkSpinBox->setRange(defMemClk + minMemClkOfsInt, defMemClk + maxMemClkOfsInt);
-    ui->memClkSlider->setValue(defMemClk + memClkOfsInt);
-    ui->memClkSpinBox->setValue(defMemClk + memClkOfsInt);
+    ui->memClkSlider->setRange(minMemClkOfsInt, maxMemClkOfsInt);
+    ui->memClkSpinBox->setRange(minMemClkOfsInt, maxMemClkOfsInt);
+    ui->memClkSlider->setValue(memClkOfsInt);
+    ui->memClkSpinBox->setValue(memClkOfsInt);
 
     ui->voltageSlider->setRange(minVoltOfsInt, maxVoltOfsInt);
     ui->voltageSpinBox->setRange(minVoltOfsInt, maxVoltOfsInt);
@@ -49,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->powerLimSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->memClkSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
+
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
+    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
 }
 
 MainWindow::~MainWindow()
@@ -58,11 +64,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionEdit_current_profile_triggered(bool)
 {
-    //editProfile editprof;
-    //editprof.setModal(false);
-    //editprof.exec();
-
-
     editProfile *editprof = new editProfile(this);
     editprof->show();
 }
@@ -70,11 +71,6 @@ void MainWindow::on_actionEdit_current_profile_triggered(bool)
 void MainWindow::on_pushButton_clicked()
 {
     qDebug() << xCurvePoints;
-    //queryGPUSettings();
-    //loadProfileSettings();
-   // checkForProfiles();
-    //getGPUDriver();
-    //checkForRoot();
 }
 
 void MainWindow::checkForRoot()
@@ -87,6 +83,68 @@ void MainWindow::checkForRoot()
         isRoot = true;
     }
     qDebug() << isRoot;
+}
+void MainWindow::tabHandler(int index)
+{
+    // Disconnect the monitor updater when the tab is not visible
+    // Maybe do this with ifs if the tabs can be moved
+    switch (index) {
+        case 2:
+            monitorUpdater->start(2000);
+            break;
+        default:
+            monitorUpdater->stop();
+            break;
+    }
+}
+void MainWindow::setupMonitorTab()
+{
+    // Set the behavior of the tree view
+    ui->monitorTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->monitorTree->setIndentation(0);
+    // Add the items
+    gputemp->setText(0, "Core Temperature");
+    powerdraw->setText(0, "Power Draw");
+    voltage->setText(0, "Core Voltage");
+    coreclock->setText(0, "Core Clock Frequency");
+    memclock->setText(0, "Memory Clock Frequency");
+    coreutil->setText(0, "Core Utilization");
+    memutil->setText(0, "Memory Utilization");
+    fanspeed->setText(0, "Fan Speed");
+    memusage->setText(0, "Used Memory/Total Memory");
+    curmaxclk->setText(0, "Maximum Core Clock Frequency");
+    curmaxmemclk->setText(0, "Maximum Memory Clock Frequency");
+
+    ui->monitorTree->addTopLevelItem(gputemp);
+    ui->monitorTree->addTopLevelItem(powerdraw);
+    ui->monitorTree->addTopLevelItem(voltage);
+    ui->monitorTree->addTopLevelItem(coreclock);
+    ui->monitorTree->addTopLevelItem(memclock);
+    ui->monitorTree->addTopLevelItem(coreutil);
+    ui->monitorTree->addTopLevelItem(memutil);
+    ui->monitorTree->addTopLevelItem(fanspeed);
+    ui->monitorTree->addTopLevelItem(memusage);
+    ui->monitorTree->addTopLevelItem(curmaxclk);
+    ui->monitorTree->addTopLevelItem(curmaxmemclk);
+    // These values only change when the apply button has been pressed
+    QString curMaxClk = QString::number(defCoreClk + latestClkOfs) + " MHz";
+    curmaxclk->setText(1, curMaxClk);
+    QString curMaxMemClk = QString::number(defMemClk + latestMemClkOfs) + " MHz";
+    curmaxmemclk->setText(1, curMaxMemClk);
+}
+void MainWindow::updateMonitor()
+{
+    monitor mon;
+    mon.queryValues();
+    gputemp->setText(1, mon.temp + "°C");
+    powerdraw->setText(1, mon.powerdraw + "W");
+    voltage->setText(1, mon.voltage + "mV");
+    coreclock->setText(1, mon.coreclock);
+    memclock->setText(1, mon.memclock);
+    coreutil->setText(1, mon.coreutil);
+    memutil->setText(1, mon.memutil);
+    fanspeed->setText(1, QString::number(fanSpeed) + " %");
+    memusage->setText(1, mon.usedmem + "/" + mon.totalmem);
 }
 void MainWindow::checkForProfiles()
 {
@@ -180,8 +238,8 @@ void MainWindow::resetStatusLabel()
 void MainWindow::resetChanges()
 {
     // If the settings haven't been applied in 10 seconds, reset all values to their latest values
-    ui->frequencySlider->setValue(defCoreClk + latestClkOfs);
-    ui->frequencySpinBox->setValue(defCoreClk + latestClkOfs);
+    ui->frequencySlider->setValue(latestClkOfs);
+    ui->frequencySpinBox->setValue(latestClkOfs);
 
     ui->powerLimSlider->setValue(latestPowerLim);
     ui->powerLimSpinBox->setValue(latestPowerLim);
@@ -189,11 +247,8 @@ void MainWindow::resetChanges()
     ui->voltageSlider->setValue(latestVoltOfs);
     ui->voltageSpinBox->setValue(latestVoltOfs);
 
-    ui->memClkSlider->setValue(curMaxMemClkInt);
-    ui->memClkSpinBox->setValue(curMaxMemClkInt);
-
-    ui->memClkSlider->setValue(defMemClk + latestMemClkOfs);
-    ui->memClkSpinBox->setValue(defMemClk + latestMemClkOfs);
+    ui->memClkSlider->setValue(latestMemClkOfs);
+    ui->memClkSpinBox->setValue(latestMemClkOfs);
     qDebug() << "timer";
 }
 void MainWindow::queryDriverSettings()
@@ -212,7 +267,7 @@ void MainWindow::queryDriverSettings()
 void MainWindow::applyFanMode()
 {
     QProcess process;
-    switch (ui->fanModeComboBox->currentIndex()) {
+    switch (fanControlMode) {
         case 0:
             // Driver controlled mode
             process.start(nvFanCtlStateSet + "0");
@@ -327,48 +382,75 @@ void MainWindow::queryGPUSettings()
         defCoreClk = curMaxClkInt - coreFreqOfsInt;
     }
     defMemClk = curMaxMemClkInt - memClkOfsInt;
+
 }
 void MainWindow::applyGPUSettings()
 {
     QProcess process;
     int offsetValue;
     int powerLimit;
+    bool hadErrors = false;
+    errorText = "Failed to apply these settings: ";
     QString input = nvCoreClkSet;
-    if (latestClkOfs != ui->frequencySlider->value() - defCoreClk) {
-        offsetValue = ui->frequencySlider->value() - defCoreClk;
+    if (latestClkOfs != ui->frequencySlider->value()) {
+        offsetValue = ui->frequencySlider->value();
         QString input = nvCoreClkSet;
         input.append(QString::number(offsetValue));
         qDebug() << input;
         process.start(input);
         process.waitForFinished(-1);
-        latestClkOfs = ui->frequencySlider->value() - defCoreClk;
+        // Check if the setting got applied by querying nvidia-settings (very inefficient unfortunately)
+        process.start(nvCoreClkOfsQ);
+        process.waitForFinished();
+        if (process.readLine().toInt() == ui->frequencySlider->value()) {
+            latestClkOfs = ui->frequencySlider->value();
+        } else {
+            errorText.append("- Core Clock Offset ");
+            hadErrors = true;
+        }
     }
 
-    if (latestMemClkOfs != ui->memClkSlider->value() - defMemClk) {
-        offsetValue = ui->memClkSlider->value() - defMemClk;
+    if (latestMemClkOfs != ui->memClkSlider->value()) {
+        offsetValue = ui->memClkSlider->value();
         input = nvMemClkSet;
         input.append(QString::number(offsetValue*2));
         qDebug() << input;
         process.start(input);
         process.waitForFinished(-1);
-        latestMemClkOfs = ui->memClkSlider->value() - defMemClk;
+
+        process.start(nvCurMemClkOfsQ);
+        process.waitForFinished(-1);
+        if (process.readLine().toInt()/2 == ui->memClkSlider->value()) {
+            latestMemClkOfs = ui->memClkSlider->value();
+        } else {
+            errorText.append("- Memory Clock Offset");
+            hadErrors = true;
+        }
     }
 
     if (latestPowerLim != ui->powerLimSlider->value()) {
         powerLimit = ui->powerLimSlider->value();
         input = nvPowerLimSet;
         if (!isRoot) {
-            input.append(QString::number(powerLimit) +"'\"");
-            input.prepend("/bin/sh -c \"kdesu -c ");
+            input = "/bin/sh -c \"pkexec " + input + QString::number(powerLimit) + "\"";
+            qDebug() << input;
             process.start(input);
             process.waitForFinished(-1);
+            if (process.exitCode() != 0) {
+                errorText.append("- Power Limit ");
+                hadErrors = true;
+                ui->powerLimSlider->setValue(latestPowerLim);
+            } else {
+                latestPowerLim = ui->powerLimSlider->value();
+            }
+
+
         } else {
             input.append(QString::number(powerLimit));
             process.start(input);
             process.waitForFinished(-1);
             qDebug() << "ran as root";
         }
-        latestPowerLim = ui->powerLimSlider->value();
     }
 
     if (latestVoltOfs != ui->voltageSlider->value()) {
@@ -378,10 +460,25 @@ void MainWindow::applyGPUSettings()
         qDebug() << input;
         process.start(input);
         process.waitForFinished(-1);
-        latestVoltOfs = ui->voltageSlider->value();
+
+        process.start(nvVoltOfsQ);
+        process.waitForFinished(-1);
+        if (process.readLine().toInt()/1000 == ui->voltageSlider->value()) {
+            latestVoltOfs = ui->voltageSlider->value();
+        } else {
+            errorText.append("- Voltage Offset");
+            hadErrors = true;
+        }
     }
+    if (hadErrors) {
+        ui->statusLabel->setText(errorText);
+    } else {
+        ui->statusLabel->setText("Settings applied");
+    }
+
     resettimer->stop();
 }
+
 void MainWindow::loadProfileSettings()
 {
     QSettings settings("nvfancurve");
@@ -427,6 +524,10 @@ void MainWindow::loadProfileSettings()
     if (settings.contains("memoryClockOffset")) {
         latestMemClkOfs=settings.value("memoryClockOffset").toInt();
     }
+    if (settings.contains("fanControlMode")) {
+        fanControlMode = settings.value("fanControlMode").toInt();
+        ui->fanModeComboBox->setCurrentIndex(fanControlMode);
+    }
     ui->statusLabel->setText("Profile settings loaded.");
     statusLabelResetTimer->start(7000);
     statusLabelResetTimer->setSingleShot(true);
@@ -459,6 +560,7 @@ void MainWindow::saveProfileSettings()
     settings.setValue("powerLimit", latestPowerLim);
     settings.setValue("clockFrequencyOffset", latestClkOfs);
     settings.setValue("memoryClockOffset", latestMemClkOfs);
+    settings.setValue("fanControlMode", fanControlMode);
 }
 
 void MainWindow::generateFanPoint()
@@ -540,16 +642,29 @@ void MainWindow::on_voltageSpinBox_valueChanged(int arg1)
 void MainWindow::on_fanSlider_valueChanged(int value)
 {
     ui->fanSpinBox->setValue(value);
+    fanUpdaterDisablerTimer->start(5000);
+    fanUpdaterDisablerTimer->setSingleShot(true);
+    disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
+    connect(fanUpdaterDisablerTimer, SIGNAL(timeout()), this, SLOT(enableFanUpdater()));
 }
 void MainWindow::on_fanSpinBox_valueChanged(int arg1)
 {
     ui->fanSlider->setValue(arg1);
+}
+void MainWindow::enableFanUpdater()
+{
+    connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
 }
 void MainWindow::on_applyButton_clicked()
 {
     applyGPUSettings();
     saveProfileSettings();
     applyFanMode();
+    setupMonitorTab();
+    //ui->statusLabel->setText("Settings applied.");
+    statusLabelResetTimer->start(7000);
+    statusLabelResetTimer->setSingleShot(true);
+    connect(statusLabelResetTimer, SIGNAL(timeout()), SLOT(resetStatusLabel()));
 }
 void MainWindow::on_editFanCurveButton_pressed()
 {
@@ -566,4 +681,9 @@ void MainWindow::on_editProfile_closed()
     xCurvePoints.clear();
     yCurvePoints.clear();
     loadProfileSettings();
+}
+
+void MainWindow::on_fanModeComboBox_currentIndexChanged(int index)
+{
+    fanControlMode = index;
 }
