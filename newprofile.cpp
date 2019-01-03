@@ -10,7 +10,8 @@ newProfile::newProfile(QWidget *parent) :
     listProfiles();
 
     connect(ui->profileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(editEntryName(QListWidgetItem*)));
-    connect(this, SIGNAL(mousePressEvent(QMouseEvent*)), this, SLOT(rightClick(QMouseEvent*)));
+
+
 }
 
 newProfile::~newProfile()
@@ -25,12 +26,9 @@ void newProfile::on_profileNameEdit_textChanged(const QString &arg1)
 
 void newProfile::on_saveButton_clicked()
 {
-    MainWindow mw;
     QSettings settings("nvfancurve");
-    newProfileName.append("/isProfile");
-    qDebug() << newProfileName;
-    settings.setValue(newProfileName, true);
-    this->close();
+    // for loop here
+    settings.beginGroup(newProfileName);
     // Add saving the GPU default values here
 }
 
@@ -59,6 +57,9 @@ void newProfile::listProfiles()
 void newProfile::editEntryName(QListWidgetItem *item)
 {
     qDebug() << "item dblclicked";
+    SignalItemDelegate *delegate = new SignalItemDelegate(ui->profileList);
+    connect(delegate, &SignalItemDelegate::editStarted,[](){qDebug("edit started");});
+    connect(delegate, &SignalItemDelegate::editFinished,[](){qDebug("edit finished");});
     ui->profileList->editItem(item);
 }
 void newProfile::rightClick(QMouseEvent *event)
@@ -72,6 +73,10 @@ void newProfile::on_cancelButton_clicked()
 }
 void newProfile::on_addButton_pressed()
 {
+    SignalItemDelegate *delegate = new SignalItemDelegate(ui->profileList);
+    connect(delegate, &SignalItemDelegate::editStarted,[](){qDebug("edit started");});
+    connect(delegate, &SignalItemDelegate::editFinished,[](){qDebug("edit finished");});
+    ui->profileList->setItemDelegate(delegate);
     ui->profileList->addItem("");
     int itemCount = ui->profileList->count()-1;
     ui->profileList->item(itemCount)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);

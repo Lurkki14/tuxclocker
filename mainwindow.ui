@@ -14,21 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="perfEditorTab">
        <attribute name="title">
@@ -206,17 +199,6 @@
        <attribute name="title">
         <string>Graph Monitor</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QListWidget" name="listWidget"/>
-        </item>
-        <item>
-         <widget class="QCustomPlot" name="widget" native="true"/>
-        </item>
-        <item>
-         <widget class="QCustomPlot" name="widget_2" native="true"/>
-        </item>
-       </layout>
       </widget>
       <widget class="QWidget" name="monitorListTab">
        <attribute name="title">
@@ -246,30 +228,34 @@
        <attribute name="title">
         <string>Page</string>
        </attribute>
-       <widget class="QScrollArea" name="scrollArea">
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>60</y>
-          <width>341</width>
-          <height>371</height>
-         </rect>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>337</width>
-           <height>367</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>471</width>
+             <height>539</height>
+            </rect>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2"/>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string/>
+      </property>
      </widget>
     </item>
    </layout>
@@ -322,14 +308,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -145,17 +145,18 @@ private slots:
     void checkForProfiles();
     void on_fanModeComboBox_currentIndexChanged(int index);
     void tabHandler(int index);
+    void setupGraphMonitorTab();
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
     QVector <int> compXPoints, compYPoints;
+    QVector <double> qv_time, qv_temp;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);
     QTimer *statusLabelResetTimer = new QTimer(this);
     QTimer *fanUpdaterDisablerTimer = new QTimer(this);
     QTimer *monitorUpdater = new QTimer(this);
-
 
     QTreeWidgetItem *gputemp = new QTreeWidgetItem;
     QTreeWidgetItem *powerdraw = new QTreeWidgetItem;

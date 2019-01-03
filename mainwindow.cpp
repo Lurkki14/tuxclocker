@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     queryDriverSettings();
     getGPUName();
     setupMonitorTab();
+    setupGraphMonitorTab();
     tabHandler(ui->tabWidget->currentIndex());
 
     ui->frequencySlider->setRange(minCoreClkOfsInt, maxCoreClkOfsInt);
@@ -131,6 +132,50 @@ void MainWindow::setupMonitorTab()
     curmaxclk->setText(1, curMaxClk);
     QString curMaxMemClk = QString::number(defMemClk + latestMemClkOfs) + " MHz";
     curmaxmemclk->setText(1, curMaxMemClk);
+}
+void MainWindow::setupGraphMonitorTab()
+{
+    // Create a widget that contains all the plots
+    QWidget *plotWidget = new QWidget;
+
+    // Scroll area for the plots
+    QScrollArea *plotScrollArea = new QScrollArea;
+
+    // Layout for the plots
+    QVBoxLayout *plotLayout = new QVBoxLayout(plotWidget);
+
+    // Add this plot
+    QCustomPlot *tempPlot = new QCustomPlot;
+    tempPlot->setMinimumHeight(1200);
+    //tempPlot->setMaximumHeight(200);
+    tempPlot->setMinimumWidth(200);
+
+    QCustomPlot *powerDrawPlot = new QCustomPlot;
+    powerDrawPlot->setMinimumHeight(200);
+    powerDrawPlot->setMaximumHeight(200);
+    powerDrawPlot->setMinimumWidth(200);
+
+    // Widget for this plot
+    QWidget *tempWidget = new QWidget;
+    QWidget *powerDrawWidget = new QWidget;
+
+    // Layout for this widget
+    QVBoxLayout *tempLayout = new QVBoxLayout(tempWidget);
+    tempLayout->addWidget(tempPlot);
+    plotLayout->addWidget(tempWidget);
+
+    QVBoxLayout *powerDrawLayout = new QVBoxLayout(powerDrawWidget);
+    powerDrawLayout->addWidget(powerDrawPlot);
+    plotLayout->addWidget(powerDrawWidget);
+
+    // Set the layout containing the scroll area as the widget for the tab
+    plotScrollArea->setWidget(plotWidget);
+    plotScrollArea->setWidgetResizable(true);
+
+    // Add scroll area to a layout so we can set it as the widget for the tab
+    QVBoxLayout *lo = new QVBoxLayout;
+    lo->addWidget(plotScrollArea);
+    ui->monitorTab->setLayout(lo);
 }
 void MainWindow::updateMonitor()
 {
@@ -475,7 +520,6 @@ void MainWindow::applyGPUSettings()
     } else {
         ui->statusLabel->setText("Settings applied");
     }
-
     resettimer->stop();
 }
 
@@ -487,7 +531,7 @@ void MainWindow::loadProfileSettings()
     // Check for existance of the setting so zeroes don't get appended to curve point vectors
     if (settings.contains("xpoints")) {
         QString xPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
-        QString yPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
+        QString yPointStr = "/bin/sh -c \"echo " + settings.value("ypoints").toString() + grepStringToInt;
         QProcess process;
         process.start(xPointStr);
         process.waitForFinished(-1);

@@ -5,6 +5,7 @@
 #include <QAbstractButton>
 #include <QSettings>
 #include <QListWidget>
+#include <QStyledItemDelegate>
 
 namespace Ui {
 class newProfile;
@@ -35,5 +36,21 @@ private:
     Ui::newProfile *ui;
     QString newProfileName;
 };
-
+// New class for editing so we can detect when the editing has finished
+class SignalItemDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(SignalItemDelegate)
+public:
+    explicit SignalItemDelegate(QObject* parent = Q_NULLPTR):QStyledItemDelegate(parent){
+        QObject::connect(this,&SignalItemDelegate::closeEditor,this,&SignalItemDelegate::editFinished);
+    }
+    void setEditorData(QWidget *editor, const QModelIndex &index) const Q_DECL_OVERRIDE {
+    void editStarted();
+    return QStyledItemDelegate::setEditorData(editor,index);
+    }
+Q_SIGNALS:
+    void editStarted();
+    void editFinished();
+};
 #endif // NEWPROFILE_H
