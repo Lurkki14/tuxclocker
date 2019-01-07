@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+
+    plotCmds powerdrawplot;
 }
 
 MainWindow::~MainWindow()
@@ -92,6 +94,9 @@ void MainWindow::tabHandler(int index)
     switch (index) {
         case 2:
             monitorUpdater->start(2000);
+            break;
+        case 1:
+            monitorUpdater->start(1000);
             break;
         default:
             monitorUpdater->stop();
@@ -135,45 +140,117 @@ void MainWindow::setupMonitorTab()
 }
 void MainWindow::setupGraphMonitorTab()
 {
-    // Create a widget that contains all the plots
-    QWidget *plotWidget = new QWidget;
+    monitor mon;
+    mon.queryValues();
 
-    // Scroll area for the plots
-    QScrollArea *plotScrollArea = new QScrollArea;
-
+    plotCmdsList.append(powerdrawplot);
+    plotCmdsList.append(tempplot);
+    plotCmdsList.append(coreclkplot);
+    plotCmdsList.append(memclkplot);
+    plotCmdsList.append(coreutilplot);
     // Layout for the plots
-    QVBoxLayout *plotLayout = new QVBoxLayout(plotWidget);
+    plotWidget->setLayout(plotLayout);
 
-    // Add this plot
-    QCustomPlot *tempPlot = new QCustomPlot;
-    tempPlot->setMinimumHeight(1200);
-    //tempPlot->setMaximumHeight(200);
-    tempPlot->setMinimumWidth(200);
+    // Define the structs
+    //plotCmdsList[0].valueq = mon.temp.toDouble();
+    plotCmdsList[0].plot = tempPlot;
+    plotCmdsList[0].vector = qv_temp;
+    plotCmdsList[0].layout = tempLayout;
+    plotCmdsList[0].widget = tempWidget;
 
-    QCustomPlot *powerDrawPlot = new QCustomPlot;
-    powerDrawPlot->setMinimumHeight(200);
-    powerDrawPlot->setMaximumHeight(200);
-    powerDrawPlot->setMinimumWidth(200);
+    //plotCmdsList[1].valueq = mon.powerdraw.toDouble();
+    plotCmdsList[1].plot = powerDrawPlot;
+    plotCmdsList[1].vector = qv_powerDraw;
+    plotCmdsList[1].layout = powerDrawLayout;
+    plotCmdsList[1].widget = powerDrawWidget;
 
-    // Widget for this plot
-    QWidget *tempWidget = new QWidget;
-    QWidget *powerDrawWidget = new QWidget;
+    //plotCmdsList[2].valueq = mon.coreclock.toDouble();
+    plotCmdsList[2].plot = coreClkPlot;
+    plotCmdsList[2].vector = qv_coreClk;
+    plotCmdsList[2].layout = coreClkLayout;
+    plotCmdsList[2].widget = coreClkWidget;
 
-    // Layout for this widget
-    QVBoxLayout *tempLayout = new QVBoxLayout(tempWidget);
-    tempLayout->addWidget(tempPlot);
-    plotLayout->addWidget(tempWidget);
+    //plotCmdsList[3].valueq = mon.memclock.toDouble();
+    plotCmdsList[3].plot = memClkPlot;
+    plotCmdsList[3].vector = qv_memClk;
+    plotCmdsList[3].layout = memClkLayout;
+    plotCmdsList[3].widget = memClkWidget;
 
-    QVBoxLayout *powerDrawLayout = new QVBoxLayout(powerDrawWidget);
-    powerDrawLayout->addWidget(powerDrawPlot);
-    plotLayout->addWidget(powerDrawWidget);
+    plotCmdsList[4].plot = coreUtilPlot;
+    plotCmdsList[4].vector = qv_coreUtil;
+    plotCmdsList[4].layout = coreUtilLayout;
+    plotCmdsList[4].widget = coreUtilWidget;
 
-    // Set the layout containing the scroll area as the widget for the tab
+    plotCmdsList[0].valueq = mon.temp.toDouble();
+    plotCmdsList[1].valueq = mon.powerdraw.toDouble();
+    plotCmdsList[2].valueq = mon.coreclock.toDouble();
+    plotCmdsList[3].valueq = mon.memclock.toDouble();
+    plotCmdsList[4].valueq = mon.coreutil.toDouble();
+    // Get the main widget backgorund palette and use the colors for the plots
+    QPalette palette;
+    palette.setCurrentColorGroup(QPalette::Active);
+    QColor color = palette.color(QPalette::Background);
+    QColor textColor = palette.color(QPalette::Text);
+    QColor graphColor = palette.color(QPalette::Highlight);
+    QPen graphPen;
+    graphPen.setWidth(2);
+    graphPen.setColor(graphColor);
+    QPen tickPen;
+    tickPen.setWidthF(0.5);
+    tickPen.setColor(textColor);
+    // Define features common to all plots
+
+    for (int i=0; i<plotCmdsList.size(); i++) {
+        plotCmdsList[i].plot->setMinimumHeight(200);
+        plotCmdsList[i].plot->setMaximumHeight(200);
+        plotCmdsList[i].plot->setMinimumWidth(200);
+
+        plotCmdsList[i].plot->addGraph();
+        plotCmdsList[i].plot->xAxis->setRange(-20, 0);
+        plotCmdsList[i].plot->xAxis->setLabel("Time (s)");
+
+        // Add the widget to the main layout
+        plotCmdsList[i].widget->setLayout(plotCmdsList[i].layout);
+        plotCmdsList[i].layout->addWidget(plotCmdsList[i].plot);
+        plotLayout->addWidget(plotCmdsList[i].widget);
+
+        plotCmdsList[i].plot->setBackground(color);
+        plotCmdsList[i].plot->xAxis->setLabelColor(textColor);
+        plotCmdsList[i].plot->yAxis->setLabelColor(textColor);
+        plotCmdsList[i].plot->xAxis->setTickLabelColor(textColor);
+        plotCmdsList[i].plot->yAxis->setTickLabelColor(textColor);
+        plotCmdsList[i].plot->graph(0)->setPen(graphPen);
+        plotCmdsList[i].plot->xAxis->setTickPen(tickPen);
+        plotCmdsList[i].plot->yAxis->setTickPen(tickPen);
+        plotCmdsList[i].plot->xAxis->setSubTickPen(tickPen);
+        plotCmdsList[i].plot->yAxis->setSubTickPen(tickPen);
+        plotCmdsList[i].plot->xAxis->setBasePen(tickPen);
+        plotCmdsList[i].plot->yAxis->setBasePen(tickPen);
+
+        // Set the y-range
+        plotCmdsList[i].plot->yAxis->setRange(plotCmdsList[i].valueq -plotCmdsList[i].valueq*0.1, plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
+        connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
+    }
+
+    tempPlot->yAxis->setLabel("Temperature (°C)");
+    //tempPlot->yAxis->setRange(0, 90);
+
+    powerDrawPlot->yAxis->setLabel("Power Draw (W)");
+    //powerDrawPlot->yAxis->setRange(0, curPowerLimInt);
+
+    coreClkPlot->yAxis->setLabel("Core Clock Frequency (MHz)");
+    //coreClkPlot->yAxis->setRange(100, curMaxClkInt);
+
+    memClkPlot->yAxis->setLabel("Memory Clock Frequency (MHz)");
+    //memClkPlot->yAxis->setRange(100, curMaxMemClkInt);
+
+    coreUtilPlot->yAxis->setLabel("Core Utilization (%)");
+    //coreUtilPlot->yAxis->setRange(0, 100);
+
     plotScrollArea->setWidget(plotWidget);
     plotScrollArea->setWidgetResizable(true);
 
     // Add scroll area to a layout so we can set it as the widget for the tab
-    QVBoxLayout *lo = new QVBoxLayout;
     lo->addWidget(plotScrollArea);
     ui->monitorTab->setLayout(lo);
 }
@@ -184,12 +261,96 @@ void MainWindow::updateMonitor()
     gputemp->setText(1, mon.temp + "°C");
     powerdraw->setText(1, mon.powerdraw + "W");
     voltage->setText(1, mon.voltage + "mV");
-    coreclock->setText(1, mon.coreclock);
-    memclock->setText(1, mon.memclock);
-    coreutil->setText(1, mon.coreutil);
+    coreclock->setText(1, mon.coreclock + " MHz");
+    memclock->setText(1, mon.memclock + " MHz");
+    coreutil->setText(1, mon.coreutil + " %");
     memutil->setText(1, mon.memutil);
     fanspeed->setText(1, QString::number(fanSpeed) + " %");
     memusage->setText(1, mon.usedmem + "/" + mon.totalmem);
+
+
+    // Decrement all time values by one
+    for (int i=0; i<qv_time.length(); i++) {
+        qv_time[i]--;
+    }
+    // Add current time (0)
+    if (qv_time.size() < 21) {
+        qv_time.append(0);
+    } else {
+        qv_time.insert(21, 0);
+    }
+    // Remove the first elements if there are more elements than the x-range
+    if (qv_time.size() > 21) {
+        qv_time.removeFirst();
+    }
+    // Update the values for plots
+    plotCmdsList[0].valueq = mon.temp.toDouble();
+    plotCmdsList[1].valueq = mon.powerdraw.toDouble();
+    plotCmdsList[2].valueq = mon.coreclock.toDouble();
+    plotCmdsList[3].valueq = mon.memclock.toDouble();
+    plotCmdsList[4].valueq = mon.coreutil.toDouble();
+    for (int i=0; i<plotCmdsList.size(); i++) {
+        //qDebug() << plotCmdsList[i].vector;
+        if (plotCmdsList[i].vector.size() < 21) {
+            plotCmdsList[i].vector.append(plotCmdsList[i].valueq);
+        } else {
+            plotCmdsList[i].vector.insert(21, plotCmdsList[i].valueq);
+        }
+
+        // Remove the first element if there are more elements than the x-range
+        if (plotCmdsList[i].vector.size() > 21) {
+            plotCmdsList[i].vector.removeFirst();
+        }
+        plotCmdsList[i].plot->graph(0)->setData(qv_time, plotCmdsList[i].vector);
+        // If the newest value is out of bounds, resize the y-range
+        qDebug() << plotCmdsList[i].plot->xAxis->range().upper;
+        if (plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
+            plotCmdsList[i].plot->yAxis->setRangeUpper(plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
+        }
+        if (plotCmdsList[i].valueq < plotCmdsList[i].plot->yAxis->range().lower) {
+            plotCmdsList[i].plot->yAxis->setRangeLower(plotCmdsList[i].valueq - plotCmdsList[i].valueq*0.1);
+        }
+        qDebug() << counter;
+
+        plotCmdsList[i].plot->replot();
+        plotCmdsList[i].plot->update();
+        }
+    // If the largest/smallest values are too close to the range end, this will resize them every 10th iteration of this function
+    if (counter >= 10) {
+        for (int i=0; i<plotCmdsList.size(); i++) {
+            double lowestval = plotCmdsList[i].vector[0];
+            double largestval = plotCmdsList[i].vector[0];
+            for (int j=0; j<plotCmdsList[i].vector.size(); j++) {
+                if (plotCmdsList[i].vector[j] < lowestval) {
+                    lowestval = plotCmdsList[i].vector[j];
+                }
+                if (plotCmdsList[i].vector[j] > largestval) {
+                    largestval = plotCmdsList[i].vector[j];
+                }
+            }
+            if (plotCmdsList[i].plot->yAxis->range().upper - largestval*0.15 > largestval) {
+                plotCmdsList[i].plot->yAxis->setRange(lowestval - lowestval*0.1, largestval + largestval*0.1);
+            }
+            if (plotCmdsList[i].plot->yAxis->range().lower + lowestval*0.15 < lowestval) {
+                // Don't set the lower range to under 0
+                if (lowestval - lowestval*0.1 < 0) {
+                    plotCmdsList[i].plot->yAxis->setRangeLower(0);
+                } else {
+                    plotCmdsList[i].plot->yAxis->setRange(lowestval - lowestval*0.1, largestval + largestval*0.1);
+                }
+            }
+        }
+        counter = 0;
+    }
+    counter++;
+}
+void MainWindow::plotHovered(QMouseEvent *event)
+{
+    QPoint cursor = event->pos();
+    //qDebug() << childAt(cursor);
+    //QWidget *widget = childAt(cursor);
+    //QCustomPlot *plot = widget->findChild<QCustomPlot*>(QString(), Qt::FindDirectChildrenOnly);
+    //plot->xAxis->setRange(-15, 0);
 }
 void MainWindow::checkForProfiles()
 {

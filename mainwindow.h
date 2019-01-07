@@ -5,6 +5,7 @@
 #include "editprofile.h"
 #include "monitor.h"
 #include <QProcess>
+# include <QList>
 //#include "/opt/cuda/include/nvml.h"
 //#include <NVCtrl/NVCtrl.h>
 
@@ -86,7 +87,7 @@ public:
     int latestMemClkOfs;
     int latestVoltOfs;
 
-    bool isRoot;
+    bool isRoot = false;
     bool manualFanCtl;
 public slots:
 
@@ -146,11 +147,11 @@ private slots:
     void on_fanModeComboBox_currentIndexChanged(int index);
     void tabHandler(int index);
     void setupGraphMonitorTab();
+    void plotHovered(QMouseEvent *event);
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
     QVector <int> compXPoints, compYPoints;
-    QVector <double> qv_time, qv_temp;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);
@@ -169,5 +170,50 @@ private:
     QTreeWidgetItem *memusage = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxclk = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
+
+    // Widgets for the graph monitor
+    QWidget *plotWidget = new QWidget;
+    QScrollArea *plotScrollArea = new QScrollArea;
+    QVBoxLayout *lo = new QVBoxLayout;
+
+    QVBoxLayout *plotLayout = new QVBoxLayout;
+
+    QVBoxLayout *tempLayout = new QVBoxLayout;
+    QVBoxLayout *powerDrawLayout = new QVBoxLayout;
+    QVBoxLayout *coreClkLayout = new QVBoxLayout;
+    QVBoxLayout *memClkLayout = new QVBoxLayout;
+    QVBoxLayout *coreUtilLayout = new QVBoxLayout;
+
+    QCustomPlot *tempPlot = new QCustomPlot;
+    QCustomPlot *powerDrawPlot = new QCustomPlot;
+    QCustomPlot *coreClkPlot = new QCustomPlot;
+    QCustomPlot *memClkPlot = new QCustomPlot;
+    QCustomPlot *coreUtilPlot = new QCustomPlot;
+
+    QWidget *tempWidget = new QWidget;
+    QWidget *powerDrawWidget = new QWidget;
+    QWidget *coreClkWidget = new QWidget;
+    QWidget *memClkWidget = new QWidget;
+    QWidget *coreUtilWidget = new QWidget;
+
+    QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil;
+    double tempnum;
+    double powernum = 0;
+    struct plotCmds
+    {
+        QVector <double> vector;
+        double valueq;
+        QCustomPlot *plot;
+        QVBoxLayout *layout;
+        QWidget *widget;
+    };
+    int counter = 0;
+
+    plotCmds powerdrawplot;
+    plotCmds tempplot;
+    plotCmds coreclkplot;
+    plotCmds memclkplot;
+    plotCmds coreutilplot;
+    QVector <plotCmds> plotCmdsList;
 };
 #endif // MAINWINDOW_H
