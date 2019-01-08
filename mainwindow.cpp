@@ -148,6 +148,8 @@ void MainWindow::setupGraphMonitorTab()
     plotCmdsList.append(coreclkplot);
     plotCmdsList.append(memclkplot);
     plotCmdsList.append(coreutilplot);
+    plotCmdsList.append(memutilplot);
+    plotCmdsList.append(voltageplot);
     // Layout for the plots
     plotWidget->setLayout(plotLayout);
 
@@ -181,11 +183,23 @@ void MainWindow::setupGraphMonitorTab()
     plotCmdsList[4].layout = coreUtilLayout;
     plotCmdsList[4].widget = coreUtilWidget;
 
+    plotCmdsList[5].plot = memUtilPlot;
+    plotCmdsList[5].vector = qv_memUtil;
+    plotCmdsList[5].layout = memUtilLayout;
+    plotCmdsList[5].widget = memUtilWidget;
+
+    plotCmdsList[6].plot = voltagePlot;
+    plotCmdsList[6].vector = qv_voltage;
+    plotCmdsList[6].layout = voltageLayout;
+    plotCmdsList[6].widget = voltageWidget;
+
     plotCmdsList[0].valueq = mon.temp.toDouble();
     plotCmdsList[1].valueq = mon.powerdraw.toDouble();
     plotCmdsList[2].valueq = mon.coreclock.toDouble();
     plotCmdsList[3].valueq = mon.memclock.toDouble();
     plotCmdsList[4].valueq = mon.coreutil.toDouble();
+    plotCmdsList[5].valueq = mon.memutil.toDouble();
+    plotCmdsList[6].valueq = mon.voltage.toDouble();
     // Get the main widget backgorund palette and use the colors for the plots
     QPalette palette;
     palette.setCurrentColorGroup(QPalette::Active);
@@ -229,23 +243,17 @@ void MainWindow::setupGraphMonitorTab()
 
         // Set the y-range
         plotCmdsList[i].plot->yAxis->setRange(plotCmdsList[i].valueq -plotCmdsList[i].valueq*0.1, plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
-        connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
+        //connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
+        //connect(plotCmdsList[i].widget, SIGNAL(mouseEnterEvent(QEvent*)), SLOT(plotHovered()));
     }
 
     tempPlot->yAxis->setLabel("Temperature (°C)");
-    //tempPlot->yAxis->setRange(0, 90);
-
     powerDrawPlot->yAxis->setLabel("Power Draw (W)");
-    //powerDrawPlot->yAxis->setRange(0, curPowerLimInt);
-
     coreClkPlot->yAxis->setLabel("Core Clock Frequency (MHz)");
-    //coreClkPlot->yAxis->setRange(100, curMaxClkInt);
-
     memClkPlot->yAxis->setLabel("Memory Clock Frequency (MHz)");
-    //memClkPlot->yAxis->setRange(100, curMaxMemClkInt);
-
     coreUtilPlot->yAxis->setLabel("Core Utilization (%)");
-    //coreUtilPlot->yAxis->setRange(0, 100);
+    memUtilPlot->yAxis->setLabel("Memory Utilization (%)");
+    voltagePlot->yAxis->setLabel("Core Voltage (mV)");
 
     plotScrollArea->setWidget(plotWidget);
     plotScrollArea->setWidgetResizable(true);
@@ -253,6 +261,8 @@ void MainWindow::setupGraphMonitorTab()
     // Add scroll area to a layout so we can set it as the widget for the tab
     lo->addWidget(plotScrollArea);
     ui->monitorTab->setLayout(lo);
+
+    connect(plotHoverUpdater, SIGNAL(timeout()), SLOT(plotHovered()));
 }
 void MainWindow::updateMonitor()
 {
@@ -264,7 +274,7 @@ void MainWindow::updateMonitor()
     coreclock->setText(1, mon.coreclock + " MHz");
     memclock->setText(1, mon.memclock + " MHz");
     coreutil->setText(1, mon.coreutil + " %");
-    memutil->setText(1, mon.memutil);
+    memutil->setText(1, mon.memutil + " %");
     fanspeed->setText(1, QString::number(fanSpeed) + " %");
     memusage->setText(1, mon.usedmem + "/" + mon.totalmem);
 
@@ -289,6 +299,8 @@ void MainWindow::updateMonitor()
     plotCmdsList[2].valueq = mon.coreclock.toDouble();
     plotCmdsList[3].valueq = mon.memclock.toDouble();
     plotCmdsList[4].valueq = mon.coreutil.toDouble();
+    plotCmdsList[5].valueq = mon.memutil.toDouble();
+    plotCmdsList[6].valueq = mon.voltage.toDouble();
     for (int i=0; i<plotCmdsList.size(); i++) {
         //qDebug() << plotCmdsList[i].vector;
         if (plotCmdsList[i].vector.size() < 21) {
@@ -303,19 +315,17 @@ void MainWindow::updateMonitor()
         }
         plotCmdsList[i].plot->graph(0)->setData(qv_time, plotCmdsList[i].vector);
         // If the newest value is out of bounds, resize the y-range
-        qDebug() << plotCmdsList[i].plot->xAxis->range().upper;
         if (plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
             plotCmdsList[i].plot->yAxis->setRangeUpper(plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
         }
         if (plotCmdsList[i].valueq < plotCmdsList[i].plot->yAxis->range().lower) {
             plotCmdsList[i].plot->yAxis->setRangeLower(plotCmdsList[i].valueq - plotCmdsList[i].valueq*0.1);
         }
-        qDebug() << counter;
 
         plotCmdsList[i].plot->replot();
         plotCmdsList[i].plot->update();
-        }
-    // If the largest/smallest values are too close to the range end, this will resize them every 10th iteration of this function
+    }
+    // If the largest/smallest value is too far from the range end, this resizes them every 10th iteration of this function
     if (counter >= 10) {
         for (int i=0; i<plotCmdsList.size(); i++) {
             double lowestval = plotCmdsList[i].vector[0];
@@ -346,11 +356,26 @@ void MainWindow::updateMonitor()
 }
 void MainWindow::plotHovered(QMouseEvent *event)
 {
+    //plotHoverUpdater->start(1000);
     QPoint cursor = event->pos();
+
     //qDebug() << childAt(cursor);
     //QWidget *widget = childAt(cursor);
     //QCustomPlot *plot = widget->findChild<QCustomPlot*>(QString(), Qt::FindDirectChildrenOnly);
     //plot->xAxis->setRange(-15, 0);
+
+    int plotIndex = 0;
+    for (int i=0; i<plotCmdsList.size(); i++) {
+        if (plotCmdsList[i].widget->underMouse()) {
+            plotIndex = i;
+            break;
+        }
+    }
+    int xindex = round(plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x())) + plotCmdsList[plotIndex].vector.size();
+
+    // Find the y-value for the corresponding coordinate
+    double ycoord = plotCmdsList[plotIndex].vector[xindex];
+    qDebug() << ycoord;
 }
 void MainWindow::checkForProfiles()
 {
@@ -878,6 +903,7 @@ void MainWindow::on_editFanCurveButton_pressed()
     connect(editProf, SIGNAL(destroyed(QObject*)), SLOT(on_editProfile_closed()));
     editProf->setModal(true);
     editProf->exec();
+
 }
 void MainWindow::on_editProfile_closed()
 {

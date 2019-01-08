@@ -25,7 +25,7 @@ public:
     QString nvCoreClkQ = "nvidia-smi --query-gpu=clocks.gr --format=csv,noheader,nounits";
     QString nvMemClkQ = "nvidia-smi --query-gpu=clocks.mem --format=csv,noheader,nounits";
     QString nvCoreUtilQ = "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits";
-    QString nvMemUtilQ = "nvidia-smi --query-gpu=utilization.memory --format=csv,noheader";
+    QString nvMemUtilQ = "nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits";
     QString nvUsedMemQ = "nvidia-smi --query-gpu=memory.used --format=csv,noheader";
     QString nvTotalMemQ = "nvidia-smi --query-gpu=memory.total --format=csv,noheader";
     QString nvCurMaxClkQ = "nvidia-smi --query-supported-clocks=gr --format=csv,noheader";

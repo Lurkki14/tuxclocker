@@ -158,6 +158,7 @@ private:
     QTimer *statusLabelResetTimer = new QTimer(this);
     QTimer *fanUpdaterDisablerTimer = new QTimer(this);
     QTimer *monitorUpdater = new QTimer(this);
+    QTimer *plotHoverUpdater = new QTimer(this);
 
     QTreeWidgetItem *gputemp = new QTreeWidgetItem;
     QTreeWidgetItem *powerdraw = new QTreeWidgetItem;
@@ -183,20 +184,26 @@ private:
     QVBoxLayout *coreClkLayout = new QVBoxLayout;
     QVBoxLayout *memClkLayout = new QVBoxLayout;
     QVBoxLayout *coreUtilLayout = new QVBoxLayout;
+    QVBoxLayout *memUtilLayout = new QVBoxLayout;
+    QVBoxLayout *voltageLayout = new QVBoxLayout;
 
     QCustomPlot *tempPlot = new QCustomPlot;
     QCustomPlot *powerDrawPlot = new QCustomPlot;
     QCustomPlot *coreClkPlot = new QCustomPlot;
     QCustomPlot *memClkPlot = new QCustomPlot;
     QCustomPlot *coreUtilPlot = new QCustomPlot;
+    QCustomPlot *memUtilPlot = new QCustomPlot;
+    QCustomPlot *voltagePlot = new QCustomPlot;
 
     QWidget *tempWidget = new QWidget;
     QWidget *powerDrawWidget = new QWidget;
     QWidget *coreClkWidget = new QWidget;
     QWidget *memClkWidget = new QWidget;
     QWidget *coreUtilWidget = new QWidget;
+    QWidget *memUtilWidget = new QWidget;
+    QWidget *voltageWidget = new QWidget;
 
-    QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil;
+    QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil, qv_memUtil, qv_voltage;
     double tempnum;
     double powernum = 0;
     struct plotCmds
@@ -214,6 +221,8 @@ private:
     plotCmds coreclkplot;
     plotCmds memclkplot;
     plotCmds coreutilplot;
+    plotCmds memutilplot;
+    plotCmds voltageplot;
     QVector <plotCmds> plotCmdsList;
 };
 #endif // MAINWINDOW_H

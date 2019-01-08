@@ -8,6 +8,19 @@ editProfile::editProfile(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Get the main widget backgorund palette and use the colors for the plots
+    QPalette palette;
+    palette.setCurrentColorGroup(QPalette::Active);
+    QColor color = palette.color(QPalette::Background);
+    QColor textColor = palette.color(QPalette::Text);
+    QColor graphColor = palette.color(QPalette::Highlight);
+    QPen graphPen;
+    graphPen.setWidth(2);
+    graphPen.setColor(graphColor);
+    QPen tickPen;
+    tickPen.setWidthF(0.5);
+    tickPen.setColor(textColor);
+
     // Define the filler line vectors and graphs so they don't need to be recreated every update
     leftLineX.append(x_lower);
     leftLineX.append(0);
@@ -26,8 +39,20 @@ editProfile::editProfile(QWidget *parent) :
     ui->curvePlot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
     ui->curvePlot->graph(0)->setLineStyle(QCPGraph::lsLine);
 
-    //ui->curvePlot->setInteractions(QCP::iSelectItems | QCP::iSelectPlottables);
-    //ui->curvePlot->graph(0)->setSelectable(QCP::SelectionType::stSingleData);
+    ui->curvePlot->setBackground(color);
+    ui->curvePlot->xAxis->setLabelColor(textColor);
+    ui->curvePlot->yAxis->setLabelColor(textColor);
+    ui->curvePlot->xAxis->setTickLabelColor(textColor);
+    ui->curvePlot->yAxis->setTickLabelColor(textColor);
+    ui->curvePlot->graph(0)->setPen(graphPen);
+    ui->curvePlot->graph(1)->setPen(graphPen);
+    ui->curvePlot->graph(2)->setPen(graphPen);
+    ui->curvePlot->xAxis->setTickPen(tickPen);
+    ui->curvePlot->yAxis->setTickPen(tickPen);
+    ui->curvePlot->xAxis->setSubTickPen(tickPen);
+    ui->curvePlot->yAxis->setSubTickPen(tickPen);
+    ui->curvePlot->xAxis->setBasePen(tickPen);
+    ui->curvePlot->yAxis->setBasePen(tickPen);
 
     ui->curvePlot->xAxis->setLabel("Temperature");
     ui->curvePlot->yAxis->setLabel("Fan speed (%)");
@@ -253,6 +278,10 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
 
 void editProfile::drawCoordtext()
 {
+    QPalette palette;
+    palette.setCurrentColorGroup(QPalette::Active);
+    QColor textColor = palette.color(QPalette::Text);
+
     QCPItemText *coordText = new QCPItemText(ui->curvePlot);
     if (draggingPoint) {
     if (qv_x[index_x] > x_upper) {
@@ -272,6 +301,7 @@ void editProfile::drawCoordtext()
     QString xString = QString::number(qv_x[index_x]);
     QString yString = QString::number(qv_y[index_y]);
     coordText->setText(xString + ", " + yString);
+    coordText->setColor(textColor);
 
     } else {
         ui->curvePlot->removeItem(coordText);
