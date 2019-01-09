@@ -39,7 +39,7 @@ private slots:
     bool initializeDragging(QMouseEvent *event);
     bool detectMove(QMouseEvent *event);
     bool detectPress(QMouseEvent *event);
-    bool detectRelease(QMouseEvent *event);
+    void detectRelease(QMouseEvent *event);
     bool checkForDuplicatePoint(int x, int y);
     int getDataIndex(QCPAbstractPlottable *plottable, int dataIndex);
     int getYcoordValue(QMouseEvent *event);

@@ -186,6 +186,7 @@ private:
     QVBoxLayout *coreUtilLayout = new QVBoxLayout;
     QVBoxLayout *memUtilLayout = new QVBoxLayout;
     QVBoxLayout *voltageLayout = new QVBoxLayout;
+    QVBoxLayout *fanSpeedLayout = new QVBoxLayout;
 
     QCustomPlot *tempPlot = new QCustomPlot;
     QCustomPlot *powerDrawPlot = new QCustomPlot;
@@ -194,6 +195,7 @@ private:
     QCustomPlot *coreUtilPlot = new QCustomPlot;
     QCustomPlot *memUtilPlot = new QCustomPlot;
     QCustomPlot *voltagePlot = new QCustomPlot;
+    QCustomPlot *fanSpeedPlot = new QCustomPlot;
 
     QWidget *tempWidget = new QWidget;
     QWidget *powerDrawWidget = new QWidget;
@@ -202,8 +204,27 @@ private:
     QWidget *coreUtilWidget = new QWidget;
     QWidget *memUtilWidget = new QWidget;
     QWidget *voltageWidget = new QWidget;
+    QWidget *fanSpeedWidget = new QWidget;
 
-    QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil, qv_memUtil, qv_voltage;
+    /*QCPTextElement *tempMaxText;
+    QCPTextElement *powerDrawMaxText;
+    QCPTextElement *coreClkMaxText;
+    QCPTextElement *memClkMaxText;
+    QCPTextElement *coreUtilMaxText;
+    QCPTextElement *memUtilMaxText;
+    QCPTextElement *voltageMaxText;
+    QCPTextElement *fanMaxText;
+
+    QCPTextElement *tempMinText;
+    QCPTextElement *powerDrawMinText;
+    QCPTextElement *coreClkMinText;
+    QCPTextElement *memClkMinText;
+    QCPTextElement *coreUtilMinText;
+    QCPTextElement *memUtilMinText;
+    QCPTextElement *voltageMinText;
+    QCPTextElement *fanMinText; */
+
+    QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil, qv_memUtil, qv_voltage, qv_fanSpeed;
     double tempnum;
     double powernum = 0;
     struct plotCmds
@@ -213,8 +234,13 @@ private:
         QCustomPlot *plot;
         QVBoxLayout *layout;
         QWidget *widget;
+        QCPTextElement *mintext;
+        QCPTextElement *maxtext;
+        QCPItemTracer *tracer;
     };
     int counter = 0;
+    // The maximum size of plot data vectors (range +1)
+    int  plotVectorSize = 181;
 
     plotCmds powerdrawplot;
     plotCmds tempplot;
@@ -223,6 +249,7 @@ private:
     plotCmds coreutilplot;
     plotCmds memutilplot;
     plotCmds voltageplot;
+    plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
 };
 #endif // MAINWINDOW_H

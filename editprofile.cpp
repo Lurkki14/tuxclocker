@@ -328,15 +328,15 @@ void editProfile::drawFillerLines()
     rePlot();
 
 }
-bool editProfile::detectRelease(QMouseEvent *event)
+void editProfile::detectRelease(QMouseEvent *event)
 {
     mousePressed = false;
-    resetMouseMove();
-    resetMouseDragging();
-    draggedIndicesUnset();
-    draggingPointUnset();
+    mouseMoving = false;
+    mouseDragging = false;
+    draggingPoint = false;
+    //draggedIndicesUnset();
+    //draggingPointUnset();
     drawCoordtext();
-    return mousePressed;
 }
 
 bool editProfile::draggingPointUnset()
