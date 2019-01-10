@@ -57,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
 
-    plotCmds powerdrawplot;
 }
 
 MainWindow::~MainWindow()
@@ -156,65 +155,45 @@ void MainWindow::setupGraphMonitorTab()
     plotWidget->setLayout(plotLayout);
 
     // Define the structs
-    //plotCmdsList[0].valueq = mon.temp.toDouble();
     plotCmdsList[0].plot = tempPlot;
     plotCmdsList[0].vector = qv_temp;
     plotCmdsList[0].layout = tempLayout;
     plotCmdsList[0].widget = tempWidget;
-    //plotCmdsList[0].mintext = tempMinText;
-    //plotCmdsList[0].maxtext = tempMaxText;
 
-    //plotCmdsList[1].valueq = mon.powerdraw.toDouble();
     plotCmdsList[1].plot = powerDrawPlot;
     plotCmdsList[1].vector = qv_powerDraw;
     plotCmdsList[1].layout = powerDrawLayout;
     plotCmdsList[1].widget = powerDrawWidget;
-    //plotCmdsList[1].mintext = powerDrawMinText;
-    //plotCmdsList[1].maxtext = powerDrawMaxText;
 
-    //plotCmdsList[2].valueq = mon.coreclock.toDouble();
     plotCmdsList[2].plot = coreClkPlot;
     plotCmdsList[2].vector = qv_coreClk;
     plotCmdsList[2].layout = coreClkLayout;
     plotCmdsList[2].widget = coreClkWidget;
-    //plotCmdsList[2].mintext = coreClkMinText;
-    //plotCmdsList[2].maxtext = coreClkMaxText;
 
-    //plotCmdsList[3].valueq = mon.memclock.toDouble();
     plotCmdsList[3].plot = memClkPlot;
     plotCmdsList[3].vector = qv_memClk;
     plotCmdsList[3].layout = memClkLayout;
     plotCmdsList[3].widget = memClkWidget;
-    //plotCmdsList[3].mintext = memClkMinText;
-    //plotCmdsList[3].maxtext = memClkMaxText;
 
     plotCmdsList[4].plot = coreUtilPlot;
     plotCmdsList[4].vector = qv_coreUtil;
     plotCmdsList[4].layout = coreUtilLayout;
     plotCmdsList[4].widget = coreUtilWidget;
-    //plotCmdsList[4].mintext = coreUtilMinText;
-    //plotCmdsList[4].maxtext = coreUtilMaxText;
 
     plotCmdsList[5].plot = memUtilPlot;
     plotCmdsList[5].vector = qv_memUtil;
     plotCmdsList[5].layout = memUtilLayout;
     plotCmdsList[5].widget = memUtilWidget;
-    //plotCmdsList[5].mintext = memUtilMinText;
-    //plotCmdsList[6].maxtext = memUtilMaxText;
 
     plotCmdsList[6].plot = voltagePlot;
     plotCmdsList[6].vector = qv_voltage;
     plotCmdsList[6].layout = voltageLayout;
     plotCmdsList[6].widget = voltageWidget;
-    //plotCmdsList[7].mintext = voltageMinText;
-    //plotCmdsList[7].maxtext = voltageMaxText;
 
     plotCmdsList[7].plot = fanSpeedPlot;
     plotCmdsList[7].vector = qv_fanSpeed;
     plotCmdsList[7].layout = fanSpeedLayout;
     plotCmdsList[7].widget = fanSpeedWidget;
-    //plotCmdsList[7].mintext = fanMinText;
-    //plotCmdsList[7].maxtext = fanMaxText;
 
     plotCmdsList[0].valueq = mon.temp.toDouble();
     plotCmdsList[1].valueq = mon.powerdraw.toDouble();
@@ -224,7 +203,7 @@ void MainWindow::setupGraphMonitorTab()
     plotCmdsList[5].valueq = mon.memutil.toDouble();
     plotCmdsList[6].valueq = mon.voltage.toDouble();
     plotCmdsList[7].valueq = fanSpeed;
-    // Get the main widget backgorund palette and use the colors for the plots
+    // Get the main widget palette and use it for the graphs
     QPalette palette;
     palette.setCurrentColorGroup(QPalette::Active);
     QColor color = palette.color(QPalette::Background);
@@ -282,16 +261,9 @@ void MainWindow::setupGraphMonitorTab()
         sublo->addElement(plotCmdsList[i].mintext);
         sublo->addElement(plotCmdsList[i].maxtext);
 
-        //QCPLayoutGrid *sublo = new QCPLayoutGrid;
-        //plotCmdsList[i].plot->plotLayout()->addElement(0, 0, sublo);
-        //sublo->setMargins(QMargins(5 ,5, 5, 5));
-        //sublo->addElement(plotCmdsList[i].mintext);
-        //sublo->addElement(plotCmdsList[i].maxtext);
-        //plotCmdsList[i].maxtext->setTextColor(textColor);
-        //plotCmdsList[i].mintext->setTextColor(textColor);
-        //plotCmdsList[i].plot->plotLayout()->addElement(plotCmdsList[i].maxtext);
-        //plotCmdsList[i].maxtext->setText("Max: " + QString::number(plotCmdsList[i].valueq));
-        //plotCmdsList[i].mintext->setText("Min: " + QString::number(plotCmdsList[i].valueq));
+        QCPItemText *text = new QCPItemText(plotCmdsList[i].plot);
+        text->setColor(textColor);
+        plotCmdsList[i].valText = text;
 
         // Set the y-range
         plotCmdsList[i].plot->yAxis->setRange(plotCmdsList[i].valueq -plotCmdsList[i].valueq*0.1, plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
@@ -307,6 +279,8 @@ void MainWindow::setupGraphMonitorTab()
         mouseTracer->setPen(tracerPen);
         //connect(r, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
         connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
+
+        connect(plotCmdsList[i].plot, SIGNAL(leaveEvent(QEvent *event)), SLOT(clearPlotTracer(QEvent *event)));
     }
 
     tempPlot->yAxis->setLabel("Temperature (°C)");
@@ -325,7 +299,7 @@ void MainWindow::setupGraphMonitorTab()
     lo->addWidget(plotScrollArea);
     ui->monitorTab->setLayout(lo);
 
-    connect(plotHoverUpdater, SIGNAL(timeout()), SLOT(plotHovered()));
+    //connect(plotHoverUpdater, SIGNAL(timeout()), SLOT(plotHovered()));
 }
 void MainWindow::updateMonitor()
 {
@@ -451,29 +425,42 @@ void MainWindow::plotHovered(QMouseEvent *event)
             break;
         }
     }
-    //int xindex = round(plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x())) ;
     double pointerxcoord = plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x());
-    //double pointerycoord = plotCmdsList[plotIndex].plot->yAxis->pixelToCoord(cursor.y());
+    qDebug() << pointerxcoord << plotVectorSize;
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
-    //double ycoord = plotCmdsList[plotIndex].vector[xindex];
-    //qDebug() << xindex;
-    //qDebug() << plotCmdsList[plotIndex].plot->plottableAt(event->pos());
-    //QPointF pixelPos = QCPAbstractPlottable1D<>()
-    //int pointerxint = round(pointerxcoord);
     int valIndex = 0;
-    if (!qv_time.isEmpty()) {
+    if (!qv_time.isEmpty() && pointerxcoord > -plotVectorSize*1.01 && pointerxcoord <= 0 + plotVectorSize*0.01) {
+        double deltax = abs(qv_time[0] - pointerxcoord);
         for (int i=0; i<plotCmdsList[plotIndex].vector.size(); i++) {
-            double deltax = abs(qv_time[0] - pointerxcoord);
             if (abs(qv_time[i] - pointerxcoord) < deltax) {
+                deltax = abs(qv_time[i] - pointerxcoord);
                 valIndex = i;
             }
         }
+        //qDebug() << plotCmdsList[plotIndex].vector[valIndex];
+        //QCPItemText *text = new QCPItemText(plotCmdsList[plotIndex].plot);
+        plotCmdsList[plotIndex].valText->setText(QString::number(plotCmdsList[plotIndex].vector[valIndex]));
+        // Make the text stay inside the plot
+        if (pointerxcoord > -plotVectorSize*0.06) {
+            plotCmdsList[plotIndex].valText->position->setCoords(-plotVectorSize*0.06, plotCmdsList[plotIndex].plot->yAxis->range().upper - plotCmdsList[plotIndex].plot->yAxis->range().size()*0.05);
+        } else if (pointerxcoord < -plotVectorSize*0.94) {
+            plotCmdsList[plotIndex].valText->position->setCoords(-plotVectorSize*0.94, plotCmdsList[plotIndex].plot->yAxis->range().upper - plotCmdsList[plotIndex].plot->yAxis->range().size()*0.05);
+        } else {
+            plotCmdsList[plotIndex].valText->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper - plotCmdsList[plotIndex].plot->yAxis->range().size()*0.05);
+        }
+        //plotCmdsList[plotIndex].widget->setToolTip("test");
+        //QToolTip::showText(cursor, QString::number(plotCmdsList[plotIndex].vector[valIndex]), plotCmdsList[plotIndex].plot);
+        //QToolTip::sh
+
+        qDebug() << "inside the plot";
+        QThread::msleep(5);
+    } else {
+        // If the cursor is not within the x-range, clear the text
+        plotCmdsList[plotIndex].valText->setText("");
     }
-    qDebug() << plotCmdsList[plotIndex].vector[valIndex];
     plotCmdsList[plotIndex].plot->update();
     plotCmdsList[plotIndex].plot->replot();
-    QThread::msleep(5);
 }
 void MainWindow::checkForProfiles()
 {
@@ -559,10 +546,6 @@ void MainWindow::resetTimer()
     resettimer->stop();
     resettimer->setSingleShot(true);
     resettimer->start(10000);
-}
-void MainWindow::resetStatusLabel()
-{
-    ui->statusLabel->clear();
 }
 void MainWindow::resetChanges()
 {
@@ -800,9 +783,9 @@ void MainWindow::applyGPUSettings()
         }
     }
     if (hadErrors) {
-        ui->statusLabel->setText(errorText);
+        ui->statusBar->showMessage(errorText, 5000);
     } else {
-        ui->statusLabel->setText("Settings applied");
+        ui->statusBar->showMessage("Settings applied", 5000);
     }
     resettimer->stop();
 }
@@ -856,9 +839,9 @@ void MainWindow::loadProfileSettings()
         fanControlMode = settings.value("fanControlMode").toInt();
         ui->fanModeComboBox->setCurrentIndex(fanControlMode);
     }
-    ui->statusLabel->setText("Profile settings loaded.");
-    statusLabelResetTimer->start(7000);
-    statusLabelResetTimer->setSingleShot(true);
+    ui->statusBar->showMessage("Profile settings loaded.", 7000);
+    //statusLabelResetTimer->start(7000);
+    //statusLabelResetTimer->setSingleShot(true);
     connect(statusLabelResetTimer, SIGNAL(timeout()), SLOT(resetStatusLabel()));
     qDebug() << xCurvePoints << yCurvePoints;
 }
@@ -989,10 +972,6 @@ void MainWindow::on_applyButton_clicked()
     saveProfileSettings();
     applyFanMode();
     setupMonitorTab();
-    //ui->statusLabel->setText("Settings applied.");
-    statusLabelResetTimer->start(7000);
-    statusLabelResetTimer->setSingleShot(true);
-    connect(statusLabelResetTimer, SIGNAL(timeout()), SLOT(resetStatusLabel()));
 }
 void MainWindow::on_editFanCurveButton_pressed()
 {

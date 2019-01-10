@@ -240,7 +240,7 @@
              <x>0</x>
              <y>0</y>
              <width>471</width>
-             <height>539</height>
+             <height>560</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_2"/>
@@ -249,13 +249,6 @@
         </item>
        </layout>
       </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string/>
-      </property>
      </widget>
     </item>
    </layout>

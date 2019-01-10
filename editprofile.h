@@ -31,29 +31,17 @@ private slots:
     void addPoint(double x, double y);
     void on_pushButton_clicked();
     void clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event);
-    //void getDataPoints();
     void on_saveButton_clicked();
-    void drawCoordtext();
-
-    double getPixelLength(QMouseEvent *event);
     bool initializeDragging(QMouseEvent *event);
     bool detectMove(QMouseEvent *event);
     bool detectPress(QMouseEvent *event);
     void detectRelease(QMouseEvent *event);
     bool checkForDuplicatePoint(int x, int y);
     int getDataIndex(QCPAbstractPlottable *plottable, int dataIndex);
-    int getYcoordValue(QMouseEvent *event);
-    int getXcoordValue(int xcoord);
-    int getXPointIndex(int xcoord, int ycoord);
-    int getYPointIndex(int index_y);
-    bool resetMouseMove();
-    bool resetMouseDragging();
+    void getClosestCoords(QMouseEvent *event);
+    void getPointIndices();
     bool checkForNearbyPoints(QMouseEvent *event);
-    bool draggedIndicesSet();
-    bool draggedIndicesUnset();
     void dragPoint(int index_x, int index_y, QMouseEvent *event);
-    bool draggingPointSet();
-    bool draggingPointUnset();
     void drawFillerLines();
     void on_clearButton_clicked();
 
@@ -66,7 +54,7 @@ private:
     QVector<double> rightLineY;
     QVector<int> curvepoints;
     QPair<int, int> curvepoint;
-    //QCPItemText *coordText;
+    QCPItemText *coordText;
     int x_lower = 0;
     int x_upper = 100;
     int y_lower = 0;

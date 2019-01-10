@@ -60,14 +60,12 @@ editProfile::editProfile(QWidget *parent) :
     ui->curvePlot->xAxis->setRange(x_lower, (x_upper+5));
     ui->curvePlot->yAxis->setRange(y_lower, (y_upper+5));
 
-    //connect(ui->curvePlot, SIGNAL(on_clickedGraph(QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent*)), SLOT(getDataIndex(QCPAbstractPlottable *plottable, int dataIndex)));
     connect(ui->curvePlot, SIGNAL(mouseDoubleClick(QMouseEvent*)), SLOT(clickedGraph(QMouseEvent*)));
-    //connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getPixelLength(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), SLOT(clickedPoint(QCPAbstractPlottable*,int,QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mousePress(QMouseEvent*)), SLOT(detectPress(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(detectMove(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mouseRelease(QMouseEvent*)), SLOT(detectRelease(QMouseEvent*)));
-    connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getYcoordValue(QMouseEvent*)));
+    connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getClosestCoords(QMouseEvent*)));
 
     // Load the existing points to the graph
     MainWindow mw;
@@ -77,6 +75,9 @@ editProfile::editProfile(QWidget *parent) :
     }
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
+
+    QCPItemText *text = new QCPItemText(ui->curvePlot);
+    coordText = text;
 }
 
 editProfile::~editProfile()
@@ -94,6 +95,8 @@ void editProfile::addPoint(double x, double y)
     if ((x_lower<=x) && (x<=x_upper) && (y_lower<=y) && (y<=y_upper) && !duplicatePoint) {
         qv_x.append(x);
         qv_y.append(y);
+        index_y = qv_y.size()-1;
+        index_x = qv_x.size()-1;
     }
 }
 
@@ -170,30 +173,22 @@ bool editProfile::checkForDuplicatePoint(int x, int y)
     }
     return duplicatePoint;
 }
-
-int editProfile::getXcoordValue(int xcoord)
+void editProfile::getClosestCoords(QMouseEvent *event)
 {
-    getXPointIndex(xcoord, ycoord);
-    return xcoord;
-}
-
-int editProfile::getYcoordValue(QMouseEvent *event)
-{
-    if (qv_x.length() != 0) {
-    //Gets the indices of points that match the current cursor location
-    QPoint point = event->pos();
-    double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(point.y());
-    double pointerxcoord = ui->curvePlot->xAxis->pixelToCoord(point.x());
-    for (int i=0; i<qv_y.length(); i++) {
-        if ((abs(pointerxcoord - qv_x[i]) < selectionPrecision) && abs(pointerycoord - qv_y[i]) < selectionPrecision) {
-            xcoord = qv_x[i];
-            ycoord = qv_y[i];
-            break;
+    // Get the coordinates of the point that the mouse is over
+    if (qv_y.size() > 0) {
+        QPoint cursor = event->pos();
+        double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(cursor.y());
+        double pointerxcoord = ui->curvePlot->xAxis->pixelToCoord(cursor.x());
+        for (int i=0; i<qv_y.size(); i++) {
+            if (sqrt(abs(pointerxcoord - qv_x[i]) * (abs(pointerxcoord - qv_x[i])) + abs(pointerycoord - qv_y[i]) * abs(pointerycoord - qv_y[i])) < selectionPrecision) {
+                xcoord = qv_x[i];
+                ycoord = qv_y[i];
+                break;
+            }
         }
     }
-    }
-    getXcoordValue(xcoord);
-    return ycoord;
+    getPointIndices();
 }
 
 bool editProfile::detectMove(QMouseEvent *event)
@@ -221,31 +216,21 @@ bool editProfile::initializeDragging(QMouseEvent *event)
     checkForNearbyPoints(event);
     if (isNearbyPoint || draggingPoint) {
         dragPoint(index_x, index_y, event);
-        draggingPointSet();
+        draggingPoint = true;
     }
     return mouseDragging;
 }
-
-int editProfile::getXPointIndex(int xcoord, int ycoord)
+void editProfile::getPointIndices()
 {
-    // Gets the indices of the point that the mouse has hovered over
-    if (qv_x.length() > 0) {
-        for (int i=0; i<qv_x.length(); i++) {
+    if (qv_y.size() > 0) {
+        for (int i=0; i<qv_y.size(); i++) {
             if ((qv_x[i] == xcoord) && (qv_y[i] == ycoord)) {
                 index_x = i;
                 index_y = i;
                 break;
             }
         }
-        getYPointIndex(index_y);
-        return index_x;
     }
-}
-
-int editProfile::getYPointIndex(int index_y)
-{
-    qDebug() << index_x << index_y;
-    return index_y;
 }
 
 void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
@@ -253,8 +238,6 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     // Moves the selected point by index
     // Sleep here so we don't take up so much CPU time
     QThread::msleep(10);
-    ui->curvePlot->clearItems();
-    drawCoordtext();
     QPoint point = event->pos();
     qv_y[index_y] = round(ui->curvePlot->yAxis->pixelToCoord(point.y()));
     qv_x[index_x] = round(ui->curvePlot->xAxis->pixelToCoord(point.x()));
@@ -271,31 +254,11 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     if (qv_y[index_y] < y_lower) {
         qv_y[index_y] = y_lower;
     }
-
-    ui->curvePlot->graph(0)->setData(qv_x, qv_y);
-    drawFillerLines();
-}
-
-void editProfile::drawCoordtext()
-{
+    // Display the coordinates
     QPalette palette;
     palette.setCurrentColorGroup(QPalette::Active);
     QColor textColor = palette.color(QPalette::Text);
 
-    QCPItemText *coordText = new QCPItemText(ui->curvePlot);
-    if (draggingPoint) {
-    if (qv_x[index_x] > x_upper) {
-        qv_x[index_x] = x_upper;
-    }
-    if (qv_x[index_x] < x_lower) {
-        qv_x[index_x] = x_lower;
-    }
-    if (qv_y[index_y] > y_upper) {
-        qv_y[index_y] = y_upper;
-    }
-    if (qv_y[index_y] < y_lower) {
-        qv_y[index_y] = y_lower;
-    }
     coordText->position->setType(QCPItemPosition::ptPlotCoords);
     coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
     QString xString = QString::number(qv_x[index_x]);
@@ -303,11 +266,9 @@ void editProfile::drawCoordtext()
     coordText->setText(xString + ", " + yString);
     coordText->setColor(textColor);
 
-    } else {
-        ui->curvePlot->removeItem(coordText);
-    }
+    ui->curvePlot->graph(0)->setData(qv_x, qv_y);
+    drawFillerLines();
 }
-
 void editProfile::drawFillerLines()
 {
     // Draw the filler lines separately so they don't interfere with the main data. graph(1) = leftward line, graph(2) = rightward line
@@ -326,7 +287,6 @@ void editProfile::drawFillerLines()
 
     ui->curvePlot->graph(2)->setData(rightLineX, rightLineY);
     rePlot();
-
 }
 void editProfile::detectRelease(QMouseEvent *event)
 {
@@ -334,57 +294,14 @@ void editProfile::detectRelease(QMouseEvent *event)
     mouseMoving = false;
     mouseDragging = false;
     draggingPoint = false;
-    //draggedIndicesUnset();
-    //draggingPointUnset();
-    drawCoordtext();
-}
-
-bool editProfile::draggingPointUnset()
-{
-    draggingPoint = false;
-    return draggingPoint;
-}
-
-bool editProfile::draggingPointSet()
-{
-    draggingPoint = true;
-    return draggingPoint;
-}
-bool editProfile::draggedIndicesSet()
-{
-    indicesSet = true;
-    return indicesSet;
-}
-
-bool editProfile::draggedIndicesUnset()
-{
-    indicesSet = false;
-    return indicesSet;
-}
-bool editProfile::resetMouseMove()
-{
-    mouseMoving = false;
-    return mouseMoving;
-}
-
-bool editProfile::resetMouseDragging()
-{
-    mouseDragging = false;
-    return mouseDragging;
-}
-
-double editProfile::getPixelLength(QMouseEvent *event)
-{
-    QPoint point = event->pos();
-    qDebug() << ui->curvePlot->graph(0)->selectTest(point, 2);
-    qDebug() << pixelLength;
-    return pixelLength;
+    coordText->setText("");
+    rePlot();
 }
 
 void editProfile::on_pushButton_clicked()
 {
     qDebug() << draggingPoint;
-    drawCoordtext();
+    coordText->setText("");
 }
 
 void editProfile::on_saveButton_clicked()
@@ -409,7 +326,6 @@ void editProfile::on_saveButton_clicked()
     xsetting.append("/xpoints");
     settings.setValue(xsetting, xarray);
     settings.setValue(ysetting, yarray);
-
 }
 
 void editProfile::on_clearButton_clicked()

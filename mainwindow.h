@@ -137,7 +137,7 @@ private slots:
 
     void on_editProfile_closed();
     void applyFanMode();
-    void resetStatusLabel();
+    //void resetStatusLabel();
     void enableFanUpdater();
     void setupMonitorTab();
     void updateMonitor();
@@ -148,6 +148,11 @@ private slots:
     void tabHandler(int index);
     void setupGraphMonitorTab();
     void plotHovered(QMouseEvent *event);
+    /*void leaveEvent(QEvent *event) {
+        QWidget::leaveEvent(event);
+        QApplication::sendEvent(tempPlot, event);
+    }*/
+    //void leaveEvent(QEvent *event);
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
@@ -237,6 +242,7 @@ private:
         QCPTextElement *mintext;
         QCPTextElement *maxtext;
         QCPItemTracer *tracer;
+        QCPItemText *valText;
     };
     int counter = 0;
     // The maximum size of plot data vectors (range +1)
@@ -251,5 +257,15 @@ private:
     plotCmds voltageplot;
     plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
+
+
 };
+class plotWidgets : public QWidget
+{
+    Q_OBJECT
+protected:
+    //void leaveEvent(QEvent *event);
+
+};
+
 #endif // MAINWINDOW_H
