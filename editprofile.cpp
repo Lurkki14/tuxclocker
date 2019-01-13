@@ -259,8 +259,12 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     palette.setCurrentColorGroup(QPalette::Active);
     QColor textColor = palette.color(QPalette::Text);
 
-    coordText->position->setType(QCPItemPosition::ptPlotCoords);
-    coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
+    //coordText->position->setType(QCPItemPosition::ptPlotCoords);
+    if (ui->curvePlot->xAxis->pixelToCoord(point.x()) < x_upper*0.1) {
+        coordText->position->setCoords(x_upper*0.1, qv_y[index_y] + 4);
+    } else {
+        coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
+    }
     QString xString = QString::number(qv_x[index_x]);
     QString yString = QString::number(qv_y[index_y]);
     coordText->setText(xString + ", " + yString);

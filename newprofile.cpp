@@ -11,7 +11,9 @@ newProfile::newProfile(QWidget *parent) :
 
     connect(ui->profileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(editEntryName(QListWidgetItem*)));
 
-
+    SignalItemDelegate *delegate = new SignalItemDelegate(ui->profileList);
+    deleg = delegate;
+    connect(deleg, SIGNAL(editStarted), SLOT(testi()));
 }
 
 newProfile::~newProfile()
@@ -23,7 +25,10 @@ void newProfile::on_profileNameEdit_textChanged(const QString &arg1)
 {
     newProfileName = arg1;
 }
-
+void newProfile::testi()
+{
+    qDebug() << "edit started";
+}
 void newProfile::on_saveButton_clicked()
 {
     QSettings settings("nvfancurve");
@@ -73,12 +78,12 @@ void newProfile::on_cancelButton_clicked()
 }
 void newProfile::on_addButton_pressed()
 {
-    SignalItemDelegate *delegate = new SignalItemDelegate(ui->profileList);
+    /*SignalItemDelegate *delegate = new SignalItemDelegate(ui->profileList);
     connect(delegate, &SignalItemDelegate::editStarted,[](){qDebug("edit started");});
     connect(delegate, &SignalItemDelegate::editFinished,[](){qDebug("edit finished");});
     ui->profileList->setItemDelegate(delegate);
     ui->profileList->addItem("");
     int itemCount = ui->profileList->count()-1;
     ui->profileList->item(itemCount)->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
-    ui->profileList->editItem(ui->profileList->item(itemCount));
+    ui->profileList->editItem(ui->profileList->item(itemCount)); */
 }

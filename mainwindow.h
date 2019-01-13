@@ -49,7 +49,9 @@ public:
     QString grepStringToInt = " | egrep -o '[0-9]{0,100}'\"";
 
     QString queryForNvidiaProp = "/bin/sh -c \"lspci -vnn | grep -c 'Kernel driver in use: nvidia'\"";
-    QString queryGPUName = "/bin/sh -c \"nvidia-smi --query-gpu=gpu_name --format=csv | grep '[0-9]'\"";
+    QString queryGPUName = "nvidia-smi --query-gpu=gpu_name --format=csv,noheader";
+    QString nvGPUCountQ = "nvidia-smi --query-gpu=count --format=csv,noheader";
+    QString nvUUIDQ = "nvidia-smi --query-gpu=uuid --format=csv,noheader";
 
     QString errorText = "Failed to apply these settings: ";
 
@@ -98,7 +100,8 @@ private slots:
 
     void on_profileComboBox_activated(const QString &arg1);
     void queryGPUSettings();
-    void getGPUName();
+    //void getGPUName();
+    void queryGPUs();
     void on_frequencySlider_valueChanged(int value);
     void on_frequencySpinBox_valueChanged(int arg1);
 
@@ -137,7 +140,6 @@ private slots:
 
     void on_editProfile_closed();
     void applyFanMode();
-    //void resetStatusLabel();
     void enableFanUpdater();
     void setupMonitorTab();
     void updateMonitor();
@@ -178,38 +180,38 @@ private:
     QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
 
     // Widgets for the graph monitor
-    QWidget *plotWidget = new QWidget;
-    QScrollArea *plotScrollArea = new QScrollArea;
-    QVBoxLayout *lo = new QVBoxLayout;
+    QWidget *plotWidget = new QWidget(this);
+    QScrollArea *plotScrollArea = new QScrollArea(this);
+    QVBoxLayout *lo = new QVBoxLayout(this);
 
-    QVBoxLayout *plotLayout = new QVBoxLayout;
+    QVBoxLayout *plotLayout = new QVBoxLayout(this);
 
-    QVBoxLayout *tempLayout = new QVBoxLayout;
-    QVBoxLayout *powerDrawLayout = new QVBoxLayout;
-    QVBoxLayout *coreClkLayout = new QVBoxLayout;
-    QVBoxLayout *memClkLayout = new QVBoxLayout;
-    QVBoxLayout *coreUtilLayout = new QVBoxLayout;
-    QVBoxLayout *memUtilLayout = new QVBoxLayout;
-    QVBoxLayout *voltageLayout = new QVBoxLayout;
-    QVBoxLayout *fanSpeedLayout = new QVBoxLayout;
+    QVBoxLayout *tempLayout = new QVBoxLayout(this);
+    QVBoxLayout *powerDrawLayout = new QVBoxLayout(this);
+    QVBoxLayout *coreClkLayout = new QVBoxLayout(this);
+    QVBoxLayout *memClkLayout = new QVBoxLayout(this);
+    QVBoxLayout *coreUtilLayout = new QVBoxLayout(this);
+    QVBoxLayout *memUtilLayout = new QVBoxLayout(this);
+    QVBoxLayout *voltageLayout = new QVBoxLayout(this);
+    QVBoxLayout *fanSpeedLayout = new QVBoxLayout(this);
 
-    QCustomPlot *tempPlot = new QCustomPlot;
-    QCustomPlot *powerDrawPlot = new QCustomPlot;
-    QCustomPlot *coreClkPlot = new QCustomPlot;
-    QCustomPlot *memClkPlot = new QCustomPlot;
-    QCustomPlot *coreUtilPlot = new QCustomPlot;
-    QCustomPlot *memUtilPlot = new QCustomPlot;
-    QCustomPlot *voltagePlot = new QCustomPlot;
-    QCustomPlot *fanSpeedPlot = new QCustomPlot;
+    QCustomPlot *tempPlot = new QCustomPlot(this);
+    QCustomPlot *powerDrawPlot = new QCustomPlot(this);
+    QCustomPlot *coreClkPlot = new QCustomPlot(this);
+    QCustomPlot *memClkPlot = new QCustomPlot(this);
+    QCustomPlot *coreUtilPlot = new QCustomPlot(this);
+    QCustomPlot *memUtilPlot = new QCustomPlot(this);
+    QCustomPlot *voltagePlot = new QCustomPlot(this);
+    QCustomPlot *fanSpeedPlot = new QCustomPlot(this);
 
-    QWidget *tempWidget = new QWidget;
-    QWidget *powerDrawWidget = new QWidget;
-    QWidget *coreClkWidget = new QWidget;
-    QWidget *memClkWidget = new QWidget;
-    QWidget *coreUtilWidget = new QWidget;
-    QWidget *memUtilWidget = new QWidget;
-    QWidget *voltageWidget = new QWidget;
-    QWidget *fanSpeedWidget = new QWidget;
+    QWidget *tempWidget = new QWidget(this);
+    QWidget *powerDrawWidget = new QWidget(this);
+    QWidget *coreClkWidget = new QWidget(this);
+    QWidget *memClkWidget = new QWidget(this);
+    QWidget *coreUtilWidget = new QWidget(this);
+    QWidget *memUtilWidget = new QWidget(this);
+    QWidget *voltageWidget = new QWidget(this);
+    QWidget *fanSpeedWidget = new QWidget(this);
 
     /*QCPTextElement *tempMaxText;
     QCPTextElement *powerDrawMaxText;
@@ -258,13 +260,6 @@ private:
     plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
 
-
-};
-class plotWidgets : public QWidget
-{
-    Q_OBJECT
-protected:
-    //void leaveEvent(QEvent *event);
 
 };
 

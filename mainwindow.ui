@@ -16,12 +16,15 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
+     <widget class="QComboBox" name="GPUComboBox"/>
+    </item>
+    <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="perfEditorTab">
        <attribute name="title">
@@ -220,31 +223,6 @@
             <string>Value</string>
            </property>
           </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Page</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QScrollArea" name="scrollArea">
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>471</width>
-             <height>560</height>
-            </rect>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_2"/>
-          </widget>
          </widget>
         </item>
        </layout>

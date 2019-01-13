@@ -32,9 +32,12 @@ private slots:
     void on_addButton_pressed();
 
     void rightClick(QMouseEvent *event);
+    void testi();
 private:
     Ui::newProfile *ui;
     QString newProfileName;
+
+    QStyledItemDelegate *deleg = new QStyledItemDelegate(this);
 };
 // New class for editing so we can detect when the editing has finished
 class SignalItemDelegate : public QStyledItemDelegate

@@ -14,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     queryGPUSettings();
     loadProfileSettings();
     queryDriverSettings();
-    getGPUName();
+    //getGPUName();
+    queryGPUs();
     setupMonitorTab();
     setupGraphMonitorTab();
     tabHandler(ui->tabWidget->currentIndex());
@@ -280,7 +281,7 @@ void MainWindow::setupGraphMonitorTab()
         //connect(r, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
         connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
 
-        connect(plotCmdsList[i].plot, SIGNAL(leaveEvent(QEvent *event)), SLOT(clearPlotTracer(QEvent *event)));
+        //connect(plotCmdsList[i].plot, SIGNAL(leaveEvent(QEvent *event)), SLOT(clearPlotTracer(QEvent *event)));
     }
 
     tempPlot->yAxis->setLabel("Temperature (°C)");
@@ -345,14 +346,14 @@ void MainWindow::updateMonitor()
         if (!plotCmdsList[i].vector.isEmpty()) {
             double lowestval = plotCmdsList[i].vector[0];
             double largestval = plotCmdsList[i].vector[0];
-            for (int j=0; j<plotCmdsList[i].vector.size(); j++) {
+            /*for (int j=0; j<plotCmdsList[i].vector.size(); j++) {
                 if (plotCmdsList[i].vector[j] < lowestval) {
                     lowestval = plotCmdsList[i].vector[j];
                 }
                 if (plotCmdsList[i].vector[j] > largestval) {
                     largestval = plotCmdsList[i].vector[j];
                 }
-            }
+            }*/
             if (largestval < plotCmdsList[i].valueq) {
                 plotCmdsList[i].maxtext->setText("Max: " + QString::number(plotCmdsList[i].valueq));
             }
@@ -408,6 +409,7 @@ void MainWindow::updateMonitor()
         counter = 0;
     }
     counter++;
+    qDebug() << qv_time.size();
 }
 void MainWindow::plotHovered(QMouseEvent *event)
 {
@@ -426,7 +428,7 @@ void MainWindow::plotHovered(QMouseEvent *event)
         }
     }
     double pointerxcoord = plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x());
-    qDebug() << pointerxcoord << plotVectorSize;
+    //qDebug() << pointerxcoord << plotVectorSize;
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
     int valIndex = 0;
@@ -453,8 +455,8 @@ void MainWindow::plotHovered(QMouseEvent *event)
         //QToolTip::showText(cursor, QString::number(plotCmdsList[plotIndex].vector[valIndex]), plotCmdsList[plotIndex].plot);
         //QToolTip::sh
 
-        qDebug() << "inside the plot";
-        QThread::msleep(5);
+        //qDebug() << "inside the plot";
+        QThread::msleep(10);
     } else {
         // If the cursor is not within the x-range, clear the text
         plotCmdsList[plotIndex].valText->setText("");
@@ -464,7 +466,6 @@ void MainWindow::plotHovered(QMouseEvent *event)
 }
 void MainWindow::checkForProfiles()
 {
-    qDebug() << "chkproffunc";
     // If there are no profiles, create one, then list all the entries whose isProfile is true in the profile selection combo box
     QSettings settings("nvfancurve");
     QStringList groups = settings.childGroups();
@@ -512,14 +513,31 @@ void MainWindow::getGPUDriver()
     }
 }
 
-void MainWindow::getGPUName()
+/*void MainWindow::getGPUName()
 {
     QProcess process;
     process.start(queryGPUName);
     process.waitForFinished(-1);
     ui->GPUNameLabel->setText(process.readLine());
+    queryGPUs();
+}*/
+void MainWindow::queryGPUs()
+{
+    QProcess process;
+    process.start(nvGPUCountQ);
+    process.waitForFinished();
+    for (int i=0; i<process.readLine().toInt(); i++) {
+        process.start(nvUUIDQ + " -i " + QString::number(i));
+        process.waitForFinished();
+        qDebug() << process.readLine();
+        process.start(queryGPUName + " -i " + QString::number(i));
+        process.waitForFinished();
+        QString GPUName = process.readLine();
+        GPUName.chop(1);
+        qDebug() << process.readLine();
+        ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + GPUName);
+    }
 }
-
 void MainWindow::fanSpeedUpdater()
 {
     QProcess process;
@@ -840,9 +858,6 @@ void MainWindow::loadProfileSettings()
         ui->fanModeComboBox->setCurrentIndex(fanControlMode);
     }
     ui->statusBar->showMessage("Profile settings loaded.", 7000);
-    //statusLabelResetTimer->start(7000);
-    //statusLabelResetTimer->setSingleShot(true);
-    connect(statusLabelResetTimer, SIGNAL(timeout()), SLOT(resetStatusLabel()));
     qDebug() << xCurvePoints << yCurvePoints;
 }
 
