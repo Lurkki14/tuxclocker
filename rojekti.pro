@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui x11extras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -30,21 +30,31 @@ SOURCES += \
     qcustomplot.cpp \
     editprofile.cpp \
     newprofile.cpp \
-    monitor.cpp
+    monitor.cpp \
+    plotwidget.cpp \
+    #nvidia.cpp
 
 HEADERS += \
         mainwindow.h \
     qcustomplot.h \
     editprofile.h \
     newprofile.h \
-    monitor.h
+    monitor.h \
+    plotwidget.h \
+    #nvidia.h
 
 FORMS += \
         mainwindow.ui \
     editprofile.ui \
     newprofile.ui
 
+INCLUDEPATH += "/usr/lib"
+
+LIBS += -lXext -lXNVCtrl -lX11
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

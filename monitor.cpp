@@ -1,7 +1,7 @@
 #include "monitor.h"
 #include "mainwindow.h"
 
-monitor::monitor(QWidget *parent) : QMainWindow(parent)
+monitor::monitor(QWidget *parent) : QObject(parent)
 {
 }
 void monitor::queryValues()

@@ -5,7 +5,8 @@
 #include "editprofile.h"
 #include "monitor.h"
 #include <QProcess>
-# include <QList>
+#include <QList>
+#include <QtConcurrent/QtConcurrent>
 //#include "/opt/cuda/include/nvml.h"
 //#include <NVCtrl/NVCtrl.h>
 
@@ -57,40 +58,41 @@ public:
 
     QString gpuDriver;
     QVector <int> xCurvePoints, yCurvePoints;
+    int currentGPUIndex = 0;
 
-    int voltInt;
-    int voltOfsInt;
-    int coreFreqOfsInt;
+    int voltInt = 0;
+    int voltOfsInt = 0;
+    int coreFreqOfsInt = 0;
 
-    int maxPowerLimInt;
-    int minPowerLimInt;
-    int curPowerLimInt;
+    int maxPowerLimInt = 0;
+    int minPowerLimInt = 0;
+    int curPowerLimInt = 0;
 
-    int minCoreClkOfsInt=0;
-    int maxCoreClkOfsInt=0;
-    int curMaxClkInt;
+    int minCoreClkOfsInt = 0;
+    int maxCoreClkOfsInt = 0;
+    int curMaxClkInt = 0;
     int minMemClkOfsInt = 0;
     int maxMemClkOfsInt = 0;
     int minVoltOfsInt = 0;
     int maxVoltOfsInt = 0;
-    int curMaxMemClkInt;
-    int memClkOfsInt;
-    int fanSpeed;
-    int temp;
-    int targetFanSpeed;
-    int fanControlMode;
+    int curMaxMemClkInt = 0;
+    int memClkOfsInt = 0;
+    int fanSpeed = 0;
+    int temp = 0;
+    int targetFanSpeed = 0;
+    int fanControlMode = 0;
 
-    int defCoreClk;
-    int defMemClk;
-    int defVolt;
+    int defCoreClk = 0;
+    int defMemClk = 0;
+    int defVolt = 0;
 
-    int latestClkOfs;
-    int latestPowerLim;
-    int latestMemClkOfs;
-    int latestVoltOfs;
+    int latestClkOfs = 0;
+    int latestPowerLim = 0;
+    int latestMemClkOfs = 0;
+    int latestVoltOfs = 0;
 
     bool isRoot = false;
-    bool manualFanCtl;
+    bool manualFanCtl = false;
 public slots:
 
 private slots:
@@ -100,7 +102,6 @@ private slots:
 
     void on_profileComboBox_activated(const QString &arg1);
     void queryGPUSettings();
-    //void getGPUName();
     void queryGPUs();
     void on_frequencySlider_valueChanged(int value);
     void on_frequencySpinBox_valueChanged(int arg1);
@@ -150,15 +151,13 @@ private slots:
     void tabHandler(int index);
     void setupGraphMonitorTab();
     void plotHovered(QMouseEvent *event);
-    /*void leaveEvent(QEvent *event) {
-        QWidget::leaveEvent(event);
-        QApplication::sendEvent(tempPlot, event);
-    }*/
-    //void leaveEvent(QEvent *event);
+    void clearPlots();
+    void clearExtremeValues();
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
-    QVector <int> compXPoints, compYPoints;
+    QStringList UUIDList;
+    QString latestUUID;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);
@@ -213,36 +212,19 @@ private:
     QWidget *voltageWidget = new QWidget(this);
     QWidget *fanSpeedWidget = new QWidget(this);
 
-    /*QCPTextElement *tempMaxText;
-    QCPTextElement *powerDrawMaxText;
-    QCPTextElement *coreClkMaxText;
-    QCPTextElement *memClkMaxText;
-    QCPTextElement *coreUtilMaxText;
-    QCPTextElement *memUtilMaxText;
-    QCPTextElement *voltageMaxText;
-    QCPTextElement *fanMaxText;
-
-    QCPTextElement *tempMinText;
-    QCPTextElement *powerDrawMinText;
-    QCPTextElement *coreClkMinText;
-    QCPTextElement *memClkMinText;
-    QCPTextElement *coreUtilMinText;
-    QCPTextElement *memUtilMinText;
-    QCPTextElement *voltageMinText;
-    QCPTextElement *fanMinText; */
-
     QVector <double> qv_time, qv_temp, qv_powerDraw, qv_coreClk, qv_memClk, qv_coreUtil, qv_memUtil, qv_voltage, qv_fanSpeed;
-    double tempnum;
-    double powernum = 0;
     struct plotCmds
     {
         QVector <double> vector;
         double valueq;
+        double maxval;
+        double minval;
         QCustomPlot *plot;
         QVBoxLayout *layout;
         QWidget *widget;
         QCPTextElement *mintext;
         QCPTextElement *maxtext;
+        QCPTextElement *curtext;
         QCPItemTracer *tracer;
         QCPItemText *valText;
     };
@@ -259,8 +241,6 @@ private:
     plotCmds voltageplot;
     plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
-
-
 };
 
 #endif // MAINWINDOW_H

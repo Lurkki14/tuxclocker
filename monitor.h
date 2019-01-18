@@ -1,9 +1,9 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
-#include <QMainWindow>
+#include <QObject>
 
-class monitor : public QMainWindow
+class monitor : public QObject
 {
     Q_OBJECT
 public:

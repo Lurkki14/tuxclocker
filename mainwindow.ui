@@ -16,9 +16,6 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QComboBox" name="GPUComboBox"/>
-    </item>
-    <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
@@ -126,8 +123,8 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>../../../Pictures/cog.png</normaloff>../../../Pictures/cog.png</iconset>
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/cog.png</normaloff>:/icons/cog.png</iconset>
           </property>
          </widget>
         </item>
@@ -279,6 +276,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

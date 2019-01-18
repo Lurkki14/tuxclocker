@@ -262,6 +262,8 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
     //coordText->position->setType(QCPItemPosition::ptPlotCoords);
     if (ui->curvePlot->xAxis->pixelToCoord(point.x()) < x_upper*0.1) {
         coordText->position->setCoords(x_upper*0.1, qv_y[index_y] + 4);
+    } else if (ui->curvePlot->xAxis->pixelToCoord(point.x()) > x_upper*0.9) {
+        coordText->position->setCoords(x_upper*0.9, qv_y[index_y] + 4);
     } else {
         coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
     }
@@ -319,7 +321,7 @@ void editProfile::on_saveButton_clicked()
         yString.append(y + ", ");
 
     }
-    MainWindow mw;
+    /*MainWindow mw;
     QVariant xarray = xString;
     QVariant yarray = yString;
     qDebug() << xarray.toString() << yarray.toString();
@@ -329,7 +331,17 @@ void editProfile::on_saveButton_clicked()
     ysetting.append("/ypoints");
     xsetting.append("/xpoints");
     settings.setValue(xsetting, xarray);
-    settings.setValue(ysetting, yarray);
+    settings.setValue(ysetting, yarray); */
+    QSettings settings("nvfancurve");
+    settings.beginGroup("General");
+    QString currentProfile = settings.value("currentProfile").toString();
+    QString latestUUID = settings.value("latestUUID").toString();
+    qDebug() << latestUUID;
+    settings.endGroup();
+    settings.beginGroup(currentProfile);
+    settings.beginGroup(latestUUID);
+    settings.setValue("ypoints", yString);
+    settings.setValue("xpoints", xString);
 }
 
 void editProfile::on_clearButton_clicked()

@@ -27,18 +27,23 @@ private slots:
     void on_profileNameEdit_textChanged(const QString &arg1);
     void on_cancelButton_clicked();
     void listProfiles();
-    void editEntryName(QListWidgetItem *item);
+    //void editEntryName(QListWidgetItem *item);
 
     void on_addButton_pressed();
 
-    void rightClick(QMouseEvent *event);
-    void testi();
+    void saveChange();
+    void on_removeButton_pressed();
+
 private:
     Ui::newProfile *ui;
     QString newProfileName;
-
     QStyledItemDelegate *deleg = new QStyledItemDelegate(this);
+    QStringList origProfileList;
+    QStringList newProfileList;
+    QStringList removedList;
+    int latestIndex = 0;
 };
+
 // New class for editing so we can detect when the editing has finished
 class SignalItemDelegate : public QStyledItemDelegate
 {

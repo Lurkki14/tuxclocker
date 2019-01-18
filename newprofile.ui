@@ -34,19 +34,29 @@
    <item row="1" column="2">
     <widget class="QPushButton" name="addButton">
      <property name="text">
-      <string>add</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/icons/plusicon.png</normaloff>:/icons/plusicon.png</iconset>
      </property>
     </widget>
    </item>
    <item row="1" column="3">
     <widget class="QPushButton" name="removeButton">
      <property name="text">
-      <string>rm</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/icons/minusicon.png</normaloff>:/icons/minusicon.png</iconset>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
