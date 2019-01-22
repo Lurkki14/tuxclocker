@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>TuxClocker</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
@@ -28,13 +28,6 @@
         <string>Performance</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="4" colspan="2">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>testinappi</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0" colspan="6">
          <widget class="QLabel" name="GPUNameLabel">
           <property name="maximumSize">
@@ -76,13 +69,6 @@
           </property>
          </widget>
         </item>
-        <item row="13" column="0" colspan="2">
-         <widget class="QPushButton" name="applyButton">
-          <property name="text">
-           <string>Apply changes</string>
-          </property>
-         </widget>
-        </item>
         <item row="11" column="0" colspan="3">
          <widget class="QLabel" name="clockFreqLabel">
           <property name="text">
@@ -118,6 +104,9 @@
             <width>87</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit fan curve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -180,18 +169,18 @@
         <item row="4" column="5">
          <widget class="QSpinBox" name="fanSpinBox"/>
         </item>
-        <item row="13" column="2">
-         <widget class="QPushButton" name="newProfile">
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
-        </item>
         <item row="13" column="3" colspan="3">
          <widget class="QComboBox" name="profileComboBox"/>
         </item>
         <item row="6" column="5">
          <widget class="QSpinBox" name="voltageSpinBox"/>
+        </item>
+        <item row="13" column="0" colspan="3">
+         <widget class="QPushButton" name="applyButton">
+          <property name="text">
+           <string>Apply changes</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -239,19 +228,11 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Fi&amp;le</string>
+     <string>Profi&amp;les</string>
     </property>
-    <addaction name="actionQuit"/>
-   </widget>
-   <widget class="QMenu" name="menuProfiles">
-    <property name="title">
-     <string>P&amp;rofiles</string>
-    </property>
-    <addaction name="actionEdit_current_profile"/>
-    <addaction name="actionAdd_new_profile"/>
+    <addaction name="actionManage_profiles"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuProfiles"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
@@ -272,6 +253,11 @@
   <action name="actionAdd_new_profile">
    <property name="text">
     <string>&amp;Add new profile</string>
+   </property>
+  </action>
+  <action name="actionManage_profiles">
+   <property name="text">
+    <string>&amp;Manage profiles</string>
    </property>
   </action>
  </widget>

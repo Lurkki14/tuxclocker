@@ -29,7 +29,6 @@ private slots:
     void clickedGraph(QMouseEvent *event);
     void rePlot();
     void addPoint(double x, double y);
-    void on_pushButton_clicked();
     void clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, QMouseEvent *event);
     void on_saveButton_clicked();
     bool initializeDragging(QMouseEvent *event);
@@ -44,6 +43,9 @@ private slots:
     void dragPoint(int index_x, int index_y, QMouseEvent *event);
     void drawFillerLines();
     void on_clearButton_clicked();
+    void drawPointHoveredText(QMouseEvent *event);
+
+    void on_cancelButton_pressed();
 
 private:
     Ui::editProfile *ui;
@@ -76,6 +78,8 @@ private:
     int index_y = 0;
     bool indicesSet = false;
     bool draggingPoint = false;
+    QTimer *pressTimer = new QTimer(this);
+    int timerTime = 1000;
 };
 
 #endif // EDITPROFILE_H

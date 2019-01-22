@@ -28,21 +28,18 @@ void newProfile::on_profileNameEdit_textChanged(const QString &arg1)
 }
 void newProfile::saveChange()
 {
-    qDebug() << "edit finished";
+    //qDebug() << "edit finished";
     //QListWidgetItem *item = ui->profileList->item(latestIndex);
     newProfileList.clear();
     for (int i=0; i<ui->profileList->count(); i++) {
         newProfileList.append(ui->profileList->item(i)->text());
-        qDebug() << newProfileList[i];
+        //qDebug() << newProfileList[i];
         ui->profileList->item(i)->setFlags(Qt::ItemIsEnabled);
     }
 }
 void newProfile::on_saveButton_clicked()
 {
-    QSettings settings("nvfancurve");
-    //settings.beginGroup("rtgerdg");
-    //settings.remove("");
-    qDebug() << removedList;
+    QSettings settings("tuxclocker");
     // Add the new ones
     for (int i=0; i<newProfileList.size(); i++) {
         settings.setValue(newProfileList[i] + "/isProfile", true);
@@ -52,21 +49,22 @@ void newProfile::on_saveButton_clicked()
         settings.remove("");
         settings.endGroup();
     }
+    close();
 }
 
 void newProfile::listProfiles()
 {
-    QSettings settings("nvfancurve");
+    QSettings settings("tuxclocker");
     QString isProfile = "/isProfile";
     QStringList groups = settings.childGroups();
-    qDebug() << "testi";
+    //qDebug() << "testi";
     for (int i=0; i<groups.length(); i++) {
         // Make a query $profile/isProfile
         QString group = groups[i];
         QString query = group.append(isProfile);
-        qDebug() << query;
+        //qDebug() << query;
         if (settings.value(query).toBool()) {
-            qDebug() << groups[i];
+            //qDebug() << groups[i];
             ui->profileList->addItem(groups[i]);
             origProfileList.append(groups[i]);
             newProfileList.append(groups[i]);
@@ -102,22 +100,10 @@ void newProfile::on_removeButton_pressed()
 {
     if (ui->profileList->count() > 1) {
         int index = ui->profileList->currentRow();
-        qDebug() << index;
-        //QListWidgetItem *item = new QListWidgetItem(ui->profileList);
         QListWidgetItem *item = ui->profileList->item(index);
         removedList.append(item->text());
         newProfileList.removeAt(index);
-
-        //newProfileList.removeAt(index);
-
-        //item = ui->profileList->item(index);
         ui->profileList->takeItem(index);
-        /*if (ui->profileList->currentRow() == ui->profileList->count()-1) {
-            ui->profileList->model()->removeRow(index);
-        } else {
-            ui->profileList->model()->removeRow(index +1);
-        }*/
-        //ui->profileList->model()->removeRow(ui->profileList->count()-1);
         delete item;
     }
 }

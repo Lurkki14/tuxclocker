@@ -6,8 +6,7 @@
 #include "monitor.h"
 #include <QProcess>
 #include <QList>
-#include <QtConcurrent/QtConcurrent>
-//#include "/opt/cuda/include/nvml.h"
+#include <QByteArray>
 //#include <NVCtrl/NVCtrl.h>
 
 namespace Ui {
@@ -98,7 +97,6 @@ public slots:
 private slots:
 
     void on_actionEdit_current_profile_triggered(bool checked);
-    void on_pushButton_clicked();
 
     void on_profileComboBox_activated(const QString &arg1);
     void queryGPUSettings();
@@ -153,6 +151,8 @@ private slots:
     void plotHovered(QMouseEvent *event);
     void clearPlots();
     void clearExtremeValues();
+    void on_actionManage_profiles_triggered();
+
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
@@ -177,6 +177,7 @@ private:
     QTreeWidgetItem *memusage = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxclk = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
+    QTreeWidgetItem *curpowerlim = new QTreeWidgetItem;
 
     // Widgets for the graph monitor
     QWidget *plotWidget = new QWidget(this);

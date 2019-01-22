@@ -54,7 +54,7 @@ editProfile::editProfile(QWidget *parent) :
     ui->curvePlot->xAxis->setBasePen(tickPen);
     ui->curvePlot->yAxis->setBasePen(tickPen);
 
-    ui->curvePlot->xAxis->setLabel("Temperature");
+    ui->curvePlot->xAxis->setLabel("Temperature (°C)");
     ui->curvePlot->yAxis->setLabel("Fan speed (%)");
 
     ui->curvePlot->xAxis->setRange(x_lower, (x_upper+5));
@@ -66,6 +66,7 @@ editProfile::editProfile(QWidget *parent) :
     connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(detectMove(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mouseRelease(QMouseEvent*)), SLOT(detectRelease(QMouseEvent*)));
     connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getClosestCoords(QMouseEvent*)));
+    connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(drawPointHoveredText(QMouseEvent*)));
 
     // Load the existing points to the graph
     MainWindow mw;
@@ -78,6 +79,7 @@ editProfile::editProfile(QWidget *parent) :
 
     QCPItemText *text = new QCPItemText(ui->curvePlot);
     coordText = text;
+    coordText->setColor(textColor);
 }
 
 editProfile::~editProfile()
@@ -90,7 +92,7 @@ void editProfile::addPoint(double x, double y)
     y = round(y);
     x = round(x);
     if (qv_x.length() != 0) {
-    checkForDuplicatePoint(x, y);
+        checkForDuplicatePoint(x, y);
     }
     if ((x_lower<=x) && (x<=x_upper) && (y_lower<=y) && (y<=y_upper) && !duplicatePoint) {
         qv_x.append(x);
@@ -138,26 +140,43 @@ void editProfile::clickedPoint(QCPAbstractPlottable *plottable, int dataIndex, Q
 bool editProfile::checkForNearbyPoints(QMouseEvent *event)
 {
     if (qv_x.length() != 0) {
-    QPoint point = event->pos();
-    double pointerxcoord = ui->curvePlot->xAxis->pixelToCoord(point.x());
-    double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(point.y());
-    for (int i=0; i<qv_x.length(); i++) {
-        if ((abs(pointerxcoord - qv_x[i]) < selectionPrecision) && abs(pointerycoord - qv_y[i]) < selectionPrecision) {
-            isNearbyPoint = true;
-            break;
+        QPoint point = event->pos();
+        double pointerxcoord = ui->curvePlot->xAxis->pixelToCoord(point.x());
+        double pointerycoord = ui->curvePlot->yAxis->pixelToCoord(point.y());
+        for (int i=0; i<qv_x.length(); i++) {
+            if ((abs(pointerxcoord - qv_x[i]) < selectionPrecision) && abs(pointerycoord - qv_y[i]) < selectionPrecision) {
+                isNearbyPoint = true;
+                break;
+            } else {
+                isNearbyPoint = false;
+            }
         }
-        else {
-            isNearbyPoint = false;
-        }
-    }
     return isNearbyPoint;
     }
 }
+void editProfile::drawPointHoveredText(QMouseEvent *event)
+{
+    checkForNearbyPoints(event);
+    if (isNearbyPoint && !draggingPoint) {
+        if (xcoord < x_upper*0.1) {
+            coordText->position->setCoords(x_upper*0.1, xcoord + 4);
+        } else if (xcoord > x_upper*0.9) {
+            coordText->position->setCoords(x_upper*0.9, xcoord + 4);
+        } else {
+            coordText->position->setCoords(xcoord, ycoord + 4);
+        }
 
+        coordText->setText(QString::number(xcoord) + ", " + QString::number(ycoord));
+        rePlot();
+    }
+    if (!isNearbyPoint && !draggingPoint) {
+        coordText->setText("");
+        rePlot();
+    }
+}
 int editProfile::getDataIndex(QCPAbstractPlottable *plottable, int dataIndex)
 {
     dataIndex = pointIndex;
-    qDebug() << pointIndex;
     return pointIndex;
 }
 
@@ -212,9 +231,13 @@ bool editProfile::detectPress(QMouseEvent *event)
 bool editProfile::initializeDragging(QMouseEvent *event)
 {
     // Decides whether to start dragging the point
+    if (!pressTimer->isActive() && !mouseDragging) {
+        pressTimer->start(20);
+        pressTimer->setSingleShot(true);
+    }
     mouseDragging = true;
     checkForNearbyPoints(event);
-    if (isNearbyPoint || draggingPoint) {
+    if ((isNearbyPoint || draggingPoint) && pressTimer->remainingTime() <= 0) {
         dragPoint(index_x, index_y, event);
         draggingPoint = true;
     }
@@ -255,16 +278,16 @@ void editProfile::dragPoint(int index_x, int index_y, QMouseEvent* event)
         qv_y[index_y] = y_lower;
     }
     // Display the coordinates
-    QPalette palette;
-    palette.setCurrentColorGroup(QPalette::Active);
-    QColor textColor = palette.color(QPalette::Text);
-
-    coordText->position->setType(QCPItemPosition::ptPlotCoords);
-    coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
+    if (ui->curvePlot->xAxis->pixelToCoord(point.x()) < x_upper*0.1) {
+        coordText->position->setCoords(x_upper*0.1, qv_y[index_y] + 4);
+    } else if (ui->curvePlot->xAxis->pixelToCoord(point.x()) > x_upper*0.9) {
+        coordText->position->setCoords(x_upper*0.9, qv_y[index_y] + 4);
+    } else {
+        coordText->position->setCoords(qv_x[index_x], qv_y[index_y] + 4);
+    }
     QString xString = QString::number(qv_x[index_x]);
     QString yString = QString::number(qv_y[index_y]);
     coordText->setText(xString + ", " + yString);
-    coordText->setColor(textColor);
 
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
@@ -298,12 +321,6 @@ void editProfile::detectRelease(QMouseEvent *event)
     rePlot();
 }
 
-void editProfile::on_pushButton_clicked()
-{
-    qDebug() << draggingPoint;
-    coordText->setText("");
-}
-
 void editProfile::on_saveButton_clicked()
 {
     QString xString;
@@ -316,24 +333,27 @@ void editProfile::on_saveButton_clicked()
 
     }
     MainWindow mw;
-    QVariant xarray = xString;
-    QVariant yarray = yString;
-    qDebug() << xarray.toString() << yarray.toString();
-    QSettings settings("nvfancurve");
-    QString xsetting = mw.currentProfile;
-    QString ysetting = mw.currentProfile;
-    ysetting.append("/ypoints");
-    xsetting.append("/xpoints");
-    settings.setValue(xsetting, xarray);
-    settings.setValue(ysetting, yarray);
+    QSettings settings("tuxclocker");
+    settings.beginGroup("General");
+    QString currentProfile = settings.value("currentProfile").toString();
+    QString latestUUID = settings.value("latestUUID").toString();
+    settings.endGroup();
+    settings.beginGroup(currentProfile);
+    settings.beginGroup(latestUUID);
+    settings.setValue("ypoints", yString);
+    settings.setValue("xpoints", xString);
+    close();
 }
 
 void editProfile::on_clearButton_clicked()
 {
-    MainWindow mw;
     qv_x.clear();
     qv_y.clear();
-    qDebug() << mw.currentProfile;
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
+}
+
+void editProfile::on_cancelButton_pressed()
+{
+    close();
 }

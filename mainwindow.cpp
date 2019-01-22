@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    checkForRoot();
     checkForProfiles();
     queryGPUSettings();
     loadProfileSettings();
@@ -69,11 +70,6 @@ void MainWindow::on_actionEdit_current_profile_triggered(bool)
 {
     editProfile *editprof = new editProfile(this);
     editprof->show();
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    qDebug() << xCurvePoints;
 }
 
 void MainWindow::checkForRoot()
@@ -507,7 +503,7 @@ void MainWindow::clearExtremeValues()
 void MainWindow::checkForProfiles()
 {
     // If there are no profiles, create one, then list all the entries whose isProfile is true in the profile selection combo box
-    QSettings settings("nvfancurve");
+    QSettings settings("tuxclocker");
     QStringList groups = settings.childGroups();
     QString isProfile = "/isProfile";
 
@@ -540,7 +536,12 @@ void MainWindow::checkForProfiles()
 void MainWindow::on_profileComboBox_activated(const QString &arg1)
 {
     // Change currentProfile to combobox selection
-    currentProfile = arg1;
+    if (currentProfile != arg1) {
+        currentProfile = arg1;
+        QSettings settings("tuxclocker");
+        settings.setValue("General/currentProfile", currentProfile);
+        loadProfileSettings();
+    }
 }
 
 void MainWindow::getGPUDriver()
@@ -660,6 +661,8 @@ void MainWindow::applyFanMode()
 void MainWindow::queryGPUSettings()
 {
     QProcess process;
+    process.setReadChannelMode(QProcess::ForwardedErrorChannel);
+    process.setReadChannel(QProcess::StandardOutput);
     process.start(nvVoltQ);
     process.waitForFinished(-1);
     voltInt = process.readLine().toInt()/1000;
@@ -675,6 +678,7 @@ void MainWindow::queryGPUSettings()
     process.waitForFinished(-1);
     for (int i=0; i<process.size(); i++) {
         if (process.readLine().toInt()/1000 > maxVoltOfsInt) {
+            qDebug() << process.readLine();
             maxVoltOfsInt = process.readLine().toInt()/1000;
         }
     }
@@ -835,7 +839,7 @@ void MainWindow::applyGPUSettings()
 
 void MainWindow::loadProfileSettings()
 {
-    QSettings settings("nvfancurve");
+    QSettings settings("tuxclocker");
     currentProfile = settings.value("General/currentProfile").toString();
     latestUUID = settings.value("General/latestUUID").toString();
     settings.beginGroup(currentProfile);
@@ -870,15 +874,27 @@ void MainWindow::loadProfileSettings()
     }
     if (settings.contains("voltageOffset")) {
         latestVoltOfs = settings.value("voltageOffset").toInt();
+
+        ui->voltageSlider->setValue(latestVoltOfs);
+        ui->voltageSpinBox->setValue(latestVoltOfs);
     }
     if (settings.contains("powerLimit")) {
         latestPowerLim = settings.value("powerLimit").toInt();
+
+        ui->powerLimSlider->setValue(latestPowerLim);
+        ui->powerLimSlider->setValue(latestPowerLim);
     }
     if (settings.contains("clockFrequencyOffset")) {
         latestClkOfs = settings.value("clockFrequencyOffset").toInt();
+
+        ui->frequencySlider->setValue(latestClkOfs);
+        ui->frequencySpinBox->setValue(latestClkOfs);
     }
     if (settings.contains("memoryClockOffset")) {
         latestMemClkOfs=settings.value("memoryClockOffset").toInt();
+
+        ui->memClkSlider->setValue(latestMemClkOfs);
+        ui->memClkSlider->setValue(latestMemClkOfs);
     }
     if (settings.contains("fanControlMode")) {
         fanControlMode = settings.value("fanControlMode").toInt();
@@ -892,7 +908,7 @@ void MainWindow::loadProfileSettings()
 void MainWindow::on_newProfile_closed()
 {
     // If currentProfile doesn't exist anymore the first profile will be the first entry
-    QSettings settings("nvfancurve");
+    QSettings settings("tuxclocker");
     QStringList groups = settings.childGroups();
     if (!groups.contains(currentProfile)) {
         for (int i=0; i<groups.size(); i++) {
@@ -915,7 +931,7 @@ void MainWindow::on_newProfile_closed()
 }
 void MainWindow::saveProfileSettings()
 {
-    QSettings settings("nvfancurve");
+    QSettings settings("tuxclocker");
     settings.beginGroup("General");
     settings.setValue("latestUUID", UUIDList[0]);
     settings.endGroup();
@@ -1022,14 +1038,16 @@ void MainWindow::enableFanUpdater()
 }
 void MainWindow::on_applyButton_clicked()
 {
-
-    QSettings settings;
+    QSettings settings("tuxclocker");
     settings.beginGroup("General");
+    QString prevProfile = settings.value("currentProfile").toString();
     settings.setValue("currentProfile", currentProfile);
-    applyGPUSettings();
-    saveProfileSettings();
-    applyFanMode();
-    setupMonitorTab();
+
+
+        applyGPUSettings();
+        saveProfileSettings();
+        applyFanMode();
+        setupMonitorTab();
 }
 void MainWindow::on_editFanCurveButton_pressed()
 {
@@ -1052,3 +1070,17 @@ void MainWindow::on_fanModeComboBox_currentIndexChanged(int index)
 {
     fanControlMode = index;
 }
+
+void MainWindow::on_actionManage_profiles_triggered()
+{
+    newProfile *np = new newProfile(this);
+    np->setAttribute(Qt::WA_DeleteOnClose);
+    connect(np, SIGNAL(destroyed(QObject*)), SLOT(on_newProfile_closed()));
+    np->setModal(false);
+    np->exec();
+}
+
+/*void MainWindow::on_profileComboBox_currentTextChanged(const QString &arg1)
+{
+
+}*/
