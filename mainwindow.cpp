@@ -5,6 +5,7 @@
 #include "newprofile.h"
 #include "monitor.h"
 #include "plotwidget.h"
+#include "nvidia.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,6 +60,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+
+    nvidia nv;
+    nv.setupXNVCtrl();
 }
 
 MainWindow::~MainWindow()

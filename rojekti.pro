@@ -34,7 +34,7 @@ SOURCES += \
     newprofile.cpp \
     monitor.cpp \
     plotwidget.cpp \
-    #nvidia.cpp
+    nvidia.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,16 +43,16 @@ HEADERS += \
     newprofile.h \
     monitor.h \
     plotwidget.h \
-    #nvidia.h
+    nvidia.h
 
 FORMS += \
         mainwindow.ui \
     editprofile.ui \
     newprofile.ui
 
-#INCLUDEPATH += "/usr/lib"
+INCLUDEPATH += "/usr/lib"
 
-#LIBS += -lXext -lXNVCtrl -lX11
+LIBS += -lXext -lXNVCtrl -lX11
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
