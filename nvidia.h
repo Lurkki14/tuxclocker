@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
+#include "/opt/cuda/include/nvml.h"
 
 class nvidia : public QObject
 {
@@ -17,15 +18,29 @@ public:
         int index;
         char *name;
         char *uuid;
-        bool overVoltAvailable;
-        bool overClockAvailable;
+        char *utils;
+        bool overVoltAvailable = false;
+        bool overClockAvailable = false;
+        bool memOverClockAvailable = false;
+        bool voltageReadable = false;
+        bool coreClkReadable = false;
+        bool memClkReadable = false;
+        bool manualFanCtrl = false;
         int maxVoltageOffset;
+        int minVoltageOffset;
+        int minCoreClkOffset;
+        int maxCoreClkOffset;
+        int minMemClkOffset;
+        int maxMemClkOffset;
 
         int coreFreq;
         int memFreq;
         int temp;
         int voltage;
         int fanSpeed;
+
+        int totalVRAM;
+        int usedVRAM;
     };
     QVector <GPU> GPUList;
     int gpuCount = 0;
@@ -35,16 +50,22 @@ signals:
 
 public slots:
     bool setupXNVCtrl();
+    bool setupNVML();
     void queryGPUCount();
     void queryGPUNames();
     void queryGPUUIDs();
     void queryGPUFeatures();
     void queryGPUVoltage(int GPUIndex);
     void queryGPUTemp(int GPUIndex);
-    void queryGPUFrequency(int GPUIndex);
+    void queryGPUFrequencies(int GPUIndex);
     void queryGPUFanSpeed(int GPUIndex);
+    void queryGPUUtils(int GPUIndex);
 
-    bool assignFanSpeed(int GPUIndex, int targetValue);
+    bool assignGPUFanSpeed(int GPUIndex, int targetValue);
+    bool assignGPUFanCtlMode(int GPUIndex, int targetValue);
+    bool assignGPUFreqOffset(int GPUIndex, int targetValue);
+    bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
+    bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
 private slots:
 };
 

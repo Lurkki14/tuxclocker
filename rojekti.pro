@@ -50,9 +50,9 @@ FORMS += \
     editprofile.ui \
     newprofile.ui
 
-INCLUDEPATH += "/usr/lib"
+INCLUDEPATH += "/usr/lib" "/lib/"
 
-LIBS += -lXext -lXNVCtrl -lX11
+LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

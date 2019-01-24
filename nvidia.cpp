@@ -9,6 +9,7 @@ nvidia::nvidia(QObject *parent) : QObject(parent)
 }
 bool nvidia::setupXNVCtrl()
 {
+    setupNVML();
     // Open the x-server connection and check if the extension exists
     dpy = XOpenDisplay(nullptr);
     Bool ret;
@@ -78,22 +79,86 @@ void nvidia::queryGPUFeatures()
     Bool ret;
     NVCTRLAttributeValidValuesRec values;
     for (int i=0; i<gpuCount; i++) {
+        // Query if voltage offset is writable/readable
         ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
                                                      i,
                                                      0,
                                                      NV_CTRL_GPU_OVER_VOLTAGE_OFFSET,
                                                      &values);
-        qDebug() << values.u.range.max << values.permissions << "value";
+        if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
+            GPUList[i].overVoltAvailable = true;
+            GPUList[i].voltageReadable = true;
+            // If the feature is writable save the offset range
+            GPUList[i].minVoltageOffset = values.u.range.min;
+            GPUList[i].minVoltageOffset = values.u.range.max;
+            //qDebug() << values.u.range.min << values.u.range.max << "offset range";
+        } else {
+            // Check if it's readable
+            if ((values.permissions & ATTRIBUTE_TYPE_READ) == ATTRIBUTE_TYPE_READ) {
+                GPUList[i].voltageReadable = true;
+            }
+        }
 
-        GPUList[i].maxVoltageOffset = values.u.range.max;
+        // Query if core clock offset is writable
+        ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     i,
+                                                     3,
+                                                     NV_CTRL_GPU_NVCLOCK_OFFSET,
+                                                     &values);
+        if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
+            GPUList[i].overClockAvailable = true;
+            GPUList[i].minCoreClkOffset = values.u.range.min;
+            GPUList[i].maxCoreClkOffset = values.u.range.max;
+            //qDebug() << values.u.range.min << values.u.range.max << "offset range";
+        } else {
+            if ((values.permissions & ATTRIBUTE_TYPE_READ) == ATTRIBUTE_TYPE_READ) {
+                GPUList[i].coreClkReadable = true;
+            }
+        }
+
+        // Query if memory clock offset is writable
+        ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     i,
+                                                     3,
+                                                     NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
+                                                     &values);
+        if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
+            GPUList[i].memOverClockAvailable = true;
+            GPUList[i].minMemClkOffset = values.u.range.min;
+            GPUList[i].maxMemClkOffset = values.u.range.max;
+            qDebug() << values.u.range.min << values.u.range.max << "offset range";
+        } else {
+            if ((values.permissions & ATTRIBUTE_TYPE_READ) == ATTRIBUTE_TYPE_READ) {
+                GPUList[i].memClkReadable = true;
+            }
+        }
+
+        // Query fan control permissions
+        int retval;
+        ret = XNVCTRLQueryTargetAttribute(dpy,
+                                          NV_CTRL_TARGET_TYPE_GPU,
+                                          i,
+                                          0,
+                                          NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+                                          &retval);
+        if ((retval & NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) {
+            qDebug() << "fanctl on";
+            GPUList[i].manualFanCtrl = true;
+        }
     }
 
     queryGPUVoltage(0);
     queryGPUTemp(0);
-    queryGPUFrequency(0);
+    queryGPUFrequencies(0);
     queryGPUFanSpeed(0);
-    //assignFanSpeed(0, 60);
+    //assignGPUFanSpeed(0, 60);
+    //assignGPUFreqOffset(0, 10);
+    //assignGPUMemClockOffset(0, 10);
+    //assignGPUVoltageOffset(0, 5000);
+    assignGPUFanCtlMode(0, NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
 }
 void nvidia::queryGPUVoltage(int GPUIndex)
 {
@@ -120,7 +185,7 @@ void nvidia::queryGPUTemp(int GPUIndex)
                                       &GPUList[GPUIndex].temp);
     qDebug() << GPUList[GPUIndex].temp;
 }
-void nvidia::queryGPUFrequency(int GPUIndex)
+void nvidia::queryGPUFrequencies(int GPUIndex)
 {
     Bool ret;
     int packedInt = 0;
@@ -151,7 +216,7 @@ void nvidia::queryGPUFanSpeed(int GPUIndex)
 
     qDebug() << GPUList[GPUIndex].fanSpeed;
 }
-bool nvidia::assignFanSpeed(int GPUIndex, int targetValue)
+bool nvidia::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
     Bool ret;
     ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
@@ -160,6 +225,49 @@ bool nvidia::assignFanSpeed(int GPUIndex, int targetValue)
                                                 0,
                                                 NV_CTRL_THERMAL_COOLER_LEVEL,
                                                 targetValue);
+    return ret;
+}
+bool nvidia::assignGPUFanCtlMode(int GPUIndex, int targetValue)
+{
+    Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     GPUIndex,
+                                                     0,
+                                                     NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+                                                     targetValue);
+    return ret;
+}
+bool nvidia::assignGPUFreqOffset(int GPUIndex, int targetValue)
+{
+    Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     GPUIndex,
+                                                     3, // This argument is the performance mode
+                                                     NV_CTRL_GPU_NVCLOCK_OFFSET,
+                                                     targetValue);
+    qDebug() << ret << "freqassign";
+    return ret;
+}
+bool nvidia::assignGPUMemClockOffset(int GPUIndex, int targetValue)
+{
+    Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     GPUIndex,
+                                                     3,
+                                                     NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
+                                                     targetValue);
+    qDebug() << ret << "memassign";
+    return ret;
+}
+bool nvidia::assignGPUVoltageOffset(int GPUIndex, int targetValue)
+{
+    Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     GPUIndex,
+                                                     0,
+                                                     NV_CTRL_GPU_OVER_VOLTAGE_OFFSET,
+                                                     targetValue);
+    qDebug() << ret;
     return ret;
 }
 /*bool nvidia::setup()
@@ -175,3 +283,21 @@ bool nvidia::assignFanSpeed(int GPUIndex, int targetValue)
     qDebug() << temp;
     return true;
 }*/
+bool nvidia::setupNVML()
+{
+    nvmlDevice_t dev;
+    nvmlReturn_t ret = nvmlInit();
+    int i;
+    char name[64];
+    nvmlDeviceGetHandleByIndex(i, &dev);
+    nvmlDeviceGetName(dev, name, sizeof(name)/sizeof(name[0]));
+    qDebug() << name << "from nvml";
+    if (NVML_SUCCESS != ret) {
+        return false;
+    }
+    return true;
+}
+void nvidia::queryGPUUtils(int GPUIndex)
+{
+
+}
