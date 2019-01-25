@@ -17,40 +17,56 @@ MainWindow::MainWindow(QWidget *parent) :
     queryGPUSettings();
     loadProfileSettings();
     queryDriverSettings();
-    //getGPUName();
     queryGPUs();
     setupMonitorTab();
     setupGraphMonitorTab();
     tabHandler(ui->tabWidget->currentIndex());
 
-    ui->frequencySlider->setRange(minCoreClkOfsInt, maxCoreClkOfsInt);
-    ui->frequencySpinBox->setRange(minCoreClkOfsInt, maxCoreClkOfsInt);
-    ui->frequencySlider->setValue(coreFreqOfsInt);
-    ui->frequencySpinBox->setValue(coreFreqOfsInt);
+    // Create persistent nvidia pointer
+    nvidia *nvd = new nvidia;
+    nv = nvd;
+    nv->setupXNVCtrl();
+    nv->setupNVML(0);
+    nv->queryGPUFeatures();
+    qDebug() << nv->GPUList.size() << nv->GPUList[0].name << "gpus from main";
+
+    // Enable sliders according to GPU properties
+    if (nv->GPUList[0].overClockAvailable) {
+        ui->frequencySlider->setRange(nv->GPUList[0].minCoreClkOffset, nv->GPUList[0].maxCoreClkOffset);
+        ui->frequencySpinBox->setRange(nv->GPUList[0].minCoreClkOffset, nv->GPUList[0].maxCoreClkOffset);
+        ui->frequencySlider->setValue(coreFreqOfsInt);
+        ui->frequencySpinBox->setValue(coreFreqOfsInt);
+
+        ui->memClkSlider->setRange(nv->GPUList[0].minMemClkOffset, nv->GPUList[0].maxMemClkOffset);
+        ui->memClkSpinBox->setRange(nv->GPUList[0].minMemClkOffset, nv->GPUList[0].maxMemClkOffset);
+        ui->memClkSlider->setValue(memClkOfsInt);
+        ui->memClkSpinBox->setValue(memClkOfsInt);
+    } else {
+        ui->frequencySlider->setEnabled(false);
+        ui->frequencySpinBox->setEnabled(false);
+    }
 
     ui->powerLimSlider->setRange(minPowerLimInt, maxPowerLimInt);
     ui->powerLimSpinBox->setRange(minPowerLimInt, maxPowerLimInt);
     ui->powerLimSlider->setValue(curPowerLimInt);
     ui->powerLimSpinBox->setValue(curPowerLimInt);
 
-    ui->memClkSlider->setRange(minMemClkOfsInt, maxMemClkOfsInt);
-    ui->memClkSpinBox->setRange(minMemClkOfsInt, maxMemClkOfsInt);
-    ui->memClkSlider->setValue(memClkOfsInt);
-    ui->memClkSpinBox->setValue(memClkOfsInt);
-
-    ui->voltageSlider->setRange(minVoltOfsInt, maxVoltOfsInt);
-    ui->voltageSpinBox->setRange(minVoltOfsInt, maxVoltOfsInt);
-    ui->voltageSlider->setValue(voltOfsInt);
-    ui->voltageSpinBox->setValue(voltOfsInt);
+    if (nv->GPUList[0].overVoltAvailable) {
+        ui->voltageSlider->setRange(nv->GPUList[0].minVoltageOffset, nv->GPUList[0].maxVoltageOffset);
+        ui->voltageSpinBox->setRange(nv->GPUList[0].minVoltageOffset, nv->GPUList[0].maxVoltageOffset);
+        ui->voltageSlider->setValue(voltOfsInt);
+        ui->voltageSpinBox->setValue(voltOfsInt);
+    } else {
+        ui->voltageSlider->setEnabled(false);
+        ui->voltageSpinBox->setEnabled(false);
+    }
 
     ui->fanSlider->setValue(fanSpeed);
     ui->fanSpinBox->setValue(fanSpeed);
     ui->fanSlider->setRange(0, 100);
     ui->fanSpinBox->setRange(0, 100);
 
-    //QTimer *fanUpdateTimer = new QTimer(this);
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
-    //connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
     fanUpdateTimer->start(2000);
 
     connect(ui->frequencySpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
@@ -60,9 +76,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
-
-    nvidia nv;
-    nv.setupXNVCtrl();
 }
 
 MainWindow::~MainWindow()
@@ -322,15 +335,31 @@ void MainWindow::setupGraphMonitorTab()
 }
 void MainWindow::updateMonitor()
 {
-    // This function takes around 300ms to complete, so it would be smoother to execute it in another thread
+    // Update the values for plots
+    nv->queryGPUTemp(0);
+    nv->queryGPUPowerDraw(0);
+    nv->queryGPUFrequencies(0);
+    nv->queryGPUUtils(0);
+    nv->queryGPUVoltage(0);
+    nv->queryGPUFanSpeed(0);
 
-    monitor mon;
+    plotCmdsList[0].valueq = nv->GPUList[0].temp;
+    plotCmdsList[1].valueq = nv->GPUList[0].powerDraw/1000;
+    plotCmdsList[2].valueq = nv->GPUList[0].coreFreq;
+    plotCmdsList[3].valueq = nv->GPUList[0].memFreq;
+    plotCmdsList[4].valueq = nv->GPUList[0].coreUtil;
+    plotCmdsList[5].valueq = nv->GPUList[0].memUtil;
+    plotCmdsList[6].valueq = nv->GPUList[0].voltage/1000;
+    plotCmdsList[7].valueq = nv->GPUList[0].fanSpeed;
+
+    qDebug() << monitorUpdater->remainingTime();
+    //monitor mon;
     //QThread *thread = new QThread(this);
     //mon.moveToThread(thread);
     //thread->start();
-    mon.queryValues();
-    fanSpeedUpdater();
-    gputemp->setText(1, mon.temp + "°C");
+    //mon.queryValues();
+    //fanSpeedUpdater();
+    /*gputemp->setText(1, mon.temp + "°C");
     powerdraw->setText(1, mon.powerdraw + "W");
     voltage->setText(1, mon.voltage + "mV");
     coreclock->setText(1, mon.coreclock + " MHz");
@@ -338,7 +367,7 @@ void MainWindow::updateMonitor()
     coreutil->setText(1, mon.coreutil + " %");
     memutil->setText(1, mon.memutil + " %");
     fanspeed->setText(1, QString::number(fanSpeed) + " %");
-    memusage->setText(1, mon.usedmem + "/" + mon.totalmem);
+    memusage->setText(1, mon.usedmem + "/" + mon.totalmem);*/
 
 
     // Decrement all time values by one
@@ -355,15 +384,6 @@ void MainWindow::updateMonitor()
     if (qv_time.size() > plotVectorSize) {
         qv_time.removeFirst();
     }
-    // Update the values for plots
-    plotCmdsList[0].valueq = mon.temp.toDouble();
-    plotCmdsList[1].valueq = mon.powerdraw.toDouble();
-    plotCmdsList[2].valueq = mon.coreclock.toDouble();
-    plotCmdsList[3].valueq = mon.memclock.toDouble();
-    plotCmdsList[4].valueq = mon.coreutil.toDouble();
-    plotCmdsList[5].valueq = mon.memutil.toDouble();
-    plotCmdsList[6].valueq = mon.voltage.toDouble();
-    plotCmdsList[7].valueq = fanSpeed;
 
     for (int i=0; i<plotCmdsList.size(); i++) {
         // Check if the max/min values need to be updated
@@ -440,12 +460,7 @@ void MainWindow::updateMonitor()
 }
 void MainWindow::plotHovered(QMouseEvent *event)
 {
-    //plotHoverUpdater->start(1000);
     QPoint cursor = event->pos();
-    //qDebug() << childAt(cursor);
-    //QWidget *widget = childAt(cursor);
-    //QCustomPlot *plot = widget->findChild<QCustomPlot*>(QString(), Qt::FindDirectChildrenOnly);
-    //plot->xAxis->setRange(-15, 0);
 
     int plotIndex = 0;
     for (int i=0; i<plotCmdsList.size(); i++) {
@@ -455,7 +470,6 @@ void MainWindow::plotHovered(QMouseEvent *event)
         }
     }
     double pointerxcoord = plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x());
-    //qDebug() << pointerxcoord << plotVectorSize;
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
     int valIndex = 0;
@@ -467,8 +481,6 @@ void MainWindow::plotHovered(QMouseEvent *event)
                 valIndex = i;
             }
         }
-        //qDebug() << plotCmdsList[plotIndex].vector[valIndex];
-        //QCPItemText *text = new QCPItemText(plotCmdsList[plotIndex].plot);
         plotCmdsList[plotIndex].valText->setText(QString::number(plotCmdsList[plotIndex].vector[valIndex]));
         // Make the text stay inside the plot
         if (pointerxcoord > -plotVectorSize*0.06) {
@@ -478,7 +490,7 @@ void MainWindow::plotHovered(QMouseEvent *event)
         } else {
             plotCmdsList[plotIndex].valText->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper - plotCmdsList[plotIndex].plot->yAxis->range().size()*0.05);
         }
-        //QThread::msleep(10);
+        QThread::msleep(10);
     } else {
         // If the cursor is not within the x-range, clear the text
         plotCmdsList[plotIndex].valText->setText("");

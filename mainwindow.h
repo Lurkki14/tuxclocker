@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QList>
 #include <QByteArray>
+#include "nvidia.h"
 //#include <NVCtrl/NVCtrl.h>
 
 namespace Ui {
@@ -158,6 +159,7 @@ private:
     bool noProfiles = true;
     QStringList UUIDList;
     QString latestUUID;
+    nvidia *nv;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);
@@ -242,6 +244,8 @@ private:
     plotCmds voltageplot;
     plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
+
+
 };
 
 #endif // MAINWINDOW_H

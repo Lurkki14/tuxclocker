@@ -9,7 +9,6 @@ nvidia::nvidia(QObject *parent) : QObject(parent)
 }
 bool nvidia::setupXNVCtrl()
 {
-    setupNVML();
     // Open the x-server connection and check if the extension exists
     dpy = XOpenDisplay(nullptr);
     Bool ret;
@@ -39,7 +38,8 @@ void nvidia::queryGPUCount()
         GPU gpu;
         GPUList.append(gpu);
     }
-    qDebug() << gpuCount;
+    qDebug() << GPUList.size() << "gpus";
+    //setupNVML(0);
 }
 void nvidia::queryGPUNames()
 {
@@ -148,17 +148,26 @@ void nvidia::queryGPUFeatures()
             qDebug() << "fanctl on";
             GPUList[i].manualFanCtrl = true;
         }
+        // Query amount of VRAM
+        ret = XNVCTRLQueryTargetAttribute(dpy,
+                                          NV_CTRL_TARGET_TYPE_GPU,
+                                          i,
+                                          0,
+                                          NV_CTRL_TOTAL_DEDICATED_GPU_MEMORY,
+                                          &GPUList[i].totalVRAM);
+        qDebug() << GPUList[i].totalVRAM << "vram";
     }
 
-    queryGPUVoltage(0);
-    queryGPUTemp(0);
-    queryGPUFrequencies(0);
-    queryGPUFanSpeed(0);
+    //queryGPUVoltage(0);
+    //queryGPUTemp(0);
+    //queryGPUFrequencies(0);
+    //queryGPUFanSpeed(0);
+    //queryGPUUsedVRAM(0);
     //assignGPUFanSpeed(0, 60);
     //assignGPUFreqOffset(0, 10);
     //assignGPUMemClockOffset(0, 10);
     //assignGPUVoltageOffset(0, 5000);
-    assignGPUFanCtlMode(0, NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
+    //assignGPUFanCtlMode(0, NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
 }
 void nvidia::queryGPUVoltage(int GPUIndex)
 {
@@ -176,6 +185,7 @@ void nvidia::queryGPUVoltage(int GPUIndex)
 }
 void nvidia::queryGPUTemp(int GPUIndex)
 {
+    qDebug() << GPUList.size();
     Bool ret;
     ret = XNVCTRLQueryTargetAttribute(dpy,
                                       NV_CTRL_TARGET_TYPE_THERMAL_SENSOR,
@@ -183,6 +193,9 @@ void nvidia::queryGPUTemp(int GPUIndex)
                                       0,
                                       NV_CTRL_THERMAL_SENSOR_READING,
                                       &GPUList[GPUIndex].temp);
+    if (!ret) {
+        qDebug() << "failed to query GPU temperature";
+    }
     qDebug() << GPUList[GPUIndex].temp;
 }
 void nvidia::queryGPUFrequencies(int GPUIndex)
@@ -215,6 +228,19 @@ void nvidia::queryGPUFanSpeed(int GPUIndex)
                                       &GPUList[GPUIndex].fanSpeed);
 
     qDebug() << GPUList[GPUIndex].fanSpeed;
+}
+void nvidia::queryGPUUsedVRAM(int GPUIndex)
+{
+    Bool ret = XNVCTRLQueryTargetAttribute(dpy,
+                                           NV_CTRL_TARGET_TYPE_GPU,
+                                           GPUIndex,
+                                           0,
+                                           NV_CTRL_USED_DEDICATED_GPU_MEMORY,
+                                           &GPUList[GPUIndex].usedVRAM);
+    if (!ret) {
+        qDebug() << "failed to query used VRAM";
+    }
+    qDebug() << GPUList[GPUIndex].usedVRAM << "usedvram";
 }
 bool nvidia::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
@@ -283,21 +309,74 @@ bool nvidia::assignGPUVoltageOffset(int GPUIndex, int targetValue)
     qDebug() << temp;
     return true;
 }*/
-bool nvidia::setupNVML()
+bool nvidia::setupNVML(int GPUIndex)
 {
-    nvmlDevice_t dev;
+    nvmlDevice_t *dev = new nvmlDevice_t;
+    device = dev;
     nvmlReturn_t ret = nvmlInit();
-    int i;
     char name[64];
-    nvmlDeviceGetHandleByIndex(i, &dev);
-    nvmlDeviceGetName(dev, name, sizeof(name)/sizeof(name[0]));
+    nvmlDeviceGetHandleByIndex(GPUIndex, dev);
+    //nvmlDeviceGetName(dev, name, sizeof(name)/sizeof(name[0]));
     qDebug() << name << "from nvml";
     if (NVML_SUCCESS != ret) {
         return false;
     }
+    //queryGPUUtils(0);
+    //queryGPUPowerLimitLimits(0);
+    //queryGPUPowerDraw(0);
+    //qDebug() << assignGPUPowerLimit(150000);
     return true;
 }
 void nvidia::queryGPUUtils(int GPUIndex)
 {
-
+    nvmlUtilization_t utils;
+    nvmlReturn_t ret = nvmlDeviceGetUtilizationRates(*device, &utils);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "failed to query GPU utilizations";
+    }
+    qDebug() << utils.gpu << utils.memory << "utils";
+    GPUList[GPUIndex].memUtil = utils.memory;
+    GPUList[GPUIndex].coreUtil = utils.gpu;
+}
+void nvidia::queryGPUPowerDraw(int GPUIndex)
+{
+    uint usg;
+    nvmlReturn_t ret = nvmlDeviceGetPowerUsage(*device, &usg);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "failed to query power usage";
+    } else {
+        GPUList[GPUIndex].powerDraw = usg;
+        qDebug() << usg << "pwrusg";
+    }
+}
+void nvidia::queryGPUPowerLimitLimits(int GPUIndex)
+{
+    uint maxlim;
+    uint minlim;
+    nvmlReturn_t ret = nvmlDeviceGetPowerManagementLimitConstraints(*device, &minlim, &maxlim);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "failed to query power limit constraints";
+    } else {
+        GPUList[GPUIndex].minPowerLim = minlim;
+        GPUList[GPUIndex].maxPowerLim = maxlim;
+        qDebug() << minlim << maxlim << "powerlims";
+    }
+}
+void nvidia::queryGPUPowerLimit(int GPUIndex)
+{
+    uint lim;
+    nvmlReturn_t ret = nvmlDeviceGetPowerManagementLimit(*device, &lim);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "failed to query power limit";
+    } else {
+        GPUList[GPUIndex].powerLim = lim;
+    }
+}
+bool nvidia::assignGPUPowerLimit(uint targetValue)
+{
+    nvmlReturn_t ret = nvmlDeviceSetPowerManagementLimit(*device, targetValue);
+    if (NVML_SUCCESS != ret) {
+        return false;
+    }
+    return true;
 }

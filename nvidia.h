@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
+#include <QProcess>
 #include "/opt/cuda/include/nvml.h"
 
 class nvidia : public QObject
@@ -38,6 +39,12 @@ public:
         int temp;
         int voltage;
         int fanSpeed;
+        uint powerDraw;
+        uint coreUtil;
+        uint memUtil;
+        uint minPowerLim;
+        uint maxPowerLim;
+        uint powerLim;
 
         int totalVRAM;
         int usedVRAM;
@@ -46,11 +53,13 @@ public:
     int gpuCount = 0;
 private:
     Display *dpy;
+
+    nvmlDevice_t *device;
 signals:
 
 public slots:
     bool setupXNVCtrl();
-    bool setupNVML();
+    bool setupNVML(int GPUIndex);
     void queryGPUCount();
     void queryGPUNames();
     void queryGPUUIDs();
@@ -59,13 +68,20 @@ public slots:
     void queryGPUTemp(int GPUIndex);
     void queryGPUFrequencies(int GPUIndex);
     void queryGPUFanSpeed(int GPUIndex);
+    void queryGPUUsedVRAM(int GPUIndex);
+
     void queryGPUUtils(int GPUIndex);
+    void queryGPUPowerDraw(int GPUIndex);
+    void queryGPUPowerLimit(int GPUIndex);
+    void queryGPUPowerLimitLimits(int GPUIndex);
 
     bool assignGPUFanSpeed(int GPUIndex, int targetValue);
     bool assignGPUFanCtlMode(int GPUIndex, int targetValue);
     bool assignGPUFreqOffset(int GPUIndex, int targetValue);
     bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
+    // NVML functions know the GPU index already based on the dev object passed in setupNVML()
+    bool assignGPUPowerLimit(uint targetValue);
 private slots:
 };
 
