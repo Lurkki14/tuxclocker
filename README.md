@@ -4,7 +4,7 @@ TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-
 
 # Screenshots
 
-![Imgur](https://i.imgur.com/fn8MoNj.png)
+![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/tW0zh86.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
 
 # Current features
 - GPU monitoring (list and graph)
