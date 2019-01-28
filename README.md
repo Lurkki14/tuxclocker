@@ -2,6 +2,10 @@ TuxClocker - A GUI overclocking utility for GNU/Linux
 ========================================
 TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-series cards and newer. Support for AMD GPUs is planned.
 
+# Screenshots
+
+![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/cZCNzmN.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
+
 # Current features
 - GPU monitoring (list and graph)
 - Overclocking
