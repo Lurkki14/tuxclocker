@@ -8,6 +8,7 @@
 #include <QList>
 #include <QByteArray>
 #include "nvidia.h"
+#include <cmath>
 //#include <NVCtrl/NVCtrl.h>
 
 namespace Ui {
@@ -153,6 +154,8 @@ private slots:
     void clearPlots();
     void clearExtremeValues();
     void on_actionManage_profiles_triggered();
+
+    void on_GPUComboBox_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

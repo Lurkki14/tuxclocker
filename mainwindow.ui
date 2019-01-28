@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
@@ -28,61 +28,6 @@
         <string>Performance</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0" colspan="6">
-         <widget class="QLabel" name="GPUNameLabel">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>52</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0" colspan="5">
-         <widget class="QSlider" name="powerLimSlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0" colspan="5">
-         <widget class="QSlider" name="memClkSlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0" colspan="2">
-         <widget class="QLabel" name="powerLimLabel">
-          <property name="text">
-           <string>Power Limit (W)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0" colspan="3">
-         <widget class="QLabel" name="voltgeLabel">
-          <property name="text">
-           <string>Voltage Offset (mV)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0" colspan="3">
-         <widget class="QLabel" name="clockFreqLabel">
-          <property name="text">
-           <string>Clock Frequency Offset (MHz)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0" colspan="5">
-         <widget class="QSlider" name="frequencySlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="fanModeLabel">
           <property name="text">
@@ -90,37 +35,31 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0" colspan="5">
+        <item row="12" column="0" colspan="3">
+         <widget class="QPushButton" name="applyButton">
+          <property name="text">
+           <string>Apply changes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="5">
          <widget class="QSlider" name="fanSlider">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="3" column="5">
-         <widget class="QPushButton" name="editFanCurveButton">
-          <property name="maximumSize">
-           <size>
-            <width>87</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit fan curve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="resources.qrc">
-            <normaloff>:/icons/cog.png</normaloff>:/icons/cog.png</iconset>
+        <item row="7" column="0" colspan="5">
+         <widget class="QSlider" name="memClkSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="fanSpeedLabel">
+        <item row="10" column="0" colspan="3">
+         <widget class="QLabel" name="clockFreqLabel">
           <property name="text">
-           <string>Fan Speed (%)</string>
+           <string>Clock Frequency Offset (MHz)</string>
           </property>
          </widget>
         </item>
@@ -143,42 +82,90 @@
           </item>
          </widget>
         </item>
-        <item row="8" column="5">
-         <widget class="QSpinBox" name="memClkSpinBox"/>
-        </item>
-        <item row="10" column="5">
-         <widget class="QSpinBox" name="powerLimSpinBox"/>
-        </item>
-        <item row="12" column="5">
+        <item row="11" column="5">
          <widget class="QSpinBox" name="frequencySpinBox"/>
         </item>
-        <item row="6" column="0" colspan="5">
-         <widget class="QSlider" name="voltageSlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item row="2" column="0">
+         <widget class="QLabel" name="fanSpeedLabel">
+          <property name="text">
+           <string>Fan Speed (%)</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="0" colspan="3">
+        <item row="4" column="0" colspan="3">
+         <widget class="QLabel" name="voltgeLabel">
+          <property name="text">
+           <string>Voltage Offset (mV)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="5">
+         <widget class="QSpinBox" name="memClkSpinBox"/>
+        </item>
+        <item row="6" column="0" colspan="3">
          <widget class="QLabel" name="memClockLabel">
           <property name="text">
            <string>Memory Clock Offset (MHz)</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="5">
+        <item row="3" column="5">
          <widget class="QSpinBox" name="fanSpinBox"/>
         </item>
-        <item row="13" column="3" colspan="3">
+        <item row="9" column="5">
+         <widget class="QSpinBox" name="powerLimSpinBox"/>
+        </item>
+        <item row="2" column="5">
+         <widget class="QPushButton" name="editFanCurveButton">
+          <property name="maximumSize">
+           <size>
+            <width>87</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit fan curve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/cog.png</normaloff>:/icons/cog.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="3" colspan="3">
          <widget class="QComboBox" name="profileComboBox"/>
         </item>
-        <item row="6" column="5">
+        <item row="5" column="5">
          <widget class="QSpinBox" name="voltageSpinBox"/>
         </item>
-        <item row="13" column="0" colspan="3">
-         <widget class="QPushButton" name="applyButton">
+        <item row="8" column="0" colspan="2">
+         <widget class="QLabel" name="powerLimLabel">
           <property name="text">
-           <string>Apply changes</string>
+           <string>Power Limit (W)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0" colspan="5">
+         <widget class="QSlider" name="frequencySlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="5">
+         <widget class="QSlider" name="voltageSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" colspan="5">
+         <widget class="QSlider" name="powerLimSlider">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
@@ -214,6 +201,9 @@
        </layout>
       </widget>
      </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QComboBox" name="GPUComboBox"/>
     </item>
    </layout>
   </widget>

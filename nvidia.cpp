@@ -1,6 +1,5 @@
 #include "nvidia.h"
 #include <X11/Xlib.h>
-
 #include "NVCtrl/NVCtrlLib.h"
 
 nvidia::nvidia(QObject *parent) : QObject(parent)
@@ -91,7 +90,7 @@ void nvidia::queryGPUFeatures()
             GPUList[i].voltageReadable = true;
             // If the feature is writable save the offset range
             GPUList[i].minVoltageOffset = values.u.range.min;
-            GPUList[i].minVoltageOffset = values.u.range.max;
+            GPUList[i].maxVoltageOffset = values.u.range.max;
             //qDebug() << values.u.range.min << values.u.range.max << "offset range";
         } else {
             // Check if it's readable
@@ -146,7 +145,7 @@ void nvidia::queryGPUFeatures()
                                           &retval);
         if ((retval & NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) {
             qDebug() << "fanctl on";
-            GPUList[i].manualFanCtrl = true;
+            GPUList[i].manualFanCtrlAvailable = true;
         }
         // Query amount of VRAM
         ret = XNVCTRLQueryTargetAttribute(dpy,
@@ -241,6 +240,34 @@ void nvidia::queryGPUUsedVRAM(int GPUIndex)
         qDebug() << "failed to query used VRAM";
     }
     qDebug() << GPUList[GPUIndex].usedVRAM << "usedvram";
+}
+void nvidia::queryGPUFreqOffset(int GPUIndex)
+{
+    Bool ret = XNVCTRLQueryTargetAttribute(dpy,
+                                           NV_CTRL_TARGET_TYPE_GPU,
+                                           GPUIndex,
+                                           3,
+                                           NV_CTRL_GPU_NVCLOCK_OFFSET,
+                                           &GPUList[GPUIndex].coreClkOffset);
+}
+void nvidia::queryGPUMemClkOffset(int GPUIndex)
+{
+    Bool ret = XNVCTRLQueryTargetAttribute(dpy,
+                                           NV_CTRL_TARGET_TYPE_GPU,
+                                           GPUIndex,
+                                           3,
+                                           NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
+                                           &GPUList[GPUIndex].memClkOffset);
+}
+void nvidia::queryGPUVoltageOffset(int GPUIndex)
+{
+    Bool ret = XNVCTRLQueryTargetAttribute(dpy,
+                                           NV_CTRL_TARGET_TYPE_GPU,
+                                           GPUIndex,
+                                           0,
+                                           NV_CTRL_GPU_OVER_VOLTAGE_OFFSET,
+                                           &GPUList[GPUIndex].voltageOffset);
+    qDebug() << GPUList[GPUIndex].voltageOffset << "offset";
 }
 bool nvidia::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
@@ -370,6 +397,37 @@ void nvidia::queryGPUPowerLimit(int GPUIndex)
         qDebug() << "failed to query power limit";
     } else {
         GPUList[GPUIndex].powerLim = lim;
+
+    }
+}
+void nvidia::queryGPUCurrentMaxClocks(int GPUIndex)
+{
+    uint curmax;
+    // Query maximum core clock
+    nvmlReturn_t ret = nvmlDeviceGetMaxClockInfo(*device, NVML_CLOCK_GRAPHICS, &curmax);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "Failed to query maximum core clock";
+    } else {
+        GPUList[GPUIndex].maxCoreClk = curmax;
+    }
+
+    // Query maximum memory clock
+    ret = nvmlDeviceGetMaxClockInfo(*device, NVML_CLOCK_MEM, &curmax);
+    if (NVML_SUCCESS != ret) {
+        qDebug() << "Failed to query maximum memory clock";
+    } else {
+        GPUList[GPUIndex].maxMemClk = curmax;
+        qDebug() << curmax << "current max clock";
+    }
+}
+void nvidia::queryGPUPowerLimitAvailability(int GPUIndex)
+{
+    // Assign the current power limit to see if modifying it is available
+    nvmlReturn_t ret = nvmlDeviceSetPowerManagementLimit(*device, GPUList[GPUIndex].powerLim);
+    if (NVML_ERROR_NOT_SUPPORTED == ret) {
+        GPUList[GPUIndex].powerLimitAvailable = false;
+    } else {
+        GPUList[GPUIndex].powerLimitAvailable = true;
     }
 }
 bool nvidia::assignGPUPowerLimit(uint targetValue)

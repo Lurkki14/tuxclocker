@@ -43,14 +43,14 @@ HEADERS += \
     newprofile.h \
     monitor.h \
     plotwidget.h \
-    nvidia.h
+    nvidia.h \
 
 FORMS += \
         mainwindow.ui \
     editprofile.ui \
     newprofile.ui
 
-INCLUDEPATH += "/usr/lib" "/lib/"
+INCLUDEPATH += $$(INCLUDEPATH) $$(LIBRARY_PATH)
 
 LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
 # Default rules for deployment.

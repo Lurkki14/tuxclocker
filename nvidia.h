@@ -5,7 +5,8 @@
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
 #include <QProcess>
-#include "/opt/cuda/include/nvml.h"
+//#include "nvml.h"
+#include <nvml.h>
 
 class nvidia : public QObject
 {
@@ -23,29 +24,37 @@ public:
         bool overVoltAvailable = false;
         bool overClockAvailable = false;
         bool memOverClockAvailable = false;
+        bool powerLimitAvailable = false;
         bool voltageReadable = false;
         bool coreClkReadable = false;
         bool memClkReadable = false;
-        bool manualFanCtrl = false;
+        bool manualFanCtrlAvailable = false;
+        int fanControlMode;
         int maxVoltageOffset;
         int minVoltageOffset;
         int minCoreClkOffset;
         int maxCoreClkOffset;
         int minMemClkOffset;
         int maxMemClkOffset;
+        uint maxCoreClk;
+        uint maxMemClk;
+
+        int voltageOffset;
+        int coreClkOffset;
+        int memClkOffset;
 
         int coreFreq;
         int memFreq;
         int temp;
         int voltage;
         int fanSpeed;
-        uint powerDraw;
+
+        double powerDraw;
         uint coreUtil;
         uint memUtil;
         uint minPowerLim;
         uint maxPowerLim;
         uint powerLim;
-
         int totalVRAM;
         int usedVRAM;
     };
@@ -69,11 +78,16 @@ public slots:
     void queryGPUFrequencies(int GPUIndex);
     void queryGPUFanSpeed(int GPUIndex);
     void queryGPUUsedVRAM(int GPUIndex);
+    void queryGPUFreqOffset(int GPUIndex);
+    void queryGPUMemClkOffset(int GPUIndex);
+    void queryGPUVoltageOffset(int GPUIndex);
 
     void queryGPUUtils(int GPUIndex);
     void queryGPUPowerDraw(int GPUIndex);
     void queryGPUPowerLimit(int GPUIndex);
     void queryGPUPowerLimitLimits(int GPUIndex);
+    void queryGPUCurrentMaxClocks(int GPUIndex);
+    void queryGPUPowerLimitAvailability(int GPUIndex);
 
     bool assignGPUFanSpeed(int GPUIndex, int targetValue);
     bool assignGPUFanCtlMode(int GPUIndex, int targetValue);
