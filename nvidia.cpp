@@ -108,6 +108,7 @@ void nvidia::queryGPUFeatures()
                                                      &values);
         if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
             GPUList[i].overClockAvailable = true;
+            GPUList[i].coreClkReadable = true;
             GPUList[i].minCoreClkOffset = values.u.range.min;
             GPUList[i].maxCoreClkOffset = values.u.range.max;
             //qDebug() << values.u.range.min << values.u.range.max << "offset range";
@@ -126,6 +127,7 @@ void nvidia::queryGPUFeatures()
                                                      &values);
         if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
             GPUList[i].memOverClockAvailable = true;
+            GPUList[i].memClkReadable = true;
             GPUList[i].minMemClkOffset = values.u.range.min;
             GPUList[i].maxMemClkOffset = values.u.range.max;
             qDebug() << values.u.range.min << values.u.range.max << "offset range";
@@ -134,18 +136,31 @@ void nvidia::queryGPUFeatures()
                 GPUList[i].memClkReadable = true;
             }
         }
-
-        // Query fan control permissions
-        int retval;
-        ret = XNVCTRLQueryTargetAttribute(dpy,
-                                          NV_CTRL_TARGET_TYPE_GPU,
-                                          i,
-                                          0,
-                                          NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
-                                          &retval);
-        if ((retval & NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) {
-            qDebug() << "fanctl on";
+        // Query if fan control mode is writable
+        ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
+                                                     NV_CTRL_TARGET_TYPE_GPU,
+                                                     i,
+                                                     0,
+                                                     NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+                                                     &values);
+        if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
             GPUList[i].manualFanCtrlAvailable = true;
+            qDebug() << "fan control available";
+            // Query fan control mode
+            int retval;
+            ret = XNVCTRLQueryTargetAttribute(dpy,
+                                              NV_CTRL_TARGET_TYPE_GPU,
+                                              i,
+                                              0,
+                                              NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+                                              &retval);
+            if ((retval & NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE) {
+                qDebug() << "fanctl on";
+                GPUList[i].fanControlMode = 1;
+            } else {
+                GPUList[i].fanControlMode = 0;
+                qDebug() << "fanctl off";
+            }
         }
         // Query amount of VRAM
         ret = XNVCTRLQueryTargetAttribute(dpy,
@@ -269,6 +284,7 @@ void nvidia::queryGPUVoltageOffset(int GPUIndex)
                                            &GPUList[GPUIndex].voltageOffset);
     qDebug() << GPUList[GPUIndex].voltageOffset << "offset";
 }
+
 bool nvidia::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
     Bool ret;

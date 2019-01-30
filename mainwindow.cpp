@@ -18,21 +18,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     checkForRoot();
     checkForProfiles();
-    //queryGPUSettings();
-    loadProfileSettings();
-    /*queryDriverSettings();
-    queryGPUs();*/
     tabHandler(ui->tabWidget->currentIndex());
 
     // Create persistent nvidia pointer
     nvidia *nvd = new nvidia;
     nv = nvd;
     nv->setupXNVCtrl();
-    nv->setupNVML(0);
+    nv->setupNVML(currentGPUIndex);
     nv->queryGPUFeatures();
-    nv->queryGPUFreqOffset(0);
-    nv->queryGPUMemClkOffset(0);
-    nv->queryGPUVoltageOffset(0);
+    nv->queryGPUFreqOffset(currentGPUIndex);
+    nv->queryGPUMemClkOffset(currentGPUIndex);
+    nv->queryGPUVoltageOffset(currentGPUIndex);
     nv->queryGPUPowerLimit(currentGPUIndex);
     nv->queryGPUPowerLimitAvailability(currentGPUIndex);
     nv->queryGPUPowerLimitLimits(currentGPUIndex);
@@ -42,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i=0; i<nv->gpuCount; i++) {
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + nv->GPUList[i].name);
     }
-
+    loadProfileSettings();
     setupMonitorTab();
     setupGraphMonitorTab();
 
@@ -52,15 +48,18 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->frequencySpinBox->setRange(nv->GPUList[currentGPUIndex].minCoreClkOffset, nv->GPUList[currentGPUIndex].maxCoreClkOffset);
         ui->frequencySlider->setValue(nv->GPUList[currentGPUIndex].coreClkOffset);
         ui->frequencySpinBox->setValue(nv->GPUList[currentGPUIndex].coreClkOffset);
+    } else {
+        ui->frequencySlider->setEnabled(false);
+        ui->frequencySpinBox->setEnabled(false);
+    }
 
+    if (nv->GPUList[currentGPUIndex].memOverClockAvailable) {
         // Divide by 2 to get the clock speed
         ui->memClkSlider->setRange(nv->GPUList[currentGPUIndex].minMemClkOffset/2, nv->GPUList[currentGPUIndex].maxMemClkOffset/2);
         ui->memClkSpinBox->setRange(nv->GPUList[currentGPUIndex].minMemClkOffset/2, nv->GPUList[currentGPUIndex].maxMemClkOffset/2);
         ui->memClkSlider->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
         ui->memClkSpinBox->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
     } else {
-        ui->frequencySlider->setEnabled(false);
-        ui->frequencySpinBox->setEnabled(false);
         ui->memClkSlider->setEnabled(false);
         ui->memClkSpinBox->setEnabled(false);
     }
@@ -84,11 +83,24 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->voltageSlider->setEnabled(false);
         ui->voltageSpinBox->setEnabled(false);
     }
-
+    qDebug() << "current fanmode" << nv->GPUList[currentGPUIndex].fanControlMode;
     ui->fanSlider->setValue(nv->GPUList[currentGPUIndex].fanSpeed);
     ui->fanSpinBox->setValue(nv->GPUList[currentGPUIndex].fanSpeed);
     ui->fanSlider->setRange(0, 100);
     ui->fanSpinBox->setRange(0, 100);
+
+    if (nv->GPUList[currentGPUIndex].fanControlMode !=1) {
+        ui->fanSlider->setDisabled(true);
+        ui->fanSpinBox->setDisabled(true);
+    }
+    if (!nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
+        // If manual fan control is not available for the GPU, disable the option
+        QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
+        QModelIndex manualModeIndex = model->index(1, ui->fanModeComboBox->modelColumn());
+        QStandardItem *manualMode = model->itemFromIndex(manualModeIndex);
+        manualMode->setEnabled(false);
+        manualMode->setToolTip("Manual fan control is not available for current GPU");
+    }
 
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
     fanUpdateTimer->start(2000);
@@ -179,9 +191,13 @@ void MainWindow::setupMonitorTab()
 }
 void MainWindow::setupGraphMonitorTab()
 {
-    monitor mon;
-    mon.queryValues();
-    fanSpeedUpdater();
+    nv->queryGPUTemp(currentGPUIndex);
+    nv->queryGPUPowerDraw(currentGPUIndex);
+    nv->queryGPUFrequencies(currentGPUIndex);
+    nv->queryGPUUtils(currentGPUIndex);
+    nv->queryGPUFanSpeed(currentGPUIndex);
+    nv->queryGPUVoltage(currentGPUIndex);
+
     plotCmdsList.append(powerdrawplot);
     plotCmdsList.append(tempplot);
     plotCmdsList.append(coreclkplot);
@@ -195,53 +211,23 @@ void MainWindow::setupGraphMonitorTab()
 
     // Define the structs
     plotCmdsList[0].plot = tempPlot;
-    plotCmdsList[0].vector = qv_temp;
-    plotCmdsList[0].layout = tempLayout;
-    //plotCmdsList[0].widget = tempWidget;
-
     plotCmdsList[1].plot = powerDrawPlot;
-    plotCmdsList[1].vector = qv_powerDraw;
-    plotCmdsList[1].layout = powerDrawLayout;
-    //plotCmdsList[1].widget = powerDrawWidget;
-
     plotCmdsList[2].plot = coreClkPlot;
-    plotCmdsList[2].vector = qv_coreClk;
-    plotCmdsList[2].layout = coreClkLayout;
-    //plotCmdsList[2].widget = coreClkWidget;
-
     plotCmdsList[3].plot = memClkPlot;
-    plotCmdsList[3].vector = qv_memClk;
-    plotCmdsList[3].layout = memClkLayout;
-    //plotCmdsList[3].widget = memClkWidget;
-
     plotCmdsList[4].plot = coreUtilPlot;
-    plotCmdsList[4].vector = qv_coreUtil;
-    plotCmdsList[4].layout = coreUtilLayout;
-    //plotCmdsList[4].widget = coreUtilWidget;
-
     plotCmdsList[5].plot = memUtilPlot;
-    plotCmdsList[5].vector = qv_memUtil;
-    plotCmdsList[5].layout = memUtilLayout;
-    //plotCmdsList[5].widget = memUtilWidget;
-
     plotCmdsList[6].plot = voltagePlot;
-    plotCmdsList[6].vector = qv_voltage;
-    plotCmdsList[6].layout = voltageLayout;
-    //plotCmdsList[6].widget = voltageWidget;
-
     plotCmdsList[7].plot = fanSpeedPlot;
-    plotCmdsList[7].vector = qv_fanSpeed;
-    plotCmdsList[7].layout = fanSpeedLayout;
-    //plotCmdsList[7].widget = fanSpeedWidget;
 
-    plotCmdsList[0].valueq = mon.temp.toDouble();
-    plotCmdsList[1].valueq = mon.powerdraw.toDouble();
-    plotCmdsList[2].valueq = mon.coreclock.toDouble();
-    plotCmdsList[3].valueq = mon.memclock.toDouble();
-    plotCmdsList[4].valueq = mon.coreutil.toDouble();
-    plotCmdsList[5].valueq = mon.memutil.toDouble();
-    plotCmdsList[6].valueq = mon.voltage.toDouble();
-    plotCmdsList[7].valueq = fanSpeed;
+    plotCmdsList[0].valueq = nv->GPUList[currentGPUIndex].temp;
+    plotCmdsList[1].valueq = nv->GPUList[currentGPUIndex].powerDraw/1000;
+    plotCmdsList[2].valueq = nv->GPUList[currentGPUIndex].coreFreq;
+    plotCmdsList[3].valueq = nv->GPUList[currentGPUIndex].memFreq;
+    plotCmdsList[4].valueq = nv->GPUList[currentGPUIndex].coreUtil;
+    plotCmdsList[5].valueq = nv->GPUList[currentGPUIndex].memUtil;
+    plotCmdsList[6].valueq = nv->GPUList[currentGPUIndex].voltage/1000;
+    plotCmdsList[7].valueq = nv->GPUList[currentGPUIndex].fanSpeed;
+
     // Get the main widget palette and use it for the graphs
     QPalette palette;
     palette.setCurrentColorGroup(QPalette::Active);
@@ -254,6 +240,8 @@ void MainWindow::setupGraphMonitorTab()
     QPen tickPen;
     tickPen.setWidthF(0.5);
     tickPen.setColor(textColor);
+    QPen tracerPen = graphPen;
+    tracerPen.setWidthF(0.5);
 
     // Button to reset extreme values
     QPushButton *resetButton = new QPushButton(this);
@@ -261,10 +249,21 @@ void MainWindow::setupGraphMonitorTab()
     resetButton->setText("Reset min/max");
     connect(resetButton, SIGNAL(clicked()), SLOT(clearExtremeValues()));
     plotLayout->addWidget(resetButton);
-
+    // Create data vectors for the GPUs
+    for (int i=0; i<nv->gpuCount; i++) {
+        GPUData gpu;
+        for (int j=0; j<plotCmdsList.size(); j++) {
+            datavector vec;
+            gpu.data.append(vec);
+        }
+        GPU.append(gpu);
+    }
+    qDebug() << GPU.size() << "GPU vec amount";
     // Define features common to all plots
-
     for (int i=0; i<plotCmdsList.size(); i++) {
+        //QVector <double> vector;
+        //GPU[currentGPUIndex].data[i].vector = vector;
+
         plotCmdsList[i].plot->setMinimumHeight(220);
         plotCmdsList[i].plot->setMaximumHeight(220);
         plotCmdsList[i].plot->setMinimumWidth(200);
@@ -278,6 +277,9 @@ void MainWindow::setupGraphMonitorTab()
         QWidget *widget = new PlotWidget(this);
         plotCmdsList[i].widget = widget;
         connect(plotCmdsList[i].widget, SIGNAL(leftPlot()), SLOT(clearPlots()));
+
+        QVBoxLayout *layout = new QVBoxLayout;
+        plotCmdsList[i].layout = layout;
 
         plotCmdsList[i].widget->setLayout(plotCmdsList[i].layout);
         plotCmdsList[i].layout->addWidget(plotCmdsList[i].plot);
@@ -330,13 +332,21 @@ void MainWindow::setupGraphMonitorTab()
         QCPItemTracer *mouseTracer = new QCPItemTracer(plotCmdsList[i].plot);
         plotCmdsList[i].tracer = mouseTracer;
         mouseTracer->setStyle(QCPItemTracer::tsCrosshair);
-        QPen tracerPen = graphPen;
-        tracerPen.setWidthF(0.5);
         mouseTracer->setPen(tracerPen);
         connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
 
         plotCmdsList[i].maxval = plotCmdsList[i].valueq;
         plotCmdsList[i].minval = plotCmdsList[i].valueq;
+    }
+    // Hide the plots for values that can't be read
+    if (!nv->GPUList[currentGPUIndex].coreClkReadable) {
+        plotCmdsList[2].widget->setVisible(false);
+    }
+    if (!nv->GPUList[currentGPUIndex].memClkReadable) {
+        plotCmdsList[3].widget->setVisible(false);
+    }
+    if (!nv->GPUList[currentGPUIndex].voltageReadable) {
+        plotCmdsList[6].widget->setVisible(false);
     }
 
     tempPlot->yAxis->setLabel("Temperature (°C)");
@@ -360,13 +370,13 @@ void MainWindow::setupGraphMonitorTab()
 void MainWindow::updateMonitor()
 {
     // Update the values for plots
-    nv->queryGPUTemp(0);
-    nv->queryGPUPowerDraw(0);
-    nv->queryGPUFrequencies(0);
-    nv->queryGPUUtils(0);
-    nv->queryGPUVoltage(0);
-    nv->queryGPUFanSpeed(0);
-    nv->queryGPUUsedVRAM(0);
+    nv->queryGPUTemp(currentGPUIndex);
+    nv->queryGPUPowerDraw(currentGPUIndex);
+    nv->queryGPUFrequencies(currentGPUIndex);
+    nv->queryGPUUtils(currentGPUIndex);
+    nv->queryGPUVoltage(currentGPUIndex);
+    nv->queryGPUFanSpeed(currentGPUIndex);
+    nv->queryGPUUsedVRAM(currentGPUIndex);
 
     // Remove the last decimal point from power draw to make it take less space on the plot
     double pwrdraw = nv->GPUList[currentGPUIndex].powerDraw;
@@ -375,45 +385,45 @@ void MainWindow::updateMonitor()
     pwrdraw = static_cast<double>(num);
     pwrdraw = pwrdraw/100;
 
-    plotCmdsList[0].valueq = nv->GPUList[0].temp;
+    plotCmdsList[0].valueq = nv->GPUList[currentGPUIndex].temp;
     plotCmdsList[1].valueq = pwrdraw;
-    plotCmdsList[2].valueq = nv->GPUList[0].coreFreq;
-    plotCmdsList[3].valueq = nv->GPUList[0].memFreq;
-    plotCmdsList[4].valueq = nv->GPUList[0].coreUtil;
-    plotCmdsList[5].valueq = nv->GPUList[0].memUtil;
-    plotCmdsList[6].valueq = nv->GPUList[0].voltage/1000;
-    plotCmdsList[7].valueq = nv->GPUList[0].fanSpeed;
+    plotCmdsList[2].valueq = nv->GPUList[currentGPUIndex].coreFreq;
+    plotCmdsList[3].valueq = nv->GPUList[currentGPUIndex].memFreq;
+    plotCmdsList[4].valueq = nv->GPUList[currentGPUIndex].coreUtil;
+    plotCmdsList[5].valueq = nv->GPUList[currentGPUIndex].memUtil;
+    plotCmdsList[6].valueq = nv->GPUList[currentGPUIndex].voltage/1000;
+    plotCmdsList[7].valueq = nv->GPUList[currentGPUIndex].fanSpeed;
 
     qDebug() << monitorUpdater->remainingTime();
 
-    gputemp->setText(1, QString::number(nv->GPUList[0].temp) + "°C");
-    powerdraw->setText(1, QString::number(nv->GPUList[0].powerDraw/1000) + "W");
-    voltage->setText(1, QString::number(nv->GPUList[0].voltage/1000) + "mV");
-    coreclock->setText(1, QString::number(nv->GPUList[0].coreFreq) + "MHz");
-    memclock->setText(1, QString::number(nv->GPUList[0].memFreq) + "MHz");
-    coreutil->setText(1, QString::number(nv->GPUList[0].coreUtil) + "%");
-    memutil->setText(1, QString::number(nv->GPUList[0].memUtil) + "%");
-    fanspeed->setText(1, QString::number(nv->GPUList[0].fanSpeed) + "%");
-    memusage->setText(1, QString::number(nv->GPUList[0].usedVRAM) + "/" + QString::number(nv->GPUList[0].totalVRAM) + "MB");
+    gputemp->setText(1, QString::number(nv->GPUList[currentGPUIndex].temp) + "°C");
+    powerdraw->setText(1, QString::number(nv->GPUList[currentGPUIndex].powerDraw/1000) + "W");
+    voltage->setText(1, QString::number(nv->GPUList[currentGPUIndex].voltage/1000) + "mV");
+    coreclock->setText(1, QString::number(nv->GPUList[currentGPUIndex].coreFreq) + "MHz");
+    memclock->setText(1, QString::number(nv->GPUList[currentGPUIndex].memFreq) + "MHz");
+    coreutil->setText(1, QString::number(nv->GPUList[currentGPUIndex].coreUtil) + "%");
+    memutil->setText(1, QString::number(nv->GPUList[currentGPUIndex].memUtil) + "%");
+    fanspeed->setText(1, QString::number(nv->GPUList[currentGPUIndex].fanSpeed) + "%");
+    memusage->setText(1, QString::number(nv->GPUList[currentGPUIndex].usedVRAM) + "/" + QString::number(nv->GPUList[currentGPUIndex].totalVRAM) + "MB");
 
     // Decrement all time values by one
-    for (int i=0; i<qv_time.length(); i++) {
-        qv_time[i]--;
+    for (int i=0; i<nv->GPUList[currentGPUIndex].qv_time.length(); i++) {
+        nv->GPUList[currentGPUIndex].qv_time[i]--;
     }
     // Add current time (0)
-    if (qv_time.size() < plotVectorSize) {
-        qv_time.append(0);
+    if (nv->GPUList[currentGPUIndex].qv_time.size() < plotVectorSize) {
+        nv->GPUList[currentGPUIndex].qv_time.append(0);
     } else {
-        qv_time.insert(plotVectorSize, 0);
+        nv->GPUList[currentGPUIndex].qv_time.insert(plotVectorSize, 0);
     }
     // Remove the first elements if there are more elements than the x-range
-    if (qv_time.size() > plotVectorSize) {
-        qv_time.removeFirst();
+    if (nv->GPUList[currentGPUIndex].qv_time.size() > plotVectorSize) {
+        nv->GPUList[currentGPUIndex].qv_time.removeFirst();
     }
 
     for (int i=0; i<plotCmdsList.size(); i++) {
         // Check if the max/min values need to be updated
-        if (!plotCmdsList[i].vector.isEmpty()) {
+        if (!GPU[currentGPUIndex].data[i].vector.isEmpty()) {
             plotCmdsList[i].curtext->setText("Cur: " + QString::number(plotCmdsList[i].valueq));
             if (plotCmdsList[i].maxval < plotCmdsList[i].valueq) {
                 plotCmdsList[i].maxtext->setText("Max: " + QString::number(plotCmdsList[i].valueq));
@@ -424,16 +434,16 @@ void MainWindow::updateMonitor()
                 plotCmdsList[i].minval = plotCmdsList[i].valueq;
             }
         }
-        if (plotCmdsList[i].vector.size() < plotVectorSize) {
-            plotCmdsList[i].vector.append(plotCmdsList[i].valueq);
+        if (GPU[currentGPUIndex].data[i].vector.size() < plotVectorSize) {
+            GPU[currentGPUIndex].data[i].vector.append(plotCmdsList[i].valueq);
         } else {
-            plotCmdsList[i].vector.insert(plotVectorSize, plotCmdsList[i].valueq);
+            GPU[currentGPUIndex].data[i].vector.insert(plotVectorSize, plotCmdsList[i].valueq);
         }
         // Remove the first element if there are more elements than the x-range
-        if (plotCmdsList[i].vector.size() > plotVectorSize) {
-            plotCmdsList[i].vector.removeFirst();
+        if (GPU[currentGPUIndex].data[i].vector.size() > plotVectorSize) {
+            GPU[currentGPUIndex].data[i].vector.removeFirst();
         }
-        plotCmdsList[i].plot->graph(0)->setData(qv_time, plotCmdsList[i].vector);
+        plotCmdsList[i].plot->graph(0)->setData(nv->GPUList[currentGPUIndex].qv_time, GPU[currentGPUIndex].data[i].vector);
         // If the newest value is out of bounds, resize the y-range
         if (plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
             plotCmdsList[i].plot->yAxis->setRangeUpper(plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
@@ -448,14 +458,14 @@ void MainWindow::updateMonitor()
     // If the largest/smallest value is too far from the range end, this resizes them every 10th iteration of this function
     if (counter >= 10) {
         for (int i=0; i<plotCmdsList.size(); i++) {
-            double lowestval = plotCmdsList[i].vector[0];
-            double largestval = plotCmdsList[i].vector[0];
-            for (int j=0; j<plotCmdsList[i].vector.size(); j++) {
-                if (plotCmdsList[i].vector[j] < lowestval) {
-                    lowestval = plotCmdsList[i].vector[j];
+            double lowestval = GPU[currentGPUIndex].data[i].vector[0];
+            double largestval = GPU[currentGPUIndex].data[i].vector[0];
+            for (int j=0; j<GPU[currentGPUIndex].data[i].vector.size(); j++) {
+                if (GPU[currentGPUIndex].data[i].vector[j] < lowestval) {
+                    lowestval = GPU[currentGPUIndex].data[i].vector[j];
                 }
-                if (plotCmdsList[i].vector[j] > largestval) {
-                    largestval = plotCmdsList[i].vector[j];
+                if (GPU[currentGPUIndex].data[i].vector[j] > largestval) {
+                    largestval = GPU[currentGPUIndex].data[i].vector[j];
                 }
             }
             if (plotCmdsList[i].plot->yAxis->range().upper - largestval*0.1 > largestval) {
@@ -489,11 +499,11 @@ void MainWindow::plotHovered(QMouseEvent *event)
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
     int valIndex = 0;
-    if (!qv_time.isEmpty() && pointerxcoord > -plotVectorSize*1.01 && pointerxcoord <= 0 + plotVectorSize*0.01) {
-        double deltax = abs(qv_time[0] - pointerxcoord);
+    if (!nv->GPUList[currentGPUIndex].qv_time.isEmpty() && pointerxcoord > -plotVectorSize*1.01 && pointerxcoord <= 0 + plotVectorSize*0.01) {
+        double deltax = abs(nv->GPUList[currentGPUIndex].qv_time[0] - pointerxcoord);
         for (int i=0; i<plotCmdsList[plotIndex].vector.size(); i++) {
-            if (abs(qv_time[i] - pointerxcoord) < deltax) {
-                deltax = abs(qv_time[i] - pointerxcoord);
+            if (abs(nv->GPUList[currentGPUIndex].qv_time[i] - pointerxcoord) < deltax) {
+                deltax = abs(nv->GPUList[currentGPUIndex].qv_time[i] - pointerxcoord);
                 valIndex = i;
             }
         }
@@ -518,7 +528,7 @@ void MainWindow::clearPlots()
 {
     for (int i=0; i<plotCmdsList.size(); i++) {
         plotCmdsList[i].valText->setText("");
-        plotCmdsList[i].tracer->position->setCoords(1, plotCmdsList[i].plot->yAxis->range().upper);
+        plotCmdsList[i].tracer->position->setCoords(1, -1);
         plotCmdsList[i].plot->replot();
         plotCmdsList[i].plot->update();
     }
@@ -574,6 +584,7 @@ void MainWindow::on_profileComboBox_activated(const QString &arg1)
         settings.setValue("General/currentProfile", currentProfile);
         loadProfileSettings();
     }
+    resettimer->stop();
 }
 
 void MainWindow::getGPUDriver()
@@ -585,25 +596,6 @@ void MainWindow::getGPUDriver()
         gpuDriver = "nvidia";
     }
 }
-void MainWindow::queryGPUs()
-{
-    QProcess process;
-    process.start(nvGPUCountQ);
-    process.waitForFinished();
-    for (int i=0; i<process.readLine().toInt(); i++) {
-        process.start(nvUUIDQ + " -i " + QString::number(i));
-        process.waitForFinished();
-        QString UUID = process.readLine();
-        UUID.chop(1);
-        UUIDList.append(UUID);
-        process.start(queryGPUName + " -i " + QString::number(i));
-        process.waitForFinished();
-        QString GPUName = process.readLine();
-        GPUName.chop(1);
-        //ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + GPUName);
-        //ui->GPUNameLabel->setText(GPUName);
-    }
-}
 void MainWindow::fanSpeedUpdater()
 {
     nv->queryGPUFanSpeed(currentGPUIndex);
@@ -612,10 +604,7 @@ void MainWindow::fanSpeedUpdater()
 }
 void MainWindow::tempUpdater()
 {
-    QProcess process;
-    process.start(nvTempQ);
-    process.waitForFinished(-1);
-    temp = process.readLine().toInt();
+    nv->queryGPUTemp(currentGPUIndex);
     if (xCurvePoints.size() != 0) {
         generateFanPoint();
     }
@@ -642,19 +631,6 @@ void MainWindow::resetChanges()
 
     ui->memClkSlider->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
     ui->memClkSpinBox->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
-}
-void MainWindow::queryDriverSettings()
-{
-    QProcess process;
-    process.start(nvFanCtlStateQ);
-    process.waitForFinished(-1);
-    if (process.readLine().toInt() == 1) {
-        manualFanCtl = true;
-        ui->fanModeComboBox->setCurrentIndex(1);
-    } else {
-        manualFanCtl = false;
-        ui->fanModeComboBox->setCurrentIndex(0);
-    }
 }
 void MainWindow::applyFanMode()
 {
@@ -696,102 +672,13 @@ void MainWindow::applyFanMode()
             break;
     }
 }
-void MainWindow::queryGPUSettings()
-{
-    QProcess process;
-    process.setReadChannelMode(QProcess::ForwardedErrorChannel);
-    process.setReadChannel(QProcess::StandardOutput);
-    process.start(nvVoltQ);
-    process.waitForFinished(-1);
-    voltInt = process.readLine().toInt()/1000;
-
-    process.start(nvVoltOfsQ);
-    process.waitForFinished(-1);
-    voltOfsInt = process.readLine().toInt()/1000;
-    latestVoltOfs = voltOfsInt;
-
-    defVolt = voltInt - voltOfsInt;
-
-    process.start(nvVoltOfsLimQ);
-    process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        if (process.readLine().toInt()/1000 > maxVoltOfsInt) {
-            qDebug() << process.readLine();
-            maxVoltOfsInt = process.readLine().toInt()/1000;
-        }
-    }
-
-    process.start(nvCoreClkOfsQ);
-    process.waitForFinished(-1);
-    coreFreqOfsInt = process.readLine().toInt();
-    latestClkOfs = coreFreqOfsInt;
-
-    process.start(nvCurMaxClkQ);
-    process.waitForFinished(-1);
-    curMaxClkInt = process.readLine().toInt();
-
-    process.start(nvMaxPowerLimQ);
-    process.waitForFinished(-1);
-    maxPowerLimInt = process.readLine().toInt();
-
-    process.start(nvMinPowerLimQ);
-    process.waitForFinished(-1);
-    minPowerLimInt = process.readLine().toInt();
-
-    process.start(nvCurPowerLimQ);
-    process.waitForFinished(-1);
-    curPowerLimInt = process.readLine().toInt();
-    latestPowerLim = curPowerLimInt;
-
-    process.start(nvClockLimQ);
-    process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        QString line = process.readLine();
-        if (line.toInt() > maxCoreClkOfsInt) {
-            maxCoreClkOfsInt = line.toInt();
-        }
-        if (line.toInt() <= minCoreClkOfsInt) {
-            minCoreClkOfsInt = line.toInt();
-        }
-    }
-
-    // This gets the transfer rate, the clock speed is rate/2
-    process.start(nvMemClkLimQ);
-    process.waitForFinished(-1);
-    for (int i=0; i<process.size(); i++) {
-        QString line = process.readLine();
-        if (line.toInt()/2 > maxMemClkOfsInt) {
-            maxMemClkOfsInt = line.toInt()/2;
-        }
-        if (line.toInt()/2 <= minMemClkOfsInt) {
-            minMemClkOfsInt = line.toInt()/2;
-        }
-    }
-
-    process.start(nvCurMaxMemClkQ);
-    process.waitForFinished(-1);
-    curMaxMemClkInt = process.readLine().toInt();
-
-    process.start(nvCurMemClkOfsQ);
-    process.waitForFinished(-1);
-    memClkOfsInt = process.readLine().toInt()/2;
-    latestMemClkOfs = memClkOfsInt;
-
-    // Since the maximum core clock reported is the same on negative offsets as on 0 offset add a check here
-    if (0 >= coreFreqOfsInt) {
-        defCoreClk = curMaxClkInt;
-    } else {
-        defCoreClk = curMaxClkInt - coreFreqOfsInt;
-    }
-    defMemClk = curMaxMemClkInt - memClkOfsInt;
-
-}
 void MainWindow::applyGPUSettings()
 {
     // Apply and save the values
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     settings.setValue("latestUUID", nv->GPUList[currentGPUIndex].uuid);
+    qDebug() << currentProfile << "curprf";
     settings.endGroup();
     settings.beginGroup(currentProfile);
     settings.beginGroup(nv->GPUList[currentGPUIndex].uuid);
@@ -828,15 +715,18 @@ void MainWindow::applyGPUSettings()
         }
     }
 
-    if (nv->GPUList[currentGPUIndex].powerLim/1000 != ui->powerLimSlider->value()) {
+    if (nv->GPUList[currentGPUIndex].powerLim/1000 != ui->powerLimSlider->value() && nv->GPUList[currentGPUIndex].powerLimitAvailable) {
         powerLimit = ui->powerLimSlider->value();
-        input = nvPowerLimSet;
         if (!isRoot) {
-            // Need to ask for root somehow without running a specific program
-            ret = nv->assignGPUPowerLimit(powerLimit*1000);
-            if (ret) {
+            // If user is not root, call nvidia-smi through pkexec until I come up with a cleaner solution
+            //ret = nv->assignGPUPowerLimit(powerLimit*1000);
+            qDebug() << "trying pkexec";
+            QProcess prc;
+            prc.start("/bin/sh -c \"pkexec " + nvPowerLimSet + QString::number(powerLimit) + " -i " + QString::number(currentGPUIndex) + "\"");
+            prc.waitForFinished();
+            if (prc.exitCode() == 0) {
                 nv->GPUList[currentGPUIndex].powerLim = powerLimit*1000;
-                settings.setValue("powerLimit", powerLimit*1000);
+                settings.setValue("powerLimit", powerLimit);
             } else {
                 errorText.append("- Power Limit");
                 hadErrors = true;
@@ -846,7 +736,7 @@ void MainWindow::applyGPUSettings()
             ret = nv->assignGPUPowerLimit(powerLimit*1000);
             if (ret) {
                 nv->GPUList[currentGPUIndex].powerLim = powerLimit*1000;
-                settings.setValue("powerLimit", powerLimit*1000);
+                settings.setValue("powerLimit", powerLimit);
             } else {
                 errorText.append("- Power Limit");
                 hadErrors = true;
@@ -876,6 +766,7 @@ void MainWindow::applyGPUSettings()
             if (ret) {
                 ui->fanSlider->setEnabled(false);
                 ui->fanSpinBox->setEnabled(false);
+                settings.setValue("fanControlMode", 0);
             } else {
                 errorText.append("- Fan mode");
             }
@@ -885,9 +776,10 @@ void MainWindow::applyGPUSettings()
             ret = nv->assignGPUFanCtlMode(currentGPUIndex, NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
             if (ret) {
                 disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
-                nv->assignGPUFanCtlMode(currentGPUIndex, ui->fanSlider->value());
+                nv->assignGPUFanSpeed(currentGPUIndex, ui->fanSlider->value());
                 ui->fanSlider->setEnabled(true);
                 ui->fanSpinBox->setEnabled(true);
+                settings.setValue("fanControlMode", 1);
             } else {
                 errorText.append("- Fan mode");
             }
@@ -899,6 +791,7 @@ void MainWindow::applyGPUSettings()
                 connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
                 ui->fanSlider->setEnabled(false);
                 ui->fanSpinBox->setEnabled(false);
+                settings.setValue("fanControlMode", 2);
             } else {
                 errorText.append("- Fan mode");
             }
@@ -917,12 +810,20 @@ void MainWindow::loadProfileSettings()
 {
     QSettings settings("tuxclocker");
     currentProfile = settings.value("General/currentProfile").toString();
+    qDebug() << "current profile" << currentProfile;
     latestUUID = settings.value("General/latestUUID").toString();
+    // Set the profile combo box selection to currentProfile
+    for (int i=0; i<ui->profileComboBox->count(); i++) {
+        if (ui->profileComboBox->itemText(i).contains(currentProfile)) {
+            ui->profileComboBox->setCurrentIndex(i);
+            break;
+        }
+    }
     settings.beginGroup(currentProfile);
     settings.beginGroup(latestUUID);
 
     // Check for existance of the setting so zeroes don't get appended to curve point vectors
-    if (settings.contains("xpoints")) {
+    if (settings.contains("xpoints") && nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         QString xPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
         QString yPointStr = "/bin/sh -c \"echo " + settings.value("ypoints").toString() + grepStringToInt;
         QProcess process;
@@ -977,9 +878,21 @@ void MainWindow::loadProfileSettings()
     if (settings.contains("fanControlMode")) {
         fanControlMode = settings.value("fanControlMode").toInt();
         ui->fanModeComboBox->setCurrentIndex(fanControlMode);
+        if (fanControlMode != 1) {
+            ui->fanSlider->setEnabled(false);
+            ui->fanSpinBox->setEnabled(false);
+        } else {
+            ui->fanSlider->setEnabled(true);
+            ui->fanSpinBox->setEnabled(true);
+        }
     }
     // Check which GPU index corresponds to the UUID and set the combo box selection to it
-    //ui->GPUComboBox->setCurrentIndex(UUIDList.indexOf(latestUUID));
+    for (int i=0; i<nv->gpuCount; i++) {
+        if (nv->GPUList[i].uuid == latestUUID) {
+            ui->GPUComboBox->setCurrentIndex(i);
+            break;
+        }
+    }
     ui->statusBar->showMessage("Profile settings loaded.", 7000);
 }
 
@@ -1005,7 +918,6 @@ void MainWindow::on_newProfile_closed()
     //ui->GPUComboBox->clear();
     checkForProfiles();
     loadProfileSettings();
-    queryGPUs();
 }
 void MainWindow::saveProfileSettings()
 {
@@ -1013,6 +925,7 @@ void MainWindow::saveProfileSettings()
     settings.beginGroup("General");
     settings.setValue("latestUUID", nv->GPUList[currentGPUIndex].uuid);
     settings.endGroup();
+    qDebug() << "current prf" << currentProfile;
     settings.beginGroup(currentProfile);
     settings.beginGroup(nv->GPUList[currentGPUIndex].uuid);
     settings.setValue("voltageOffset", nv->GPUList[currentGPUIndex].voltageOffset);
@@ -1047,11 +960,8 @@ void MainWindow::generateFanPoint()
             targetFanSpeed = (((yCurvePoints[index + 1] - yCurvePoints[index]) * (temp - xCurvePoints[index])) / (xCurvePoints[index + 1] - xCurvePoints[index])) + yCurvePoints[index];
         }
     }
-    QProcess process;
-    QString input = nvFanSpeedSet;
-    input.append(QString::number(targetFanSpeed));
-    process.start(input);
-    process.waitForFinished(-1);
+
+    nv->assignGPUFanSpeed(currentGPUIndex, targetFanSpeed);
 }
 void MainWindow::on_frequencySlider_valueChanged(int value)
 {
@@ -1123,9 +1033,10 @@ void MainWindow::on_applyButton_clicked()
 
 
     applyGPUSettings();
-    //saveProfileSettings();
-    //applyFanMode();
-    //setupMonitorTab();
+    // Query the maximum offsets
+    nv->queryGPUCurrentMaxClocks(currentGPUIndex);
+    curmaxmemclk->setText(1, QString::number(nv->GPUList[currentGPUIndex].maxMemClk) + "MHz");
+    curmaxclk->setText(1, QString::number(nv->GPUList[currentGPUIndex].maxCoreClk) + "MHz");
 }
 void MainWindow::on_editFanCurveButton_pressed()
 {
@@ -1158,25 +1069,29 @@ void MainWindow::on_actionManage_profiles_triggered()
     np->exec();
 }
 
-/*void MainWindow::on_profileComboBox_currentTextChanged(const QString &arg1)
-{
-
-}*/
-
 void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
 {
     currentGPUIndex = index;
+    // Change latest UUID and load settings for the GPU
+    QSettings settings("tuxclocker");
+    settings.setValue("General/latestUUID", nv->GPUList[index].uuid);
     // Call the NVML setup function so the index of the device struct is updated
     nv->setupNVML(currentGPUIndex);
     nv->queryGPUPowerLimitLimits(currentGPUIndex);
     nv->queryGPUPowerLimit(currentGPUIndex);
+    nv->queryGPUPowerLimitAvailability(currentGPUIndex);
+    nv->queryGPUCurrentMaxClocks(currentGPUIndex);
     // Change the slider ranges and availabilities according to the GPU
     if (nv->GPUList[index].overClockAvailable) {
         ui->frequencySlider->setRange(nv->GPUList[index].minCoreClkOffset, nv->GPUList[index].maxCoreClkOffset);
-        ui->memClkSlider->setRange(nv->GPUList[index].minMemClkOffset, nv->GPUList[index].maxMemClkOffset);
     } else {
         ui->frequencySlider->setEnabled(false);
         ui->frequencySpinBox->setEnabled(false);
+    }
+
+    if (nv->GPUList[index].memOverClockAvailable) {
+        ui->memClkSlider->setRange(nv->GPUList[index].minMemClkOffset, nv->GPUList[index].maxMemClkOffset);
+    } else {
         ui->memClkSlider->setEnabled(false);
         ui->memClkSpinBox->setEnabled(false);
     }
@@ -1187,8 +1102,7 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
         ui->voltageSlider->setEnabled(false);
         ui->voltageSpinBox->setEnabled(false);
     }
-
-    if (!nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
+    if (!nv->GPUList[index].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
         QModelIndex manualModeIndex = model->index(1, ui->fanModeComboBox->modelColumn());
@@ -1196,4 +1110,8 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
         manualMode->setEnabled(false);
         manualMode->setToolTip("Manual fan control is not available for current GPU");
     }
+    loadProfileSettings();
+    // Update maximum clocks
+    curmaxmemclk->setText(1, QString::number(nv->GPUList[index].maxMemClk) + "MHz");
+    curmaxclk->setText(1, QString::number(nv->GPUList[index].maxCoreClk) + "MHz");
 }

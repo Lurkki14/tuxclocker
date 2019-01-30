@@ -16,11 +16,8 @@ public:
 
     struct GPU
     {
-        bool status;
-        int index;
         char *name;
         char *uuid;
-        char *utils;
         bool overVoltAvailable = false;
         bool overClockAvailable = false;
         bool memOverClockAvailable = false;
@@ -57,12 +54,14 @@ public:
         uint powerLim;
         int totalVRAM;
         int usedVRAM;
+        // Vectors for plotting
+        QVector <double> qv_time;
     };
     QVector <GPU> GPUList;
+
     int gpuCount = 0;
 private:
     Display *dpy;
-
     nvmlDevice_t *device;
 signals:
 
