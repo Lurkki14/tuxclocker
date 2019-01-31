@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QWidget::setWindowIcon(QIcon("gpuonfire.svg"));
 
     checkForRoot();
     checkForProfiles();

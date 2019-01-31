@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>TuxClocker</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/gpuonfire.svg</normaloff>:/icons/gpuonfire.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="1" column="0">

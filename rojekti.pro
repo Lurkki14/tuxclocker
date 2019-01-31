@@ -53,6 +53,7 @@ INCLUDEPATH += "/usr/lib"
 INCLUDEPATH += $$(INCLUDEPATH)
 
 LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
