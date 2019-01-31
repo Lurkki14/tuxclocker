@@ -332,7 +332,6 @@ void editProfile::on_saveButton_clicked()
         yString.append(y + ", ");
 
     }
-    MainWindow mw;
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     QString currentProfile = settings.value("currentProfile").toString();
