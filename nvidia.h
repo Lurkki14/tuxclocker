@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
 #include <QProcess>
-//#include "nvml.h"
 #include <nvml.h>
 
 class nvidia : public QObject
@@ -54,8 +53,6 @@ public:
         uint powerLim;
         int totalVRAM;
         int usedVRAM;
-        // Vectors for plotting
-        QVector <double> qv_time;
     };
     QVector <GPU> GPUList;
 

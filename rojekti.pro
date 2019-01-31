@@ -32,7 +32,6 @@ SOURCES += \
     qcustomplot.cpp \
     editprofile.cpp \
     newprofile.cpp \
-    monitor.cpp \
     plotwidget.cpp \
     nvidia.cpp
 
@@ -41,16 +40,17 @@ HEADERS += \
     qcustomplot.h \
     editprofile.h \
     newprofile.h \
-    monitor.h \
     plotwidget.h \
     nvidia.h \
+    nvml.h
 
 FORMS += \
         mainwindow.ui \
     editprofile.ui \
     newprofile.ui
 
-INCLUDEPATH += $$(INCLUDEPATH) $$(LIBRARY_PATH)
+INCLUDEPATH += "/usr/lib"
+INCLUDEPATH += $$(INCLUDEPATH)
 
 LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
 # Default rules for deployment.

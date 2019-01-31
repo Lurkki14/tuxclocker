@@ -407,18 +407,18 @@ void MainWindow::updateMonitor()
     memusage->setText(1, QString::number(nv->GPUList[currentGPUIndex].usedVRAM) + "/" + QString::number(nv->GPUList[currentGPUIndex].totalVRAM) + "MB");
 
     // Decrement all time values by one
-    for (int i=0; i<nv->GPUList[currentGPUIndex].qv_time.length(); i++) {
-        nv->GPUList[currentGPUIndex].qv_time[i]--;
+    for (int i=0; i<GPU[currentGPUIndex].qv_time.length(); i++) {
+        GPU[currentGPUIndex].qv_time[i]--;
     }
     // Add current time (0)
-    if (nv->GPUList[currentGPUIndex].qv_time.size() < plotVectorSize) {
-        nv->GPUList[currentGPUIndex].qv_time.append(0);
+    if (GPU[currentGPUIndex].qv_time.size() < plotVectorSize) {
+        GPU[currentGPUIndex].qv_time.append(0);
     } else {
-        nv->GPUList[currentGPUIndex].qv_time.insert(plotVectorSize, 0);
+        GPU[currentGPUIndex].qv_time.insert(plotVectorSize, 0);
     }
     // Remove the first elements if there are more elements than the x-range
-    if (nv->GPUList[currentGPUIndex].qv_time.size() > plotVectorSize) {
-        nv->GPUList[currentGPUIndex].qv_time.removeFirst();
+    if (GPU[currentGPUIndex].qv_time.size() > plotVectorSize) {
+        GPU[currentGPUIndex].qv_time.removeFirst();
     }
 
     for (int i=0; i<plotCmdsList.size(); i++) {
@@ -443,7 +443,7 @@ void MainWindow::updateMonitor()
         if (GPU[currentGPUIndex].data[i].vector.size() > plotVectorSize) {
             GPU[currentGPUIndex].data[i].vector.removeFirst();
         }
-        plotCmdsList[i].plot->graph(0)->setData(nv->GPUList[currentGPUIndex].qv_time, GPU[currentGPUIndex].data[i].vector);
+        plotCmdsList[i].plot->graph(0)->setData(GPU[currentGPUIndex].qv_time, GPU[currentGPUIndex].data[i].vector);
         // If the newest value is out of bounds, resize the y-range
         if (plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
             plotCmdsList[i].plot->yAxis->setRangeUpper(plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
@@ -487,7 +487,6 @@ void MainWindow::updateMonitor()
 void MainWindow::plotHovered(QMouseEvent *event)
 {
     QPoint cursor = event->pos();
-
     int plotIndex = 0;
     for (int i=0; i<plotCmdsList.size(); i++) {
         if (plotCmdsList[i].widget->underMouse()) {
@@ -499,15 +498,15 @@ void MainWindow::plotHovered(QMouseEvent *event)
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
     int valIndex = 0;
-    if (!nv->GPUList[currentGPUIndex].qv_time.isEmpty() && pointerxcoord > -plotVectorSize*1.01 && pointerxcoord <= 0 + plotVectorSize*0.01) {
-        double deltax = abs(nv->GPUList[currentGPUIndex].qv_time[0] - pointerxcoord);
-        for (int i=0; i<plotCmdsList[plotIndex].vector.size(); i++) {
-            if (abs(nv->GPUList[currentGPUIndex].qv_time[i] - pointerxcoord) < deltax) {
-                deltax = abs(nv->GPUList[currentGPUIndex].qv_time[i] - pointerxcoord);
+    if (!GPU[currentGPUIndex].qv_time.isEmpty() && pointerxcoord > -plotVectorSize*1.01 && pointerxcoord <= 0 + plotVectorSize*0.01) {
+        double deltax = abs(GPU[currentGPUIndex].qv_time[0] - pointerxcoord);
+        for (int i=0; i<GPU[currentGPUIndex].qv_time.size(); i++) {
+            if (abs(GPU[currentGPUIndex].qv_time[i] - pointerxcoord) < deltax) {
+                deltax = abs(GPU[currentGPUIndex].qv_time[i] - pointerxcoord);
                 valIndex = i;
             }
         }
-        plotCmdsList[plotIndex].valText->setText(QString::number(plotCmdsList[plotIndex].vector[valIndex]));
+        plotCmdsList[plotIndex].valText->setText(QString::number(GPU[currentGPUIndex].data[plotIndex].vector[valIndex]));
         // Make the text stay inside the plot
         if (pointerxcoord > -plotVectorSize*0.06) {
             plotCmdsList[plotIndex].valText->position->setCoords(-plotVectorSize*0.06, plotCmdsList[plotIndex].plot->yAxis->range().upper - plotCmdsList[plotIndex].plot->yAxis->range().size()*0.05);

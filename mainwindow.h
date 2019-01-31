@@ -195,7 +195,7 @@ private:
     QCustomPlot *voltagePlot = new QCustomPlot(this);
     QCustomPlot *fanSpeedPlot = new QCustomPlot(this);
 
-    QVector <double> qv_time;
+    //QVector <double> qv_time;
 
     struct plotCmds
     {
@@ -218,6 +218,7 @@ private:
 
     struct GPUData {
         QVector <datavector> data;
+        QVector <double> qv_time;
     };
     QVector <GPUData> GPU;
     int counter = 0;
