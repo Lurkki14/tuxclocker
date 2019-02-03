@@ -92,9 +92,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->fanSlider->setDisabled(true);
         ui->fanSpinBox->setDisabled(true);
     }
-    if (nv->GPUList[currentGPUIndex].fanControlMode == 2) {
-        connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
-    }
+
     if (!nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
@@ -941,7 +939,7 @@ void MainWindow::generateFanPoint()
     if (nv->GPUList[currentGPUIndex].temp <= xCurvePoints[0]) {
         targetFanSpeed = yCurvePoints[0];
     }
-    if (nv->GPUList[currentGPUIndex].temp  >= xCurvePoints[xCurvePoints.size()-1]) {
+    else if (nv->GPUList[currentGPUIndex].temp  >= xCurvePoints[xCurvePoints.size()-1]) {
         targetFanSpeed = yCurvePoints[yCurvePoints.size()-1];
     } else {
         // Get the index of the leftmost point of the interpolated interval by comparing it to temperature
