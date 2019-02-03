@@ -74,6 +74,7 @@ editProfile::editProfile(QWidget *parent) :
         qv_x.append(mw.xCurvePoints[i]);
         qv_y.append(mw.yCurvePoints[i]);
     }
+
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
 
@@ -323,15 +324,6 @@ void editProfile::detectRelease(QMouseEvent *event)
 
 void editProfile::on_saveButton_clicked()
 {
-    QString xString;
-    QString yString;
-    for (int i=0; i<qv_x.length(); i++) {
-        QString x = QString::number(ui->curvePlot->graph(0)->dataSortKey(i));
-        QString y = QString::number(ui->curvePlot->graph(0)->dataMainValue(i));
-        xString.append(x + ", ");
-        yString.append(y + ", ");
-
-    }
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     QString currentProfile = settings.value("currentProfile").toString();
@@ -339,8 +331,15 @@ void editProfile::on_saveButton_clicked()
     settings.endGroup();
     settings.beginGroup(currentProfile);
     settings.beginGroup(latestUUID);
-    settings.setValue("ypoints", yString);
-    settings.setValue("xpoints", xString);
+    QString xString;
+    QString yString;
+    settings.beginWriteArray("curvepoints");
+    for (int i=0; i<qv_x.length(); i++) {
+        settings.setArrayIndex(i);
+        settings.setValue("xpoints", ui->curvePlot->graph(0)->dataSortKey(i));
+        settings.setValue("ypoints", ui->curvePlot->graph(0)->dataMainValue(i));
+    }
+    settings.endArray();
     close();
 }
 

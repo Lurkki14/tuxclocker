@@ -241,7 +241,7 @@ void nvidia::queryGPUFanSpeed(int GPUIndex)
                                       NV_CTRL_THERMAL_COOLER_CURRENT_LEVEL,
                                       &GPUList[GPUIndex].fanSpeed);
 
-    qDebug() << GPUList[GPUIndex].fanSpeed;
+    //qDebug() << GPUList[GPUIndex].fanSpeed;
 }
 void nvidia::queryGPUUsedVRAM(int GPUIndex)
 {

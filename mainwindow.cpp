@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
         // Divide by 2 to get the clock speed
         ui->memClkSlider->setRange(nv->GPUList[currentGPUIndex].minMemClkOffset/2, nv->GPUList[currentGPUIndex].maxMemClkOffset/2);
         ui->memClkSpinBox->setRange(nv->GPUList[currentGPUIndex].minMemClkOffset/2, nv->GPUList[currentGPUIndex].maxMemClkOffset/2);
-        ui->memClkSlider->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
-        ui->memClkSpinBox->setValue(nv->GPUList[currentGPUIndex].memClkOffset/2);
+        ui->memClkSlider->setValue(nv->GPUList[currentGPUIndex].memClkOffset);
+        ui->memClkSpinBox->setValue(nv->GPUList[currentGPUIndex].memClkOffset);
     } else {
         ui->memClkSlider->setEnabled(false);
         ui->memClkSpinBox->setEnabled(false);
@@ -808,7 +808,6 @@ void MainWindow::loadProfileSettings()
 {
     QSettings settings("tuxclocker");
     currentProfile = settings.value("General/currentProfile").toString();
-    qDebug() << "current profile" << currentProfile;
     latestUUID = settings.value("General/latestUUID").toString();
     // Set the profile combo box selection to currentProfile
     for (int i=0; i<ui->profileComboBox->count(); i++) {
@@ -819,22 +818,17 @@ void MainWindow::loadProfileSettings()
     }
     settings.beginGroup(currentProfile);
     settings.beginGroup(latestUUID);
-
-    // Check for existance of the setting so zeroes don't get appended to curve point vectors
-    if (settings.contains("xpoints") && nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
-        QString xPointStr = "/bin/sh -c \"echo " + settings.value("xpoints").toString() + grepStringToInt;
-        QString yPointStr = "/bin/sh -c \"echo " + settings.value("ypoints").toString() + grepStringToInt;
-        QProcess process;
-        process.start(xPointStr);
-        process.waitForFinished(-1);
-        for (int i=0; i<process.size() +1; i++) {
-            xCurvePoints.append(process.readLine().toInt());
+    // Check if manual control is available and set the combo box accordingly
+    if (nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
+        xCurvePoints.clear();
+        yCurvePoints.clear();
+        int size = settings.beginReadArray("curvepoints");
+        for (int i=0; i<size; i++) {
+            settings.setArrayIndex(i);
+            xCurvePoints.append(settings.value("xpoints").toInt());
+            yCurvePoints.append(settings.value("ypoints").toInt());
         }
-        process.start(yPointStr);
-        process.waitForFinished(-1);
-        for (int i=0; i<process.size() +1; i++) {
-            yCurvePoints.append(process.readLine().toInt());
-        }
+        settings.endArray();
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
         QModelIndex customModeIndex = model->index(2, ui->fanModeComboBox->modelColumn());
         QStandardItem *customMode = model->itemFromIndex(customModeIndex);
@@ -869,9 +863,9 @@ void MainWindow::loadProfileSettings()
     }
     if (settings.contains("memoryClockOffset")) {
         latestMemClkOfs=settings.value("memoryClockOffset").toInt();
-
         ui->memClkSlider->setValue(latestMemClkOfs);
         ui->memClkSlider->setValue(latestMemClkOfs);
+        qDebug() << latestMemClkOfs << "is now memclkoffset";
     }
     if (settings.contains("fanControlMode")) {
         fanControlMode = settings.value("fanControlMode").toInt();
@@ -1029,7 +1023,6 @@ void MainWindow::on_applyButton_clicked()
     QString prevProfile = settings.value("currentProfile").toString();
     settings.setValue("currentProfile", currentProfile);
 
-
     applyGPUSettings();
     // Query the maximum offsets
     nv->queryGPUCurrentMaxClocks(currentGPUIndex);
@@ -1048,6 +1041,7 @@ void MainWindow::on_editFanCurveButton_pressed()
 void MainWindow::on_editProfile_closed()
 {
     // Clear the existing curve points and load the new ones
+    qDebug() << "dialog closed";
     xCurvePoints.clear();
     yCurvePoints.clear();
     loadProfileSettings();
