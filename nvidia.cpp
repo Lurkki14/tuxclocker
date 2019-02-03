@@ -171,17 +171,6 @@ void nvidia::queryGPUFeatures()
                                           &GPUList[i].totalVRAM);
         qDebug() << GPUList[i].totalVRAM << "vram";
     }
-
-    //queryGPUVoltage(0);
-    //queryGPUTemp(0);
-    //queryGPUFrequencies(0);
-    //queryGPUFanSpeed(0);
-    //queryGPUUsedVRAM(0);
-    //assignGPUFanSpeed(0, 60);
-    //assignGPUFreqOffset(0, 10);
-    //assignGPUMemClockOffset(0, 10);
-    //assignGPUVoltageOffset(0, 5000);
-    //assignGPUFanCtlMode(0, NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
 }
 void nvidia::queryGPUVoltage(int GPUIndex)
 {
@@ -241,7 +230,6 @@ void nvidia::queryGPUFanSpeed(int GPUIndex)
                                       NV_CTRL_THERMAL_COOLER_CURRENT_LEVEL,
                                       &GPUList[GPUIndex].fanSpeed);
 
-    //qDebug() << GPUList[GPUIndex].fanSpeed;
 }
 void nvidia::queryGPUUsedVRAM(int GPUIndex)
 {
