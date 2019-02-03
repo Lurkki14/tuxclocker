@@ -92,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->fanSlider->setDisabled(true);
         ui->fanSpinBox->setDisabled(true);
     }
+
     if (!nv->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
@@ -603,6 +604,8 @@ void MainWindow::fanSpeedUpdater()
 void MainWindow::tempUpdater()
 {
     nv->queryGPUTemp(currentGPUIndex);
+    qDebug() << "updating temp";
+    qDebug() << xCurvePoints << yCurvePoints;
     if (xCurvePoints.size() != 0) {
         generateFanPoint();
     }
@@ -789,6 +792,7 @@ void MainWindow::applyGPUSettings()
                 connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
                 ui->fanSlider->setEnabled(false);
                 ui->fanSpinBox->setEnabled(false);
+                fanUpdateTimer->start(2000);
                 settings.setValue("fanControlMode", 2);
             } else {
                 errorText.append("- Fan mode");
@@ -932,15 +936,15 @@ void MainWindow::generateFanPoint()
     // Calculate the value for fan speed based on temperature
     // First check if the fan speed should be y[0] or y[final]
     int index = 0;
-    if (temp <= xCurvePoints[0]) {
+    if (nv->GPUList[currentGPUIndex].temp <= xCurvePoints[0]) {
         targetFanSpeed = yCurvePoints[0];
     }
-    if (temp >= xCurvePoints[xCurvePoints.size()-1]) {
+    else if (nv->GPUList[currentGPUIndex].temp  >= xCurvePoints[xCurvePoints.size()-1]) {
         targetFanSpeed = yCurvePoints[yCurvePoints.size()-1];
     } else {
         // Get the index of the leftmost point of the interpolated interval by comparing it to temperature
         for (int i=0; i<xCurvePoints.size(); i++) {
-            if (temp >= xCurvePoints[i] && temp <= xCurvePoints[i+1]) {
+            if (nv->GPUList[currentGPUIndex].temp  >= xCurvePoints[i] && nv->GPUList[currentGPUIndex].temp <= xCurvePoints[i+1]) {
                 index = i;
                 break;
             }
@@ -949,10 +953,10 @@ void MainWindow::generateFanPoint()
         if (xCurvePoints[index] - xCurvePoints[index + 1] == 0) {
             targetFanSpeed = yCurvePoints[index+1];
         } else {
-            targetFanSpeed = (((yCurvePoints[index + 1] - yCurvePoints[index]) * (temp - xCurvePoints[index])) / (xCurvePoints[index + 1] - xCurvePoints[index])) + yCurvePoints[index];
+            targetFanSpeed = (((yCurvePoints[index + 1] - yCurvePoints[index]) * (nv->GPUList[currentGPUIndex].temp  - xCurvePoints[index])) / (xCurvePoints[index + 1] - xCurvePoints[index])) + yCurvePoints[index];
         }
     }
-
+    qDebug() << "target fan speed is" << targetFanSpeed;
     nv->assignGPUFanSpeed(currentGPUIndex, targetFanSpeed);
 }
 void MainWindow::on_frequencySlider_valueChanged(int value)
