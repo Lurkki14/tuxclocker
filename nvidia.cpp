@@ -4,7 +4,6 @@
 
 nvidia::nvidia(QObject *parent) : QObject(parent)
 {
-
 }
 bool nvidia::setupXNVCtrl()
 {
@@ -18,7 +17,6 @@ bool nvidia::setupXNVCtrl()
                                 event_basep,
                                 error_basep);
     qDebug() << ret;
-
     queryGPUCount();
     queryGPUNames();
     queryGPUUIDs();

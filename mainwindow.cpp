@@ -3,11 +3,10 @@
 #include "editprofile.h"
 #include "ui_editprofile.h"
 #include "newprofile.h"
-#include "monitor.h"
 #include "plotwidget.h"
 #include "nvidia.h"
+//#include "gputypes.h"
 #include <NVCtrl/NVCtrl.h>
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,8 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     tabHandler(ui->tabWidget->currentIndex());
 
     // Create persistent nvidia pointer
-    nvidia *nvd = new nvidia;
-    nv = nvd;
+    nv = new nvidia;
+    //gputypes *types;
+    //types = nv;
+
     nv->setupXNVCtrl();
     nv->setupNVML(currentGPUIndex);
     nv->queryGPUFeatures();

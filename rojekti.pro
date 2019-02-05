@@ -33,7 +33,8 @@ SOURCES += \
     editprofile.cpp \
     newprofile.cpp \
     plotwidget.cpp \
-    nvidia.cpp
+    nvidia.cpp \
+    gputypes.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     newprofile.h \
     plotwidget.h \
     nvidia.h \
-    nvml.h
+    nvml.h \
+    gputypes.h
 
 FORMS += \
         mainwindow.ui \

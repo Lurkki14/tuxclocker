@@ -3,11 +3,12 @@
 
 #include <QMainWindow>
 #include "editprofile.h"
-#include "monitor.h"
+//#include "monitor.h"
 #include <QProcess>
 #include <QList>
 #include <QByteArray>
 #include "nvidia.h"
+//#include "gputypes.h"
 //#include <NVCtrl/NVCtrl.h>
 
 namespace Ui {
@@ -158,6 +159,7 @@ private:
     QStringList UUIDList;
     QString latestUUID;
     nvidia *nv;
+    //gputypes *types;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);

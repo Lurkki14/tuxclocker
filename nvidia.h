@@ -5,14 +5,15 @@
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
 #include <QProcess>
-#include <nvml.h>
+#include "nvml.h"
+#include "gputypes.h"
 
-class nvidia : public QObject
+class nvidia : public QObject, public gputypes
 {
     Q_OBJECT
 public:
     explicit nvidia(QObject *parent = nullptr);
-
+    //gputypes *types;
     struct GPU
     {
         char *name;
@@ -61,7 +62,6 @@ private:
     Display *dpy;
     nvmlDevice_t *device;
 signals:
-
 public slots:
     bool setupXNVCtrl();
     bool setupNVML(int GPUIndex);
