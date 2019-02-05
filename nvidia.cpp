@@ -1,8 +1,9 @@
-#include "nvidia.h"
+//#include "nvidia.h"
+#include "gputypes.h"
 #include <X11/Xlib.h>
 #include "NVCtrl/NVCtrlLib.h"
 
-nvidia::nvidia(QObject *parent) : QObject(parent)
+nvidia::nvidia()
 {
 }
 bool nvidia::setupXNVCtrl()

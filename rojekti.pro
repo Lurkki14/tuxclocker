@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui x11extras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -42,9 +42,10 @@ HEADERS += \
     editprofile.h \
     newprofile.h \
     plotwidget.h \
-    nvidia.h \
+    #nvidia.h \
     nvml.h \
-    gputypes.h
+    gputypes.h \
+    #xlibvars.h
 
 FORMS += \
         mainwindow.ui \

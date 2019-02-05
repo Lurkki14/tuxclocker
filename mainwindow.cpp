@@ -4,8 +4,6 @@
 #include "ui_editprofile.h"
 #include "newprofile.h"
 #include "plotwidget.h"
-#include "nvidia.h"
-//#include "gputypes.h"
 #include <NVCtrl/NVCtrl.h>
 
 MainWindow::MainWindow(QWidget *parent) :

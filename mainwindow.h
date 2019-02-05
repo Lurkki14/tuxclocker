@@ -3,13 +3,10 @@
 
 #include <QMainWindow>
 #include "editprofile.h"
-//#include "monitor.h"
 #include <QProcess>
 #include <QList>
 #include <QByteArray>
-#include "nvidia.h"
-//#include "gputypes.h"
-//#include <NVCtrl/NVCtrl.h>
+#include "gputypes.h"
 
 namespace Ui {
 class MainWindow;
