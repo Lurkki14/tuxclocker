@@ -5,15 +5,19 @@
 #include <QVector>
 #include <QDebug>
 #include <QtX11Extras/QX11Info>
+#ifdef NVIDIA
 #include "nvml.h"
+#endif
 
 class gputypes : public QObject
 {
     Q_OBJECT
 public:
     gputypes();
+    enum Type{NV, AMD};
     struct GPU
     {
+        int gputype;
         char *name;
         char *uuid;
         bool overVoltAvailable = false;
@@ -56,11 +60,13 @@ public:
     QVector <GPU> GPUList;
 
     int gpuCount = 0;
+#ifdef NVIDIA
     Display *dpy;
     nvmlDevice_t *device;
+#endif
 
-    virtual bool setupXNVCtrl() = 0;
-    virtual bool setupNVML(int GPUIndex) = 0;
+    virtual bool setupGPU() = 0;
+    virtual bool setupGPUSecondary(int GPUIndex) = 0;
     virtual void queryGPUCount() = 0;
     virtual void queryGPUNames() = 0;
     virtual void queryGPUUIDs() = 0;
@@ -81,7 +87,7 @@ public:
     virtual void queryGPUPowerLimitAvailability(int GPUIndex) = 0;
 
     virtual bool assignGPUFanSpeed(int GPUIndex, int targetValue) = 0;
-    virtual bool assignGPUFanCtlMode(int GPUIndex, int targetValue) = 0;
+    virtual bool assignGPUFanCtlMode(int GPUIndex, bool targetStatus) = 0;
     virtual bool assignGPUFreqOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUMemClockOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUVoltageOffset(int GPUIndex, int targetValue) = 0;
@@ -91,65 +97,16 @@ protected:
 
 private:
 };
-
+#ifdef NVIDIA
 class nvidia : public gputypes
 {
     Q_OBJECT
 public:
-    //explicit nvidia(QObject *parent = nullptr);
     nvidia();
-    //gputypes *types;
-    struct GPU
-    {
-        char *name;
-        char *uuid;
-        bool overVoltAvailable = false;
-        bool overClockAvailable = false;
-        bool memOverClockAvailable = false;
-        bool powerLimitAvailable = false;
-        bool voltageReadable = false;
-        bool coreClkReadable = false;
-        bool memClkReadable = false;
-        bool manualFanCtrlAvailable = false;
-        int fanControlMode;
-        int maxVoltageOffset;
-        int minVoltageOffset;
-        int minCoreClkOffset;
-        int maxCoreClkOffset;
-        int minMemClkOffset;
-        int maxMemClkOffset;
-        uint maxCoreClk;
-        uint maxMemClk;
-
-        int voltageOffset;
-        int coreClkOffset;
-        int memClkOffset;
-
-        int coreFreq;
-        int memFreq;
-        int temp;
-        int voltage;
-        int fanSpeed;
-
-        double powerDraw;
-        uint coreUtil;
-        uint memUtil;
-        uint minPowerLim;
-        uint maxPowerLim;
-        uint powerLim;
-        int totalVRAM;
-        int usedVRAM;
-    };
-    QVector <GPU> GPUList;
-
-    int gpuCount = 0;
-private:
-    Display *dpy;
-    nvmlDevice_t *device;
 signals:
 public slots:
-    bool setupXNVCtrl();
-    bool setupNVML(int GPUIndex);
+    bool setupGPU();
+    bool setupGPUSecondary(int GPUIndex);
     void queryGPUCount();
     void queryGPUNames();
     void queryGPUUIDs();
@@ -171,7 +128,7 @@ public slots:
     void queryGPUPowerLimitAvailability(int GPUIndex);
 
     bool assignGPUFanSpeed(int GPUIndex, int targetValue);
-    bool assignGPUFanCtlMode(int GPUIndex, int targetValue);
+    bool assignGPUFanCtlMode(int GPUIndex, bool manual);
     bool assignGPUFreqOffset(int GPUIndex, int targetValue);
     bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
@@ -179,4 +136,5 @@ public slots:
     bool assignGPUPowerLimit(uint targetValue);
 private slots:
 };
+#endif
 #endif // GPUTYPES_H

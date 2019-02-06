@@ -1,3 +1,4 @@
+#ifdef NVIDIA
 /*
  * Copyright 1993-2018 NVIDIA Corporation.  All rights reserved.
  *
@@ -6276,6 +6277,8 @@ nvmlReturn_t DECLDIR nvmlGetBlacklistDeviceInfoByIndex(unsigned int index, nvmlB
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

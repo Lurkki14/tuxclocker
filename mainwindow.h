@@ -133,7 +133,6 @@ private slots:
     void on_editFanCurveButton_pressed();
 
     void on_editProfile_closed();
-    void applyFanMode();
     void enableFanUpdater();
     void setupMonitorTab();
     void updateMonitor();
@@ -153,10 +152,13 @@ private slots:
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
+    bool mouseOverPlot = false;
     QStringList UUIDList;
     QString latestUUID;
+#ifdef NVIDIA
     nvidia *nv;
-    //gputypes *types;
+#endif
+    gputypes *types;
 
     QTimer *resettimer = new QTimer(this);
     QTimer *fanUpdateTimer = new QTimer(this);

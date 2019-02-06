@@ -26,6 +26,9 @@ CONFIG += c++11
 CONFIG (release, debug|release) {
            DEFINES += QT_NO_DEBUG_OUTPUT
        }
+
+DEFINES += NVIDIA
+
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
@@ -64,3 +67,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
