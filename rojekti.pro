@@ -27,7 +27,8 @@ CONFIG (release, debug|release) {
            DEFINES += QT_NO_DEBUG_OUTPUT
        }
 
-DEFINES += NVIDIA
+#DEFINES += NVIDIA
+DEFINES += AMD
 
 SOURCES += \
         main.cpp \
@@ -37,7 +38,8 @@ SOURCES += \
     newprofile.cpp \
     plotwidget.cpp \
     nvidia.cpp \
-    gputypes.cpp
+    gputypes.cpp \
+    amd.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -58,7 +60,7 @@ FORMS += \
 INCLUDEPATH += "/usr/lib"
 INCLUDEPATH += $$(INCLUDEPATH)
 
-LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
+#LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

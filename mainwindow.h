@@ -158,6 +158,9 @@ private:
 #ifdef NVIDIA
     nvidia *nv;
 #endif
+#ifdef AMD
+    amd *amdptr;
+#endif
     gputypes *types;
 
     QTimer *resettimer = new QTimer(this);

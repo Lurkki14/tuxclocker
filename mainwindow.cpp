@@ -23,11 +23,15 @@ MainWindow::MainWindow(QWidget *parent) :
     nv = new nvidia;
     types = nv;
 #endif
+#ifdef AMD
+    amdptr = new amd;
+    types = amdptr;
+#endif
     // This is for libxnvctrl
     types->setupGPU();
     // This is for NVML
     types->setupGPUSecondary(currentGPUIndex);
-    types->queryGPUFeatures();
+    /*types->queryGPUFeatures();
     types->queryGPUFreqOffset(currentGPUIndex);
     types->queryGPUMemClkOffset(currentGPUIndex);
     types->queryGPUVoltageOffset(currentGPUIndex);
@@ -39,10 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i=0; i<types->gpuCount; i++) {
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].name);
     }
+    */
     loadProfileSettings();
     setupMonitorTab();
     setupGraphMonitorTab();
-
+    /*
     // Enable sliders according to GPU properties
     if (types->GPUList[currentGPUIndex].overClockAvailable) {
         ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].minCoreClkOffset, types->GPUList[currentGPUIndex].maxCoreClkOffset);
@@ -103,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
         manualMode->setEnabled(false);
         manualMode->setToolTip("Manual fan control is not available for current GPU");
     }
-
+    */
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
     fanUpdateTimer->start(2000);
 

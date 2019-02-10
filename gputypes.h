@@ -14,7 +14,7 @@ class gputypes : public QObject
     Q_OBJECT
 public:
     gputypes();
-    enum Type{NV, AMD};
+    //enum Type{NV, AMD};
     struct GPU
     {
         int gputype;
@@ -137,4 +137,46 @@ public slots:
 private slots:
 };
 #endif
+
+#ifdef AMD
+class amd : public gputypes
+{
+    Q_OBJECT
+public:
+    amd();
+signals:
+public slots:
+    bool setupGPU();
+    bool setupGPUSecondary(int GPUIndex);
+    void queryGPUCount();
+    void queryGPUNames();
+    void queryGPUUIDs();
+    void queryGPUFeatures();
+    void queryGPUVoltage(int GPUIndex);
+    void queryGPUTemp(int GPUIndex);
+    void queryGPUFrequencies(int GPUIndex);
+    void queryGPUFanSpeed(int GPUIndex);
+    void queryGPUUsedVRAM(int GPUIndex);
+    void queryGPUFreqOffset(int GPUIndex);
+    void queryGPUMemClkOffset(int GPUIndex);
+    void queryGPUVoltageOffset(int GPUIndex);
+
+    void queryGPUUtils(int GPUIndex);
+    void queryGPUPowerDraw(int GPUIndex);
+    void queryGPUPowerLimit(int GPUIndex);
+    void queryGPUPowerLimitLimits(int GPUIndex);
+    void queryGPUCurrentMaxClocks(int GPUIndex);
+    void queryGPUPowerLimitAvailability(int GPUIndex);
+
+    bool assignGPUFanSpeed(int GPUIndex, int targetValue);
+    bool assignGPUFanCtlMode(int GPUIndex, bool manual);
+    bool assignGPUFreqOffset(int GPUIndex, int targetValue);
+    bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
+    bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
+    // NVML functions know the GPU index already based on the dev object passed in setupNVML()
+    bool assignGPUPowerLimit(uint targetValue);
+private slots:
+};
+#endif
+
 #endif // GPUTYPES_H
