@@ -13,18 +13,16 @@ TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-
 - Change power limit
 - Fan mode selection
 - Custom fan curve
+- Provisional multi-GPU support
 - Profiles
 
-# Planned features
-- Multi-GPU support
+# Features in development
 - AMD support
-- Rewrite nvidia controlling using libxnvctrl
 
 # Requirements
-
 - nvidia-smi
 - nvidia-settings
-- Qt libraries
+- Qt 5 libraries
 - Coolbits set to the value you want (31 for all functionality)
 
 # Installation
