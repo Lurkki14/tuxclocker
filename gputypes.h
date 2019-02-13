@@ -4,9 +4,19 @@
 #include <QObject>
 #include <QVector>
 #include <QDebug>
+#include <QDir>
 #include <QtX11Extras/QX11Info>
 #ifdef NVIDIA
 #include "nvml.h"
+#endif
+
+#ifdef AMD
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <libdrm/amdgpu_drm.h>
+#include <libdrm/amdgpu.h>
+#include <xf86drm.h>
+#include <xf86drmMode.h>
 #endif
 
 class gputypes : public QObject
@@ -14,7 +24,7 @@ class gputypes : public QObject
     Q_OBJECT
 public:
     gputypes();
-    //enum Type{NV, AMD};
+    enum Type{NV, AMDGPU};
     struct GPU
     {
         int gputype;
@@ -56,6 +66,10 @@ public:
         uint powerLim;
         int totalVRAM;
         int usedVRAM;
+
+        // AMD only:
+        // GPU index in the filesystem eg. card0
+        int fsindex;
     };
     QVector <GPU> GPUList;
 
@@ -63,6 +77,10 @@ public:
 #ifdef NVIDIA
     Display *dpy;
     nvmlDevice_t *device;
+#endif
+
+#ifdef AMD
+    amdgpu_device_handle *dev;
 #endif
 
     virtual bool setupGPU() = 0;

@@ -59,8 +59,10 @@ FORMS += \
 
 INCLUDEPATH += "/usr/lib"
 INCLUDEPATH += $$(INCLUDEPATH)
+INCLUDEPATH += "/usr/include/libdrm"
 
 #LIBS += -lXext -lXNVCtrl -lX11 -lnvidia-ml
+LIBS += -ldrm -ldrm_amdgpu
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
