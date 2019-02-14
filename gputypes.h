@@ -70,6 +70,8 @@ public:
         // AMD only:
         // GPU index in the filesystem eg. card0
         int fsindex;
+        // name of the folder in /sys/class/drm/card(n)/device/hwmon
+        QString hwmonpath;
     };
     QVector <GPU> GPUList;
 
