@@ -17,6 +17,7 @@
 #include <libdrm/amdgpu.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+#include <QRegularExpressionMatchIterator>
 #endif
 
 class gputypes : public QObject
@@ -67,11 +68,14 @@ public:
         int totalVRAM;
         int usedVRAM;
 
+#ifdef AMD
         // AMD only:
         // GPU index in the filesystem eg. card0
         int fsindex;
         // name of the folder in /sys/class/drm/card(n)/device/hwmon
         QString hwmonpath;
+        amdgpu_device_handle *dev;
+#endif
     };
     QVector <GPU> GPUList;
 
@@ -81,9 +85,7 @@ public:
     nvmlDevice_t *device;
 #endif
 
-#ifdef AMD
-    amdgpu_device_handle *dev;
-#endif
+
 
     virtual bool setupGPU() = 0;
     virtual bool setupGPUSecondary(int GPUIndex) = 0;

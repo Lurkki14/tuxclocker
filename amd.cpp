@@ -28,8 +28,7 @@ bool amd::setupGPU()
             uint32_t major = 0;
             uint32_t minor = 0;
             amdgpu_device_handle handle;
-            dev = &handle;
-            int ret = amdgpu_device_initialize(fd, &major, &minor, dev);
+            int ret = amdgpu_device_initialize(fd, &major, &minor, &handle);
             qDebug() << major;
             if (ret > -1) {
                 // Create a gpu object with the correct paremeters
@@ -37,7 +36,7 @@ bool amd::setupGPU()
                 gpu.fsindex = i;
                 gpu.gputype = Type::AMDGPU;
                 // Get the hwmon folder name
-                QString monpath = "/sys/class/drm/card0/device/hwmon";
+                QString monpath = "/sys/class/drm/card"+QString::number(i)+"/device/hwmon";
                 QDir mondir(monpath);
                 qDebug() << mondir.entryList() << "mondir";
                 QStringList list = mondir.entryList();
@@ -50,11 +49,13 @@ bool amd::setupGPU()
                     }
                 }
 
-                const char *name = amdgpu_get_marketing_name(*dev);
+                const char *name = amdgpu_get_marketing_name(handle);
                 char tempname[64];
                 strcpy(tempname, name);
                 gpu.name = tempname;
+                gpu.dev = &handle;
                 qDebug() << gpu.name;
+                gpuCount++;
                 GPUList.append(gpu);
 
                 retb = true;
@@ -79,17 +80,39 @@ void amd::queryGPUNames()
     /*for (int i=0; i<GPUList.size(); i++) {
         if (GPUList[i].gputype == Type::AMDGPU) {
             const char *name;
-            name = amdgpu_get_marketing_name(*dev);
+            name = amdgpu_get_marketing_name(*GPUList[GPUIndex].dev);
             //strcpy(GPUList[i].name, name);
             qDebug() << name;
         }
     }*/
 }
 void amd::queryGPUUIDs(){}
-void amd::queryGPUFeatures(){}
+void amd::queryGPUFeatures()
+{
+    // Read the pp_od_clk_voltage file and parse output
+    QRegularExpression numexp("\\d+\\d");
+    int type = 0;
+    int breakcount = 0;
+    for (int i=0; i<gpuCount; i++) {
+        QString path;
+        QString line;
+        if (GPUList[i].gputype == Type::AMDGPU) {
+            path = "/sys/class/drm/card"+QString::number(GPUList[i].fsindex)+"/device/pp_od_clk_voltage";
+            QFile tablefile(path);
+            bool ret = tablefile.open(QFile::ReadOnly | QFile::Text);
+            if (ret) {
+                QTextStream str(&tablefile);
+                while (!str.atEnd() && breakcount < 30) {
+                    breakcount++;
+                }
+                tablefile.close();
+            }
+        }
+    }
+}
 void amd::queryGPUVoltage(int GPUIndex)
 {
-    int ret = amdgpu_query_sensor_info(*dev,
+    int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_VDDGFX,
                                        sizeof (GPUList[GPUIndex].voltage),
                                        &GPUList[GPUIndex].voltage);
@@ -97,7 +120,7 @@ void amd::queryGPUVoltage(int GPUIndex)
 }
 void amd::queryGPUTemp(int GPUIndex)
 {
-    int ret = amdgpu_query_sensor_info(*dev,
+    int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                              AMDGPU_INFO_SENSOR_GPU_TEMP,
                              sizeof (GPUList[GPUIndex].temp),
                              &GPUList[GPUIndex].temp);
@@ -105,13 +128,13 @@ void amd::queryGPUTemp(int GPUIndex)
 }
 void amd::queryGPUFrequencies(int GPUIndex)
 {
-    int ret = amdgpu_query_sensor_info(*dev,
+    int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GFX_SCLK,
                                        sizeof (GPUList[GPUIndex].coreFreq),
                                        &GPUList[GPUIndex].coreFreq);
     if (ret < 0) qDebug("Failed to query GPU core clock");
 
-    ret = amdgpu_query_sensor_info(*dev,
+    ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                    AMDGPU_INFO_SENSOR_GFX_MCLK,
                                    sizeof (GPUList[GPUIndex].memFreq),
                                    &GPUList[GPUIndex].memFreq);
@@ -136,7 +159,7 @@ void amd::queryGPUVoltageOffset(int GPUIndex){}
 
 void amd::queryGPUUtils(int GPUIndex)
 {
-    int ret = amdgpu_query_sensor_info(*dev,
+    int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GPU_LOAD,
                                        sizeof (GPUList[GPUIndex].coreUtil),
                                        &GPUList[GPUIndex].coreUtil);
@@ -144,7 +167,7 @@ void amd::queryGPUUtils(int GPUIndex)
 }
 void amd::queryGPUPowerDraw(int GPUIndex)
 {
-    int ret = amdgpu_query_sensor_info(*dev,
+    int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
                                        sizeof (GPUList[GPUIndex].powerDraw),
                                        &GPUList[GPUIndex].powerDraw);
@@ -182,7 +205,7 @@ void amd::queryGPUPowerLimitLimits(int GPUIndex)
 void amd::queryGPUCurrentMaxClocks(int GPUIndex)
 {
     amdgpu_gpu_info info;
-    int ret = amdgpu_query_gpu_info(*dev, &info);
+    int ret = amdgpu_query_gpu_info(*GPUList[GPUIndex].dev, &info);
     if (ret < 0) qDebug("Failed to query GPU maximum clocks");
     else {
         uint clock = static_cast<uint>(info.max_engine_clk);
