@@ -115,10 +115,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
     ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
 
-    ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()-1]);
+    /*ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()-1]);
     ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].corecloks[types->GPUList[currentGPUIndex].corecloks.size()-1]);
     ui->powerLimSlider->setValue(types->GPUList[currentGPUIndex].powerLim);
-    ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].corevolts[types->GPUList[currentGPUIndex].corevolts.size()-1]);
+    ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].corevolts[types->GPUList[currentGPUIndex].corevolts.size()-1]);*/
 
     if (!types->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
