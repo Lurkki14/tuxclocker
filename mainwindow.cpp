@@ -20,7 +20,6 @@ along with TuxClocker.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "editprofile.h"
 #include "ui_editprofile.h"
 #include "newprofile.h"
-#include "monitor.h"
 #include "plotwidget.h"
 #include "nvidia.h"
 #include <NVCtrl/NVCtrl.h>

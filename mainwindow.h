@@ -20,7 +20,6 @@ along with TuxClocker.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include <QMainWindow>
 #include "editprofile.h"
-#include "monitor.h"
 #include <QProcess>
 #include <QList>
 #include <QByteArray>
