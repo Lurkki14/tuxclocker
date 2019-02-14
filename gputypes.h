@@ -75,6 +75,14 @@ public:
         // name of the folder in /sys/class/drm/card(n)/device/hwmon
         QString hwmonpath;
         amdgpu_device_handle *dev;
+        // Pstate vectors
+        QVector <int> memvolts, corevolts, memclocks, corecloks;
+        int maxVoltageLimit;
+        int minVoltageLimit;
+        int maxCoreClkLimit;
+        int minCoreClkLimit;
+        int maxMemClkLimit;
+        int minMemClkLimit;
 #endif
     };
     QVector <GPU> GPUList;

@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     */
 
     // Enable sliders according to GPU properties
+    /*
     if (types->GPUList[currentGPUIndex].overClockAvailable) {
         ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].minCoreClkOffset, types->GPUList[currentGPUIndex].maxCoreClkOffset);
         ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].minCoreClkOffset, types->GPUList[currentGPUIndex].maxCoreClkOffset);
@@ -99,7 +100,25 @@ MainWindow::MainWindow(QWidget *parent) :
     if (types->GPUList[currentGPUIndex].fanControlMode !=1) {
         ui->fanSlider->setDisabled(true);
         ui->fanSpinBox->setDisabled(true);
-    }
+    }*/
+
+    // Testing code
+    ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].minVoltageLimit, types->GPUList[currentGPUIndex].maxVoltageOffset);
+    ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].minVoltageLimit, types->GPUList[currentGPUIndex].maxVoltageOffset);
+
+    ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].minPowerLim, types->GPUList[currentGPUIndex].maxPowerLim);
+    ui->powerLimSpinBox->setRange(types->GPUList[currentGPUIndex].minPowerLim, types->GPUList[currentGPUIndex].maxPowerLim);
+
+    ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].minCoreClkLimit, types->GPUList[currentGPUIndex].maxCoreClkLimit);
+    ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].minCoreClkLimit, types->GPUList[currentGPUIndex].maxCoreClkLimit);
+
+    ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
+    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
+
+    ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()]);
+    ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].corecloks[types->GPUList[currentGPUIndex].corecloks.size()]);
+    ui->powerLimSlider->setValue(types->GPUList[currentGPUIndex].powerLim);
+    ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].corevolts[types->GPUList[currentGPUIndex].corevolts.size()]);
 
     if (!types->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option

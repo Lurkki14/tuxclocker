@@ -92,6 +92,7 @@ void amd::queryGPUFeatures()
     // Read the pp_od_clk_voltage file and parse output
     QRegularExpression numexp("\\d+\\d");
     int type = 0;
+    int column = 0;
     int breakcount = 0;
     for (int i=0; i<gpuCount; i++) {
         QString path;
@@ -103,6 +104,59 @@ void amd::queryGPUFeatures()
             if (ret) {
                 QTextStream str(&tablefile);
                 while (!str.atEnd() && breakcount < 30) {
+                    line = str.readLine();
+                    if (line.contains("OD_SCLK")) type = 1;
+                    if (line.contains("OD_MCLK")) type = 2;
+                    if (line.contains("OD_RANGE")) type = 3;
+                    QRegularExpressionMatchIterator iter = numexp.globalMatch(line);
+                    // Read all matches for the line
+                    while  (iter.hasNext()) {
+                        QRegularExpressionMatch nummatch = iter.next();
+                        QString capline = nummatch.captured();
+                        int num = capline.toInt();
+
+                        if (type == 1) {
+                            if (column == 0) {
+                                GPUList[i].corecloks.append(num);
+                            } else {
+                                GPUList[i].corevolts.append(num);
+                            }
+                        }
+
+                        if (type == 2) {
+                            if (column == 0) {
+                                GPUList[i].memclocks.append(num);
+                            } else {
+                                GPUList[i].memvolts.append(num);
+                            }
+                        }
+
+                        if (type == 3) {
+                            if (line.contains("sclk", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minCoreClkLimit = num;
+                                } else {
+                                    GPUList[i].maxCoreClkLimit = num;
+                                }
+                            }
+                            if (line.contains("mclk", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minMemClkLimit = num;
+                                } else {
+                                    GPUList[i].maxMemClkLimit = num;
+                                }
+                            }
+                            if (line.contains("vdd", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minVoltageLimit = num;
+                                } else {
+                                    GPUList[i].maxVoltageLimit = num;
+                                }
+                            }
+                        }
+                        column++;
+                    }
+                    column = 0;
                     breakcount++;
                 }
                 tablefile.close();
