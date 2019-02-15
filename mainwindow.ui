@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>507</width>
-    <height>672</height>
+    <width>517</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -173,6 +173,13 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="amdPstateButton">
+          <property name="text">
+           <string>Edit Pstates</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="monitorTab">
@@ -216,7 +223,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>507</width>
+     <width>517</width>
      <height>28</height>
     </rect>
    </property>

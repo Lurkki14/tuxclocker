@@ -53,6 +53,7 @@ bool amd::setupGPU()
                 char tempname[64];
                 strcpy(tempname, name);
                 gpu.name = tempname;
+                gpu.displayName = QString::fromUtf8(name);
                 gpu.dev = &handle;
                 qDebug() << gpu.name;
                 gpuCount++;
@@ -72,6 +73,20 @@ bool amd::setupGPU()
         queryGPUPowerLimitLimits(0);
     }
     return retb;
+}
+void amd::calculateUIProperties(int GPUIndex)
+{
+    GPUList[GPUIndex].voltageSliderMin = GPUList[GPUIndex].minVoltageLimit;
+    GPUList[GPUIndex].voltageSliderMax = GPUList[GPUIndex].maxVoltageLimit;
+
+    GPUList[GPUIndex].coreClkSliderMin = GPUList[GPUIndex].minCoreClkLimit;
+    GPUList[GPUIndex].coreClkSliderMax = GPUList[GPUIndex].maxCoreClkLimit;
+
+    GPUList[GPUIndex].memClkSliderMin = GPUList[GPUIndex].minMemClkLimit;
+    GPUList[GPUIndex].memClkSliderMax = GPUList[GPUIndex].maxMemClkLimit;
+
+    GPUList[GPUIndex].powerLimSliderMax = static_cast<int>(GPUList[GPUIndex].maxPowerLim);
+    GPUList[GPUIndex].powerLimSliderMin = static_cast<int>(GPUList[GPUIndex].minPowerLim);
 }
 bool amd::setupGPUSecondary(int GPUIndex){return  true;}
 void amd::queryGPUCount(){}

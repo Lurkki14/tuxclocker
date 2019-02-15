@@ -28,6 +28,17 @@ public:
     enum Type{NV, AMDGPU};
     struct GPU
     {
+        // UI variables
+        int powerLimSliderMin;
+        int powerLimSliderMax;
+        int memClkSliderMin;
+        int memClkSliderMax;
+        int coreClkSliderMin;
+        int coreClkSliderMax;
+        int voltageSliderMax;
+        int voltageSliderMin;
+        QString displayName;
+
         int gputype;
         char *name;
         char *uuid;
@@ -93,7 +104,7 @@ public:
     nvmlDevice_t *device;
 #endif
 
-
+    virtual void calculateUIProperties(int GPUIndex) = 0;
 
     virtual bool setupGPU() = 0;
     virtual bool setupGPUSecondary(int GPUIndex) = 0;
@@ -135,6 +146,8 @@ public:
     nvidia();
 signals:
 public slots:
+    void calculateUIProperties();
+
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
     void queryGPUCount();
@@ -176,6 +189,7 @@ public:
     amd();
 signals:
 public slots:
+    void calculateUIProperties(int GPUIndex);
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
     void queryGPUCount();

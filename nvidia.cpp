@@ -6,6 +6,10 @@
 nvidia::nvidia()
 {
 }
+void nvidia::calculateUIProperties()
+{
+
+}
 bool nvidia::setupGPU()
 {
     // Open the x-server connection and check if the extension exists

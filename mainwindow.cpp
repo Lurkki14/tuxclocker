@@ -39,9 +39,12 @@ MainWindow::MainWindow(QWidget *parent) :
     types->queryGPUPowerLimitAvailability(currentGPUIndex);
     types->queryGPUPowerLimitLimits(currentGPUIndex);
     types->queryGPUCurrentMaxClocks(currentGPUIndex);
+    if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
+        types->calculateUIProperties(currentGPUIndex);
+    }
     // Populate the GPU combo box
     for (int i=0; i<types->gpuCount; i++) {
-        ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].name);
+        ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].displayName);
     }
     /*
     loadProfileSettings();
@@ -103,17 +106,18 @@ MainWindow::MainWindow(QWidget *parent) :
     }*/
 
     // Testing code
-    ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].minVoltageLimit, types->GPUList[currentGPUIndex].maxVoltageOffset);
-    ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].minVoltageLimit, types->GPUList[currentGPUIndex].maxVoltageOffset);
 
-    ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].minPowerLim, types->GPUList[currentGPUIndex].maxPowerLim);
-    ui->powerLimSpinBox->setRange(types->GPUList[currentGPUIndex].minPowerLim, types->GPUList[currentGPUIndex].maxPowerLim);
+    ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
+    ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
 
-    ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].minCoreClkLimit, types->GPUList[currentGPUIndex].maxCoreClkLimit);
-    ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].minCoreClkLimit, types->GPUList[currentGPUIndex].maxCoreClkLimit);
+    ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
+    ui->powerLimSpinBox->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
 
-    ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
-    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].minMemClkLimit, types->GPUList[currentGPUIndex].maxMemClkLimit);
+    ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMax);
+    ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMin);
+
+    ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
+    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
 
     /*ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()-1]);
     ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].corecloks[types->GPUList[currentGPUIndex].corecloks.size()-1]);
@@ -1101,4 +1105,11 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     // Update maximum clocks
     curmaxmemclk->setText(1, QString::number(types->GPUList[index].maxMemClk) + "MHz");
     curmaxclk->setText(1, QString::number(types->GPUList[index].maxCoreClk) + "MHz");
+}
+
+void MainWindow::on_amdPstateButton_pressed()
+{
+    amdPstateEditor *ps = new amdPstateEditor;
+    ps->setModal(false);
+    ps->exec();
 }

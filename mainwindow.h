@@ -7,6 +7,9 @@
 #include <QList>
 #include <QByteArray>
 #include "gputypes.h"
+#ifdef AMD
+#include "amdpstateeditor.h"
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -148,6 +151,8 @@ private slots:
     void on_actionManage_profiles_triggered();
 
     void on_GPUComboBox_currentIndexChanged(int index);
+
+    void on_amdPstateButton_pressed();
 
 private:
     Ui::MainWindow *ui;
