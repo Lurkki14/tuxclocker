@@ -6,9 +6,9 @@ amdPstateEditor::amdPstateEditor(QWidget *parent) :
     ui(new Ui::amdPstateEditor)
 {
     ui->setupUi(this);
-    generateUI();
     amdptr = new amd;
-    types = amd;
+    types = amdptr;
+    generateUI();
 
 }
 
