@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QSlider>
 #include <QHBoxLayout>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QLabel>
 #include "gputypes.h"
 
 namespace Ui {
@@ -21,6 +24,7 @@ public:
 
 private:
     Ui::amdPstateEditor *ui;
+    gputypes *types;
     void generateUI();
 };
 
