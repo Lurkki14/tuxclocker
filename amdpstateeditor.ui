@@ -13,20 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QWidget" name="coreClkPstateView" native="true">
-     <widget class="QWidget" name="memClkPstateView" native="true">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>320</y>
-        <width>571</width>
-        <height>201</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
+    <widget class="QWidget" name="centralWidget" native="true"/>
    </item>
   </layout>
  </widget>

@@ -25,6 +25,7 @@ public:
 private:
     Ui::amdPstateEditor *ui;
     gputypes *types;
+    amd *amdptr;
     void generateUI();
 };
 

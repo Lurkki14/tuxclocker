@@ -9,6 +9,7 @@ amdPstateEditor::amdPstateEditor(QWidget *parent) :
     generateUI();
     amdptr = new amd;
     types = amd;
+
 }
 
 amdPstateEditor::~amdPstateEditor()
@@ -21,7 +22,7 @@ void amdPstateEditor::generateUI()
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
-    for (int i=0; i<types->GPUList[0].coreclocks.size(); i++) {
+    for (int i=0; i<types->GPUList[0].corecloks.size(); i++) {
         QGridLayout *glo = new QGridLayout;
         QLabel *lb = new QLabel;
         QLabel *lb1 = new QLabel;
@@ -71,7 +72,7 @@ void amdPstateEditor::generateUI()
     lower->setLayout(ulo);
     upper->setLayout(llo);
 
-    QVBoxLayout *mainlo = new QVBoxLayout;
+    QVBoxLayout *mainlo = new QVBoxLayout(this);
     mainlo->addWidget(upper);
     mainlo->addWidget(lower);
     ui->centralWidget->setLayout(mainlo);
