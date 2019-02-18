@@ -26,8 +26,8 @@ public slots:
 
 private:
     Ui::amdPstateEditor *ui;
-    gputypes *types;
-    amd *amdptr;
+    //gputypes *types;
+    //amd *amdptr;
 };
 
 #endif // AMDPSTATEEDITOR_H
