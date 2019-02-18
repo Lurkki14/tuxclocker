@@ -35,9 +35,9 @@ MainWindow::MainWindow(QWidget *parent) :
     types->queryGPUFreqOffset(currentGPUIndex);
     types->queryGPUMemClkOffset(currentGPUIndex);
     types->queryGPUVoltageOffset(currentGPUIndex);
-    types->queryGPUPowerLimit(currentGPUIndex);
-    types->queryGPUPowerLimitAvailability(currentGPUIndex);
-    types->queryGPUPowerLimitLimits(currentGPUIndex);
+    //types->queryGPUPowerLimit(currentGPUIndex);
+    //types->queryGPUPowerLimitAvailability(currentGPUIndex);
+    //types->queryGPUPowerLimitLimits(currentGPUIndex);
     types->queryGPUCurrentMaxClocks(currentGPUIndex);
     if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
         types->calculateUIProperties(currentGPUIndex);
@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
-    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+    //connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
 }
 
 MainWindow::~MainWindow()
