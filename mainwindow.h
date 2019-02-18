@@ -149,6 +149,8 @@ private slots:
 
     void on_GPUComboBox_currentIndexChanged(int index);
 
+    void on_pstateButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;

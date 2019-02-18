@@ -4,6 +4,7 @@
 #include "ui_editprofile.h"
 #include "newprofile.h"
 #include "plotwidget.h"
+#include "amdpstateeditor.h"
 #ifdef NVIDIA
 #include <NVCtrl/NVCtrl.h>
 #endif
@@ -1101,4 +1102,11 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     // Update maximum clocks
     curmaxmemclk->setText(1, QString::number(types->GPUList[index].maxMemClk) + "MHz");
     curmaxclk->setText(1, QString::number(types->GPUList[index].maxCoreClk) + "MHz");
+}
+
+void MainWindow::on_pstateButton_clicked()
+{
+    amdPstateEditor *ps = new amdPstateEditor;
+    ps->generateUI(types);
+    ps->exec();
 }

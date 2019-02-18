@@ -173,6 +173,13 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="pstateButton">
+          <property name="text">
+           <string>Edit Pstates</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="monitorTab">

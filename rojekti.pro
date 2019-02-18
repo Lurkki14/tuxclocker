@@ -39,7 +39,8 @@ SOURCES += \
     plotwidget.cpp \
     nvidia.cpp \
     gputypes.cpp \
-    amd.cpp
+    amd.cpp \
+    amdpstateeditor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,11 +52,13 @@ HEADERS += \
     nvml.h \
     gputypes.h \
     #xlibvars.h
+    amdpstateeditor.h
 
 FORMS += \
         mainwindow.ui \
     editprofile.ui \
-    newprofile.ui
+    newprofile.ui \
+    amdpstateeditor.ui
 
 INCLUDEPATH += "/usr/lib"
 INCLUDEPATH += $$(INCLUDEPATH)
