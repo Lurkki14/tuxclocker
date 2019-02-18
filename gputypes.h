@@ -87,7 +87,7 @@ public:
         QString hwmonpath;
         amdgpu_device_handle *dev;
         // Pstate vectors
-        QVector <int> memvolts, corevolts, memclocks, corecloks;
+        QVector <int> memvolts, corevolts, memclocks, coreclocks;
         int maxVoltageLimit;
         int minVoltageLimit;
         int maxCoreClkLimit;

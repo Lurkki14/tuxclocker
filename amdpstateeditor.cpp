@@ -18,52 +18,87 @@ void amdPstateEditor::generateUI(gputypes *types)
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
-    for (int i=0; i<types->GPUList[0].corecloks.size(); i++) {
+    for (int i=0; i<types->GPUList[0].coreclocks.size(); i++) {
+        pstate pstate;
         QGridLayout *glo = new QGridLayout;
-        QLabel *lb = new QLabel;
-        QLabel *lb1 = new QLabel;
-        QLabel *lb2 = new QLabel;
-        lb->setText("mV");
-        lb1->setText("MHz");
-        lb2->setText("Core pstate "+QString::number(i));
-        QSlider *sl = new QSlider;
-        QSlider *sl1 = new QSlider;
-        QSpinBox *sp = new QSpinBox;
-        QSpinBox *sp1 = new QSpinBox;
-        glo->addWidget(lb2);
-        glo->addWidget(lb1, 1, 0);
-        glo->addWidget(lb, 1, 1);
-        glo->addWidget(sl, 2, 0);
-        glo->addWidget(sl1, 2, 1);
-        glo->addWidget(sp, 3, 0);
-        glo->addWidget(sp1, 3, 1);
-        QWidget *slowdg = new QWidget;
-        slowdg->setLayout(glo);
-        llo->addWidget(slowdg);
+        QLabel *voltlabel = new QLabel;
+        QLabel *freqlabel = new QLabel;
+        QLabel *pstatelabel = new QLabel;
+        voltlabel->setText("mV");
+        freqlabel->setText("MHz");
+        pstatelabel->setText("Core pstate "+QString::number(i));
+        QSlider *freqslider = new QSlider;
+        QSlider *voltslider = new QSlider;
+        QSpinBox *freqspinbox = new QSpinBox;
+        QSpinBox *voltspinbox = new QSpinBox;
+        connect(freqslider, SIGNAL(valueChanged(int value)), SLOT(detectIndex()));
+
+        freqslider->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
+        freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
+
+        voltslider->setRange(types->GPUList[0].corevolts[0], types->GPUList[0].corevolts[types->GPUList[0].corevolts.size()-1]);
+        voltspinbox->setRange(types->GPUList[0].corevolts[0], types->GPUList[0].corevolts[types->GPUList[0].corevolts.size()-1]);
+
+        voltspinbox->setValue(types->GPUList[0].corevolts[i]);
+        freqspinbox->setValue(types->GPUList[0].coreclocks[i]);
+
+        glo->addWidget(pstatelabel);
+        glo->addWidget(freqlabel, 1, 0);
+        glo->addWidget(voltlabel, 1, 1);
+        glo->addWidget(freqslider, 2, 0);
+        glo->addWidget(voltslider, 2, 1);
+        glo->addWidget(freqspinbox, 3, 0);
+        glo->addWidget(voltspinbox, 3, 1);
+        QWidget *freqsliderowdg = new QWidget;
+        freqsliderowdg->setLayout(glo);
+        llo->addWidget(freqsliderowdg);
+
+        pstate.voltslider = voltslider;
+        pstate.freqslider = freqslider;
+        pstate.voltspinbox = voltspinbox;
+        pstate.freqspinbox = freqspinbox;
+        pstates.append(pstate);
     }
 
     for (int i=0; i<types->GPUList[0].memclocks.size(); i++) {
+        pstate pstate;
         QGridLayout *glo = new QGridLayout;
-        QLabel *lb = new QLabel;
-        QLabel *lb1 = new QLabel;
-        QLabel *lb2 = new QLabel;
-        lb->setText("mV");
-        lb1->setText("MHz");
-        lb2->setText("Memory pstate "+QString::number(i));
-        QSlider *sl = new QSlider;
-        QSlider *sl1 = new QSlider;
-        QSpinBox *sp = new QSpinBox;
-        QSpinBox *sp1 = new QSpinBox;
-        glo->addWidget(lb2);
-        glo->addWidget(lb1, 1, 0);
-        glo->addWidget(lb, 1, 1);
-        glo->addWidget(sl, 2, 0);
-        glo->addWidget(sl1, 2, 1);
-        glo->addWidget(sp, 3, 0);
-        glo->addWidget(sp1, 3, 1);
-        QWidget *slowdg = new QWidget;
-        slowdg->setLayout(glo);
-        ulo->addWidget(slowdg);
+        QLabel *voltlabel = new QLabel;
+        QLabel *freqlabel = new QLabel;
+        QLabel *pstatelabel = new QLabel;
+        voltlabel->setText("mV");
+        freqlabel->setText("MHz");
+        pstatelabel->setText("Memory pstate "+QString::number(i));
+        QSlider *freqslider = new QSlider;
+        QSlider *voltslider = new QSlider;
+        QSpinBox *freqspinbox = new QSpinBox;
+        QSpinBox *voltspinbox = new QSpinBox;
+
+        freqslider->setRange(types->GPUList[0].memclocks[0], types->GPUList[0].memclocks[types->GPUList[0].memclocks.size()-1]);
+        freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].memclocks.size()-1]);
+
+        voltslider->setRange(types->GPUList[0].memvolts[0], types->GPUList[0].memvolts[types->GPUList[0].memvolts.size()-1]);
+        voltspinbox->setRange(types->GPUList[0].memvolts[0], types->GPUList[0].memvolts[types->GPUList[0].memvolts.size()-1]);
+
+        voltspinbox->setValue(types->GPUList[0].memvolts[i]);
+        freqspinbox->setValue(types->GPUList[0].memclocks[i]);
+
+        glo->addWidget(pstatelabel);
+        glo->addWidget(freqlabel, 1, 0);
+        glo->addWidget(voltlabel, 1, 1);
+        glo->addWidget(freqslider, 2, 0);
+        glo->addWidget(voltslider, 2, 1);
+        glo->addWidget(freqspinbox, 3, 0);
+        glo->addWidget(voltspinbox, 3, 1);
+        QWidget *freqsliderowdg = new QWidget;
+        freqsliderowdg->setLayout(glo);
+        ulo->addWidget(freqsliderowdg);
+
+        pstate.voltslider = voltslider;
+        pstate.freqslider = freqslider;
+        pstate.voltspinbox = voltspinbox;
+        pstate.freqspinbox = freqspinbox;
+        pstates.append(pstate);
     }
     lower->setLayout(ulo);
     upper->setLayout(llo);
@@ -72,4 +107,12 @@ void amdPstateEditor::generateUI(gputypes *types)
     mainlo->addWidget(upper);
     mainlo->addWidget(lower);
     ui->centralWidget->setLayout(mainlo);
+}
+void amdPstateEditor::detectIndex()
+{
+    for (int i=0; i<pstates.size(); i++) {
+        if (pstates[i].freqslider->isSliderDown()) {
+            qDebug() << "slider" << i << "is active";
+        }
+    }
 }

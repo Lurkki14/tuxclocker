@@ -22,9 +22,17 @@ public:
     explicit amdPstateEditor(QWidget *parent = nullptr);
     ~amdPstateEditor();
     void generateUI(gputypes *types);
+    void detectIndex();
 
 private:
     Ui::amdPstateEditor *ui;
+    struct pstate {
+        QSlider *voltslider;
+        QSlider *freqslider;
+        QSpinBox *voltspinbox;
+        QSpinBox *freqspinbox;
+    };
+    QVector <pstate> pstates;
 };
 
 #endif // AMDPSTATEEDITOR_H

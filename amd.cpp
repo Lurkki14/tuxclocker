@@ -132,7 +132,7 @@ void amd::queryGPUFeatures()
 
                         if (type == 1) {
                             if (column == 0) {
-                                GPUList[i].corecloks.append(num);
+                                GPUList[i].coreclocks.append(num);
                             } else {
                                 GPUList[i].corevolts.append(num);
                             }
