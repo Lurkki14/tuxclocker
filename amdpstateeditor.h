@@ -21,12 +21,13 @@ class amdPstateEditor : public QDialog
 public:
     explicit amdPstateEditor(QWidget *parent = nullptr);
     ~amdPstateEditor();
+public slots:
+    void generateUI(gputypes *types);
 
 private:
     Ui::amdPstateEditor *ui;
     gputypes *types;
     amd *amdptr;
-    void generateUI();
 };
 
 #endif // AMDPSTATEEDITOR_H

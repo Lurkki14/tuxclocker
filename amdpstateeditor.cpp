@@ -6,9 +6,9 @@ amdPstateEditor::amdPstateEditor(QWidget *parent) :
     ui(new Ui::amdPstateEditor)
 {
     ui->setupUi(this);
-    amdptr = new amd;
-    types = amdptr;
-    generateUI();
+    //amdptr = new amd;
+    //types = amdptr;
+    //generateUI();
 
 }
 
@@ -16,7 +16,7 @@ amdPstateEditor::~amdPstateEditor()
 {
     delete ui;
 }
-void amdPstateEditor::generateUI()
+void amdPstateEditor::generateUI(gputypes *types)
 {
     QWidget *lower = new QWidget;
     QWidget *upper = new QWidget;
