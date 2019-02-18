@@ -3,10 +3,12 @@
 
 #include <QMainWindow>
 #include "editprofile.h"
+#include "newprofile.h"
 #include <QProcess>
 #include <QList>
 #include <QByteArray>
 #include "gputypes.h"
+#include "plotwidget.h"
 #ifdef AMD
 #include "amdpstateeditor.h"
 #endif
@@ -152,11 +154,8 @@ private slots:
 
     void on_GPUComboBox_currentIndexChanged(int index);
 
-<<<<<<< HEAD
+
     void on_amdPstateButton_pressed();
-=======
-    void on_pstateButton_clicked();
->>>>>>> 09ca6b3c9f828481d3690c9999546c2d9785d9bd
 
 private:
     Ui::MainWindow *ui;

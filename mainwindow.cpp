@@ -1108,17 +1108,11 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     curmaxclk->setText(1, QString::number(types->GPUList[index].maxCoreClk) + "MHz");
 }
 
-<<<<<<< HEAD
+
 void MainWindow::on_amdPstateButton_pressed()
 {
     amdPstateEditor *ps = new amdPstateEditor;
     ps->generateUI(types);
-    ps->setModal(false);
-=======
-void MainWindow::on_pstateButton_clicked()
-{
-    amdPstateEditor *ps = new amdPstateEditor;
-    ps->generateUI(types);
->>>>>>> 09ca6b3c9f828481d3690c9999546c2d9785d9bd
+    ps->setModal(true);
     ps->exec();
 }

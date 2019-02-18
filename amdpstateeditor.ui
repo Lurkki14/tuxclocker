@@ -6,13 +6,10 @@
    <rect>
     <x>0</x>
     <y>0</y>
-<<<<<<< HEAD
     <width>713</width>
     <height>550</height>
-=======
     <width>600</width>
     <height>428</height>
->>>>>>> 09ca6b3c9f828481d3690c9999546c2d9785d9bd
    </rect>
   </property>
   <property name="windowTitle">
