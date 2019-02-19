@@ -19,7 +19,6 @@ void amdPstateEditor::generateUI(gputypes *types)
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
     for (int i=0; i<types->GPUList[0].coreclocks.size(); i++) {
-        pstate pstate;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
         QLabel *freqlabel = new QLabel;
@@ -31,7 +30,10 @@ void amdPstateEditor::generateUI(gputypes *types)
         QSlider *voltslider = new QSlider;
         QSpinBox *freqspinbox = new QSpinBox;
         QSpinBox *voltspinbox = new QSpinBox;
-        connect(freqslider, SIGNAL(valueChanged(int)), SLOT(detectIndex()));
+        connect(freqslider, SIGNAL(valueChanged(int)), freqspinbox, SLOT(setValue(int)));
+        connect(freqspinbox, SIGNAL(valueChanged(int)), freqslider, SLOT(setValue(int)));
+        connect(voltspinbox, SIGNAL(valueChanged(int)), voltslider, SLOT(setValue(int)));
+        connect(voltslider, SIGNAL(valueChanged(int)), voltspinbox, SLOT(setValue(int)));
 
         freqslider->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
         freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
@@ -52,16 +54,9 @@ void amdPstateEditor::generateUI(gputypes *types)
         QWidget *freqsliderowdg = new QWidget;
         freqsliderowdg->setLayout(glo);
         llo->addWidget(freqsliderowdg);
-
-        pstate.voltslider = voltslider;
-        pstate.freqslider = freqslider;
-        pstate.voltspinbox = voltspinbox;
-        pstate.freqspinbox = freqspinbox;
-        pstates.append(pstate);
     }
 
     for (int i=0; i<types->GPUList[0].memclocks.size(); i++) {
-        pstate pstate;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
         QLabel *freqlabel = new QLabel;
@@ -73,6 +68,10 @@ void amdPstateEditor::generateUI(gputypes *types)
         QSlider *voltslider = new QSlider;
         QSpinBox *freqspinbox = new QSpinBox;
         QSpinBox *voltspinbox = new QSpinBox;
+        connect(freqslider, SIGNAL(valueChanged(int)), freqspinbox, SLOT(setValue(int)));
+        connect(freqspinbox, SIGNAL(valueChanged(int)), freqslider, SLOT(setValue(int)));
+        connect(voltspinbox, SIGNAL(valueChanged(int)), voltslider, SLOT(setValue(int)));
+        connect(voltslider, SIGNAL(valueChanged(int)), voltspinbox, SLOT(setValue(int)));
 
         freqslider->setRange(types->GPUList[0].memclocks[0], types->GPUList[0].memclocks[types->GPUList[0].memclocks.size()-1]);
         freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].memclocks.size()-1]);
@@ -93,12 +92,6 @@ void amdPstateEditor::generateUI(gputypes *types)
         QWidget *freqsliderowdg = new QWidget;
         freqsliderowdg->setLayout(glo);
         ulo->addWidget(freqsliderowdg);
-
-        pstate.voltslider = voltslider;
-        pstate.freqslider = freqslider;
-        pstate.voltspinbox = voltspinbox;
-        pstate.freqspinbox = freqspinbox;
-        pstates.append(pstate);
     }
     lower->setLayout(ulo);
     upper->setLayout(llo);
@@ -107,12 +100,4 @@ void amdPstateEditor::generateUI(gputypes *types)
     mainlo->addWidget(upper);
     mainlo->addWidget(lower);
     ui->centralWidget->setLayout(mainlo);
-}
-void amdPstateEditor::detectIndex()
-{
-    for (int i=0; i<pstates.size(); i++) {
-        if (pstates[i].freqslider->isSliderDown()) {
-            qDebug() << "slider" << i << "is active";
-        }
-    }
 }
