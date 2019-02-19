@@ -31,7 +31,7 @@ void amdPstateEditor::generateUI(gputypes *types)
         QSlider *voltslider = new QSlider;
         QSpinBox *freqspinbox = new QSpinBox;
         QSpinBox *voltspinbox = new QSpinBox;
-        connect(freqslider, SIGNAL(valueChanged(int value)), SLOT(detectIndex()));
+        connect(freqslider, SIGNAL(valueChanged(int)), SLOT(detectIndex()));
 
         freqslider->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
         freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
