@@ -27,8 +27,8 @@ bool amd::setupGPU()
             // Attempt to initialize the GPU
             uint32_t major = 0;
             uint32_t minor = 0;
-            amdgpu_device_handle handle;
-            int ret = amdgpu_device_initialize(fd, &major, &minor, &handle);
+            amdgpu_device_handle *handle = new amdgpu_device_handle;
+            int ret = amdgpu_device_initialize(fd, &major, &minor, handle);
             qDebug() << major;
             if (ret == 0) {
                 // Create a gpu object with the correct paremeters
@@ -49,17 +49,17 @@ bool amd::setupGPU()
                     }
                 }
 
-                const char *name = amdgpu_get_marketing_name(handle);
+                const char *name = amdgpu_get_marketing_name(*handle);
                 char tempname[64];
                 strcpy(tempname, name);
                 gpu.name = tempname;
                 gpu.displayName = QString::fromUtf8(name);
-                gpu.dev = &handle;
+                gpu.dev = handle;
                 qDebug() << gpu.name;
 
                 int reading = 0;
                 uint size = sizeof (int);
-                ret = amdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GFX_SCLK, size, &reading);
+                ret = amdgpu_query_sensor_info(*handle, AMDGPU_INFO_SENSOR_GFX_SCLK, size, &reading);
                 qDebug() << "coreclk" << reading << ret;
 
                 GPUList.append(gpu);
@@ -187,8 +187,12 @@ void amd::queryGPUFeatures()
                 }
                 tablefile.close();
             }
+            // Check if voltage is readable
+
         }
+
     }
+
 }
 void amd::queryGPUVoltage(int GPUIndex)
 {

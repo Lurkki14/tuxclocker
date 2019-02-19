@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // This is for NVML
     types->setupGPUSecondary(currentGPUIndex);
     types->queryGPUFeatures();
+    types->queryGPUFrequencies(0);
     //types->queryGPUFreqOffset(currentGPUIndex);
     //types->queryGPUMemClkOffset(currentGPUIndex);
     //types->queryGPUVoltageOffset(currentGPUIndex);
