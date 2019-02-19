@@ -30,7 +30,7 @@ bool amd::setupGPU()
             amdgpu_device_handle handle;
             int ret = amdgpu_device_initialize(fd, &major, &minor, &handle);
             qDebug() << major;
-            if (ret > -1) {
+            if (ret == 0) {
                 // Create a gpu object with the correct paremeters
                 GPU gpu;
                 gpu.fsindex = i;
@@ -56,8 +56,14 @@ bool amd::setupGPU()
                 gpu.displayName = QString::fromUtf8(name);
                 gpu.dev = &handle;
                 qDebug() << gpu.name;
-                gpuCount++;
+
+                int reading = 0;
+                uint size = sizeof (int);
+                ret = amdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GFX_SCLK, size, &reading);
+                qDebug() << "coreclk" << reading << ret;
+
                 GPUList.append(gpu);
+                gpuCount++;
 
                 retb = true;
             }
@@ -87,6 +93,11 @@ void amd::calculateUIProperties(int GPUIndex)
 
     GPUList[GPUIndex].powerLimSliderMax = static_cast<int>(GPUList[GPUIndex].maxPowerLim);
     GPUList[GPUIndex].powerLimSliderMin = static_cast<int>(GPUList[GPUIndex].minPowerLim);
+
+    /*GPUList[GPUIndex].voltageSliderCur = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
+    GPUList[GPUIndex].powerLimSliderCur = static_cast<int>(GPUList[GPUIndex].powerLim);
+    GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
+    GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];*/
 }
 bool amd::setupGPUSecondary(int GPUIndex){return  true;}
 void amd::queryGPUCount(){}
@@ -185,29 +196,32 @@ void amd::queryGPUVoltage(int GPUIndex)
                                        AMDGPU_INFO_SENSOR_VDDGFX,
                                        sizeof (GPUList[GPUIndex].voltage),
                                        &GPUList[GPUIndex].voltage);
-    if (ret < 0) qDebug("Failed to query voltage");
+    if (ret != 0) qDebug("Failed to query voltage");
 }
 void amd::queryGPUTemp(int GPUIndex)
 {
+    qDebug() << "querying GPU" << GPUIndex << GPUList[GPUIndex].displayName;
     int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                              AMDGPU_INFO_SENSOR_GPU_TEMP,
                              sizeof (GPUList[GPUIndex].temp),
                              &GPUList[GPUIndex].temp);
-    if (ret < 0) qDebug("Failed to query GPU temperature");
+    if (ret != 0) qDebug("Failed to query GPU temperature");
 }
 void amd::queryGPUFrequencies(int GPUIndex)
 {
+    int reading;
     int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GFX_SCLK,
                                        sizeof (GPUList[GPUIndex].coreFreq),
-                                       &GPUList[GPUIndex].coreFreq);
-    if (ret < 0) qDebug("Failed to query GPU core clock");
+                                       &reading);
+    qDebug() << reading << ret;
+    if (ret != 0) qDebug("Failed to query GPU core clock");
 
     ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                    AMDGPU_INFO_SENSOR_GFX_MCLK,
                                    sizeof (GPUList[GPUIndex].memFreq),
                                    &GPUList[GPUIndex].memFreq);
-    if (ret < 0) qDebug("Failed to query GPU memory clock");
+    if (ret != 0) qDebug("Failed to query GPU memory clock");
 }
 void amd::queryGPUFanSpeed(int GPUIndex)
 {
@@ -232,7 +246,7 @@ void amd::queryGPUUtils(int GPUIndex)
                                        AMDGPU_INFO_SENSOR_GPU_LOAD,
                                        sizeof (GPUList[GPUIndex].coreUtil),
                                        &GPUList[GPUIndex].coreUtil);
-    if (ret < 0) qDebug("Failed to query GPU Utilization");
+    if (ret != 0) qDebug("Failed to query GPU Utilization");
 }
 void amd::queryGPUPowerDraw(int GPUIndex)
 {
@@ -240,7 +254,7 @@ void amd::queryGPUPowerDraw(int GPUIndex)
                                        AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
                                        sizeof (GPUList[GPUIndex].powerDraw),
                                        &GPUList[GPUIndex].powerDraw);
-    if (ret < 0) qDebug("failed to query GPU power draw");
+    if (ret != 0) qDebug("failed to query GPU power draw");
 }
 void amd::queryGPUPowerLimit(int GPUIndex)
 {
@@ -273,7 +287,7 @@ void amd::queryGPUPowerLimitLimits(int GPUIndex)
 }
 void amd::queryGPUCurrentMaxClocks(int GPUIndex)
 {
-    amdgpu_gpu_info info;
+    /*amdgpu_gpu_info info;
     int ret = amdgpu_query_gpu_info(*GPUList[GPUIndex].dev, &info);
     if (ret < 0) qDebug("Failed to query GPU maximum clocks");
     else {
@@ -282,7 +296,7 @@ void amd::queryGPUCurrentMaxClocks(int GPUIndex)
 
         clock = static_cast<uint>(info.max_memory_clk);
         GPUList[GPUIndex].maxMemClk = clock/1000;
-    }
+    }*/
 }
 void amd::queryGPUPowerLimitAvailability(int GPUIndex){}
 

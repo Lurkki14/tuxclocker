@@ -33,13 +33,13 @@ MainWindow::MainWindow(QWidget *parent) :
     // This is for NVML
     types->setupGPUSecondary(currentGPUIndex);
     types->queryGPUFeatures();
-    types->queryGPUFreqOffset(currentGPUIndex);
-    types->queryGPUMemClkOffset(currentGPUIndex);
-    types->queryGPUVoltageOffset(currentGPUIndex);
+    //types->queryGPUFreqOffset(currentGPUIndex);
+    //types->queryGPUMemClkOffset(currentGPUIndex);
+    //types->queryGPUVoltageOffset(currentGPUIndex);
     //types->queryGPUPowerLimit(currentGPUIndex);
     //types->queryGPUPowerLimitAvailability(currentGPUIndex);
     //types->queryGPUPowerLimitLimits(currentGPUIndex);
-    types->queryGPUCurrentMaxClocks(currentGPUIndex);
+    //types->queryGPUCurrentMaxClocks(currentGPUIndex);
     if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
         types->calculateUIProperties(currentGPUIndex);
     }
@@ -47,11 +47,11 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i=0; i<types->gpuCount; i++) {
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].displayName);
     }
-    /*
-    loadProfileSettings();
-    setupMonitorTab();
+
+    //loadProfileSettings();
+    //setupMonitorTab();
     setupGraphMonitorTab();
-    */
+
 
     // Enable sliders according to GPU properties
     /*
@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Testing code
 
-    ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
+    /*ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
     ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
 
     ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
@@ -118,7 +118,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMin);
 
     ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
-    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
+    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);*/
 
     /*ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()-1]);
     ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].corecloks[types->GPUList[currentGPUIndex].corecloks.size()-1]);
@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
-    //connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
 }
 
 MainWindow::~MainWindow()

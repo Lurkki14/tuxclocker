@@ -37,6 +37,11 @@ public:
         int coreClkSliderMax;
         int voltageSliderMax;
         int voltageSliderMin;
+
+        int voltageSliderCur;
+        int powerLimSliderCur;
+        int memClkSliderCur;
+        int coreClkSliderCur;
         QString displayName;
 
         int gputype;
