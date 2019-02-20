@@ -62,6 +62,7 @@ void amdPstateEditor::generateUI()
 
         state.voltspinbox = voltspinbox;
         state.freqspinbox = freqspinbox;
+        corePstates.append(state);
     }
 
     for (int i=0; i<types->GPUList[0].memclocks.size(); i++) {
@@ -122,16 +123,26 @@ void amdPstateEditor::generateUI()
 bool amdPstateEditor::applyValues()
 {
     qDebug("Applying values");
+    QProcess proc;
+    QString volt;
+    QString freq;
+    // Apply core pstates
     for (int i=0; i<corePstates.size(); i++) {
         if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
-            QProcess proc;
-            QString volt = QString::number(corePstates[i].freqspinbox->value());
-            QString freq = QString::number(corePstates[i].voltspinbox->value());
-            proc.start("pkexec echo \"s "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage");
+            volt = QString::number(corePstates[i].freqspinbox->value());
+            freq = QString::number(corePstates[i].voltspinbox->value());
+            proc.start("/bin/sh -c \"pkexec echo \"s "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
             proc.waitForFinished();
         }
     }
-
-
+    // Apply memory pstates
+    for (int i=0; i<memPstates.size(); i++) {
+        if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
+            volt = QString::number(corePstates[i].freqspinbox->value());
+            freq = QString::number(corePstates[i].voltspinbox->value());
+            proc.start("/bin/sh -c \"pkexec echo \"s "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
+            proc.waitForFinished();
+        }
+    }
     return true;
 }
