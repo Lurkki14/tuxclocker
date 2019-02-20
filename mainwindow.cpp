@@ -1114,6 +1114,7 @@ void MainWindow::on_amdPstateButton_pressed()
 {
     amdPstateEditor *ps = new amdPstateEditor;
     ps->grabPointer(types);
+    ps->generateUI();
     ps->setModal(true);
     ps->exec();
 }
