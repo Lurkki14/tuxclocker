@@ -54,6 +54,8 @@ public:
         bool voltageReadable = false;
         bool coreClkReadable = false;
         bool memClkReadable = false;
+        bool powerDrawReadable = false;
+        bool coreUtilReadable = false;
         bool manualFanCtrlAvailable = false;
         int fanControlMode;
         int maxVoltageOffset;
@@ -86,7 +88,7 @@ public:
 
 #ifdef AMD
         // AMD only:
-        // GPU index in the filesystem eg. card0
+        // GPU index in the filesystem eg. 0 in card0
         int fsindex;
         // name of the folder in /sys/class/drm/card(n)/device/hwmon
         QString hwmonpath;

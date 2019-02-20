@@ -188,7 +188,64 @@ void amd::queryGPUFeatures()
                 tablefile.close();
             }
             // Check if voltage is readable
-
+            int reading;
+            int retval = amdgpu_query_sensor_info(*GPUList[i].dev,
+                                               AMDGPU_INFO_SENSOR_VDDGFX,
+                                               sizeof (int),
+                                               &reading);
+            if (retval != 0) {
+                GPUList[i].voltageReadable = false;
+                qDebug() << "voltage unreadable for GPU" << i;
+            } else {
+                GPUList[i].voltageReadable = true;
+            }
+            // Core clock
+            retval = amdgpu_query_sensor_info(*GPUList[i].dev,
+                                               AMDGPU_INFO_SENSOR_GFX_SCLK,
+                                               sizeof (int),
+                                               &reading);
+            if (retval != 0) {
+                GPUList[i].coreClkReadable = false;
+            } else {
+                GPUList[i].coreClkReadable = true;
+            }
+            // Memory clock
+            retval = amdgpu_query_sensor_info(*GPUList[i].dev,
+                                               AMDGPU_INFO_SENSOR_GFX_MCLK,
+                                               sizeof (int),
+                                               &reading);
+            if (retval != 0) {
+                GPUList[i].memClkReadable = false;
+            } else {
+                GPUList[i].memClkReadable = true;
+            }
+            // GPU Utilization
+            retval = amdgpu_query_sensor_info(*GPUList[i].dev,
+                                               AMDGPU_INFO_SENSOR_GPU_LOAD,
+                                               sizeof (int),
+                                               &reading);
+            if (retval != 0) {
+                GPUList[i].coreUtilReadable= false;
+                qDebug() << "utilization unreadable for GPU" << i;
+            } else {
+                GPUList[i].coreUtilReadable = true;
+            }
+            // Power draw
+            retval = amdgpu_query_sensor_info(*GPUList[i].dev,
+                                               AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
+                                               sizeof (int),
+                                               &reading);
+            if (retval != 0) {
+                GPUList[i].powerDrawReadable = false;
+            } else {
+                GPUList[i].powerDrawReadable = true;
+            }
+            // Check if min/max power limits were readable (does this indicate it's writable though?)
+            if (GPUList[i].minPowerLim == GPUList[i].maxPowerLim) {
+                GPUList[i].powerLimitAvailable = false;
+            } else {
+                GPUList[i].powerLimitAvailable = true;
+            }
         }
 
     }

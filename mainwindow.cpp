@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // This is for NVML
     types->setupGPUSecondary(currentGPUIndex);
     types->queryGPUFeatures();
-    types->queryGPUFrequencies(0);
+    //types->queryGPUFrequencies(currentGPUIndex);
     //types->queryGPUFreqOffset(currentGPUIndex);
     //types->queryGPUMemClkOffset(currentGPUIndex);
     //types->queryGPUVoltageOffset(currentGPUIndex);
@@ -41,17 +41,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //types->queryGPUPowerLimitAvailability(currentGPUIndex);
     //types->queryGPUPowerLimitLimits(currentGPUIndex);
     //types->queryGPUCurrentMaxClocks(currentGPUIndex);
-    if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
+    /*if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
         types->calculateUIProperties(currentGPUIndex);
     }
     // Populate the GPU combo box
     for (int i=0; i<types->gpuCount; i++) {
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].displayName);
-    }
+    }*/
 
     //loadProfileSettings();
     //setupMonitorTab();
-    setupGraphMonitorTab();
+    //setupGraphMonitorTab();
 
 
     // Enable sliders according to GPU properties
@@ -126,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->powerLimSlider->setValue(types->GPUList[currentGPUIndex].powerLim);
     ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].corevolts[types->GPUList[currentGPUIndex].corevolts.size()-1]);*/
 
-    if (!types->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
+    /*if (!types->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
         QModelIndex manualModeIndex = model->index(1, ui->fanModeComboBox->modelColumn());
@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
-    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));*/
 }
 
 MainWindow::~MainWindow()
