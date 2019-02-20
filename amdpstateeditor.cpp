@@ -12,13 +12,18 @@ amdPstateEditor::~amdPstateEditor()
 {
     delete ui;
 }
-void amdPstateEditor::generateUI(gputypes *types)
+void amdPstateEditor::grabPointer(gputypes *newtypes)
+{
+    types = newtypes;
+}
+void amdPstateEditor::generateUI()
 {
     QWidget *lower = new QWidget;
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
     for (int i=0; i<types->GPUList[0].coreclocks.size(); i++) {
+        corePstate state;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
         QLabel *freqlabel = new QLabel;
@@ -53,10 +58,14 @@ void amdPstateEditor::generateUI(gputypes *types)
         glo->addWidget(voltspinbox, 3, 1);
         QWidget *freqsliderowdg = new QWidget;
         freqsliderowdg->setLayout(glo);
-        llo->addWidget(freqsliderowdg);
+        ulo->addWidget(freqsliderowdg);
+
+        state.voltspinbox = voltspinbox;
+        state.freqspinbox = freqspinbox;
     }
 
     for (int i=0; i<types->GPUList[0].memclocks.size(); i++) {
+        memPstate state;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
         QLabel *freqlabel = new QLabel;
@@ -91,13 +100,38 @@ void amdPstateEditor::generateUI(gputypes *types)
         glo->addWidget(voltspinbox, 3, 1);
         QWidget *freqsliderowdg = new QWidget;
         freqsliderowdg->setLayout(glo);
-        ulo->addWidget(freqsliderowdg);
+        llo->addWidget(freqsliderowdg);
+        state.voltspinbox = voltspinbox;
+        state.freqspinbox = freqspinbox;
+        memPstates.append(state);
     }
-    lower->setLayout(ulo);
-    upper->setLayout(llo);
+    // Add an apply button
+    QPushButton *applyButton = new QPushButton;
+    connect(applyButton, SIGNAL(clicked()), SLOT(applyValues()));
+    applyButton->setText("Apply values");
+    llo->addWidget(applyButton);
+
+    lower->setLayout(llo);
+    upper->setLayout(ulo);
 
     QVBoxLayout *mainlo = new QVBoxLayout(this);
     mainlo->addWidget(upper);
     mainlo->addWidget(lower);
     ui->centralWidget->setLayout(mainlo);
+}
+bool amdPstateEditor::applyValues()
+{
+    qDebug("Applying values");
+    for (int i=0; i<corePstates.size(); i++) {
+        if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
+            QProcess proc;
+            QString volt = QString::number(corePstates[i].freqspinbox->value());
+            QString freq = QString::number(corePstates[i].voltspinbox->value());
+            proc.start("pkexec echo \"s "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage");
+            proc.waitForFinished();
+        }
+    }
+
+
+    return true;
 }
