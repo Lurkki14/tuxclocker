@@ -6,6 +6,7 @@ amdPstateEditor::amdPstateEditor(QWidget *parent) :
     ui(new Ui::amdPstateEditor)
 {
     ui->setupUi(this);
+    generateUI();
 }
 
 amdPstateEditor::~amdPstateEditor()
@@ -18,6 +19,7 @@ void amdPstateEditor::grabPointer(gputypes *newtypes)
 }
 void amdPstateEditor::generateUI()
 {
+    qDebug() << types->gpuCount << "gpus in pointer";
     QWidget *lower = new QWidget;
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
