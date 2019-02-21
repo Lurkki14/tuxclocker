@@ -6,25 +6,21 @@ amdPstateEditor::amdPstateEditor(QWidget *parent) :
     ui(new Ui::amdPstateEditor)
 {
     ui->setupUi(this);
-    generateUI();
 }
 
 amdPstateEditor::~amdPstateEditor()
 {
     delete ui;
 }
-void amdPstateEditor::grabPointer(gputypes *newtypes)
+void amdPstateEditor::generateUI(gputypes *newtypes)
 {
     types = newtypes;
-}
-void amdPstateEditor::generateUI()
-{
-    qDebug() << types->gpuCount << "gpus in pointer";
+    qDebug() << newtypes->gpuCount << "gpus in pointer";
     QWidget *lower = new QWidget;
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
-    for (int i=0; i<types->GPUList[0].coreclocks.size(); i++) {
+    for (int i=0; i<newtypes->GPUList[0].coreclocks.size(); i++) {
         corePstate state;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
@@ -42,14 +38,14 @@ void amdPstateEditor::generateUI()
         connect(voltspinbox, SIGNAL(valueChanged(int)), voltslider, SLOT(setValue(int)));
         connect(voltslider, SIGNAL(valueChanged(int)), voltspinbox, SLOT(setValue(int)));
 
-        freqslider->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
-        freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].coreclocks.size()-1]);
+        freqslider->setRange(newtypes->GPUList[0].coreclocks[0], newtypes->GPUList[0].coreclocks[newtypes->GPUList[0].coreclocks.size()-1]);
+        freqspinbox->setRange(newtypes->GPUList[0].coreclocks[0], newtypes->GPUList[0].coreclocks[newtypes->GPUList[0].coreclocks.size()-1]);
 
-        voltslider->setRange(types->GPUList[0].corevolts[0], types->GPUList[0].corevolts[types->GPUList[0].corevolts.size()-1]);
-        voltspinbox->setRange(types->GPUList[0].corevolts[0], types->GPUList[0].corevolts[types->GPUList[0].corevolts.size()-1]);
+        voltslider->setRange(newtypes->GPUList[0].corevolts[0], newtypes->GPUList[0].corevolts[newtypes->GPUList[0].corevolts.size()-1]);
+        voltspinbox->setRange(newtypes->GPUList[0].corevolts[0], newtypes->GPUList[0].corevolts[newtypes->GPUList[0].corevolts.size()-1]);
 
-        voltspinbox->setValue(types->GPUList[0].corevolts[i]);
-        freqspinbox->setValue(types->GPUList[0].coreclocks[i]);
+        voltspinbox->setValue(newtypes->GPUList[0].corevolts[i]);
+        freqspinbox->setValue(newtypes->GPUList[0].coreclocks[i]);
 
         glo->addWidget(pstatelabel);
         glo->addWidget(freqlabel, 1, 0);
@@ -67,7 +63,7 @@ void amdPstateEditor::generateUI()
         corePstates.append(state);
     }
 
-    for (int i=0; i<types->GPUList[0].memclocks.size(); i++) {
+    for (int i=0; i<newtypes->GPUList[0].memclocks.size(); i++) {
         memPstate state;
         QGridLayout *glo = new QGridLayout;
         QLabel *voltlabel = new QLabel;
@@ -85,14 +81,14 @@ void amdPstateEditor::generateUI()
         connect(voltspinbox, SIGNAL(valueChanged(int)), voltslider, SLOT(setValue(int)));
         connect(voltslider, SIGNAL(valueChanged(int)), voltspinbox, SLOT(setValue(int)));
 
-        freqslider->setRange(types->GPUList[0].memclocks[0], types->GPUList[0].memclocks[types->GPUList[0].memclocks.size()-1]);
-        freqspinbox->setRange(types->GPUList[0].coreclocks[0], types->GPUList[0].coreclocks[types->GPUList[0].memclocks.size()-1]);
+        freqslider->setRange(newtypes->GPUList[0].memclocks[0], newtypes->GPUList[0].memclocks[newtypes->GPUList[0].memclocks.size()-1]);
+        freqspinbox->setRange(newtypes->GPUList[0].coreclocks[0], newtypes->GPUList[0].coreclocks[newtypes->GPUList[0].memclocks.size()-1]);
 
-        voltslider->setRange(types->GPUList[0].memvolts[0], types->GPUList[0].memvolts[types->GPUList[0].memvolts.size()-1]);
-        voltspinbox->setRange(types->GPUList[0].memvolts[0], types->GPUList[0].memvolts[types->GPUList[0].memvolts.size()-1]);
+        voltslider->setRange(newtypes->GPUList[0].memvolts[0], newtypes->GPUList[0].memvolts[newtypes->GPUList[0].memvolts.size()-1]);
+        voltspinbox->setRange(newtypes->GPUList[0].memvolts[0], newtypes->GPUList[0].memvolts[newtypes->GPUList[0].memvolts.size()-1]);
 
-        voltspinbox->setValue(types->GPUList[0].memvolts[i]);
-        freqspinbox->setValue(types->GPUList[0].memclocks[i]);
+        voltspinbox->setValue(newtypes->GPUList[0].memvolts[i]);
+        freqspinbox->setValue(newtypes->GPUList[0].memclocks[i]);
 
         glo->addWidget(pstatelabel);
         glo->addWidget(freqlabel, 1, 0);

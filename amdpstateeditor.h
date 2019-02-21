@@ -23,8 +23,7 @@ class amdPstateEditor : public QDialog
 public:
     explicit amdPstateEditor(QWidget *parent = nullptr);
     ~amdPstateEditor();
-    void grabPointer(gputypes *newtypes);
-    void generateUI();
+    void generateUI(gputypes *newtypes);
 
 private:
     Ui::amdPstateEditor *ui;

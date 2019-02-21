@@ -1113,8 +1113,7 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
 void MainWindow::on_amdPstateButton_pressed()
 {
     amdPstateEditor *ps = new amdPstateEditor;
-    ps->grabPointer(types);
-    ps->generateUI();
+    ps->generateUI(types);
     ps->setModal(true);
     ps->exec();
 }
