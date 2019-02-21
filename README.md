@@ -23,7 +23,7 @@ TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-
 - nvidia-smi
 - nvidia-settings
 - Qt 5 libraries
-- Coolbits set to the value you want (31 for all functionality)
+- [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to the value you want (31 for all functionality)
 
 # Installation
 
@@ -35,7 +35,3 @@ qmake rojekti.pro
 make
 make install (installs into /opt/tuxclocker/bin)
 ```
-
-
-
-
