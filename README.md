@@ -35,3 +35,9 @@ qmake rojekti.pro
 make
 make install (installs into /opt/tuxclocker/bin)
 ```
+### Arch Linux
+#### AUR package
+[https://aur.archlinux.org/packages/tuxclocker/](https://aur.archlinux.org/packages/tuxclocker/)
+
+
+
