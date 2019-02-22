@@ -44,6 +44,15 @@ public:
         int coreClkSliderCur;
         QString displayName;
 
+        int displayTemp;
+        double displayPowerDraw;
+        int displayCoreFreq;
+        int displayMemFreq;
+        int displayCoreUtil;
+        int displayMemUtil;
+        int displayVoltage;
+        int displayFanSpeed;
+
         int gputype;
         char *name;
         char *uuid;
@@ -112,6 +121,7 @@ public:
 #endif
 
     virtual void calculateUIProperties(int GPUIndex) = 0;
+    virtual void calculateDisplayValues(int GPUIndex) = 0;
 
     virtual bool setupGPU() = 0;
     virtual bool setupGPUSecondary(int GPUIndex) = 0;
@@ -154,6 +164,7 @@ public:
 signals:
 public slots:
     void calculateUIProperties();
+    void calculateDisplayValues(int GPUIndex) = 0;
 
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
@@ -197,6 +208,8 @@ public:
 signals:
 public slots:
     void calculateUIProperties(int GPUIndex);
+    void calculateDisplayValues(int GPUIndex);
+
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
     void queryGPUCount();

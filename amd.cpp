@@ -99,6 +99,18 @@ void amd::calculateUIProperties(int GPUIndex)
     GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
     GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];*/
 }
+void amd::calculateDisplayValues(int GPUIndex)
+{
+    GPUList[GPUIndex].displayTemp = GPUList[GPUIndex].temp/1000;
+    GPUList[GPUIndex].displayPowerDraw = GPUList[GPUIndex].powerDraw;
+    GPUList[GPUIndex].displayCoreFreq = GPUList[GPUIndex].coreFreq;
+    GPUList[GPUIndex].displayMemFreq = GPUList[GPUIndex].memFreq;
+    GPUList[GPUIndex].displayCoreUtil = static_cast <int> (GPUList[GPUIndex].coreUtil);
+    // Not available on AMD
+    GPUList[GPUIndex].displayMemUtil = 0;
+    GPUList[GPUIndex].displayVoltage = GPUList[GPUIndex].voltage;
+    GPUList[GPUIndex].displayFanSpeed = GPUList[GPUIndex].fanSpeed;
+}
 bool amd::setupGPUSecondary(int GPUIndex){return  true;}
 void amd::queryGPUCount(){}
 void amd::queryGPUNames()
@@ -274,7 +286,7 @@ void amd::queryGPUFrequencies(int GPUIndex)
     int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GFX_SCLK,
                                        sizeof (GPUList[GPUIndex].coreFreq),
-                                       &reading);
+                                       &GPUList[GPUIndex].coreFreq);
     qDebug() << reading << ret;
     if (ret != 0) qDebug("Failed to query GPU core clock");
 

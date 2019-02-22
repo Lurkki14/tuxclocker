@@ -41,17 +41,17 @@ MainWindow::MainWindow(QWidget *parent) :
     //types->queryGPUPowerLimitAvailability(currentGPUIndex);
     //types->queryGPUPowerLimitLimits(currentGPUIndex);
     //types->queryGPUCurrentMaxClocks(currentGPUIndex);
-    /*if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
+    if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU) {
         types->calculateUIProperties(currentGPUIndex);
     }
     // Populate the GPU combo box
     for (int i=0; i<types->gpuCount; i++) {
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].displayName);
-    }*/
+    }
 
     //loadProfileSettings();
     //setupMonitorTab();
-    //setupGraphMonitorTab();
+    setupGraphMonitorTab();
 
 
     // Enable sliders according to GPU properties
@@ -141,10 +141,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->frequencySpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->powerLimSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->memClkSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
-    connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
+    connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));*/
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
-    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));*/
+    connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
 }
 
 MainWindow::~MainWindow()
@@ -252,14 +252,25 @@ void MainWindow::setupGraphMonitorTab()
     plotCmdsList[6].plot = voltagePlot;
     plotCmdsList[7].plot = fanSpeedPlot;
 
-    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
+    /*plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
     plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].powerDraw/1000;
     plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].coreFreq;
     plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].memFreq;
     plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].coreUtil;
     plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].memUtil;
     plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].voltage/1000;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;
+    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;*/
+
+    types->calculateDisplayValues(currentGPUIndex);
+    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].displayTemp;
+    plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].displayPowerDraw;
+    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].displayCoreFreq;
+    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].displayMemFreq;
+    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].displayCoreUtil;
+    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].displayMemUtil;
+    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].displayVoltage;
+    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].displayFanSpeed;
+
 
     // Get the main widget palette and use it for the graphs
     QPalette palette;
@@ -418,14 +429,24 @@ void MainWindow::updateMonitor()
     pwrdraw = static_cast<double>(num);
     pwrdraw = pwrdraw/100;
 
-    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
+    /*plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
     plotCmdsList[1].valueq = pwrdraw;
     plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].coreFreq;
     plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].memFreq;
     plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].coreUtil;
     plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].memUtil;
     plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].voltage/1000;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;
+    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;*/
+
+    types->calculateDisplayValues(currentGPUIndex);
+    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].displayTemp;
+    plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].displayPowerDraw;
+    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].displayCoreFreq;
+    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].displayMemFreq;
+    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].displayCoreUtil;
+    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].displayMemUtil;
+    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].displayVoltage;
+    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].displayFanSpeed;
 
     qDebug() << monitorUpdater->remainingTime();
 
