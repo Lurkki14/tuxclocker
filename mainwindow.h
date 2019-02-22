@@ -148,6 +148,7 @@ private slots:
     void tabHandler(int index);
     void setupGraphMonitorTab();
     void plotHovered(QMouseEvent *event);
+    void updateTracer();
     void clearPlots();
     void clearExtremeValues();
     void on_actionManage_profiles_triggered();
@@ -160,7 +161,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     bool noProfiles = true;
-    bool mouseOverPlot = false;
     QStringList UUIDList;
     QString latestUUID;
 #ifdef NVIDIA
@@ -208,6 +208,10 @@ private:
     QCustomPlot *fanSpeedPlot = new QCustomPlot(this);
 
     //QVector <double> qv_time;
+    // For updating the plot
+    bool insidePlot = false;
+    double latestPointerXcoord;
+    int plotIndex = 0;
 
     struct plotCmds
     {

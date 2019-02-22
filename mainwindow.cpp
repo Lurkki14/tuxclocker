@@ -537,20 +537,22 @@ void MainWindow::updateMonitor()
         counter = 0;
     }
     counter++;
-    //if (mouseOverPlot) plotHovered(event)
+    if (insidePlot) updateTracer();
 }
 void MainWindow::plotHovered(QMouseEvent *event)
 {
     QPoint cursor = event->pos();
-    int plotIndex = 0;
+    plotIndex = 0;
     for (int i=0; i<plotCmdsList.size(); i++) {
         if (plotCmdsList[i].widget->underMouse()) {
             plotIndex = i;
             break;
         }
     }
-    mouseOverPlot = true;
+    insidePlot = true;
     double pointerxcoord = plotCmdsList[plotIndex].plot->xAxis->pixelToCoord(cursor.x());
+    latestPointerXcoord = pointerxcoord;
+
     plotCmdsList[plotIndex].tracer->position->setCoords(pointerxcoord, plotCmdsList[plotIndex].plot->yAxis->range().upper);
     // Find the y-value for the corresponding coordinate
     int valIndex = 0;
@@ -575,10 +577,22 @@ void MainWindow::plotHovered(QMouseEvent *event)
     } else {
         // If the cursor is not within the x-range, clear the text
         plotCmdsList[plotIndex].valText->setText("");
-        mouseOverPlot = false;
+        insidePlot = false;
     }
     plotCmdsList[plotIndex].plot->update();
     plotCmdsList[plotIndex].plot->replot();
+}
+void MainWindow::updateTracer()
+{
+    int index = 0;
+    double delta = abs(latestPointerXcoord - GPU[currentGPUIndex].qv_time[0]);
+    for (int i=0; i<GPU[currentGPUIndex].qv_time.size(); i++) {
+        if (abs(latestPointerXcoord - GPU[currentGPUIndex].qv_time[i]) < delta) {
+            delta = abs(latestPointerXcoord - GPU[currentGPUIndex].qv_time[i]);
+            index = i;
+        }
+    }
+    plotCmdsList[plotIndex].valText->setText(QString::number(GPU[currentGPUIndex].data[plotIndex].vector[index]));
 }
 void MainWindow::clearPlots()
 {
@@ -588,7 +602,7 @@ void MainWindow::clearPlots()
         plotCmdsList[i].plot->replot();
         plotCmdsList[i].plot->update();
     }
-    mouseOverPlot = false;
+    insidePlot = false;
 }
 void MainWindow::clearExtremeValues()
 {
