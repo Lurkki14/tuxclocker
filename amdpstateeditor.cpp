@@ -128,9 +128,9 @@ bool amdPstateEditor::applyValues()
     // Apply core pstates
     for (int i=0; i<corePstates.size(); i++) {
         if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
-            volt = QString::number(corePstates[i].freqspinbox->value());
-            freq = QString::number(corePstates[i].voltspinbox->value());
-            cmd = "/bin/sh -c \"pkexec echo 's "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"";
+            volt = QString::number(corePstates[i].voltspinbox->value());
+            freq = QString::number(corePstates[i].freqspinbox->value());
+            cmd = "pkexec /bin/sh -c \"echo 's "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"";
             qDebug() << cmd;
             proc.start(cmd);
             proc.waitForFinished();
@@ -138,10 +138,10 @@ bool amdPstateEditor::applyValues()
     }
     // Apply memory pstates
     for (int i=0; i<memPstates.size(); i++) {
-        if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
-            volt = QString::number(corePstates[i].freqspinbox->value());
-            freq = QString::number(corePstates[i].voltspinbox->value());
-            cmd = "/bin/sh -c \"pkexec echo 'm "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"";
+        if ((memPstates[i].freqspinbox->value() != types->GPUList[0].memclocks[i]) || (memPstates[i].voltspinbox->value() != types->GPUList[0].memvolts[i])) {
+            volt = QString::number(memPstates[i].voltspinbox->value());
+            freq = QString::number(memPstates[i].freqspinbox->value());
+            cmd = "pkexec /bin/sh -c \"echo 'm "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"";
             qDebug() << cmd;
             proc.start(cmd);
             proc.waitForFinished();
