@@ -129,7 +129,7 @@ bool amdPstateEditor::applyValues()
         if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
             volt = QString::number(corePstates[i].freqspinbox->value());
             freq = QString::number(corePstates[i].voltspinbox->value());
-            proc.start("/bin/sh -c \"pkexec echo \"s "+ QString::number(i) + " "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
+            proc.start("/bin/sh -c \"pkexec echo 's "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
             proc.waitForFinished();
         }
     }
@@ -138,14 +138,10 @@ bool amdPstateEditor::applyValues()
         if ((corePstates[i].freqspinbox->value() != types->GPUList[0].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[0].corevolts[i])) {
             volt = QString::number(corePstates[i].freqspinbox->value());
             freq = QString::number(corePstates[i].voltspinbox->value());
-            proc.start("/bin/sh -c \"pkexec echo \"m "+ QString::number(i) + " "+ volt +" "+ freq +"\" "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
+            proc.start("/bin/sh -c \"pkexec echo 'm "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[0].fsindex)+"/device/pp_od_clk_voltage\"");
             proc.waitForFinished();
         }
     }
-    QString cmd = "/bin/sh -c \"pkexec echo pootis > /home/jussi/Documents/testfile\"";
-    qDebug() << cmd;
-    proc.start(cmd);
-    proc.waitForFinished();
 
     return true;
 }
