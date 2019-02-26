@@ -94,10 +94,14 @@ void amd::calculateUIProperties(int GPUIndex)
     GPUList[GPUIndex].powerLimSliderMax = static_cast<int>(GPUList[GPUIndex].maxPowerLim);
     GPUList[GPUIndex].powerLimSliderMin = static_cast<int>(GPUList[GPUIndex].minPowerLim);
 
-    /*GPUList[GPUIndex].voltageSliderCur = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
-    GPUList[GPUIndex].powerLimSliderCur = static_cast<int>(GPUList[GPUIndex].powerLim);
-    GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
-    GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];*/
+    if (GPUList[GPUIndex].overVoltAvailable) {
+        GPUList[GPUIndex].voltageSliderCur = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
+    }
+    /*GPUList[GPUIndex].powerLimSliderCur = static_cast<int>(GPUList[GPUIndex].powerLim);*/
+    if (GPUList[GPUIndex].overClockAvailable) {
+        GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
+        GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];
+    }
 }
 void amd::calculateDisplayValues(int GPUIndex)
 {
@@ -133,9 +137,9 @@ void amd::queryGPUFeatures()
     int type = 0;
     int column = 0;
     int breakcount = 0;
+    QString path;
+    QString line;
     for (int i=0; i<gpuCount; i++) {
-        QString path;
-        QString line;
         if (GPUList[i].gputype == Type::AMDGPU) {
             path = "/sys/class/drm/card"+QString::number(GPUList[i].fsindex)+"/device/pp_od_clk_voltage";
             QFile tablefile(path);
@@ -199,6 +203,13 @@ void amd::queryGPUFeatures()
                     breakcount++;
                 }
                 tablefile.close();
+            }
+            // If the pstate vectors are empty after searching, set the features disabled
+            if (!GPUList[i].corevolts.isEmpty()) GPUList[i].overVoltAvailable = true;
+
+            if (!GPUList[i].coreclocks.isEmpty()) {
+                GPUList[i].overClockAvailable = true;
+                GPUList[i].memOverClockAvailable = true;
             }
             // Check if voltage is readable
             int reading;
@@ -304,7 +315,7 @@ void amd::queryGPUFanSpeed(int GPUIndex)
     bool ret = pwmfile.open(QFile::ReadOnly | QFile::Text);
     if (ret) {
         QString fanspeed = pwmfile.readLine().trimmed();
-        double percspeed = (fanspeed.toDouble()/255)*100;
+        double percspeed = (fanspeed.toDouble()/2.55);
         GPUList[GPUIndex].fanSpeed = static_cast<int>(percspeed);
         qDebug() << GPUList[GPUIndex].fanSpeed << "fanspeed";
     }

@@ -109,23 +109,46 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Testing code
 
-    /*ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
-    ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
+    if (types->GPUList[currentGPUIndex].overVoltAvailable) {
+        ui->voltageSlider->setEnabled(true);
+        ui->voltageSpinBox->setEnabled(true);
+        ui->voltageSlider->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
+        ui->voltageSpinBox->setRange(types->GPUList[currentGPUIndex].voltageSliderMin, types->GPUList[currentGPUIndex].voltageSliderMax);
+        ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].voltageSliderCur);
+    } else {
+        ui->voltageSlider->setEnabled(false);
+        ui->voltageSpinBox->setEnabled(false);
+    }
 
-    ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
-    ui->powerLimSpinBox->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
+    if (types->GPUList[currentGPUIndex].overClockAvailable) {
+        ui->frequencySlider->setEnabled(true);
+        ui->frequencySpinBox->setEnabled(true);
+        ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMax);
+        ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMin);
+        ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].coreClkSliderCur);
 
-    ui->frequencySpinBox->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMax);
-    ui->frequencySlider->setRange(types->GPUList[currentGPUIndex].coreClkSliderMin, types->GPUList[currentGPUIndex].coreClkSliderMin);
+        ui->memClkSlider->setEnabled(true);
+        ui->memClkSpinBox->setEnabled(true);
+        ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
+        ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
+        ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memClkSliderCur);
+    } else {
+        ui->frequencySlider->setEnabled(false);
+        ui->frequencySpinBox->setEnabled(false);
+        ui->memClkSlider->setEnabled(false);
+        ui->memClkSpinBox->setEnabled(false);
+    }
 
-    ui->memClkSlider->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);
-    ui->memClkSpinBox->setRange(types->GPUList[currentGPUIndex].memClkSliderMin, types->GPUList[currentGPUIndex].memClkSliderMax);*/
-
-    /*ui->memClkSlider->setValue(types->GPUList[currentGPUIndex].memclocks[types->GPUList[currentGPUIndex].memclocks.size()-1]);
-    ui->frequencySlider->setValue(types->GPUList[currentGPUIndex].corecloks[types->GPUList[currentGPUIndex].corecloks.size()-1]);
-    ui->powerLimSlider->setValue(types->GPUList[currentGPUIndex].powerLim);
-    ui->voltageSlider->setValue(types->GPUList[currentGPUIndex].corevolts[types->GPUList[currentGPUIndex].corevolts.size()-1]);*/
-
+    if (types->GPUList[currentGPUIndex].powerLimitAvailable) {
+        ui->powerLimSlider->setEnabled(true);
+        ui->powerLimSpinBox->setEnabled(true);
+        ui->powerLimSlider->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
+        ui->powerLimSpinBox->setRange(types->GPUList[currentGPUIndex].powerLimSliderMin, types->GPUList[currentGPUIndex].powerLimSliderMax);
+        ui->powerLimSlider->setValue(types->GPUList[currentGPUIndex].powerLimSliderCur);
+    } else {
+        ui->powerLimSlider->setEnabled(false);
+        ui->powerLimSpinBox->setEnabled(false);
+    }
     /*if (!types->GPUList[currentGPUIndex].manualFanCtrlAvailable) {
         // If manual fan control is not available for the GPU, disable the option
         QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
@@ -134,14 +157,14 @@ MainWindow::MainWindow(QWidget *parent) :
         manualMode->setEnabled(false);
         manualMode->setToolTip("Manual fan control is not available for current GPU");
     }
-
+*/
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
     fanUpdateTimer->start(2000);
 
     connect(ui->frequencySpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->powerLimSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
     connect(ui->memClkSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
-    connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));*/
+    connect(ui->voltageSpinBox, SIGNAL(valueChanged(int)), SLOT(resetTimer()));
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
