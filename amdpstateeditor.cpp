@@ -140,8 +140,6 @@ bool amdPstateEditor::applyValues()
             freq = QString::number(corePstates[i].freqspinbox->value());
             cmd.append("echo 's "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[gpuidx].fsindex)+"/device/pp_od_clk_voltage & ");
             qDebug() << cmd;
-            proc.start(cmd);
-            proc.waitForFinished();
         }
     }
     // Apply memory pstates
@@ -152,8 +150,6 @@ bool amdPstateEditor::applyValues()
             freq = QString::number(memPstates[i].freqspinbox->value());
             cmd.append("echo 'm "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[gpuidx].fsindex)+"/device/pp_od_clk_voltage & ");
             qDebug() << cmd;
-            proc.start(cmd);
-            proc.waitForFinished();
         }
     }
     if (changedState) {
