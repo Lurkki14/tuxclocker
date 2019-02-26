@@ -108,6 +108,7 @@ void amd::calculateDisplayValues(int GPUIndex)
     GPUList[GPUIndex].displayCoreUtil = static_cast <int> (GPUList[GPUIndex].coreUtil);
     // Not available on AMD
     GPUList[GPUIndex].displayMemUtil = 0;
+
     GPUList[GPUIndex].displayVoltage = GPUList[GPUIndex].voltage;
     GPUList[GPUIndex].displayFanSpeed = GPUList[GPUIndex].fanSpeed;
 }
@@ -259,7 +260,8 @@ void amd::queryGPUFeatures()
                 GPUList[i].powerLimitAvailable = true;
             }
         }
-
+        // Assume manual fan control is always avilable for AMD
+        GPUList[i].manualFanCtrlAvailable = true;
     }
 
 }
@@ -328,6 +330,7 @@ void amd::queryGPUPowerDraw(int GPUIndex)
                                        sizeof (GPUList[GPUIndex].powerDraw),
                                        &GPUList[GPUIndex].powerDraw);
     if (ret != 0) qDebug("failed to query GPU power draw");
+    else qDebug() << GPUList[GPUIndex].powerDraw << "power draw";
 }
 void amd::queryGPUPowerLimit(int GPUIndex)
 {
@@ -373,10 +376,35 @@ void amd::queryGPUCurrentMaxClocks(int GPUIndex)
 }
 void amd::queryGPUPowerLimitAvailability(int GPUIndex){}
 
-bool amd::assignGPUFanSpeed(int GPUIndex, int targetValue){}
+bool amd::assignGPUFanSpeed(int GPUIndex, int targetValue)
+{
+    QProcess proc;
+    bool ret = false;
+    proc.start("pkexec /bin/sh -c \"echo '" + QString::number(targetValue*2.55) + "' > " + GPUList[GPUIndex].hwmonpath + "/pwm1");
+    proc.waitForFinished(-1);
+    if (proc.exitCode() == 0) {
+        ret = true;
+    }
+    return ret;
+}
 bool amd::assignGPUFanCtlMode(int GPUIndex, bool manual)
 {
-
+    QProcess proc;
+    bool ret = false;
+    if (manual) {
+        proc.start("pkexec /bin/sh -c \"echo '1' > " + GPUList[GPUIndex].hwmonpath + "/pwm1_enable");
+        proc.waitForFinished(-1);
+        if (proc.exitCode() == 0) {
+            ret = true;
+        }
+    } else {
+        proc.start("pkexec /bin/sh -c \"echo '0' > " + GPUList[GPUIndex].hwmonpath + "/pwm1_enable");
+        proc.waitForFinished(-1);
+        if (proc.exitCode() == 0) {
+            ret = true;
+        }
+    }
+    return ret;
 }
 bool amd::assignGPUFreqOffset(int GPUIndex, int targetValue){}
 bool amd::assignGPUMemClockOffset(int GPUIndex, int targetValue){}

@@ -423,11 +423,11 @@ void MainWindow::updateMonitor()
     types->queryGPUUsedVRAM(currentGPUIndex);
 
     // Remove the last decimal point from power draw to make it take less space on the plot
-    double pwrdraw = types->GPUList[currentGPUIndex].powerDraw;
+    /*double pwrdraw = types->GPUList[currentGPUIndex].powerDraw;
     pwrdraw = pwrdraw/10;
     int num = static_cast<int>(pwrdraw);
     pwrdraw = static_cast<double>(num);
-    pwrdraw = pwrdraw/100;
+    pwrdraw = pwrdraw/100;*/
 
     /*plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
     plotCmdsList[1].valueq = pwrdraw;
@@ -1148,7 +1148,7 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
 void MainWindow::on_amdPstateButton_pressed()
 {
     amdPstateEditor *ps = new amdPstateEditor;
-    ps->generateUI(types);
+    ps->generateUI(types, currentGPUIndex);
     ps->setModal(true);
     ps->exec();
 }

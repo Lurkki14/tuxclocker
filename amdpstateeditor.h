@@ -23,11 +23,12 @@ class amdPstateEditor : public QDialog
 public:
     explicit amdPstateEditor(QWidget *parent = nullptr);
     ~amdPstateEditor();
-    void generateUI(gputypes *newtypes);
+    void generateUI(gputypes *newtypes, int GPUIndex);
 
 private:
     Ui::amdPstateEditor *ui;
-    // These are used for getting the values out of the sliders when applying, only a slider or spinbox is required, since they are synced
+    /* These are used for getting the values out of the sliders when applying,
+    only a slider or spinbox is required, since they are synced */
     struct memPstate {
         QSpinBox *voltspinbox;
         QSpinBox *freqspinbox;
@@ -39,8 +40,10 @@ private:
     QVector <corePstate> corePstates;
     QVector <memPstate> memPstates;
     gputypes *types;
+    int gpuidx;
 private slots:
     bool applyValues();
+    bool resetPstates();
 };
 
 #endif // AMDPSTATEEDITOR_H

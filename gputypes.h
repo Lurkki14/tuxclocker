@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QtX11Extras/QX11Info>
+#include <QProcess>
 #ifdef NVIDIA
 #include "nvml.h"
 #endif
