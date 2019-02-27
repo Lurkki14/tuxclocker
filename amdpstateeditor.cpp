@@ -105,16 +105,20 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
         state.freqspinbox = freqspinbox;
         memPstates.append(state);
     }
+    QWidget *buttonwidget = new QWidget;
+    QVBoxLayout *buttonlo = new QVBoxLayout;
     // Add an apply button
     QPushButton *applyButton = new QPushButton;
     connect(applyButton, SIGNAL(clicked()), SLOT(applyValues()));
     applyButton->setText("Apply values");
-    llo->addWidget(applyButton);
+    buttonlo->addWidget(applyButton);
     // Add a reset button
     QPushButton *resetButton = new QPushButton;
     connect(resetButton, SIGNAL(clicked()), SLOT(resetPstates()));
     resetButton->setText("Reset to defaults");
-    llo->addWidget(resetButton);
+    buttonlo->addWidget(resetButton);
+    buttonwidget->setLayout(buttonlo);
+    llo->addWidget(buttonwidget);
 
     lower->setLayout(llo);
     upper->setLayout(ulo);

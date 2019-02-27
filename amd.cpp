@@ -97,7 +97,9 @@ void amd::calculateUIProperties(int GPUIndex)
     if (GPUList[GPUIndex].overVoltAvailable) {
         GPUList[GPUIndex].voltageSliderCur = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
     }
-    /*GPUList[GPUIndex].powerLimSliderCur = static_cast<int>(GPUList[GPUIndex].powerLim);*/
+    if (GPUList[GPUIndex].powerLimitAvailable) {
+        GPUList[GPUIndex].powerLimSliderCur = static_cast<int>(GPUList[GPUIndex].powerLim);
+    }
     if (GPUList[GPUIndex].overClockAvailable) {
         GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
         GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];
@@ -336,12 +338,16 @@ void amd::queryGPUUtils(int GPUIndex)
 }
 void amd::queryGPUPowerDraw(int GPUIndex)
 {
+    int reading = 0;
     int ret = amdgpu_query_sensor_info(*GPUList[GPUIndex].dev,
                                        AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
-                                       sizeof (GPUList[GPUIndex].powerDraw),
-                                       &GPUList[GPUIndex].powerDraw);
+                                       sizeof (reading),
+                                       &reading);
     if (ret != 0) qDebug("failed to query GPU power draw");
-    else qDebug() << GPUList[GPUIndex].powerDraw << "power draw";
+    else {
+        qDebug() << GPUList[GPUIndex].powerDraw << "power draw";
+        GPUList[GPUIndex].powerDraw = static_cast<double>(reading);
+    }
 }
 void amd::queryGPUPowerLimit(int GPUIndex)
 {
@@ -420,6 +426,9 @@ bool amd::assignGPUFanCtlMode(int GPUIndex, bool manual)
 bool amd::assignGPUFreqOffset(int GPUIndex, int targetValue){}
 bool amd::assignGPUMemClockOffset(int GPUIndex, int targetValue){}
 bool amd::assignGPUVoltageOffset(int GPUIndex, int targetValue){}
-bool amd::assignGPUPowerLimit(uint targetValue){}
+bool amd::assignGPUPowerLimit(uint targetValue)
+{
+
+}
 
 #endif
