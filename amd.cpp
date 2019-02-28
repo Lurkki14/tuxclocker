@@ -156,6 +156,7 @@ void amd::calculateUIProperties(int GPUIndex)
     latestFanSlider = GPUList[GPUIndex].fanSpeed;
     fanSlider->setRange(0, 100);
     fanSpinBox->setRange(0, 100);
+    fanSlider->setValue(GPUList[GPUIndex].fanSpeed);
 }
 void amd::calculateDisplayValues(int GPUIndex)
 {
