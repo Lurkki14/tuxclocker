@@ -7,6 +7,9 @@
 #include <QDir>
 #include <QtX11Extras/QX11Info>
 #include <QProcess>
+#include <QSlider>
+#include <QSpinBox>
+#include <QLabel>
 #ifdef NVIDIA
 #include "nvml.h"
 #endif
@@ -96,6 +99,7 @@ public:
         int totalVRAM;
         int usedVRAM;
 
+
 #ifdef AMD
         // AMD only:
         // GPU index in the filesystem eg. 0 in card0
@@ -114,8 +118,36 @@ public:
 #endif
     };
     QVector <GPU> GPUList;
-
     int gpuCount = 0;
+    // Pointers for modifying the ui main view
+    QSlider *voltageSlider;
+    QSlider *coreClockSlider;
+    QSlider *fanSlider;
+    QSlider *memClockSlider;
+    QSlider *powerLimSlider;
+    QSlider *memVoltageSlider;
+
+    QSpinBox *voltageSpinBox;
+    QSpinBox *coreClockSpinBox;
+    QSpinBox *fanSpinBox;
+    QSpinBox *memClockSpinBox;
+    QSpinBox *powerLimSpinBox;
+    QSpinBox *memVoltageSpinBox;
+
+    QLabel *voltageLabel;
+    QLabel *coreClockLabel;
+    QLabel *fanLabel;
+    QLabel *memClockLabel;
+    QLabel *powerLimLabel;
+    QLabel *memVoltageLabel;
+    // Variables to check if a slider has been changed
+    int latestFanSlider;
+    int latestVoltageSlider;
+    int latestMemClkSlider;
+    int latestpowerLimSlider;
+    int latestCoreClkSlider;
+    int latestMemVoltageSlider;
+
 #ifdef NVIDIA
     Display *dpy;
     nvmlDevice_t *device;
@@ -123,6 +155,7 @@ public:
 
     virtual void calculateUIProperties(int GPUIndex) = 0;
     virtual void calculateDisplayValues(int GPUIndex) = 0;
+    virtual QString applySettings(int GPUIndex) = 0;
 
     virtual bool setupGPU() = 0;
     virtual bool setupGPUSecondary(int GPUIndex) = 0;
@@ -150,7 +183,7 @@ public:
     virtual bool assignGPUFreqOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUMemClockOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUVoltageOffset(int GPUIndex, int targetValue) = 0;
-    virtual bool assignGPUPowerLimit(uint targetValue) = 0;
+    virtual bool assignGPUPowerLimit(int GPUIndex, uint targetValue) = 0;
 protected:
     ~gputypes();
 
@@ -166,6 +199,7 @@ signals:
 public slots:
     void calculateUIProperties();
     void calculateDisplayValues(int GPUIndex) = 0;
+    QString applySettings(int GPUIndex);
 
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
@@ -210,6 +244,7 @@ signals:
 public slots:
     void calculateUIProperties(int GPUIndex);
     void calculateDisplayValues(int GPUIndex);
+    QString applySettings(int GPUIndex);
 
     bool setupGPU();
     bool setupGPUSecondary(int GPUIndex);
@@ -239,7 +274,7 @@ public slots:
     bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
     // NVML functions know the GPU index already based on the dev object passed in setupNVML()
-    bool assignGPUPowerLimit(uint targetValue);
+    bool assignGPUPowerLimit(int GPUIndex, uint targetValue);
 private slots:
 };
 #endif

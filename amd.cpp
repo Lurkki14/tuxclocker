@@ -1,5 +1,6 @@
 #ifdef AMD
 #include "gputypes.h"
+#include <tgmath.h>
 
 amd::amd() {}
 bool amd::setupGPU()
@@ -82,7 +83,7 @@ bool amd::setupGPU()
 }
 void amd::calculateUIProperties(int GPUIndex)
 {
-    GPUList[GPUIndex].voltageSliderMin = GPUList[GPUIndex].minVoltageLimit;
+    /*GPUList[GPUIndex].voltageSliderMin = GPUList[GPUIndex].minVoltageLimit;
     GPUList[GPUIndex].voltageSliderMax = GPUList[GPUIndex].maxVoltageLimit;
 
     GPUList[GPUIndex].coreClkSliderMin = GPUList[GPUIndex].minCoreClkLimit;
@@ -103,7 +104,58 @@ void amd::calculateUIProperties(int GPUIndex)
     if (GPUList[GPUIndex].overClockAvailable) {
         GPUList[GPUIndex].memClkSliderCur = GPUList[GPUIndex].memvolts[GPUList[GPUIndex].memclocks.size()-1];
         GPUList[GPUIndex].coreClkSliderCur = GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1];
+    }*/
+    if (GPUList[GPUIndex].overVoltAvailable) {
+        voltageSlider->setEnabled(true);
+        voltageSpinBox->setEnabled(true);
+        voltageSlider->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
+        voltageSpinBox->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
+        voltageSlider->setValue(GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1]);
+
+        latestVoltageSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
+    } else {
+        voltageSlider->setEnabled(false);
+        voltageSpinBox->setEnabled(false);
     }
+
+    if (GPUList[GPUIndex].overClockAvailable) {
+        coreClockSlider->setEnabled(true);
+        coreClockSpinBox->setEnabled(true);
+        coreClockSpinBox->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
+        coreClockSlider->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
+        coreClockSlider->setValue(GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1]);
+
+        memClockSlider->setEnabled(true);
+        memClockSpinBox->setEnabled(true);
+        memClockSlider->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
+        memClockSpinBox->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
+        memClockSlider->setValue(GPUList[GPUIndex].memclocks[GPUList[GPUIndex].memclocks.size()-1]);
+
+        latestCoreClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].coreclocks.size()-1];
+        latestMemClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].memclocks.size()-1];
+    } else {
+        coreClockSlider->setEnabled(false);
+        coreClockSpinBox->setEnabled(false);
+        memClockSlider->setEnabled(false);
+        memClockSpinBox->setEnabled(false);
+    }
+
+    if (GPUList[GPUIndex].powerLimitAvailable) {
+        powerLimSlider->setEnabled(true);
+        powerLimSpinBox->setEnabled(true);
+        powerLimSlider->setRange(static_cast<int>(GPUList[GPUIndex].minPowerLim), static_cast<int>(GPUList[GPUIndex].maxPowerLim));
+        powerLimSpinBox->setRange(static_cast<int>(GPUList[GPUIndex].minPowerLim), static_cast<int>(GPUList[GPUIndex].maxPowerLim));
+        powerLimSlider->setValue(static_cast<int>(GPUList[GPUIndex].powerLim));
+
+        latestpowerLimSlider = static_cast<int>(GPUList[GPUIndex].powerLim);
+    } else {
+        powerLimSlider->setEnabled(false);
+        powerLimSpinBox->setEnabled(false);
+    }
+
+    latestFanSlider = GPUList[GPUIndex].fanSpeed;
+    fanSlider->setRange(0, 100);
+    fanSpinBox->setRange(0, 100);
 }
 void amd::calculateDisplayValues(int GPUIndex)
 {
@@ -117,6 +169,32 @@ void amd::calculateDisplayValues(int GPUIndex)
 
     GPUList[GPUIndex].displayVoltage = GPUList[GPUIndex].voltage;
     GPUList[GPUIndex].displayFanSpeed = GPUList[GPUIndex].fanSpeed;
+}
+QString amd::applySettings(int GPUIndex)
+{
+    QString successStr = "Settings applied";
+    QString errStr = "Failed to apply these settings: ";
+    bool hadErrors = false;
+    if (GPUList[GPUIndex].manualFanCtrlAvailable && latestFanSlider != fanSlider->value()) {
+        if (!assignGPUFanSpeed(GPUIndex, fanSlider->value())) {
+            hadErrors = true;
+            fanSlider->setValue(latestFanSlider);
+            errStr.append("Fan speed, ");
+        }
+    }
+
+    if (GPUList[GPUIndex].powerLimitAvailable && latestpowerLimSlider != powerLimSlider->value()) {
+        if (!assignGPUPowerLimit(GPUIndex, static_cast<uint>(powerLimSlider->value()*1000000))) {
+            hadErrors = true;
+            powerLimSlider->setValue(latestpowerLimSlider);
+            errStr.append("Power limit, ");
+        }
+    }
+
+    if (hadErrors) {
+        errStr.chop(2);
+        return errStr;
+    } else return successStr;
 }
 bool amd::setupGPUSecondary(int GPUIndex){return  true;}
 void amd::queryGPUCount(){}
@@ -395,9 +473,12 @@ void amd::queryGPUPowerLimitAvailability(int GPUIndex){}
 
 bool amd::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
+    qDebug() << "assigning fanspeed to" << targetValue;
     QProcess proc;
     bool ret = false;
-    proc.start("pkexec /bin/sh -c \"echo '" + QString::number(targetValue*2.55) + "' > " + GPUList[GPUIndex].hwmonpath + "/pwm1");
+    int cmdval = static_cast<int>(ceil(targetValue*2.55));
+    qDebug() << "cmdval: " << cmdval;
+    proc.start("pkexec /bin/sh -c \"echo '" + QString::number(cmdval) + "' > " + GPUList[GPUIndex].hwmonpath + "/pwm1");
     proc.waitForFinished(-1);
     if (proc.exitCode() == 0) {
         ret = true;
@@ -426,9 +507,15 @@ bool amd::assignGPUFanCtlMode(int GPUIndex, bool manual)
 bool amd::assignGPUFreqOffset(int GPUIndex, int targetValue){}
 bool amd::assignGPUMemClockOffset(int GPUIndex, int targetValue){}
 bool amd::assignGPUVoltageOffset(int GPUIndex, int targetValue){}
-bool amd::assignGPUPowerLimit(uint targetValue)
+bool amd::assignGPUPowerLimit(int GPUIndex, uint targetValue)
 {
-
+    QProcess proc;
+    proc.start("pkexec /bin/sh -c \"echo '" + QString::number(targetValue) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap");
+    proc.waitForFinished(-1);
+    if (proc.exitCode() != 0) {
+        return true;
+    }
+    return false;
 }
 
 #endif

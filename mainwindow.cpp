@@ -28,6 +28,27 @@ MainWindow::MainWindow(QWidget *parent) :
     amdptr = new amd;
     types = amdptr;
 #endif
+    // Set pointer locations for ui elements
+    types->fanSlider = ui->fanSlider;
+    types->fanSpinBox = ui->fanSpinBox;
+    types->fanLabel = ui->fanSpeedLabel;
+
+    types->voltageSlider = ui->voltageSlider;
+    types->voltageSpinBox = ui->voltageSpinBox;
+    types->voltageLabel = ui->voltgeLabel;
+
+    types->coreClockSlider = ui->frequencySlider;
+    types->coreClockSpinBox = ui->frequencySpinBox;
+    types->coreClockLabel = ui->clockFreqLabel;
+
+    types->powerLimSlider = ui->powerLimSlider;
+    types->powerLimSpinBox = ui->powerLimSpinBox;
+    types->powerLimLabel = ui->powerLimLabel;
+
+    types->memClockSlider = ui->memClkSlider;
+    types->memClockSpinBox = ui->memClkSpinBox;
+    types->memClockLabel = ui->memClockLabel;
+
     // This is for libxnvctrl
     types->setupGPU();
     // This is for NVML
@@ -730,6 +751,8 @@ void MainWindow::resetChanges()
 }
 void MainWindow::applyGPUSettings()
 {
+    ui->statusBar->showMessage(types->applySettings(currentGPUIndex), 5000);
+    /*
     // Apply and save the values
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
@@ -860,7 +883,7 @@ void MainWindow::applyGPUSettings()
     } else {
         ui->statusBar->showMessage("Settings applied", 5000);
     }
-    resettimer->stop();
+    resettimer->stop();*/
 }
 
 void MainWindow::loadProfileSettings()
