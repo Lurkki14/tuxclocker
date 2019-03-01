@@ -110,9 +110,9 @@ void amd::calculateUIProperties(int GPUIndex)
         voltageSpinBox->setEnabled(true);
         voltageSlider->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSpinBox->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
-        voltageSlider->setValue(GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1]);
+        voltageSlider->setValue(GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.last()]);
 
-        latestVoltageSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.size()-1];
+        latestVoltageSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.last()];
     } else {
         voltageSlider->setEnabled(false);
         voltageSpinBox->setEnabled(false);
@@ -123,16 +123,16 @@ void amd::calculateUIProperties(int GPUIndex)
         coreClockSpinBox->setEnabled(true);
         coreClockSpinBox->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
-        coreClockSlider->setValue(GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.size()-1]);
+        coreClockSlider->setValue(GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.last()]);
 
         memClockSlider->setEnabled(true);
         memClockSpinBox->setEnabled(true);
         memClockSlider->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSpinBox->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
-        memClockSlider->setValue(GPUList[GPUIndex].memclocks[GPUList[GPUIndex].memclocks.size()-1]);
+        memClockSlider->setValue(GPUList[GPUIndex].memclocks[GPUList[GPUIndex].memclocks.last()]);
 
-        latestCoreClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].coreclocks.size()-1];
-        latestMemClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].memclocks.size()-1];
+        latestCoreClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].coreclocks.last()];
+        latestMemClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].memclocks.last()];
     } else {
         coreClockSlider->setEnabled(false);
         coreClockSpinBox->setEnabled(false);

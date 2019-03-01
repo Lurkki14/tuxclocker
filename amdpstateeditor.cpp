@@ -85,8 +85,8 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
         freqslider->setRange(newtypes->GPUList[gpuidx].minMemClkLimit, newtypes->GPUList[gpuidx].maxMemClkLimit);
         freqspinbox->setRange(newtypes->GPUList[gpuidx].minMemClkLimit, newtypes->GPUList[gpuidx].maxMemClkLimit);
 
-        voltslider->setRange(newtypes->GPUList[gpuidx].minMemClkLimit, newtypes->GPUList[gpuidx].maxMemClkLimit);
-        voltspinbox->setRange(newtypes->GPUList[gpuidx].minMemClkLimit, newtypes->GPUList[gpuidx].maxMemClkLimit);
+        voltslider->setRange(newtypes->GPUList[gpuidx].minVoltageLimit, newtypes->GPUList[gpuidx].maxVoltageLimit);
+        voltspinbox->setRange(newtypes->GPUList[gpuidx].minVoltageLimit, newtypes->GPUList[gpuidx].maxVoltageLimit);
 
         voltspinbox->setValue(newtypes->GPUList[gpuidx].memvolts[i]);
         freqspinbox->setValue(newtypes->GPUList[gpuidx].memclocks[i]);
