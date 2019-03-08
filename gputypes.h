@@ -10,6 +10,7 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QLabel>
+#include <QComboBox>
 #ifdef NVIDIA
 #include "nvml.h"
 #endif
@@ -140,6 +141,8 @@ public:
     QLabel *memClockLabel;
     QLabel *powerLimLabel;
     QLabel *memVoltageLabel;
+
+    QComboBox *fanModeComboBox;
     // Variables to check if a slider has been changed
     int latestFanSlider;
     int latestVoltageSlider;
@@ -177,6 +180,7 @@ public:
     virtual void queryGPUPowerLimitLimits(int GPUIndex) = 0;
     virtual void queryGPUCurrentMaxClocks(int GPUIndex) = 0;
     virtual void queryGPUPowerLimitAvailability(int GPUIndex) = 0;
+    virtual void queryGPUFanCtlMode(int GPUIndex) = 0;
 
     virtual bool assignGPUFanSpeed(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUFanCtlMode(int GPUIndex, bool targetStatus) = 0;
@@ -222,6 +226,7 @@ public slots:
     void queryGPUPowerLimitLimits(int GPUIndex);
     void queryGPUCurrentMaxClocks(int GPUIndex);
     void queryGPUPowerLimitAvailability(int GPUIndex);
+    void queryGPUFanCtlMode(int GPUIndex) = 0;
 
     bool assignGPUFanSpeed(int GPUIndex, int targetValue);
     bool assignGPUFanCtlMode(int GPUIndex, bool manual);
@@ -267,13 +272,13 @@ public slots:
     void queryGPUPowerLimitLimits(int GPUIndex);
     void queryGPUCurrentMaxClocks(int GPUIndex);
     void queryGPUPowerLimitAvailability(int GPUIndex);
+    void queryGPUFanCtlMode(int GPUIndex);
 
     bool assignGPUFanSpeed(int GPUIndex, int targetValue);
     bool assignGPUFanCtlMode(int GPUIndex, bool manual);
     bool assignGPUFreqOffset(int GPUIndex, int targetValue);
     bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
-    // NVML functions know the GPU index already based on the dev object passed in setupNVML()
     bool assignGPUPowerLimit(int GPUIndex, uint targetValue);
 private slots:
 };

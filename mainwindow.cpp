@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     types->memClockSpinBox = ui->memClkSpinBox;
     types->memClockLabel = ui->memClockLabel;
 
+    types->fanModeComboBox = ui->fanModeComboBox;
     // This is for libxnvctrl
     types->setupGPU();
     // This is for NVML
@@ -713,6 +714,7 @@ void MainWindow::resetChanges()
 void MainWindow::applyGPUSettings()
 {
     ui->statusBar->showMessage(types->applySettings(currentGPUIndex), 5000);
+    resettimer->stop();
     /*
     // Apply and save the values
     QSettings settings("tuxclocker");
@@ -1092,7 +1094,7 @@ void MainWindow::on_editProfile_closed()
 
 void MainWindow::on_fanModeComboBox_currentIndexChanged(int index)
 {
-    types->GPUList[currentGPUIndex].fanControlMode = index;
+    //types->GPUList[currentGPUIndex].fanControlMode = index;
 }
 
 void MainWindow::on_actionManage_profiles_triggered()

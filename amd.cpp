@@ -78,6 +78,7 @@ bool amd::setupGPU()
         queryGPUPowerLimit(0);
         queryGPUFanSpeed(0);
         queryGPUPowerLimitLimits(0);
+        queryGPUFanCtlMode(0);
     }
     return retb;
 }
@@ -110,9 +111,9 @@ void amd::calculateUIProperties(int GPUIndex)
         voltageSpinBox->setEnabled(true);
         voltageSlider->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSpinBox->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
-        voltageSlider->setValue(GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.last()]);
+        voltageSlider->setValue(GPUList[GPUIndex].corevolts.last());
 
-        latestVoltageSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].corevolts.last()];
+        latestVoltageSlider = GPUList[GPUIndex].corevolts.last();
     } else {
         voltageSlider->setEnabled(false);
         voltageSpinBox->setEnabled(false);
@@ -123,16 +124,16 @@ void amd::calculateUIProperties(int GPUIndex)
         coreClockSpinBox->setEnabled(true);
         coreClockSpinBox->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
-        coreClockSlider->setValue(GPUList[GPUIndex].coreclocks[GPUList[GPUIndex].coreclocks.last()]);
+        coreClockSlider->setValue(GPUList[GPUIndex].coreclocks.last());
 
         memClockSlider->setEnabled(true);
         memClockSpinBox->setEnabled(true);
         memClockSlider->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSpinBox->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
-        memClockSlider->setValue(GPUList[GPUIndex].memclocks[GPUList[GPUIndex].memclocks.last()]);
+        memClockSlider->setValue(GPUList[GPUIndex].memclocks.last());
 
-        latestCoreClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].coreclocks.last()];
-        latestMemClkSlider = GPUList[GPUIndex].corevolts[GPUList[GPUIndex].memclocks.last()];
+        latestCoreClkSlider = GPUList[GPUIndex].coreclocks.last();
+        latestMemClkSlider = GPUList[GPUIndex].memclocks.last();
     } else {
         coreClockSlider->setEnabled(false);
         coreClockSpinBox->setEnabled(false);
@@ -157,6 +158,8 @@ void amd::calculateUIProperties(int GPUIndex)
     fanSlider->setRange(0, 100);
     fanSpinBox->setRange(0, 100);
     fanSlider->setValue(GPUList[GPUIndex].fanSpeed);
+
+    fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
 }
 void amd::calculateDisplayValues(int GPUIndex)
 {
@@ -176,6 +179,27 @@ QString amd::applySettings(int GPUIndex)
     QString successStr = "Settings applied";
     QString errStr = "Failed to apply these settings: ";
     bool hadErrors = false;
+    QProcess proc;
+    QString cmd = "pkexec /bin/sh -c \"";
+    /*
+    // Assign fan mode
+    switch (fanModeComboBox->currentIndex()) {
+        case 0:
+        if (!assignGPUFanCtlMode(GPUIndex, false)) {
+            hadErrors = true;
+            errStr.append("Fan mode, ");
+        }
+        break;
+        case 1:
+        if (latestFanSlider != fanSlider->value()) {
+            if (!assignGPUFanCtlMode(GPUIndex, true)) {
+                hadErrors = true;
+                errStr.append("Fan mode, ");
+            }
+        }
+        break;
+    }
+
     if (GPUList[GPUIndex].manualFanCtrlAvailable && latestFanSlider != fanSlider->value()) {
         if (!assignGPUFanSpeed(GPUIndex, fanSlider->value())) {
             hadErrors = true;
@@ -189,6 +213,38 @@ QString amd::applySettings(int GPUIndex)
             hadErrors = true;
             powerLimSlider->setValue(latestpowerLimSlider);
             errStr.append("Power limit, ");
+        }
+    }*/
+    // To avoid asking for password in pkexec multiple times, apply everything at once and query what succeeded afterwards
+    int cmdval = 0;
+    qDebug() << fanModeComboBox->currentIndex() << GPUList[GPUIndex].fanControlMode << "box index";
+    if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+        switch (fanModeComboBox->currentIndex()) {
+            case 0:
+            cmd.append("echo '0' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+            break;
+
+            case 1:
+            cmd.append("echo '1' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+
+            int targetValue = fanSlider->value();
+            cmdval = static_cast<int>(ceil(targetValue*2.55));
+            cmd.append("echo '"+QString::number(cmdval)+"' > "+GPUList[GPUIndex].hwmonpath+"/pwm1 & ");
+            break;
+        }
+    }
+
+    cmd.append("\"");
+    proc.start(cmd);
+    proc.waitForFinished(-1);
+
+    // If fan mode was changed, check if it was successful
+    if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+        queryGPUFanCtlMode(GPUIndex);
+        if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+            hadErrors = true;
+            errStr.append("Fan mode, ");
+            fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
         }
     }
 
@@ -351,9 +407,19 @@ void amd::queryGPUFeatures()
             } else {
                 GPUList[i].powerLimitAvailable = true;
             }
+
+            // Assume manual fan control is always avilable for AMD
+            GPUList[i].manualFanCtrlAvailable = true;
+
+            // Query the current fan control mode
+            QFile fanmodefile(GPUList[i].hwmonpath+"/pwm1_enable");
+            if (fanmodefile.open(QFile::ReadOnly | QFile::Text)) {
+                QString fanmode = fanmodefile.readLine();
+                GPUList[i].fanControlMode = fanmode.toInt();
+                qDebug() << "setting combo box index to" << fanmode.toInt();
+                fanModeComboBox->setCurrentIndex(fanmode.toInt());
+            }
         }
-        // Assume manual fan control is always avilable for AMD
-        GPUList[i].manualFanCtrlAvailable = true;
     }
 
 }
@@ -471,7 +537,17 @@ void amd::queryGPUCurrentMaxClocks(int GPUIndex)
     }*/
 }
 void amd::queryGPUPowerLimitAvailability(int GPUIndex){}
-
+void amd::queryGPUFanCtlMode(int GPUIndex)
+{
+    QFile fanmodefile(GPUList[GPUIndex].hwmonpath+"/pwm1_enable");
+    if (fanmodefile.open(QFile::ReadOnly | QFile::Text)) {
+        QString fanmode = fanmodefile.readLine();
+        GPUList[GPUIndex].fanControlMode = fanmode.toInt();
+        //fanModeComboBox->setCurrentIndex(fanmode.toInt());
+        qDebug() << "fan mode is" << fanmode.toInt();
+    }
+    else qDebug("Failed to query fan mode");
+}
 bool amd::assignGPUFanSpeed(int GPUIndex, int targetValue)
 {
     qDebug() << "assigning fanspeed to" << targetValue;

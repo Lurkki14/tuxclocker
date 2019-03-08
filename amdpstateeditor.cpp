@@ -160,6 +160,7 @@ bool amdPstateEditor::applyValues()
         cmd.append("\"");
         proc.start(cmd);
         proc.waitForFinished(-1);
+        if (proc.exitCode() != 0) return false;
     }
 
     return true;
