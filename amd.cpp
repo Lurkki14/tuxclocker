@@ -159,7 +159,9 @@ void amd::calculateUIProperties(int GPUIndex)
     fanSpinBox->setRange(0, 100);
     fanSlider->setValue(GPUList[GPUIndex].fanSpeed);
 
-    fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
+    //qDebug() << "setting fan box to" << GPUList[GPUIndex].fanControlMode;
+    // For some reason it can't set it here, try to do it here for cleanness
+    //fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
 }
 void amd::calculateDisplayValues(int GPUIndex)
 {
@@ -218,6 +220,7 @@ QString amd::applySettings(int GPUIndex)
     // To avoid asking for password in pkexec multiple times, apply everything at once and query what succeeded afterwards
     int cmdval = 0;
     qDebug() << fanModeComboBox->currentIndex() << GPUList[GPUIndex].fanControlMode << "box index";
+    // Apply fan settings
     if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
         switch (fanModeComboBox->currentIndex()) {
             case 0:
@@ -233,6 +236,10 @@ QString amd::applySettings(int GPUIndex)
             break;
         }
     }
+    // Apply power limit
+    if (powerLimSlider->value() != latestpowerLimSlider) {
+        cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
+    }
 
     cmd.append("\"");
     proc.start(cmd);
@@ -247,6 +254,7 @@ QString amd::applySettings(int GPUIndex)
             fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
         }
     }
+    // Power limit
 
     if (hadErrors) {
         errStr.chop(2);
@@ -417,7 +425,7 @@ void amd::queryGPUFeatures()
                 QString fanmode = fanmodefile.readLine();
                 GPUList[i].fanControlMode = fanmode.toInt();
                 qDebug() << "setting combo box index to" << fanmode.toInt();
-                fanModeComboBox->setCurrentIndex(fanmode.toInt());
+                //fanModeComboBox->setCurrentIndex(fanmode.toInt());
             }
         }
     }

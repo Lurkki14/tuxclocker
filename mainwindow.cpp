@@ -71,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->GPUComboBox->addItem("GPU-" + QString::number(i) + ": " + types->GPUList[i].displayName);
     }
 
+    ui->fanModeComboBox->setCurrentIndex(types->GPUList[currentGPUIndex].fanControlMode);
     //loadProfileSettings();
     //setupMonitorTab();
     setupGraphMonitorTab();
