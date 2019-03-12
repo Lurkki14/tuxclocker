@@ -1,6 +1,7 @@
 #ifdef AMD
 #include "gputypes.h"
 #include <tgmath.h>
+#include <QThread>
 
 amd::amd() {}
 bool amd::setupGPU()
@@ -244,10 +245,12 @@ QString amd::applySettings(int GPUIndex)
     cmd.append("\"");
     proc.start(cmd);
     proc.waitForFinished(-1);
+    QThread::msleep(200);
 
     // If fan mode was changed, check if it was successful
     if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
         queryGPUFanCtlMode(GPUIndex);
+        qDebug() << "checking combo box" << fanModeComboBox->currentIndex() << GPUList[GPUIndex].fanControlMode;
         if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
             hadErrors = true;
             errStr.append("Fan mode, ");
@@ -255,6 +258,15 @@ QString amd::applySettings(int GPUIndex)
         }
     }
     // Power limit
+    if (powerLimSlider->value() != latestpowerLimSlider) {
+        queryGPUPowerLimit(GPUIndex);
+        if (powerLimSlider->value() * 1000000 != static_cast<int>(GPUList[GPUIndex].powerLim)) {
+            hadErrors = true;
+            errStr.append("Power Limit, ");
+        } else {
+            latestpowerLimSlider = powerLimSlider->value();
+        }
+    }
 
     if (hadErrors) {
         errStr.chop(2);

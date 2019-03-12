@@ -120,13 +120,23 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
     buttonwidget->setLayout(buttonlo);
     llo->addWidget(buttonwidget);
 
+    QStatusBar *statusbar = new QStatusBar;
+    statusBar = statusbar;
+    QWidget *barwdg = new QWidget;
+    QVBoxLayout *barlo = new QVBoxLayout;
+    barlo->addWidget(statusbar);
+    barwdg->setLayout(barlo);
+
     lower->setLayout(llo);
     upper->setLayout(ulo);
 
     QVBoxLayout *mainlo = new QVBoxLayout;
     mainlo->addWidget(upper);
     mainlo->addWidget(lower);
+    mainlo->addWidget(barwdg);
     ui->centralWidget->setLayout(mainlo);
+
+    //statusbar->showMessage("test");
 }
 bool amdPstateEditor::applyValues()
 {
@@ -135,11 +145,12 @@ bool amdPstateEditor::applyValues()
     QString volt;
     QString freq;
     QString cmd = "pkexec /bin/sh -c \"";
-    bool changedState = false;
+    // Vector for saving what got applied
+    QVector <int> changedMemPstates, changedCorePstates;
     // Apply core pstates
     for (int i=0; i<corePstates.size(); i++) {
         if ((corePstates[i].freqspinbox->value() != types->GPUList[gpuidx].coreclocks[i]) || (corePstates[i].voltspinbox->value() != types->GPUList[gpuidx].corevolts[i])) {
-            changedState = true;
+            changedCorePstates.append(i);
             volt = QString::number(corePstates[i].voltspinbox->value());
             freq = QString::number(corePstates[i].freqspinbox->value());
             cmd.append("echo 's "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[gpuidx].fsindex)+"/device/pp_od_clk_voltage & ");
@@ -149,20 +160,34 @@ bool amdPstateEditor::applyValues()
     // Apply memory pstates
     for (int i=0; i<memPstates.size(); i++) {
         if ((memPstates[i].freqspinbox->value() != types->GPUList[gpuidx].memclocks[i]) || (memPstates[i].voltspinbox->value() != types->GPUList[gpuidx].memvolts[i])) {
-            changedState = true;
+            changedMemPstates.append(i);
             volt = QString::number(memPstates[i].voltspinbox->value());
             freq = QString::number(memPstates[i].freqspinbox->value());
             cmd.append("echo 'm "+ QString::number(i) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(types->GPUList[gpuidx].fsindex)+"/device/pp_od_clk_voltage & ");
             qDebug() << cmd;
         }
     }
-    if (changedState) {
+    if (!changedMemPstates.isEmpty() || !changedCorePstates.isEmpty()) {
         cmd.append("\"");
         proc.start(cmd);
         proc.waitForFinished(-1);
-        if (proc.exitCode() != 0) return false;
+        if (proc.exitCode() != 0) {
+            statusBar->showMessage("Failed to apply changes.");
+            return false;
+        }
+    }
+    // Save the values if it was successful
+    for (int i=0; i<changedMemPstates.size(); i++) {
+        types->GPUList[gpuidx].memclocks[changedMemPstates[i]] = memPstates[changedMemPstates[i]].freqspinbox->value();
+        types->GPUList[gpuidx].memvolts[changedMemPstates[i]] = memPstates[changedMemPstates[i]].voltspinbox->value();
     }
 
+    for (int i=0; i<changedCorePstates.size(); i++) {
+        types->GPUList[gpuidx].coreclocks[changedCorePstates[i]] = corePstates[changedCorePstates[i]].freqspinbox->value();
+        types->GPUList[gpuidx].corevolts[changedCorePstates[i]] = corePstates[changedCorePstates[i]].voltspinbox->value();
+    }
+
+    statusBar->showMessage("Changes applied.");
     return true;
 }
 bool amdPstateEditor::resetPstates()

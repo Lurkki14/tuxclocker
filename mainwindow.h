@@ -213,6 +213,11 @@ private:
     double latestPointerXcoord;
     int plotIndex = 0;
 
+    struct monitorCmds {
+        void (gputypes::*queryFunc)(int);
+        int displayValue;
+    };
+    QVector <monitorCmds> monitorCmdsList;
     struct plotCmds
     {
         QVector <double> vector;

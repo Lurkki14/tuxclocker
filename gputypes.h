@@ -65,12 +65,14 @@ public:
         bool overClockAvailable = false;
         bool memOverClockAvailable = false;
         bool powerLimitAvailable = false;
+
         bool voltageReadable = false;
         bool coreClkReadable = false;
         bool memClkReadable = false;
         bool powerDrawReadable = false;
         bool coreUtilReadable = false;
         bool manualFanCtrlAvailable = false;
+
         int fanControlMode;
         int maxVoltageOffset;
         int minVoltageOffset;

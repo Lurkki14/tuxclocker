@@ -231,6 +231,39 @@ void MainWindow::setupMonitorTab()
 }
 void MainWindow::setupGraphMonitorTab()
 {
+    // Check what is readable and make monitoring structs
+    if (types->GPUList[currentGPUIndex].voltageReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUVoltage;
+        monstruct.displayValue = types->GPUList[currentGPUIndex].displayVoltage;
+        monitorCmdsList.append(monstruct);
+    }
+    if (types->GPUList[currentGPUIndex].powerDrawReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUPowerDraw;
+        monstruct.displayValue = types->GPUList[currentGPUIndex].displayPowerDraw;
+        monitorCmdsList.append(monstruct);
+    }
+    if (types->GPUList[currentGPUIndex].coreUtilReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUUtils;
+        monstruct.displayValue = types->GPUList[currentGPUIndex].displayCoreUtil;
+        monitorCmdsList.append(monstruct);
+    }
+
+    if (types->GPUList[currentGPUIndex].coreClkReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUFrequencies;
+        monstruct.displayValue = types->GPUList[currentGPUIndex].displayCoreFreq;
+        monitorCmdsList.append(monstruct);
+    }
+    monitorCmds monstruct;
+    monstruct.queryFunc = &gputypes::queryGPUFanSpeed;
+    monstruct.displayValue = types->GPUList[currentGPUIndex].displayFanSpeed;
+    monitorCmdsList.append(monstruct);
+
+
+
     types->queryGPUTemp(currentGPUIndex);
     types->queryGPUPowerDraw(currentGPUIndex);
     types->queryGPUFrequencies(currentGPUIndex);
@@ -422,12 +455,16 @@ void MainWindow::updateMonitor()
 {
     // Update the values for plots
     types->queryGPUTemp(currentGPUIndex);
-    types->queryGPUPowerDraw(currentGPUIndex);
-    types->queryGPUFrequencies(currentGPUIndex);
-    types->queryGPUUtils(currentGPUIndex);
+    //types->queryGPUPowerDraw(currentGPUIndex);
+    //types->queryGPUFrequencies(currentGPUIndex);
+    //types->queryGPUUtils(currentGPUIndex);
     types->queryGPUVoltage(currentGPUIndex);
-    types->queryGPUFanSpeed(currentGPUIndex);
+    //types->queryGPUFanSpeed(currentGPUIndex);
     types->queryGPUUsedVRAM(currentGPUIndex);
+
+    for (int i=0; i<monitorCmdsList.size(); i++) {
+        (*types.*monitorCmdsList[i].queryFunc)(currentGPUIndex);
+    }
 
     // Remove the last decimal point from power draw to make it take less space on the plot
     /*double pwrdraw = types->GPUList[currentGPUIndex].powerDraw;
@@ -1064,6 +1101,7 @@ void MainWindow::enableFanUpdater()
 }
 void MainWindow::on_applyButton_clicked()
 {
+    resettimer->stop();
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     QString prevProfile = settings.value("currentProfile").toString();

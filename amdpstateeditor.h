@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QProcess>
+#include <QStatusBar>
 #include "gputypes.h"
 
 namespace Ui {
@@ -39,6 +40,7 @@ private:
     };
     QVector <corePstate> corePstates;
     QVector <memPstate> memPstates;
+    QStatusBar *statusBar;
     gputypes *types;
     int gpuidx;
 private slots:
