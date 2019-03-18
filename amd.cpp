@@ -241,6 +241,12 @@ QString amd::applySettings(int GPUIndex)
     if (powerLimSlider->value() != latestpowerLimSlider) {
         cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
     }
+    // Apply voltage/core clock (highest pstate)
+    if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+        QString volt = QString::number(voltageSlider->value());
+        QString freq = QString::number(coreClockSlider->value());
+        cmd.append("echo 'm "+ QString::number(GPUList[GPUIndex].corevolts.size()-1) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(GPUList[GPUIndex].fsindex)+"/device/pp_od_clk_voltage & ");
+    }
 
     cmd.append("\"");
     proc.start(cmd);
@@ -260,12 +266,15 @@ QString amd::applySettings(int GPUIndex)
     // Power limit
     if (powerLimSlider->value() != latestpowerLimSlider) {
         queryGPUPowerLimit(GPUIndex);
-        if (powerLimSlider->value() * 1000000 != static_cast<int>(GPUList[GPUIndex].powerLim)) {
+        if (powerLimSlider->value() != static_cast<int>(GPUList[GPUIndex].powerLim)) {
             hadErrors = true;
             errStr.append("Power Limit, ");
         } else {
             latestpowerLimSlider = powerLimSlider->value();
         }
+    }
+    // Core clock/voltage
+    if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
     }
 
     if (hadErrors) {
