@@ -275,6 +275,14 @@ QString amd::applySettings(int GPUIndex)
     }
     // Core clock/voltage
     if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+        queryPstates();
+        if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+            hadErrors = true;
+            errStr.append("Core pstate, ");
+        } else {
+            latestVoltageSlider = voltageSlider->value();
+            latestCoreClkSlider = coreClockSlider->value();
+        }
     }
 
     if (hadErrors) {
@@ -305,9 +313,12 @@ void amd::queryGPUFeatures()
     int breakcount = 0;
     QString path;
     QString line;
+
+    queryPstates();
+
     for (int i=0; i<gpuCount; i++) {
         if (GPUList[i].gputype == Type::AMDGPU) {
-            path = "/sys/class/drm/card"+QString::number(GPUList[i].fsindex)+"/device/pp_od_clk_voltage";
+            /*path = "/sys/class/drm/card"+QString::number(GPUList[i].fsindex)+"/device/pp_od_clk_voltage";
             QFile tablefile(path);
             bool ret = tablefile.open(QFile::ReadOnly | QFile::Text);
             if (ret) {
@@ -369,7 +380,7 @@ void amd::queryGPUFeatures()
                     breakcount++;
                 }
                 tablefile.close();
-            }
+            }*/
             // If the pstate vectors are empty after searching, set the features disabled
             if (!GPUList[i].corevolts.isEmpty()) GPUList[i].overVoltAvailable = true;
 
@@ -451,6 +462,82 @@ void amd::queryGPUFeatures()
         }
     }
 
+}
+void amd::queryPstates()
+{
+    QString path;
+    int breakcount = 0;
+    QString line;
+    int column = 0;
+    int type = 0;
+    QRegularExpression numexp("\\d+\\d");
+    for (int i=0; i<gpuCount; i++) {
+        if (GPUList[i].gputype == Type::AMDGPU) {
+            path = "/sys/class/drm/card"+QString::number(GPUList[i].fsindex)+"/device/pp_od_clk_voltage";
+            QFile tablefile(path);
+            bool ret = tablefile.open(QFile::ReadOnly | QFile::Text);
+            if (ret) {
+                QTextStream str(&tablefile);
+                while (!str.atEnd() && breakcount < 30) {
+                    line = str.readLine();
+                    if (line.contains("OD_SCLK")) type = 1;
+                    if (line.contains("OD_MCLK")) type = 2;
+                    if (line.contains("OD_RANGE")) type = 3;
+                    QRegularExpressionMatchIterator iter = numexp.globalMatch(line);
+                    // Read all matches for the line
+                    while  (iter.hasNext()) {
+                        QRegularExpressionMatch nummatch = iter.next();
+                        QString capline = nummatch.captured();
+                        int num = capline.toInt();
+
+                        if (type == 1) {
+                            if (column == 0) {
+                                GPUList[i].coreclocks.append(num);
+                            } else {
+                                GPUList[i].corevolts.append(num);
+                            }
+                        }
+
+                        if (type == 2) {
+                            if (column == 0) {
+                                GPUList[i].memclocks.append(num);
+                            } else {
+                                GPUList[i].memvolts.append(num);
+                            }
+                        }
+
+                        if (type == 3) {
+                            if (line.contains("sclk", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minCoreClkLimit = num;
+                                } else {
+                                    GPUList[i].maxCoreClkLimit = num;
+                                }
+                            }
+                            if (line.contains("mclk", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minMemClkLimit = num;
+                                } else {
+                                    GPUList[i].maxMemClkLimit = num;
+                                }
+                            }
+                            if (line.contains("vdd", Qt::CaseInsensitive)) {
+                                if (column == 0) {
+                                    GPUList[i].minVoltageLimit = num;
+                                } else {
+                                    GPUList[i].maxVoltageLimit = num;
+                                }
+                            }
+                        }
+                        column++;
+                    }
+                    column = 0;
+                    breakcount++;
+                }
+                tablefile.close();
+            }
+        }
+    }
 }
 void amd::queryGPUVoltage(int GPUIndex)
 {

@@ -282,6 +282,7 @@ public slots:
     bool assignGPUMemClockOffset(int GPUIndex, int targetValue);
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
     bool assignGPUPowerLimit(int GPUIndex, uint targetValue);
+    void queryPstates();
 private slots:
 };
 #endif
