@@ -65,6 +65,7 @@ public:
         bool overClockAvailable = false;
         bool memOverClockAvailable = false;
         bool powerLimitAvailable = false;
+        QString pci_id;
 
         bool voltageReadable = false;
         bool coreClkReadable = false;
@@ -92,6 +93,7 @@ public:
         int temp;
         int voltage;
         int fanSpeed;
+        int fanPwm;
 
         double powerDraw;
         uint coreUtil;

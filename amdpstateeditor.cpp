@@ -177,15 +177,32 @@ bool amdPstateEditor::applyValues()
         }
     }
     // Save the values if it was successful
+    QSettings settings("tuxclocker");
+    settings.beginGroup("General");
+    QString currentProfile = settings.value("currentProfile").toString();
+    settings.endGroup();
+    settings.beginGroup(currentProfile);
+    settings.beginGroup(types->GPUList[gpuidx].pci_id);
+
+    settings.beginWriteArray("memPstates");
     for (int i=0; i<changedMemPstates.size(); i++) {
+        settings.setArrayIndex(changedMemPstates[i]);
         types->GPUList[gpuidx].memclocks[changedMemPstates[i]] = memPstates[changedMemPstates[i]].freqspinbox->value();
         types->GPUList[gpuidx].memvolts[changedMemPstates[i]] = memPstates[changedMemPstates[i]].voltspinbox->value();
+        settings.setValue("voltage", memPstates[changedMemPstates[i]].voltspinbox->value());
+        settings.setValue("frequency", memPstates[changedMemPstates[i]].freqspinbox->value());
     }
+    settings.endArray();
 
+    settings.beginWriteArray("corePstates");
     for (int i=0; i<changedCorePstates.size(); i++) {
+        settings.setArrayIndex(changedCorePstates[i]);
         types->GPUList[gpuidx].coreclocks[changedCorePstates[i]] = corePstates[changedCorePstates[i]].freqspinbox->value();
         types->GPUList[gpuidx].corevolts[changedCorePstates[i]] = corePstates[changedCorePstates[i]].voltspinbox->value();
+        settings.setValue("voltage", corePstates[changedCorePstates[i]].voltspinbox->value());
+        settings.setValue("frequency", corePstates[changedCorePstates[i]].freqspinbox->value());
     }
+    settings.endArray();
 
     statusBar->showMessage("Changes applied.");
     return true;

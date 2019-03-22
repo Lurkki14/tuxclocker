@@ -1,7 +1,9 @@
 #ifdef AMD
 #include "gputypes.h"
 #include <tgmath.h>
+#include <string.h>
 #include <QThread>
+#include <QSettings>
 
 amd::amd() {}
 bool amd::setupGPU()
@@ -59,12 +61,28 @@ bool amd::setupGPU()
                 gpu.dev = handle;
                 qDebug() << gpu.name;
 
+                // Get the UUID - vendor id, device id
+                drmDevicePtr drdev;
+                drmGetDevice(fd, &drdev);
+                drmPciDeviceInfo pci_info = *drdev->deviceinfo.pci;
+                QString pci_id = QString::number(pci_info.vendor_id)+"-"+QString::number(pci_info.device_id);
+                //QByteArray barr = uuid.toLocal8Bit();
+                /*char uuid;
+                char vendor = static_cast<char>(pci_info.vendor_id);
+                char device = static_cast<char>(pci_info.device_id);
+                strcat(&uuid, &vendor);
+                strcat(&uuid, &device);
+                gpu.uuid = &uuid;*/
+                gpu.pci_id = pci_id;
+                qDebug() << "UUID: " << gpu.pci_id;
+
                 int reading = 0;
                 uint size = sizeof (int);
                 ret = amdgpu_query_sensor_info(*handle, AMDGPU_INFO_SENSOR_GFX_SCLK, size, &reading);
                 qDebug() << "coreclk" << reading << ret;
 
                 GPUList.append(gpu);
+                //qDebug() << "UUID 2: " << GPUList[0].uuid;
                 gpuCount++;
 
                 retb = true;
@@ -179,6 +197,14 @@ void amd::calculateDisplayValues(int GPUIndex)
 }
 QString amd::applySettings(int GPUIndex)
 {
+    QSettings settings("tuxclocker");
+    settings.beginGroup("General");
+    settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
+    QString currentProfile = settings.value("currentProfile").toString();
+    settings.endGroup();
+    settings.beginGroup(currentProfile);
+    settings.beginGroup(GPUList[GPUIndex].pci_id);
+
     QString successStr = "Settings applied";
     QString errStr = "Failed to apply these settings: ";
     bool hadErrors = false;
@@ -237,15 +263,25 @@ QString amd::applySettings(int GPUIndex)
             break;
         }
     }
+    // Apply fan speed
+    if (fanModeComboBox->currentIndex() == 1 && (latestFanSlider != fanSlider->value())) {
+        int targetValue = fanSlider->value();
+        cmdval = static_cast<int>(ceil(targetValue*2.55));
+        cmd.append("echo '"+QString::number(cmdval)+"' > "+GPUList[GPUIndex].hwmonpath+"/pwm1 & ");
+    }
+
     // Apply power limit
     if (powerLimSlider->value() != latestpowerLimSlider) {
         cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
     }
+
     // Apply voltage/core clock (highest pstate)
-    if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
-        QString volt = QString::number(voltageSlider->value());
-        QString freq = QString::number(coreClockSlider->value());
-        cmd.append("echo 'm "+ QString::number(GPUList[GPUIndex].corevolts.size()-1) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(GPUList[GPUIndex].fsindex)+"/device/pp_od_clk_voltage & ");
+    if (GPUList[GPUIndex].overClockAvailable) {
+        if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+            QString volt = QString::number(voltageSlider->value());
+            QString freq = QString::number(coreClockSlider->value());
+            cmd.append("echo 'm "+ QString::number(GPUList[GPUIndex].corevolts.size()-1) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(GPUList[GPUIndex].fsindex)+"/device/pp_od_clk_voltage & ");
+        }
     }
 
     cmd.append("\"");
@@ -261,8 +297,24 @@ QString amd::applySettings(int GPUIndex)
             hadErrors = true;
             errStr.append("Fan mode, ");
             fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
+        } else {
+            // Save to settings is applying was successful
+            settings.setValue("fanControlMode", fanModeComboBox->currentIndex());
         }
     }
+    // Fan speed
+    if (fanModeComboBox->currentIndex() == 1 && (GPUList[GPUIndex].fanSpeed != fanSlider->value())) {
+        queryGPUFanSpeed(GPUIndex);
+        qDebug() << "tried to change fan speed to " << cmdval << "speed is " << GPUList[GPUIndex].fanPwm;
+        if (GPUList[GPUIndex].fanPwm != cmdval) {
+            hadErrors = true;
+            errStr.append("Fan speed, ");
+        } else {
+            latestFanSlider = fanSlider->value();
+        }
+    }
+
+
     // Power limit
     if (powerLimSlider->value() != latestpowerLimSlider) {
         queryGPUPowerLimit(GPUIndex);
@@ -271,17 +323,20 @@ QString amd::applySettings(int GPUIndex)
             errStr.append("Power Limit, ");
         } else {
             latestpowerLimSlider = powerLimSlider->value();
+            settings.setValue("powerLimit", powerLimSlider->value());
         }
     }
     // Core clock/voltage
-    if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
-        queryPstates();
+    if (GPUList[GPUIndex].overClockAvailable) {
         if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
-            hadErrors = true;
-            errStr.append("Core pstate, ");
-        } else {
-            latestVoltageSlider = voltageSlider->value();
-            latestCoreClkSlider = coreClockSlider->value();
+            queryPstates();
+            if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+                hadErrors = true;
+                errStr.append("Core pstate, ");
+            } else {
+                latestVoltageSlider = voltageSlider->value();
+                latestCoreClkSlider = coreClockSlider->value();
+            }
         }
     }
 
@@ -579,7 +634,8 @@ void amd::queryGPUFanSpeed(int GPUIndex)
     if (ret) {
         QString fanspeed = pwmfile.readLine().trimmed();
         double percspeed = (fanspeed.toDouble()/2.55);
-        GPUList[GPUIndex].fanSpeed = static_cast<int>(percspeed);
+        GPUList[GPUIndex].fanPwm = fanspeed.toInt();
+        GPUList[GPUIndex].fanSpeed = static_cast<int>(ceil(percspeed));
         qDebug() << GPUList[GPUIndex].fanSpeed << "fanspeed";
     }
     else qDebug("Failed to query fan speed");

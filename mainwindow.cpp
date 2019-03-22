@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     ui->fanModeComboBox->setCurrentIndex(types->GPUList[currentGPUIndex].fanControlMode);
-    //loadProfileSettings();
+    loadProfileSettings();
     //setupMonitorTab();
     setupGraphMonitorTab();
 
@@ -751,6 +751,7 @@ void MainWindow::resetChanges()
 }
 void MainWindow::applyGPUSettings()
 {
+    qDebug() << "saving settigns for UUID " << types->GPUList[currentGPUIndex].uuid;
     ui->statusBar->showMessage(types->applySettings(currentGPUIndex), 5000);
     resettimer->stop();
     /*

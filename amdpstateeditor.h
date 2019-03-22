@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QProcess>
 #include <QStatusBar>
+#include <QSettings>
 #include "gputypes.h"
 
 namespace Ui {
