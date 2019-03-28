@@ -200,13 +200,16 @@ QString amd::applySettings(int GPUIndex)
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
+    qDebug() << "read uiid " << settings.value("latestUUID").toString();
     QString currentProfile = settings.value("currentProfile").toString();
     settings.endGroup();
     settings.beginGroup(currentProfile);
     settings.beginGroup(GPUList[GPUIndex].pci_id);
 
     QString successStr = "Settings applied";
-    QString errStr = "Failed to apply these settings: ";
+    //QString errStr = "Failed to apply these settings: ";
+    QString errStr = "Failed to apply settings  ";
+
     bool hadErrors = false;
     QProcess proc;
     QString cmd = "pkexec /bin/sh -c \"";
@@ -290,7 +293,7 @@ QString amd::applySettings(int GPUIndex)
     QThread::msleep(200);
 
     // If fan mode was changed, check if it was successful
-    if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+    /*if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
         queryGPUFanCtlMode(GPUIndex);
         qDebug() << "checking combo box" << fanModeComboBox->currentIndex() << GPUList[GPUIndex].fanControlMode;
         if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
@@ -338,12 +341,27 @@ QString amd::applySettings(int GPUIndex)
                 latestCoreClkSlider = coreClockSlider->value();
             }
         }
-    }
+    }*/
 
-    if (hadErrors) {
+    if (proc.exitCode() != 0) {
         errStr.chop(2);
+        fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);
+        fanSlider->setValue(latestFanSlider);
+        memClockSlider->setValue(latestMemClkSlider);
+        coreClockSlider->setValue(latestCoreClkSlider);
+        voltageSlider->setValue(latestVoltageSlider);
+        powerLimSlider->setValue(latestpowerLimSlider);
+
         return errStr;
-    } else return successStr;
+    } else {
+        latestFanSlider = fanSlider->value();
+        latestMemClkSlider = memClockSlider->value();
+        latestpowerLimSlider = powerLimSlider->value();
+        latestCoreClkSlider = coreClockSlider->value();
+        latestVoltageSlider = voltageSlider->value();
+
+        return successStr;
+    }
 }
 bool amd::setupGPUSecondary(int GPUIndex){return  true;}
 void amd::queryGPUCount(){}

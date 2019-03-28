@@ -328,6 +328,8 @@ void editProfile::on_saveButton_clicked()
     settings.beginGroup("General");
     QString currentProfile = settings.value("currentProfile").toString();
     QString latestUUID = settings.value("latestUUID").toString();
+    //QString latestUUID = "4098-26649";
+    qDebug() << "saving for uuid " << latestUUID;
     settings.endGroup();
     settings.beginGroup(currentProfile);
     settings.beginGroup(latestUUID);
