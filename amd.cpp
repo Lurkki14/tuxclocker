@@ -131,7 +131,8 @@ void amd::calculateUIProperties(int GPUIndex)
         voltageSlider->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSpinBox->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSlider->setValue(GPUList[GPUIndex].corevolts.last());
-
+        qDebug() << "voltage slider: minimum = " << GPUList[GPUIndex].minVoltageLimit
+        << "maximum = " << GPUList[GPUIndex].maxVoltageLimit << "current = " << GPUList[GPUIndex].corevolts.last();
         latestVoltageSlider = GPUList[GPUIndex].corevolts.last();
     } else {
         voltageSlider->setEnabled(false);
@@ -144,12 +145,16 @@ void amd::calculateUIProperties(int GPUIndex)
         coreClockSpinBox->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setValue(GPUList[GPUIndex].coreclocks.last());
+        qDebug() << "core clock slider: minimum = " << GPUList[GPUIndex].minCoreClkLimit
+        << "maximum = " << GPUList[GPUIndex].maxCoreClkLimit << "current = " << GPUList[GPUIndex].coreclocks.last();
 
         memClockSlider->setEnabled(true);
         memClockSpinBox->setEnabled(true);
         memClockSlider->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSpinBox->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSlider->setValue(GPUList[GPUIndex].memclocks.last());
+        qDebug() << "mem clock slider: minimum = " << GPUList[GPUIndex].minMemClkLimit
+        << "maximum = " << GPUList[GPUIndex].maxMemClkLimit << "current = " << GPUList[GPUIndex].memclocks.last();
 
         latestCoreClkSlider = GPUList[GPUIndex].coreclocks.last();
         latestMemClkSlider = GPUList[GPUIndex].memclocks.last();
