@@ -2,11 +2,13 @@
 #include "ui_editprofile.h"
 #include "mainwindow.h"
 
-editProfile::editProfile(QWidget *parent) :
+editProfile::editProfile(QWidget *parent, int GPUIndex, gputypes *types) :
     QDialog(parent),
     ui(new Ui::editProfile)
 {
     ui->setupUi(this);
+    GPUId = GPUIndex;
+    type = types;
 
     // Get the main widget backgorund palette and use the colors for the plots
     QPalette palette;
@@ -69,11 +71,24 @@ editProfile::editProfile(QWidget *parent) :
     connect(ui->curvePlot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(drawPointHoveredText(QMouseEvent*)));
 
     // Load the existing points to the graph
-    MainWindow mw;
+    /*MainWindow mw;
     for (int i=0; i<mw.xCurvePoints.length(); i++) {
         qv_x.append(mw.xCurvePoints[i]);
         qv_y.append(mw.yCurvePoints[i]);
+    }*/
+    QSettings settings("tuxclocker");
+    QString profile = settings.value("currentProfile").toString();
+    QString UUID = settings.value("latestUUID").toString();
+    settings.beginGroup(profile);
+    settings.beginGroup(UUID);
+    int size = settings.beginReadArray("curvepoints");
+    for (int i=0; i<size; i++) {
+        settings.setArrayIndex(i);
+        qv_x.append(settings.value("xpoints").toInt());
+        qv_y.append(settings.value("ypoints").toInt());
     }
+    settings.endArray();
+
 
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
@@ -325,14 +340,10 @@ void editProfile::detectRelease(QMouseEvent *event)
 void editProfile::on_saveButton_clicked()
 {
     QSettings settings("tuxclocker");
-    settings.beginGroup("General");
     QString currentProfile = settings.value("currentProfile").toString();
-    QString latestUUID = settings.value("latestUUID").toString();
-    //QString latestUUID = "4098-26649";
-    qDebug() << "saving for uuid " << latestUUID;
-    settings.endGroup();
+    settings.setValue("latestUUID", type->GPUList[GPUId].pci_id);
     settings.beginGroup(currentProfile);
-    settings.beginGroup(latestUUID);
+    settings.beginGroup(type->GPUList[GPUId].pci_id);
     QString xString;
     QString yString;
     settings.beginWriteArray("curvepoints");

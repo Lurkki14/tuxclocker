@@ -178,9 +178,7 @@ bool amdPstateEditor::applyValues()
     }
     // Save the values if it was successful
     QSettings settings("tuxclocker");
-    settings.beginGroup("General");
     QString currentProfile = settings.value("currentProfile").toString();
-    settings.endGroup();
     settings.beginGroup(currentProfile);
     settings.beginGroup(types->GPUList[gpuidx].pci_id);
 

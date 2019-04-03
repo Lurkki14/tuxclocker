@@ -199,10 +199,11 @@ QString amd::applySettings(int GPUIndex)
 {
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
-    settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
+    //settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
     qDebug() << "read uiid " << settings.value("latestUUID").toString();
     QString currentProfile = settings.value("currentProfile").toString();
     settings.endGroup();
+    settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
     settings.beginGroup(currentProfile);
     settings.beginGroup(GPUList[GPUIndex].pci_id);
 

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QVector>
 #include "qcustomplot.h"
+#include "gputypes.h"
 #include <QString>
 
 namespace Ui {
@@ -15,7 +16,7 @@ class editProfile : public QDialog
     Q_OBJECT
 
 public:
-    explicit editProfile(QWidget *parent = nullptr);
+    explicit editProfile(QWidget *parent = nullptr, int GPUIndex = 0, gputypes *types = nullptr);
     ~editProfile();
     QVector<double> qv_x, qv_y;
     QVector<int> cpoints_x, cpoints_y;
@@ -76,6 +77,8 @@ private:
     int ycoord;
     int index_x = 0;
     int index_y = 0;
+    int GPUId = 0;
+    gputypes *type;
     bool indicesSet = false;
     bool draggingPoint = false;
     QTimer *pressTimer = new QTimer(this);

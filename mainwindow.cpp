@@ -76,7 +76,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //setupMonitorTab();
     setupGraphMonitorTab();
 
-
     // Enable sliders according to GPU properties
     /*
     if (types->GPUList[currentGPUIndex].overClockAvailable) {
@@ -675,7 +674,7 @@ void MainWindow::checkForProfiles()
     }
     if (noProfiles) {
         settings.setValue("New Profile/isProfile", true);
-        settings.setValue("General/currentProfile", "New Profile");
+        settings.setValue("currentProfile", "New Profile");
         currentProfile = "New Profile";
     }
     // Redefine child groups so it contains the newly created profile if it was made
@@ -696,7 +695,7 @@ void MainWindow::on_profileComboBox_activated(const QString &arg1)
     if (currentProfile != arg1) {
         currentProfile = arg1;
         QSettings settings("tuxclocker");
-        settings.setValue("General/currentProfile", currentProfile);
+        settings.setValue("currentProfile", currentProfile);
         loadProfileSettings();
     }
     resettimer->stop();
@@ -891,8 +890,8 @@ void MainWindow::applyGPUSettings()
 void MainWindow::loadProfileSettings()
 {
     QSettings settings("tuxclocker");
-    currentProfile = settings.value("General/currentProfile").toString();
-    latestUUID = settings.value("General/latestUUID").toString();
+    currentProfile = settings.value("currentProfile").toString();
+    latestUUID = settings.value("latestUUID").toString();
     // Set the profile combo box selection to currentProfile
     for (int i=0; i<ui->profileComboBox->count(); i++) {
         if (ui->profileComboBox->itemText(i).contains(currentProfile)) {
@@ -989,7 +988,7 @@ void MainWindow::on_newProfile_closed()
         }
     }
     //settings.endGroup();
-    settings.setValue("General/currentProfile", currentProfile);
+    settings.setValue("currentProfile", currentProfile);
     ui->profileComboBox->clear();
     //ui->GPUComboBox->clear();
     checkForProfiles();
@@ -1103,20 +1102,21 @@ void MainWindow::enableFanUpdater()
 void MainWindow::on_applyButton_clicked()
 {
     resettimer->stop();
+    applyGPUSettings();
+    /*
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     QString prevProfile = settings.value("currentProfile").toString();
     settings.setValue("currentProfile", currentProfile);
 
-    applyGPUSettings();
     // Query the maximum offsets
     types->queryGPUCurrentMaxClocks(currentGPUIndex);
     curmaxmemclk->setText(1, QString::number(types->GPUList[currentGPUIndex].maxMemClk) + "MHz");
-    curmaxclk->setText(1, QString::number(types->GPUList[currentGPUIndex].maxCoreClk) + "MHz");
+    curmaxclk->setText(1, QString::number(types->GPUList[currentGPUIndex].maxCoreClk) + "MHz");*/
 }
 void MainWindow::on_editFanCurveButton_pressed()
 {
-    editProfile *editProf = new editProfile(this);
+    editProfile *editProf = new editProfile(this, currentGPUIndex, types);
     editProf->setAttribute(Qt::WA_DeleteOnClose);
     connect(editProf, SIGNAL(destroyed(QObject*)), SLOT(on_editProfile_closed()));
     editProf->setModal(true);
@@ -1151,7 +1151,7 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     currentGPUIndex = index;
     // Change latest UUID and load settings for the GPU
     QSettings settings("tuxclocker");
-    settings.setValue("General/latestUUID", types->GPUList[index].uuid);
+    //settings.setValue("latestUUID", types->GPUList[index].uuid);
     // Call the NVML setup function so the index of the device struct is updated
     types->setupGPUSecondary(currentGPUIndex);
     types->queryGPUPowerLimitLimits(currentGPUIndex);
