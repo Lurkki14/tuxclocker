@@ -131,6 +131,7 @@ void amd::calculateUIProperties(int GPUIndex)
         voltageSlider->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSpinBox->setRange(GPUList[GPUIndex].minVoltageLimit, GPUList[GPUIndex].maxVoltageLimit);
         voltageSlider->setValue(GPUList[GPUIndex].corevolts.last());
+        voltageSpinBox->setValue(GPUList[GPUIndex].corevolts.last());
         qDebug() << "voltage slider: minimum = " << GPUList[GPUIndex].minVoltageLimit
         << "maximum = " << GPUList[GPUIndex].maxVoltageLimit << "current = " << GPUList[GPUIndex].corevolts.last();
         latestVoltageSlider = GPUList[GPUIndex].corevolts.last();
@@ -145,6 +146,7 @@ void amd::calculateUIProperties(int GPUIndex)
         coreClockSpinBox->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setRange(GPUList[GPUIndex].minCoreClkLimit, GPUList[GPUIndex].maxCoreClkLimit);
         coreClockSlider->setValue(GPUList[GPUIndex].coreclocks.last());
+        coreClockSpinBox->setValue(GPUList[GPUIndex].coreclocks.last());
         qDebug() << "core clock slider: minimum = " << GPUList[GPUIndex].minCoreClkLimit
         << "maximum = " << GPUList[GPUIndex].maxCoreClkLimit << "current = " << GPUList[GPUIndex].coreclocks.last();
 
@@ -153,6 +155,7 @@ void amd::calculateUIProperties(int GPUIndex)
         memClockSlider->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSpinBox->setRange(GPUList[GPUIndex].minMemClkLimit, GPUList[GPUIndex].maxMemClkLimit);
         memClockSlider->setValue(GPUList[GPUIndex].memclocks.last());
+        memClockSpinBox->setValue(GPUList[GPUIndex].memclocks.last());
         qDebug() << "mem clock slider: minimum = " << GPUList[GPUIndex].minMemClkLimit
         << "maximum = " << GPUList[GPUIndex].maxMemClkLimit << "current = " << GPUList[GPUIndex].memclocks.last();
 
@@ -171,6 +174,7 @@ void amd::calculateUIProperties(int GPUIndex)
         powerLimSlider->setRange(static_cast<int>(GPUList[GPUIndex].minPowerLim), static_cast<int>(GPUList[GPUIndex].maxPowerLim));
         powerLimSpinBox->setRange(static_cast<int>(GPUList[GPUIndex].minPowerLim), static_cast<int>(GPUList[GPUIndex].maxPowerLim));
         powerLimSlider->setValue(static_cast<int>(GPUList[GPUIndex].powerLim));
+        powerLimSpinBox->setValue(static_cast<int>(GPUList[GPUIndex].powerLim));
 
         latestpowerLimSlider = static_cast<int>(GPUList[GPUIndex].powerLim);
     } else {
