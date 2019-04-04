@@ -1148,7 +1148,7 @@ void MainWindow::on_actionManage_profiles_triggered()
 
 void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
 {
-    currentGPUIndex = index;
+    /*currentGPUIndex = index;
     // Change latest UUID and load settings for the GPU
     QSettings settings("tuxclocker");
     //settings.setValue("latestUUID", types->GPUList[index].uuid);
@@ -1190,7 +1190,18 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     loadProfileSettings();
     // Update maximum clocks
     curmaxmemclk->setText(1, QString::number(types->GPUList[index].maxMemClk) + "MHz");
-    curmaxclk->setText(1, QString::number(types->GPUList[index].maxCoreClk) + "MHz");
+    curmaxclk->setText(1, QString::number(types->GPUList[index].maxCoreClk) + "MHz"); */
+
+    currentGPUIndex = index;
+    QSettings settings("tuxclocker");
+    if (types->GPUList[index].gputype == types->AMDGPU) {
+        settings.setValue("latestUUID", types->GPUList[index].pci_id);
+    }
+    if (types->GPUList[index].gputype == types->NV) {
+        settings.setValue("latestUUID", types->GPUList[index].uuid);
+    }
+    types->calculateUIProperties(currentGPUIndex);
+    loadProfileSettings();
 }
 
 
