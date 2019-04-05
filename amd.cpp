@@ -264,7 +264,7 @@ QString amd::applySettings(int GPUIndex)
     if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
         switch (fanModeComboBox->currentIndex()) {
             case 0:
-            cmd.append("echo '0' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+            cmd.append("echo '2' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
             break;
 
             case 1:
@@ -538,7 +538,18 @@ void amd::queryGPUFeatures()
             QFile fanmodefile(GPUList[i].hwmonpath+"/pwm1_enable");
             if (fanmodefile.open(QFile::ReadOnly | QFile::Text)) {
                 QString fanmode = fanmodefile.readLine();
-                GPUList[i].fanControlMode = fanmode.toInt();
+                //GPUList[i].fanControlMode = fanmode.toInt();
+                switch (fanmode.toInt()) {
+                    case 0:
+                        GPUList[i].fanControlMode = 0;
+                        break;
+                    case 1:
+                        GPUList[i].fanControlMode = 1;
+                        break;
+                    case 2:
+                        GPUList[i].fanControlMode = 0;
+                        break;
+                }
                 qDebug() << "setting combo box index to" << fanmode.toInt();
                 //fanModeComboBox->setCurrentIndex(fanmode.toInt());
             }
@@ -742,8 +753,19 @@ void amd::queryGPUFanCtlMode(int GPUIndex)
     QFile fanmodefile(GPUList[GPUIndex].hwmonpath+"/pwm1_enable");
     if (fanmodefile.open(QFile::ReadOnly | QFile::Text)) {
         QString fanmode = fanmodefile.readLine();
-        GPUList[GPUIndex].fanControlMode = fanmode.toInt();
+        //GPUList[GPUIndex].fanControlMode = fanmode.toInt();
         //fanModeComboBox->setCurrentIndex(fanmode.toInt());
+        switch (fanmode.toInt()) {
+            case 0:
+                GPUList[GPUIndex].fanControlMode = 0;
+                break;
+            case 1:
+                GPUList[GPUIndex].fanControlMode = 1;
+                break;
+            case 2:
+                GPUList[GPUIndex].fanControlMode = 0;
+                break;
+        }
         qDebug() << "fan mode is" << fanmode.toInt();
     }
     else qDebug("Failed to query fan mode");
