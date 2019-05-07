@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
     types->memClockLabel = ui->memClockLabel;
 
     types->fanModeComboBox = ui->fanModeComboBox;
+
+    types->fanUpdateTimer = fanUpdateTimer;
     // This is for libxnvctrl
     types->setupGPU();
     // This is for NVML

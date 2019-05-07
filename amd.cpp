@@ -2,6 +2,7 @@
 #include "gputypes.h"
 #include <tgmath.h>
 #include <string.h>
+#include "mainwindow.h"
 #include <QThread>
 #include <QSettings>
 
@@ -206,6 +207,8 @@ void amd::calculateDisplayValues(int GPUIndex)
 }
 QString amd::applySettings(int GPUIndex)
 {
+    currentGPUIndex = GPUIndex;
+
     QSettings settings("tuxclocker");
     settings.beginGroup("General");
     //settings.setValue("latestUUID", GPUList[GPUIndex].pci_id);
@@ -223,56 +226,54 @@ QString amd::applySettings(int GPUIndex)
     bool hadErrors = false;
     QProcess proc;
     QString cmd = "pkexec /bin/sh -c \"";
-    /*
-    // Assign fan mode
-    switch (fanModeComboBox->currentIndex()) {
-        case 0:
-        if (!assignGPUFanCtlMode(GPUIndex, false)) {
-            hadErrors = true;
-            errStr.append("Fan mode, ");
-        }
-        break;
-        case 1:
-        if (latestFanSlider != fanSlider->value()) {
-            if (!assignGPUFanCtlMode(GPUIndex, true)) {
-                hadErrors = true;
-                errStr.append("Fan mode, ");
-            }
-        }
-        break;
-    }
 
-    if (GPUList[GPUIndex].manualFanCtrlAvailable && latestFanSlider != fanSlider->value()) {
-        if (!assignGPUFanSpeed(GPUIndex, fanSlider->value())) {
-            hadErrors = true;
-            fanSlider->setValue(latestFanSlider);
-            errStr.append("Fan speed, ");
-        }
-    }
-
-    if (GPUList[GPUIndex].powerLimitAvailable && latestpowerLimSlider != powerLimSlider->value()) {
-        if (!assignGPUPowerLimit(GPUIndex, static_cast<uint>(powerLimSlider->value()*1000000))) {
-            hadErrors = true;
-            powerLimSlider->setValue(latestpowerLimSlider);
-            errStr.append("Power limit, ");
-        }
-    }*/
     // To avoid asking for password in pkexec multiple times, apply everything at once and query what succeeded afterwards
     int cmdval = 0;
+    int targetValue = 0;
     qDebug() << fanModeComboBox->currentIndex() << GPUList[GPUIndex].fanControlMode << "box index";
     // Apply fan settings
-    if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+    // On custom mode, the mode needs to be set again to load the new points
+
+    if (fanModeComboBox->currentIndex() == 2 || fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
         switch (fanModeComboBox->currentIndex()) {
             case 0:
-            cmd.append("echo '2' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+            cmd.append("echo '0' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+            // Disconnect fancurve timer
+            disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+
             break;
 
             case 1:
             cmd.append("echo '1' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
-
-            int targetValue = fanSlider->value();
+            targetValue = fanSlider->value();
             cmdval = static_cast<int>(ceil(targetValue*2.55));
             cmd.append("echo '"+QString::number(cmdval)+"' > "+GPUList[GPUIndex].hwmonpath+"/pwm1 & ");
+
+            // Disconnect fancurve timer
+            disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+            break;
+
+            case 2:
+            cmd.append("echo '1' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
+            // Load the curve points from settings
+
+            QSettings settings("tuxclocker");
+            QString profile = settings.value("currentProfile").toString();
+            QString UUID = settings.value("latestUUID").toString();
+            settings.beginGroup(profile);
+            settings.beginGroup(UUID);
+            int size = settings.beginReadArray("curvepoints");
+            for (int i=0; i<size; i++) {
+                settings.setArrayIndex(i);
+                xCurvePoints.append(settings.value("xpoints").toInt());
+                yCurvePoints.append(settings.value("ypoints").toInt());
+            }
+            settings.endArray();
+
+            disconnect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+            // Activate the fan updater
+            connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(tempUpdater()));
+            fanUpdateTimer->start(2000);
             break;
         }
     }
@@ -284,10 +285,11 @@ QString amd::applySettings(int GPUIndex)
     }
 
     // Apply power limit
-    if (powerLimSlider->value() != latestpowerLimSlider) {
-        cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
+    if (GPUList[GPUIndex].powerLimitAvailable) {
+        if (powerLimSlider->value() != latestpowerLimSlider) {
+            cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
+        }
     }
-
     // Apply voltage/core clock (highest pstate)
     if (GPUList[GPUIndex].overClockAvailable) {
         if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
@@ -298,6 +300,7 @@ QString amd::applySettings(int GPUIndex)
     }
 
     cmd.append("\"");
+    qDebug() << "running cmd " << cmd;
     proc.start(cmd);
     proc.waitForFinished(-1);
     QThread::msleep(200);
@@ -364,6 +367,8 @@ QString amd::applySettings(int GPUIndex)
 
         return errStr;
     } else {
+        GPUList[GPUIndex].fanControlMode = fanModeComboBox->currentIndex();
+
         latestFanSlider = fanSlider->value();
         latestMemClkSlider = memClockSlider->value();
         latestpowerLimSlider = powerLimSlider->value();
@@ -466,6 +471,7 @@ void amd::queryGPUFeatures()
             }*/
             // If the pstate vectors are empty after searching, set the features disabled
             if (!GPUList[i].corevolts.isEmpty()) GPUList[i].overVoltAvailable = true;
+            else GPUList[i].overVoltAvailable = false;
 
             if (!GPUList[i].coreclocks.isEmpty()) {
                 GPUList[i].overClockAvailable = true;
@@ -815,6 +821,15 @@ bool amd::assignGPUPowerLimit(int GPUIndex, uint targetValue)
         return true;
     }
     return false;
+}
+
+void amd::tempUpdater() {
+    queryGPUTemp(currentGPUIndex);
+    if (!xCurvePoints.isEmpty()) {
+        int targetFanSpeed = generateFanPoint(GPUList[currentGPUIndex].temp / 1000, xCurvePoints, yCurvePoints);
+        qDebug() << "fancurve: setting to" << targetFanSpeed << "%";
+        assignGPUFanSpeed(currentGPUIndex, targetFanSpeed);
+    }
 }
 
 #endif

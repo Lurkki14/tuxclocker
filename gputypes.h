@@ -147,6 +147,8 @@ public:
     QLabel *memVoltageLabel;
 
     QComboBox *fanModeComboBox;
+
+    QTimer *fanUpdateTimer;
     // Variables to check if a slider has been changed
     int latestFanSlider;
     int latestVoltageSlider;
@@ -155,6 +157,10 @@ public:
     int latestCoreClkSlider;
     int latestMemVoltageSlider;
 
+    // Fancurve vectors
+    QVector <int> xCurvePoints, yCurvePoints;
+    // Latest GPU index for the fancurve
+    int currentGPUIndex;
 #ifdef NVIDIA
     Display *dpy;
     nvmlDevice_t *device;
@@ -192,6 +198,10 @@ public:
     virtual bool assignGPUMemClockOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUVoltageOffset(int GPUIndex, int targetValue) = 0;
     virtual bool assignGPUPowerLimit(int GPUIndex, uint targetValue) = 0;
+
+    virtual void tempUpdater() = 0;
+    // Return  the desired fan percentage
+    int generateFanPoint(int temp, QVector <int> xPoints, QVector <int> yPoints);
 protected:
     ~gputypes();
 
@@ -239,6 +249,8 @@ public slots:
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
     // NVML functions know the GPU index already based on the dev object passed in setupNVML()
     bool assignGPUPowerLimit(uint targetValue);
+
+    void tempUpdater();
 private slots:
 };
 #endif
@@ -285,6 +297,9 @@ public slots:
     bool assignGPUVoltageOffset(int GPUIndex, int targetValue);
     bool assignGPUPowerLimit(int GPUIndex, uint targetValue);
     void queryPstates();
+
+    void tempUpdater();
+
 private slots:
 };
 #endif

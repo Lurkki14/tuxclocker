@@ -96,6 +96,7 @@ public:
 
     bool isRoot = false;
 public slots:
+    void tempUpdater();
 
 private slots:
 
@@ -131,7 +132,6 @@ private slots:
     void getGPUDriver();
     void generateFanPoint();
     void checkForRoot();
-    void tempUpdater();
     void resetChanges();
     void resetTimer();
 
