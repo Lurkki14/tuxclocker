@@ -263,6 +263,10 @@ QString amd::applySettings(int GPUIndex)
             settings.beginGroup(profile);
             settings.beginGroup(UUID);
             int size = settings.beginReadArray("curvepoints");
+            // Remove old curve points
+            yCurvePoints.clear();
+            xCurvePoints.clear();
+
             for (int i=0; i<size; i++) {
                 settings.setArrayIndex(i);
                 xCurvePoints.append(settings.value("xpoints").toInt());
