@@ -965,10 +965,19 @@ void MainWindow::loadProfileSettings()
     }
     // Check which GPU index corresponds to the UUID and set the combo box selection to it
     for (int i=0; i<types->gpuCount; i++) {
-        if (types->GPUList[i].uuid == latestUUID) {
-            ui->GPUComboBox->setCurrentIndex(i);
-            break;
+        if (types->GPUList[i].gputype == types->AMDGPU) {
+            if (types->GPUList[i].pci_id == latestUUID) {
+                ui->GPUComboBox->setCurrentIndex(i);
+                break;
+            }
         }
+        else if (types->GPUList[i].gputype == types->NV) {
+            if (types->GPUList[i].uuid == latestUUID) {
+                ui->GPUComboBox->setCurrentIndex(i);
+                break;
+            }
+        }
+
     }
     ui->statusBar->showMessage("Profile settings loaded.", 7000);
 }
