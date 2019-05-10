@@ -198,14 +198,6 @@ private:
 
     QVBoxLayout *plotLayout = new QVBoxLayout;
 
-    QCustomPlot *tempPlot = new QCustomPlot(this);
-    QCustomPlot *powerDrawPlot = new QCustomPlot(this);
-    QCustomPlot *coreClkPlot = new QCustomPlot(this);
-    QCustomPlot *memClkPlot = new QCustomPlot(this);
-    QCustomPlot *coreUtilPlot = new QCustomPlot(this);
-    QCustomPlot *memUtilPlot = new QCustomPlot(this);
-    QCustomPlot *voltagePlot = new QCustomPlot(this);
-    QCustomPlot *fanSpeedPlot = new QCustomPlot(this);
 
     //QVector <double> qv_time;
     // For updating the plot
@@ -221,7 +213,7 @@ private:
     struct plotCmds
     {
         QVector <double> vector;
-        double valueq;
+        double *valueq;
         double maxval;
         double minval;
         QCustomPlot *plot;
@@ -246,14 +238,6 @@ private:
     // The maximum size of plot data vectors (range +1)
     int  plotVectorSize = 181;
 
-    plotCmds powerdrawplot;
-    plotCmds tempplot;
-    plotCmds coreclkplot;
-    plotCmds memclkplot;
-    plotCmds coreutilplot;
-    plotCmds memutilplot;
-    plotCmds voltageplot;
-    plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
 
 };

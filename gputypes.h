@@ -49,14 +49,14 @@ public:
         int coreClkSliderCur;
         QString displayName;
 
-        int displayTemp;
+        double displayTemp;
         double displayPowerDraw;
-        int displayCoreFreq;
-        int displayMemFreq;
-        int displayCoreUtil;
-        int displayMemUtil;
-        int displayVoltage;
-        int displayFanSpeed;
+        double displayCoreFreq;
+        double displayMemFreq;
+        double displayCoreUtil;
+        double displayMemUtil;
+        double displayVoltage;
+        double displayFanSpeed;
 
         int gputype;
         char *name;
@@ -72,6 +72,7 @@ public:
         bool memClkReadable = false;
         bool powerDrawReadable = false;
         bool coreUtilReadable = false;
+        bool memUtilReadable = false;
         bool manualFanCtrlAvailable = false;
 
         int fanControlMode;

@@ -544,6 +544,9 @@ void amd::queryGPUFeatures()
             // Assume manual fan control is always avilable for AMD
             GPUList[i].manualFanCtrlAvailable = true;
 
+            // Memory utilization isn't available for AMD
+            GPUList[i].memUtilReadable = false;
+
             // Query the current fan control mode
             QFile fanmodefile(GPUList[i].hwmonpath+"/pwm1_enable");
             if (fanmodefile.open(QFile::ReadOnly | QFile::Text)) {

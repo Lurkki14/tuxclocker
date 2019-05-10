@@ -236,82 +236,108 @@ void MainWindow::setupGraphMonitorTab()
     if (types->GPUList[currentGPUIndex].voltageReadable) {
         monitorCmds monstruct;
         monstruct.queryFunc = &gputypes::queryGPUVoltage;
-        monstruct.displayValue = types->GPUList[currentGPUIndex].displayVoltage;
         monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayVoltage;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Core Voltage (mV)");
+        plotCmdsList.append(plotstruct);
     }
     if (types->GPUList[currentGPUIndex].powerDrawReadable) {
         monitorCmds monstruct;
         monstruct.queryFunc = &gputypes::queryGPUPowerDraw;
-        monstruct.displayValue = types->GPUList[currentGPUIndex].displayPowerDraw;
         monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayPowerDraw;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Power Draw (W)");
+        plotCmdsList.append(plotstruct);
     }
     if (types->GPUList[currentGPUIndex].coreUtilReadable) {
         monitorCmds monstruct;
         monstruct.queryFunc = &gputypes::queryGPUUtils;
-        monstruct.displayValue = types->GPUList[currentGPUIndex].displayCoreUtil;
         monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayCoreUtil;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Core Utilization (%)");
+        plotCmdsList.append(plotstruct);
+    }
+
+    if (types->GPUList[currentGPUIndex].memUtilReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUFrequencies;
+        monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayCoreFreq;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Memory Utilization (%)");
+        plotCmdsList.append(plotstruct);
     }
 
     if (types->GPUList[currentGPUIndex].coreClkReadable) {
         monitorCmds monstruct;
         monstruct.queryFunc = &gputypes::queryGPUFrequencies;
-        monstruct.displayValue = types->GPUList[currentGPUIndex].displayCoreFreq;
         monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayCoreFreq;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Core Clock Frequency (MHz)");
+        plotCmdsList.append(plotstruct);
     }
-    monitorCmds monstruct;
-    monstruct.queryFunc = &gputypes::queryGPUFanSpeed;
-    monstruct.displayValue = types->GPUList[currentGPUIndex].displayFanSpeed;
-    monitorCmdsList.append(monstruct);
+
+    if (types->GPUList[currentGPUIndex].memClkReadable) {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUFrequencies;
+        monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayMemFreq;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Memory Clock Frequency (MHz)");
+        plotCmdsList.append(plotstruct);
+    }
+
+    {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUFanSpeed;
+        monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayFanSpeed;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Fan Speed (%)");
+        plotCmdsList.append(plotstruct);
+    }
+
+    {
+        monitorCmds monstruct;
+        monstruct.queryFunc = &gputypes::queryGPUFanSpeed;
+        monitorCmdsList.append(monstruct);
+
+        plotCmds plotstruct;
+        plotstruct.valueq = &types->GPUList[currentGPUIndex].displayTemp;
+        plotstruct.plot = new QCustomPlot;
+        plotstruct.plot->yAxis->setLabel("Temperature (°C)");
+        plotCmdsList.append(plotstruct);
+    }
 
 
+    // Call all monitoring functions that are available
+    for (int i=0; i<monitorCmdsList.size(); i++) {
+        (*types.*monitorCmdsList[i].queryFunc)(currentGPUIndex);
+    }
 
-    types->queryGPUTemp(currentGPUIndex);
-    types->queryGPUPowerDraw(currentGPUIndex);
-    types->queryGPUFrequencies(currentGPUIndex);
-    types->queryGPUUtils(currentGPUIndex);
-    types->queryGPUFanSpeed(currentGPUIndex);
-    types->queryGPUVoltage(currentGPUIndex);
-
-    plotCmdsList.append(powerdrawplot);
-    plotCmdsList.append(tempplot);
-    plotCmdsList.append(coreclkplot);
-    plotCmdsList.append(memclkplot);
-    plotCmdsList.append(coreutilplot);
-    plotCmdsList.append(memutilplot);
-    plotCmdsList.append(voltageplot);
-    plotCmdsList.append(fanspeedplot);
     // Layout for the plots
     plotWidget->setLayout(plotLayout);
 
-    // Define the structs
-    plotCmdsList[0].plot = tempPlot;
-    plotCmdsList[1].plot = powerDrawPlot;
-    plotCmdsList[2].plot = coreClkPlot;
-    plotCmdsList[3].plot = memClkPlot;
-    plotCmdsList[4].plot = coreUtilPlot;
-    plotCmdsList[5].plot = memUtilPlot;
-    plotCmdsList[6].plot = voltagePlot;
-    plotCmdsList[7].plot = fanSpeedPlot;
-
-    /*plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
-    plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].powerDraw/1000;
-    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].coreFreq;
-    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].memFreq;
-    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].coreUtil;
-    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].memUtil;
-    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].voltage/1000;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;*/
 
     types->calculateDisplayValues(currentGPUIndex);
-    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].displayTemp;
-    plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].displayPowerDraw;
-    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].displayCoreFreq;
-    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].displayMemFreq;
-    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].displayCoreUtil;
-    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].displayMemUtil;
-    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].displayVoltage;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].displayFanSpeed;
-
 
     // Get the main widget palette and use it for the graphs
     QPalette palette;
@@ -385,17 +411,17 @@ void MainWindow::setupGraphMonitorTab()
 
         QCPTextElement *minelem = new QCPTextElement(plotCmdsList[i].plot);
         plotCmdsList[i].mintext = minelem;
-        minelem->setText("Min: " + QString::number(plotCmdsList[i].valueq));
+        minelem->setText("Min: " + QString::number(*plotCmdsList[i].valueq));
         minelem->setTextColor(textColor);
 
         QCPTextElement *maxelem = new QCPTextElement(plotCmdsList[i].plot);
         plotCmdsList[i].maxtext = maxelem;
-        maxelem->setText("Max: " + QString::number(plotCmdsList[i].valueq));
+        maxelem->setText("Max: " + QString::number(*plotCmdsList[i].valueq));
         maxelem->setTextColor(textColor);
 
         QCPTextElement *curelem = new QCPTextElement(plotCmdsList[i].plot);
         plotCmdsList[i].curtext = curelem;
-        curelem->setText("Cur: " + QString::number(plotCmdsList[i].valueq));
+        curelem->setText("Cur: " + QString::number(*plotCmdsList[i].valueq));
         curelem->setTextColor(textColor);
 
         plotCmdsList[i].plot->plotLayout()->insertRow(0);
@@ -411,7 +437,7 @@ void MainWindow::setupGraphMonitorTab()
         plotCmdsList[i].valText = text;
 
         // Set the y-range
-        plotCmdsList[i].plot->yAxis->setRange(plotCmdsList[i].valueq -plotCmdsList[i].valueq*0.1, plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
+        plotCmdsList[i].plot->yAxis->setRange(*plotCmdsList[i].valueq -*plotCmdsList[i].valueq*0.1, *plotCmdsList[i].valueq + *plotCmdsList[i].valueq*0.1);
 
         // Add the tracers
         QCPItemTracer *mouseTracer = new QCPItemTracer(plotCmdsList[i].plot);
@@ -420,28 +446,9 @@ void MainWindow::setupGraphMonitorTab()
         mouseTracer->setPen(tracerPen);
         connect(plotCmdsList[i].plot, SIGNAL(mouseMove(QMouseEvent*)), SLOT(plotHovered(QMouseEvent*)));
 
-        plotCmdsList[i].maxval = plotCmdsList[i].valueq;
-        plotCmdsList[i].minval = plotCmdsList[i].valueq;
+        plotCmdsList[i].maxval = *plotCmdsList[i].valueq;
+        plotCmdsList[i].minval = *plotCmdsList[i].valueq;
     }
-    // Hide the plots for values that can't be read
-    if (!types->GPUList[currentGPUIndex].coreClkReadable) {
-        plotCmdsList[2].widget->setVisible(false);
-    }
-    if (!types->GPUList[currentGPUIndex].memClkReadable) {
-        plotCmdsList[3].widget->setVisible(false);
-    }
-    if (!types->GPUList[currentGPUIndex].voltageReadable) {
-        plotCmdsList[6].widget->setVisible(false);
-    }
-
-    tempPlot->yAxis->setLabel("Temperature (°C)");
-    powerDrawPlot->yAxis->setLabel("Power Draw (W)");
-    coreClkPlot->yAxis->setLabel("Core Clock Frequency (MHz)");
-    memClkPlot->yAxis->setLabel("Memory Clock Frequency (MHz)");
-    coreUtilPlot->yAxis->setLabel("Core Utilization (%)");
-    memUtilPlot->yAxis->setLabel("Memory Utilization (%)");
-    voltagePlot->yAxis->setLabel("Core Voltage (mV)");
-    fanSpeedPlot->yAxis->setLabel("Fan Speed (%)");
 
     plotScrollArea->setWidget(plotWidget);
     plotScrollArea->setWidgetResizable(true);
@@ -455,43 +462,12 @@ void MainWindow::setupGraphMonitorTab()
 void MainWindow::updateMonitor()
 {
     // Update the values for plots
-    types->queryGPUTemp(currentGPUIndex);
-    //types->queryGPUPowerDraw(currentGPUIndex);
-    //types->queryGPUFrequencies(currentGPUIndex);
-    //types->queryGPUUtils(currentGPUIndex);
-    types->queryGPUVoltage(currentGPUIndex);
-    //types->queryGPUFanSpeed(currentGPUIndex);
-    types->queryGPUUsedVRAM(currentGPUIndex);
-
+    // Call all monitoring functions that are available
     for (int i=0; i<monitorCmdsList.size(); i++) {
         (*types.*monitorCmdsList[i].queryFunc)(currentGPUIndex);
     }
 
-    // Remove the last decimal point from power draw to make it take less space on the plot
-    /*double pwrdraw = types->GPUList[currentGPUIndex].powerDraw;
-    pwrdraw = pwrdraw/10;
-    int num = static_cast<int>(pwrdraw);
-    pwrdraw = static_cast<double>(num);
-    pwrdraw = pwrdraw/100;*/
-
-    /*plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].temp;
-    plotCmdsList[1].valueq = pwrdraw;
-    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].coreFreq;
-    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].memFreq;
-    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].coreUtil;
-    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].memUtil;
-    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].voltage/1000;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].fanSpeed;*/
-
     types->calculateDisplayValues(currentGPUIndex);
-    plotCmdsList[0].valueq = types->GPUList[currentGPUIndex].displayTemp;
-    plotCmdsList[1].valueq = types->GPUList[currentGPUIndex].displayPowerDraw;
-    plotCmdsList[2].valueq = types->GPUList[currentGPUIndex].displayCoreFreq;
-    plotCmdsList[3].valueq = types->GPUList[currentGPUIndex].displayMemFreq;
-    plotCmdsList[4].valueq = types->GPUList[currentGPUIndex].displayCoreUtil;
-    plotCmdsList[5].valueq = types->GPUList[currentGPUIndex].displayMemUtil;
-    plotCmdsList[6].valueq = types->GPUList[currentGPUIndex].displayVoltage;
-    plotCmdsList[7].valueq = types->GPUList[currentGPUIndex].displayFanSpeed;
 
     qDebug() << monitorUpdater->remainingTime();
 
@@ -523,20 +499,20 @@ void MainWindow::updateMonitor()
     for (int i=0; i<plotCmdsList.size(); i++) {
         // Check if the max/min values need to be updated
         if (!GPU[currentGPUIndex].data[i].vector.isEmpty()) {
-            plotCmdsList[i].curtext->setText("Cur: " + QString::number(plotCmdsList[i].valueq));
-            if (plotCmdsList[i].maxval < plotCmdsList[i].valueq) {
-                plotCmdsList[i].maxtext->setText("Max: " + QString::number(plotCmdsList[i].valueq));
-                plotCmdsList[i].maxval = plotCmdsList[i].valueq;
+            plotCmdsList[i].curtext->setText("Cur: " + QString::number(*plotCmdsList[i].valueq));
+            if (plotCmdsList[i].maxval < *plotCmdsList[i].valueq) {
+                plotCmdsList[i].maxtext->setText("Max: " + QString::number(*plotCmdsList[i].valueq));
+                plotCmdsList[i].maxval = *plotCmdsList[i].valueq;
             }
-            if (plotCmdsList[i].minval > plotCmdsList[i].valueq) {
-                plotCmdsList[i].mintext->setText("Min: " + QString::number(plotCmdsList[i].valueq));
-                plotCmdsList[i].minval = plotCmdsList[i].valueq;
+            if (plotCmdsList[i].minval > *plotCmdsList[i].valueq) {
+                plotCmdsList[i].mintext->setText("Min: " + QString::number(*plotCmdsList[i].valueq));
+                plotCmdsList[i].minval = *plotCmdsList[i].valueq;
             }
         }
         if (GPU[currentGPUIndex].data[i].vector.size() < plotVectorSize) {
-            GPU[currentGPUIndex].data[i].vector.append(plotCmdsList[i].valueq);
+            GPU[currentGPUIndex].data[i].vector.append(*plotCmdsList[i].valueq);
         } else {
-            GPU[currentGPUIndex].data[i].vector.insert(plotVectorSize, plotCmdsList[i].valueq);
+            GPU[currentGPUIndex].data[i].vector.insert(plotVectorSize, *plotCmdsList[i].valueq);
         }
         // Remove the first element if there are more elements than the x-range
         if (GPU[currentGPUIndex].data[i].vector.size() > plotVectorSize) {
@@ -544,11 +520,11 @@ void MainWindow::updateMonitor()
         }
         plotCmdsList[i].plot->graph(0)->setData(GPU[currentGPUIndex].qv_time, GPU[currentGPUIndex].data[i].vector);
         // If the newest value is out of bounds, resize the y-range
-        if (plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
-            plotCmdsList[i].plot->yAxis->setRangeUpper(plotCmdsList[i].valueq + plotCmdsList[i].valueq*0.1);
+        if (*plotCmdsList[i].valueq > plotCmdsList[i].plot->yAxis->range().upper) {
+            plotCmdsList[i].plot->yAxis->setRangeUpper(*plotCmdsList[i].valueq + *plotCmdsList[i].valueq*0.1);
         }
-        if (plotCmdsList[i].valueq < plotCmdsList[i].plot->yAxis->range().lower) {
-            plotCmdsList[i].plot->yAxis->setRangeLower(plotCmdsList[i].valueq - plotCmdsList[i].valueq*0.1);
+        if (*plotCmdsList[i].valueq < plotCmdsList[i].plot->yAxis->range().lower) {
+            plotCmdsList[i].plot->yAxis->setRangeLower(*plotCmdsList[i].valueq - *plotCmdsList[i].valueq*0.1);
         }
         plotCmdsList[i].plot->replot();
         plotCmdsList[i].plot->update();
@@ -652,10 +628,10 @@ void MainWindow::clearPlots()
 void MainWindow::clearExtremeValues()
 {
     for (int i=0; i<plotCmdsList.size(); i++) {
-        plotCmdsList[i].minval = plotCmdsList[i].valueq;
-        plotCmdsList[i].maxval = plotCmdsList[i].valueq;
-        plotCmdsList[i].mintext->setText("Min: " + QString::number(plotCmdsList[i].valueq));
-        plotCmdsList[i].maxtext->setText("Max: " + QString::number(plotCmdsList[i].valueq));
+        plotCmdsList[i].minval = *plotCmdsList[i].valueq;
+        plotCmdsList[i].maxval = *plotCmdsList[i].valueq;
+        plotCmdsList[i].mintext->setText("Min: " + QString::number(*plotCmdsList[i].valueq));
+        plotCmdsList[i].maxtext->setText("Max: " + QString::number(*plotCmdsList[i].valueq));
     }
 }
 void MainWindow::checkForProfiles()
