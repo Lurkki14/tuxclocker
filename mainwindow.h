@@ -178,7 +178,7 @@ private:
     QTimer *monitorUpdater = new QTimer(this);
     QTimer *plotHoverUpdater = new QTimer(this);
 
-    QTreeWidgetItem *gputemp = new QTreeWidgetItem;
+    /*QTreeWidgetItem *gputemp = new QTreeWidgetItem;
     QTreeWidgetItem *powerdraw = new QTreeWidgetItem;
     QTreeWidgetItem *voltage = new QTreeWidgetItem;
     QTreeWidgetItem *coreclock = new QTreeWidgetItem;
@@ -189,7 +189,7 @@ private:
     QTreeWidgetItem *memusage = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxclk = new QTreeWidgetItem;
     QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
-    QTreeWidgetItem *curpowerlim = new QTreeWidgetItem;
+    QTreeWidgetItem *curpowerlim = new QTreeWidgetItem;*/
 
     // Widgets for the graph monitor
     QWidget *plotWidget = new QWidget;
@@ -225,6 +225,16 @@ private:
         QCPItemTracer *tracer;
         QCPItemText *valText;
     };
+
+    // Struct for the tree view
+    struct treeEntry {
+        QString unit;
+        QTreeWidgetItem *item;
+        double *displayValue;
+    };
+    QVector <treeEntry> treeEntryList;
+
+
     struct datavector {
         QVector <double> vector;
     };
@@ -239,7 +249,6 @@ private:
     int  plotVectorSize = 181;
 
     QVector <plotCmds> plotCmdsList;
-
 };
 
 #endif // MAINWINDOW_H

@@ -168,7 +168,7 @@ bool amdPstateEditor::applyValues()
         }
     }
     if (!changedMemPstates.isEmpty() || !changedCorePstates.isEmpty()) {
-        cmd.append("echo 'c' > /sys/class/drm/card" + QString::number(types->GPUList[gpuidx].fsindex) + "/device_pp_od_clk_voltage\"");
+        cmd.append("echo 'c' > /sys/class/drm/card" + QString::number(types->GPUList[gpuidx].fsindex) + "/device/pp_od_clk_voltage\"");
         proc.start(cmd);
         proc.waitForFinished(-1);
         if (proc.exitCode() != 0) {

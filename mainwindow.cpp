@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->fanModeComboBox->setCurrentIndex(types->GPUList[currentGPUIndex].fanControlMode);
     loadProfileSettings();
-    //setupMonitorTab();
+    setupMonitorTab();
     setupGraphMonitorTab();
 
     // Enable sliders according to GPU properties
@@ -200,35 +200,89 @@ void MainWindow::setupMonitorTab()
     // Set the behavior of the tree view
     ui->monitorTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->monitorTree->setIndentation(0);
-    // Add the items
-    gputemp->setText(0, "Core Temperature");
-    powerdraw->setText(0, "Power Draw");
-    voltage->setText(0, "Core Voltage");
-    coreclock->setText(0, "Core Clock Frequency");
-    memclock->setText(0, "Memory Clock Frequency");
-    coreutil->setText(0, "Core Utilization");
-    memutil->setText(0, "Memory Utilization");
-    fanspeed->setText(0, "Fan Speed");
-    memusage->setText(0, "Used Memory/Total Memory");
-    curmaxclk->setText(0, "Maximum Core Clock Frequency");
-    curmaxmemclk->setText(0, "Maximum Memory Clock Frequency");
 
-    ui->monitorTree->addTopLevelItem(gputemp);
-    ui->monitorTree->addTopLevelItem(powerdraw);
-    ui->monitorTree->addTopLevelItem(voltage);
-    ui->monitorTree->addTopLevelItem(coreclock);
-    ui->monitorTree->addTopLevelItem(memclock);
-    ui->monitorTree->addTopLevelItem(coreutil);
-    ui->monitorTree->addTopLevelItem(memutil);
-    ui->monitorTree->addTopLevelItem(fanspeed);
-    ui->monitorTree->addTopLevelItem(memusage);
-    ui->monitorTree->addTopLevelItem(curmaxclk);
-    ui->monitorTree->addTopLevelItem(curmaxmemclk);
-    // These values only change when the apply button has been pressed
-    QString curMaxClk = QString::number(types->GPUList[currentGPUIndex].maxCoreClk) + " MHz";
-    curmaxclk->setText(1, curMaxClk);
-    QString curMaxMemClk = QString::number(types->GPUList[currentGPUIndex].maxMemClk) + " MHz";
-    curmaxmemclk->setText(1, curMaxMemClk);
+    // Add the items for the available readings
+    if (types->GPUList[currentGPUIndex].voltageReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Core Voltage");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayVoltage;
+        entry.unit = "mV";
+
+        treeEntryList.append(entry);
+    }
+    if (types->GPUList[currentGPUIndex].powerDrawReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Power Draw");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayPowerDraw;
+        entry.unit = "W";
+
+        treeEntryList.append(entry);
+    }
+    if (types->GPUList[currentGPUIndex].coreUtilReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayCoreUtil;
+        entry.item->setText(0, "Core Utilization");
+        entry.unit = "%";
+
+        treeEntryList.append(entry);
+    }
+
+    if (types->GPUList[currentGPUIndex].memUtilReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Memory Voltage");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayMemUtil;
+        entry.unit = "%";
+
+        treeEntryList.append(entry);
+    }
+
+    if (types->GPUList[currentGPUIndex].coreClkReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Core Clock Frequency");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayCoreFreq;
+        entry.unit = "MHz";
+
+        treeEntryList.append(entry);
+    }
+
+    if (types->GPUList[currentGPUIndex].memClkReadable) {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Memory Clock Frequency");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayMemFreq;
+        entry.unit = "MHz";
+
+        treeEntryList.append(entry);
+    }
+
+    {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Fan Speed");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayFanSpeed;
+        entry.unit = "%";
+
+        treeEntryList.append(entry);
+    }
+
+    {
+        treeEntry entry;
+        entry.item = new QTreeWidgetItem;
+        entry.item->setText(0, "Temperature");
+        entry.displayValue = &types->GPUList[currentGPUIndex].displayTemp;
+        entry.unit = "°C";
+
+        treeEntryList.append(entry);
+    }
+
+    for (int i=0; i<treeEntryList.size(); i++) {
+        ui->monitorTree->addTopLevelItem(treeEntryList[i].item);
+    }
 }
 void MainWindow::setupGraphMonitorTab()
 {
@@ -471,15 +525,11 @@ void MainWindow::updateMonitor()
 
     qDebug() << monitorUpdater->remainingTime();
 
-    gputemp->setText(1, QString::number(types->GPUList[currentGPUIndex].temp) + "°C");
-    powerdraw->setText(1, QString::number(types->GPUList[currentGPUIndex].powerDraw/1000) + "W");
-    voltage->setText(1, QString::number(types->GPUList[currentGPUIndex].voltage/1000) + "mV");
-    coreclock->setText(1, QString::number(types->GPUList[currentGPUIndex].coreFreq) + "MHz");
-    memclock->setText(1, QString::number(types->GPUList[currentGPUIndex].memFreq) + "MHz");
-    coreutil->setText(1, QString::number(types->GPUList[currentGPUIndex].coreUtil) + "%");
-    memutil->setText(1, QString::number(types->GPUList[currentGPUIndex].memUtil) + "%");
-    fanspeed->setText(1, QString::number(types->GPUList[currentGPUIndex].fanSpeed) + "%");
-    memusage->setText(1, QString::number(types->GPUList[currentGPUIndex].usedVRAM) + "/" + QString::number(types->GPUList[currentGPUIndex].totalVRAM) + "MB");
+    // Update the monitor tree view
+
+    for (int i=0; i<treeEntryList.size(); i++) {
+        treeEntryList[i].item->setText(1, QString::number(*treeEntryList[i].displayValue)+" "+treeEntryList[i].unit);
+    }
 
     // Decrement all time values by one
     for (int i=0; i<GPU[currentGPUIndex].qv_time.length(); i++) {
