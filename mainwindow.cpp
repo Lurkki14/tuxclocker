@@ -74,6 +74,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     ui->fanModeComboBox->setCurrentIndex(types->GPUList[currentGPUIndex].fanControlMode);
+    // This probably isn't good practice
+    on_fanModeComboBox_currentIndexChanged(ui->fanModeComboBox->currentIndex());
+
     loadProfileSettings();
     setupMonitorTab();
     setupGraphMonitorTab();
@@ -143,6 +146,15 @@ MainWindow::MainWindow(QWidget *parent) :
         manualMode->setToolTip("Manual fan control is not available for current GPU");
     }
 */
+    // Disable the custom selection for AMD if not ran as root
+    if (types->GPUList[currentGPUIndex].gputype == types->AMDGPU && !isRoot) {
+        QStandardItemModel *model = qobject_cast<QStandardItemModel*>(ui->fanModeComboBox->model());
+        QModelIndex customModeIndex = model->index(2, ui->fanModeComboBox->modelColumn());
+        QStandardItem *customMode = model->itemFromIndex(customModeIndex);
+        customMode->setEnabled(false);
+        customMode->setToolTip("Custom mode disabled due to not running as root");
+    }
+
     connect(fanUpdateTimer, SIGNAL(timeout()), this, SLOT(fanSpeedUpdater()));
     fanUpdateTimer->start(2000);
 
@@ -371,7 +383,7 @@ void MainWindow::setupGraphMonitorTab()
 
     {
         monitorCmds monstruct;
-        monstruct.queryFunc = &gputypes::queryGPUFanSpeed;
+        monstruct.queryFunc = &gputypes::queryGPUTemp;
         monitorCmdsList.append(monstruct);
 
         plotCmds plotstruct;
@@ -1171,7 +1183,22 @@ void MainWindow::on_editProfile_closed()
 
 void MainWindow::on_fanModeComboBox_currentIndexChanged(int index)
 {
-    //types->GPUList[currentGPUIndex].fanControlMode = index;
+    // Enable/disable the fan slider/spinbox depending on the selection
+
+    switch (index) {
+        case 0:
+            ui->fanSlider->setDisabled(true);
+            ui->fanSpinBox->setDisabled(true);
+            break;
+        case 1:
+            ui->fanSlider->setEnabled(true);
+            ui->fanSpinBox->setEnabled(true);
+            break;
+        case 2:
+            ui->fanSlider->setDisabled(true);
+            ui->fanSpinBox->setDisabled(true);
+            break;
+    }
 }
 
 void MainWindow::on_actionManage_profiles_triggered()

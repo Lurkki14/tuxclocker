@@ -178,19 +178,6 @@ private:
     QTimer *monitorUpdater = new QTimer(this);
     QTimer *plotHoverUpdater = new QTimer(this);
 
-    /*QTreeWidgetItem *gputemp = new QTreeWidgetItem;
-    QTreeWidgetItem *powerdraw = new QTreeWidgetItem;
-    QTreeWidgetItem *voltage = new QTreeWidgetItem;
-    QTreeWidgetItem *coreclock = new QTreeWidgetItem;
-    QTreeWidgetItem *memclock = new QTreeWidgetItem;
-    QTreeWidgetItem *coreutil = new QTreeWidgetItem;
-    QTreeWidgetItem *memutil = new QTreeWidgetItem;
-    QTreeWidgetItem *fanspeed = new QTreeWidgetItem;
-    QTreeWidgetItem *memusage = new QTreeWidgetItem;
-    QTreeWidgetItem *curmaxclk = new QTreeWidgetItem;
-    QTreeWidgetItem *curmaxmemclk = new QTreeWidgetItem;
-    QTreeWidgetItem *curpowerlim = new QTreeWidgetItem;*/
-
     // Widgets for the graph monitor
     QWidget *plotWidget = new QWidget;
     QScrollArea *plotScrollArea = new QScrollArea;
