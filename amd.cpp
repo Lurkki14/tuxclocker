@@ -188,6 +188,16 @@ void amd::calculateUIProperties(int GPUIndex)
     fanSpinBox->setRange(0, 100);
     fanSlider->setValue(GPUList[GPUIndex].fanSpeed);
 
+    // Disable the pstate editor button if no pstates were found
+    if (GPUList[GPUIndex].coreclocks.isEmpty() || GPUList[GPUIndex].memclocks.isEmpty()) {
+        pstateButton->setDisabled(true);
+    }
+
+    // Change the label names to suit AMD
+    coreClockLabel->setText("Core Clock (MHz)");
+    memClockLabel->setText("Memory Clock (MHz)");
+    voltageLabel->setText("Core Voltage (mV)");
+
     //qDebug() << "setting fan box to" << GPUList[GPUIndex].fanControlMode;
     // For some reason it can't set it here, try to do it here for cleanness
     //fanModeComboBox->setCurrentIndex(GPUList[GPUIndex].fanControlMode);

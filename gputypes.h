@@ -11,6 +11,7 @@
 #include <QSpinBox>
 #include <QLabel>
 #include <QComboBox>
+#include <QPushButton>
 #ifdef NVIDIA
 #include "nvml.h"
 #endif
@@ -148,6 +149,8 @@ public:
     QLabel *memVoltageLabel;
 
     QComboBox *fanModeComboBox;
+
+    QPushButton *pstateButton;
 
     QTimer *fanUpdateTimer;
     // Variables to check if a slider has been changed

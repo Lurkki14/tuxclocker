@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     types->fanModeComboBox = ui->fanModeComboBox;
 
     types->fanUpdateTimer = fanUpdateTimer;
+    types->pstateButton = ui->amdPstateButton;
     // This is for libxnvctrl
     types->setupGPU();
     // This is for NVML
