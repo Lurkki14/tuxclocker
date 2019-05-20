@@ -90,7 +90,6 @@ editProfile::editProfile(QWidget *parent, int GPUIndex, gputypes *types) :
     }
     settings.endArray();
 
-
     ui->curvePlot->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();
 

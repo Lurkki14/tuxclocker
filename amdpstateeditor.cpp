@@ -121,8 +121,8 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
         // Set the appropriate slider values for the pstate
         int frequency = settings.value("frequency").toInt();
         int voltage = settings.value("voltage").toInt();
-        memPstates[memPstateIndices[i].toInt()].freqspinbox->setValue(frequency);
-        memPstates[memPstateIndices[i].toInt()].voltspinbox->setValue(voltage);
+        memPstates[memPstateIndices[i].toInt() - 1].freqspinbox->setValue(frequency);
+        memPstates[memPstateIndices[i].toInt() - 1].voltspinbox->setValue(voltage);
         settings.endGroup();
     }
     settings.endGroup();
@@ -134,8 +134,8 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
         settings.beginGroup(corePstateIndices[i]);
         int frequency = settings.value("frequency").toInt();
         int voltage = settings.value("voltage").toInt();
-        corePstates[corePstateIndices[i].toInt()].freqspinbox->setValue(frequency);
-        corePstates[corePstateIndices[i].toInt()].voltspinbox->setValue(voltage);
+        corePstates[corePstateIndices[i].toInt() - 1].freqspinbox->setValue(frequency);
+        corePstates[corePstateIndices[i].toInt() - 1].voltspinbox->setValue(voltage);
         settings.endGroup();
     }
     settings.endGroup();

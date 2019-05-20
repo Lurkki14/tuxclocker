@@ -233,7 +233,7 @@ QString amd::applySettings(int GPUIndex)
     //QString errStr = "Failed to apply these settings: ";
     QString errStr = "Failed to apply settings  ";
 
-    bool hadErrors = false;
+    bool hadChanges = false;
     QProcess proc;
     QString cmd = "pkexec /bin/sh -c \"";
 
@@ -245,6 +245,7 @@ QString amd::applySettings(int GPUIndex)
     // On custom mode, the mode needs to be set again to load the new points
 
     if (fanModeComboBox->currentIndex() == 2 || fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
+        hadChanges = true;
         switch (fanModeComboBox->currentIndex()) {
             case 0:
             cmd.append("echo '0' > "+GPUList[GPUIndex].hwmonpath+"/pwm1_enable & ");
@@ -293,6 +294,7 @@ QString amd::applySettings(int GPUIndex)
     }
     // Apply fan speed
     if (fanModeComboBox->currentIndex() == 1 && (latestFanSlider != fanSlider->value())) {
+        hadChanges = true;
         int targetValue = fanSlider->value();
         cmdval = static_cast<int>(ceil(targetValue*2.55));
         cmd.append("echo '"+QString::number(cmdval)+"' > "+GPUList[GPUIndex].hwmonpath+"/pwm1 & ");
@@ -301,12 +303,14 @@ QString amd::applySettings(int GPUIndex)
     // Apply power limit
     if (GPUList[GPUIndex].powerLimitAvailable) {
         if (powerLimSlider->value() != latestpowerLimSlider) {
+            hadChanges = true;
             cmd.append("echo '" + QString::number(powerLimSlider->value() * 1000000) +"' > " + GPUList[GPUIndex].hwmonpath + "/power1_cap & ");
         }
     }
     // Apply voltage/core clock (highest pstate)
     if (GPUList[GPUIndex].overClockAvailable) {
         if ((coreClockSlider->value() != GPUList[GPUIndex].coreclocks.last()) || (voltageSlider->value() != GPUList[GPUIndex].corevolts.last())) {
+            hadChanges = true;
             QString volt = QString::number(voltageSlider->value());
             QString freq = QString::number(coreClockSlider->value());
             cmd.append("echo 'm "+ QString::number(GPUList[GPUIndex].corevolts.size()-1) + " "+ freq +" "+ volt +"' "+"> /sys/class/drm/card"+QString::number(GPUList[GPUIndex].fsindex)+"/device/pp_od_clk_voltage & ");
@@ -315,9 +319,11 @@ QString amd::applySettings(int GPUIndex)
 
     cmd.append("\"");
     qDebug() << "running cmd " << cmd;
-    proc.start(cmd);
-    proc.waitForFinished(-1);
-    QThread::msleep(200);
+    if (hadChanges) {
+        proc.start(cmd);
+        proc.waitForFinished(-1);
+        QThread::msleep(200);
+    } else return "Nothing to apply.";
 
     // If fan mode was changed, check if it was successful
     /*if (fanModeComboBox->currentIndex() != GPUList[GPUIndex].fanControlMode) {
