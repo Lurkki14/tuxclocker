@@ -16,11 +16,11 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
 {
     types = newtypes;
     gpuidx = GPUIndex;
-    qDebug() << newtypes->gpuCount << "gpus in pointer";
     QWidget *lower = new QWidget;
     QWidget *upper = new QWidget;
     QHBoxLayout *ulo = new QHBoxLayout;
     QHBoxLayout *llo = new QHBoxLayout;
+
     for (int i=0; i<newtypes->GPUList[gpuidx].coreclocks.size(); i++) {
         corePstate state;
         QGridLayout *glo = new QGridLayout;
@@ -105,6 +105,41 @@ void amdPstateEditor::generateUI(gputypes *newtypes, int GPUIndex)
         state.freqspinbox = freqspinbox;
         memPstates.append(state);
     }
+
+    // Load the existing changes from settings
+    QSettings settings("tuxclocker");
+    QString profile = settings.value("currentProfile").toString();
+    QString UUID = settings.value("latestUUID").toString();
+    settings.beginGroup(profile);
+    settings.beginGroup(UUID);
+    // Read memory pstates
+    settings.beginGroup("memPstates");
+    // Get the indices of pstates
+    QStringList memPstateIndices = settings.childGroups();
+    for (int i=0; i<memPstateIndices.size(); i++) {
+        settings.beginGroup(memPstateIndices[i]);
+        // Set the appropriate slider values for the pstate
+        int frequency = settings.value("frequency").toInt();
+        int voltage = settings.value("voltage").toInt();
+        memPstates[memPstateIndices[i].toInt()].freqspinbox->setValue(frequency);
+        memPstates[memPstateIndices[i].toInt()].voltspinbox->setValue(voltage);
+        settings.endGroup();
+    }
+    settings.endGroup();
+
+    // Read core pstates
+    settings.beginGroup("corePstates");
+    QStringList corePstateIndices = settings.childGroups();
+    for (int i=0; i<corePstateIndices.size(); i++) {
+        settings.beginGroup(corePstateIndices[i]);
+        int frequency = settings.value("frequency").toInt();
+        int voltage = settings.value("voltage").toInt();
+        corePstates[corePstateIndices[i].toInt()].freqspinbox->setValue(frequency);
+        corePstates[corePstateIndices[i].toInt()].voltspinbox->setValue(voltage);
+        settings.endGroup();
+    }
+    settings.endGroup();
+
     QWidget *buttonwidget = new QWidget;
     QVBoxLayout *buttonlo = new QVBoxLayout;
     // Add an apply button

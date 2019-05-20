@@ -81,6 +81,7 @@ editProfile::editProfile(QWidget *parent, int GPUIndex, gputypes *types) :
     QString UUID = settings.value("latestUUID").toString();
     settings.beginGroup(profile);
     settings.beginGroup(UUID);
+
     int size = settings.beginReadArray("curvepoints");
     for (int i=0; i<size; i++) {
         settings.setArrayIndex(i);
