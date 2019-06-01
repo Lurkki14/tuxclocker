@@ -95,6 +95,9 @@ void nvidia::queryGPUFeatures()
     Bool ret;
     NVCTRLAttributeValidValuesRec values;
     for (int i=0; i<gpuCount; i++) {
+        // Query all performance modes
+        queryGPUMaxPerfMode(i);
+
         // Query if voltage offset is writable/readable
         ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
@@ -120,7 +123,7 @@ void nvidia::queryGPUFeatures()
         ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
                                                      i,
-                                                     3,
+                                                     GPUList[i].maxPerfMode,
                                                      NV_CTRL_GPU_NVCLOCK_OFFSET,
                                                      &values);
         if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
@@ -139,7 +142,7 @@ void nvidia::queryGPUFeatures()
         ret = XNVCTRLQueryValidTargetAttributeValues(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
                                                      i,
-                                                     3,
+                                                     GPUList[i].maxPerfMode,
                                                      NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
                                                      &values);
         if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
@@ -187,6 +190,32 @@ void nvidia::queryGPUFeatures()
                                           NV_CTRL_TOTAL_DEDICATED_GPU_MEMORY,
                                           &GPUList[i].totalVRAM);
         qDebug() << GPUList[i].totalVRAM << "vram";
+    }
+}
+void nvidia::queryGPUMaxPerfMode(int GPUIndex)
+{
+    char* result;
+    Bool ret = XNVCTRLQueryTargetStringAttribute(dpy,
+                                                 NV_CTRL_TARGET_TYPE_GPU,
+                                                 GPUIndex,
+                                                 0,
+                                                 NV_CTRL_STRING_PERFORMANCE_MODES,
+                                                 &result);
+    if(ret){
+        QString modes(result);
+        free(result);
+
+        // Each perf mode is separated by a ";" symbol, so for obtaining the number
+        // of maximal performance mode it should be enough to just count number of
+        // ";" occurences
+        int maxPerfMode = modes.count(';');
+        GPUList[GPUIndex].maxPerfMode = uint(maxPerfMode);
+
+        qDebug() << modes;
+        return;
+    }
+    else {
+        GPUList[GPUIndex].maxPerfMode = 3;
     }
 }
 void nvidia::queryGPUVoltage(int GPUIndex)
@@ -266,7 +295,7 @@ void nvidia::queryGPUFreqOffset(int GPUIndex)
     Bool ret = XNVCTRLQueryTargetAttribute(dpy,
                                            NV_CTRL_TARGET_TYPE_GPU,
                                            GPUIndex,
-                                           3,
+                                           GPUList[GPUIndex].maxPerfMode,
                                            NV_CTRL_GPU_NVCLOCK_OFFSET,
                                            &GPUList[GPUIndex].coreClkOffset);
 }
@@ -275,7 +304,7 @@ void nvidia::queryGPUMemClkOffset(int GPUIndex)
     Bool ret = XNVCTRLQueryTargetAttribute(dpy,
                                            NV_CTRL_TARGET_TYPE_GPU,
                                            GPUIndex,
-                                           3,
+                                           GPUList[GPUIndex].maxPerfMode,
                                            NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
                                            &GPUList[GPUIndex].memClkOffset);
 }
@@ -316,7 +345,7 @@ bool nvidia::assignGPUFreqOffset(int GPUIndex, int targetValue)
     Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
                                                      GPUIndex,
-                                                     3, // This argument is the performance mode
+                                                     GPUList[GPUIndex].maxPerfMode, // This argument is the performance mode
                                                      NV_CTRL_GPU_NVCLOCK_OFFSET,
                                                      targetValue);
     qDebug() << ret << "freqassign";
@@ -327,7 +356,7 @@ bool nvidia::assignGPUMemClockOffset(int GPUIndex, int targetValue)
     Bool ret = XNVCTRLSetTargetAttributeAndGetStatus(dpy,
                                                      NV_CTRL_TARGET_TYPE_GPU,
                                                      GPUIndex,
-                                                     3,
+                                                     GPUList[GPUIndex].maxPerfMode,
                                                      NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
                                                      targetValue);
     qDebug() << ret << "memassign";
