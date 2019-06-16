@@ -307,6 +307,7 @@ void nvidia::queryGPUMemClkOffset(int GPUIndex)
                                            GPUList[GPUIndex].maxPerfMode,
                                            NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET,
                                            &GPUList[GPUIndex].memClkOffset);
+    GPUList[GPUIndex].memClkOffset /= 2;
 }
 void nvidia::queryGPUVoltageOffset(int GPUIndex)
 {
