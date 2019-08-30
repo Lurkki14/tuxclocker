@@ -134,9 +134,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if (!QSystemTrayIcon::isSystemTrayAvailable())
         {
-#ifdef dbg
-            std::cout << "Qt: System tray unavailable.\n";
-#endif
+            qDebug() << "Qt: System tray unavailable";
             ignore_closeEvent = false;
             MainWindow::show();
         }
