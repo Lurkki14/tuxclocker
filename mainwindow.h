@@ -251,6 +251,10 @@ private:
     plotCmds fanspeedplot;
     QVector <plotCmds> plotCmdsList;
 
+    QSystemTrayIcon* trayIcon;
+    QMenu* createMenu();
+    void closeEvent(QCloseEvent *);
+    bool ignore_closeEvent = true;
 };
 
 #endif // MAINWINDOW_H
