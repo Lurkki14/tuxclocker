@@ -1,0 +1,3 @@
+project('tuxclocker')
+
+subdir('src')
