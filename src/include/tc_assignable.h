@@ -9,13 +9,16 @@
 enum tc_assignable_value_category {TC_ASSIGNABLE_RANGE, TC_ASSIGNABLE_ENUM};
 
 // Is the range double or integer
-enum tc_assignable_range_data_type {TC_ASSIGNABLE_RANGE_INT, TC_ASSIGNABLE_RANGE_DOUBLE};
+enum tc_assignable_range_data_type {
+  TC_ASSIGNABLE_RANGE_INT,
+  TC_ASSIGNABLE_RANGE_DOUBLE
+};
 
-typedef struct tc_assignable_range_double_t{
+typedef struct tc_assignable_range_double_t {
   double min, max;
 } tc_assignable_range_double_t;
 
-typedef struct tc_assignable_range_int_t{
+typedef struct tc_assignable_range_int_t {
   int64_t min, max;
 } tc_assignable_range_int_t;
 
@@ -31,8 +34,6 @@ typedef struct {
   uint16_t property_count;
   char **properties;
 } tc_assignable_enum_t;
-
-
 
 typedef struct tc_assignable_node_t {
   // Assignable name eg. fan speed
@@ -54,3 +55,12 @@ typedef struct tc_assignable_node_t {
   uint16_t children_count;
   struct tc_assignable_node_t **children_nodes;
 } tc_assignable_node_t;
+
+/* Utility functions for assignables */
+// Allocates memory for a tunable node
+tc_assignable_node_t *tc_assignable_node_new();
+// Deallocates memory of the node
+void tc_assignable_node_destroy(tc_assignable_node_t *node);
+
+// Add a child to a node
+int8_t tc_assignable_node_add_child(tc_assignable_node_t *node, tc_assignable_node_t *child);
