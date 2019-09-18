@@ -76,7 +76,7 @@ static int8_t generate_assignable_tree() {
 
     // Append to the root node
     if (tc_assignable_node_add_child(root_node, gpu_name_node) != TC_SUCCESS) {
-
+      // Couldn't allocate memory, destroy the node
     }
   }
 }

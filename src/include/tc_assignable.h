@@ -52,6 +52,7 @@ typedef struct tc_assignable_node_t {
     tc_assignable_range_t range_info;
   };
 
+  struct tc_assignable_node_t *parent;
   uint16_t children_count;
   struct tc_assignable_node_t **children_nodes;
 } tc_assignable_node_t;
