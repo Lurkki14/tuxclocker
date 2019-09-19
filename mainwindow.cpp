@@ -1163,6 +1163,34 @@ QMenu* MainWindow::createMenu()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-    MainWindow::hide();
-    if(ignore_closeEvent) e->ignore();
+    if(!ignore_closeEvent)
+    {
+        //Just quit if system tray is unavailable
+        QApplication::quit();
+    }
+
+    QMessageBox mb(QMessageBox::Warning,
+                   QString("TuxClocker"),
+                   QString("Do you want to close or minimize to tray?"),
+                   QMessageBox::NoButton, this);
+
+    QPushButton *closeBtn = mb.addButton(QString("Close"), QMessageBox::YesRole);
+    QPushButton *minimizeBtn = mb.addButton(QString("Minimize"), QMessageBox::NoRole);
+    QPushButton *cancelBtn = mb.addButton(QString("Cancel"), QMessageBox::RejectRole);
+
+    mb.setDefaultButton(closeBtn);
+    mb.setEscapeButton(cancelBtn);
+    mb.exec();
+
+    if (mb.clickedButton() == minimizeBtn)
+    {
+        MainWindow::hide();
+        e->ignore();
+        return;
+    }
+    else if (mb.clickedButton() == cancelBtn)
+    {
+        e->ignore();
+        return;
+    }
 }
