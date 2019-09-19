@@ -130,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*Create tray icon */
     {
-        auto appIcon = QIcon(":/icons/gpuonfire.svg");
+        auto appIcon = QIcon(QPixmap(":/icons/gpuonfire.svg"));
 
         if (!QSystemTrayIcon::isSystemTrayAvailable())
         {
