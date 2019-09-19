@@ -1149,7 +1149,7 @@ QMenu* MainWindow::createMenu()
 {
     auto menu = new QMenu(this);
 
-    QAction* show = new QAction("&Open settings", this);
+    QAction* show = new QAction("&Maximize TuxClocker", this);
     connect(show, &QAction::triggered, this, [=]{MainWindow::show();});
     menu->addAction(show);
 
