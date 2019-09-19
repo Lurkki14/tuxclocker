@@ -11,6 +11,8 @@
 static int8_t init();
 static int8_t close();
 static int8_t generate_assignable_tree();
+// Functions for adding nodes to the GPU
+void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev);
 
 static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
@@ -77,6 +79,40 @@ static int8_t generate_assignable_tree() {
     // Append to the root node
     if (tc_assignable_node_add_child(root_node, gpu_name_node) != TC_SUCCESS) {
       // Couldn't allocate memory, destroy the node
+      tc_assignable_node_destroy(gpu_name_node);
+      continue;
     }
+    // Try to add tunables that don't have children first
+    add_power_limit_item(gpu_name_node, nvml_handles[i]);
   }
+
+  return TC_SUCCESS;
+}
+
+void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev) {
+  uint32_t min, max;
+  if (nvmlDeviceGetPowerManagementLimitConstraints(dev, &min, &max) != NVML_SUCCESS) {
+    return;
+  }
+  // Create a new node
+  tc_assignable_node_t *power_node = tc_assignable_node_new();
+  if (power_node == NULL) {
+    return;
+  }
+  // Assign the parent
+  if (tc_assignable_node_add_child(parent, power_node) != TC_SUCCESS) {
+    return;
+  }
+
+  // Create the assignable range
+  tc_assignable_range_int_t int_range = {
+    .min = (min / 1000),
+    .max = (max / 1000)
+  };
+  tc_assignable_range_t range = {
+    .range_data_type = TC_ASSIGNABLE_RANGE_INT,
+    .int_range = int_range
+  };
+  power_node->value_category = TC_ASSIGNABLE_RANGE;
+  power_node->range_info = range;
 }

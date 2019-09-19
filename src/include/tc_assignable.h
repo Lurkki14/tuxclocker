@@ -6,7 +6,10 @@
 /* Defines the interface for modifying writable properties in controlled hardware.
    It is a tree structure provided by a module. */
 
-enum tc_assignable_value_category {TC_ASSIGNABLE_RANGE, TC_ASSIGNABLE_ENUM};
+enum tc_assignable_value_category {
+  TC_ASSIGNABLE_RANGE,
+  TC_ASSIGNABLE_ENUM
+};
 
 // Is the range double or integer
 enum tc_assignable_range_data_type {
@@ -14,11 +17,11 @@ enum tc_assignable_range_data_type {
   TC_ASSIGNABLE_RANGE_DOUBLE
 };
 
-typedef struct tc_assignable_range_double_t {
+typedef struct {
   double min, max;
 } tc_assignable_range_double_t;
 
-typedef struct tc_assignable_range_int_t {
+typedef struct {
   int64_t min, max;
 } tc_assignable_range_int_t;
 
@@ -65,3 +68,5 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node);
 
 // Add a child to a node
 int8_t tc_assignable_node_add_child(tc_assignable_node_t *node, tc_assignable_node_t *child);
+
+/* Utility functions for range and property info*/

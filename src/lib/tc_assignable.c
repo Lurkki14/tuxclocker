@@ -24,7 +24,7 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node) {
     }
     // Free memory of previous array
     for (uint16_t i = 0; i < node->parent->children_count; i++) {
-      free(node->parent->children_nodes[i]);
+      tc_assignable_node_destroy(node->parent->children_nodes[i]);
     }
     free(node->parent->children_nodes);
 
@@ -33,13 +33,8 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node) {
   }
 
   // The name is allocated on the heap
-  if (node->name != NULL) {
-    free(node->name);
-  }
-  if (node->unit != NULL) {
-    free(node->unit);
-  }
-
+  free(node->name);
+  free(node->unit);
   free(node);
 }
 
