@@ -5,7 +5,8 @@
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
-  TC_CATEGORY_PROPERTY
+  TC_CATEGORY_PROPERTY,
+  TC_CATEGORY_INTERFACE
 };
 
 
