@@ -1,4 +1,5 @@
 #include "/opt/cuda/include/nvml.h"
+//#include <nvml.h>
 #include <X11/Xlib.h>
 #include <string.h>
 

@@ -4,7 +4,6 @@ libxnvctrl = cc.find_library('XNVCtrl', required : false)
 
 nvidia_linux_libs = [libnvml, libx, libxnvctrl]
 
-#nvml_h = cc.has_header('nvml.h')
 all_nvidia_linux_libs = true
 
 foreach lib : nvidia_linux_libs
