@@ -9,8 +9,6 @@ enum tc_module_category {
   TC_CATEGORY_INTERFACE
 };
 
-
-
 typedef struct tc_module_t {
   enum tc_module_category category;
   const char *name;
