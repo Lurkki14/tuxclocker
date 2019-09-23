@@ -5,8 +5,10 @@
 
 #include <tc_assignable.h>
 #include <tc_common.h>
+#include <tc_module.h>
 
 #define MAX_GPUS 32
+
 
 // Local function declarations
 static int8_t init();
