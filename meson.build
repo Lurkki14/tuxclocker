@@ -1,4 +1,4 @@
-project('tuxclocker', 'c')
+project('tuxclocker', 'c', 'cpp')
 
 cc = meson.get_compiler('c')
 

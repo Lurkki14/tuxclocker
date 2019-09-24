@@ -1,1 +1,2 @@
 subdir('assignable')
+subdir('interface')

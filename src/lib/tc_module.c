@@ -18,6 +18,9 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
         case TC_CATEGORY_ASSIGNABLE:
             snprintf(abs_env_path, 128, "%s/%s/%s", env_module_path, "assignable", name);
             break;
+        case TC_CATEGORY_INTERFACE:
+            snprintf(abs_env_path, 128, "%s/%s/%s", env_module_path, "interface", name);
+            break;
         default:
             return NULL;
     }
