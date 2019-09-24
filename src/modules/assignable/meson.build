@@ -14,7 +14,7 @@ foreach lib : nvidia_linux_libs
 endforeach
 
 if all_nvidia_linux_libs
-	shared_library('libnvidia', 'nvidia_linux.c',
+	shared_library('nvidia', 'nvidia_linux.c',
 		include_directories : incdir,
 		dependencies : nvidia_linux_libs,
 		link_with : libtuxclocker)

@@ -9,8 +9,16 @@ enum tc_module_category {
   TC_CATEGORY_INTERFACE
 };
 
+// REPLACE THIS WITH SOMETHING MORE ROBUST
+// Default path for modules
+#define TC_MODULE_PATH "/usr/lib/tuxclocker"
+
+// Env variable name to load modules from in addition
+#define TC_MODULE_PATH_ENV "TC_MODULE_PATH"
+
 // Function name the module loader uses to get the module_t describing the module
 #define TC_MODULE_INFO_FUNCTION_NAME "tc_get_module_handle"
+#define TC_MODULE_INFO_FUNCTION tc_get_module_handle
 
 typedef struct tc_module_t {
   enum tc_module_category category;

@@ -9,6 +9,8 @@
 
 #define MAX_GPUS 32
 
+// Function for module loader to get the module structure
+tc_module_t *TC_MODULE_INFO_FUNCTION();
 
 // Local function declarations
 static int8_t init();
@@ -21,6 +23,18 @@ static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
 static Display *dpy;
 static tc_assignable_node_t *root_node;
+
+static tc_module_t mod_info = {
+    .category = TC_CATEGORY_ASSIGNABLE,
+    .name = "nvidia",
+    .description = "Nvidia assignables",
+    .init_callback = &init,
+    .close_callback = &close
+};
+
+tc_module_t *TC_MODULE_INFO_FUNCTION() {
+    return &mod_info;
+}
 
 static int8_t init() {
   // Initialize library
