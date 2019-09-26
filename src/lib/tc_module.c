@@ -3,7 +3,10 @@
 
 #include <tc_module.h>
 
-
+// Local function for returning the top level paths to look for eg "/usr/lib/tuxclocker/modules/"
+static char **module_search_paths(uint8_t *count) {
+    return NULL;
+}
 
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name) {
     // How do we find out where the library path is?
@@ -32,4 +35,8 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
     // Call the function to get the module handle
     tc_module_t *(*mod_info_func)() = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME);
     return mod_info_func();
+}
+
+tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count) {
+    return NULL;
 }

@@ -15,6 +15,7 @@ tc_module_t *TC_MODULE_INFO_FUNCTION();
 // Local function declarations
 static int8_t init();
 static int8_t close();
+static tc_assignable_node_t *category_callback();
 static int8_t generate_assignable_tree();
 // Functions for adding nodes to the GPU
 void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev);
@@ -24,16 +25,21 @@ static nvmlDevice_t nvml_handles[MAX_GPUS];
 static Display *dpy;
 static tc_assignable_node_t *root_node;
 
-static tc_module_t mod_info = {
+tc_module_t mod_info = {
     .category = TC_CATEGORY_ASSIGNABLE,
     .name = "nvidia",
     .description = "Nvidia assignables",
     .init_callback = &init,
-    .close_callback = &close
+    .close_callback = &close,
+    .category_data_callback = (void *(*)())&category_callback
 };
 
 tc_module_t *TC_MODULE_INFO_FUNCTION() {
     return &mod_info;
+}
+
+static tc_assignable_node_t *category_callback() {
+    return root_node;
 }
 
 static int8_t init() {
@@ -92,7 +98,7 @@ static int8_t generate_assignable_tree() {
     // Got the name, append the item to the root item
     tc_assignable_node_t *gpu_name_node = tc_assignable_node_new();
     gpu_name_node->name = strdup(gpu_name);
-
+    
     // Append to the root node
     if (tc_assignable_node_add_child(root_node, gpu_name_node) != TC_SUCCESS) {
       // Couldn't allocate memory, destroy the node

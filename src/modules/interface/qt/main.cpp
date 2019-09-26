@@ -16,6 +16,8 @@ static tc_module_t mod_info = {
     .name = "qt",
     .description = "Qt Interface",
     .init_callback = (int8_t (*)()) &main,
+    .init_callback_argc = 2,
+    .init_callback_args = {TC_TYPE_INT, TC_TYPE_STRING_ARR},
     .close_callback = NULL
 };
 

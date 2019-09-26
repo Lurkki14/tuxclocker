@@ -2,6 +2,13 @@
 
 #include <stdint.h>
 
+#include <tc_common.h>
+
+// Use unmangled symbols for C++
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
@@ -20,6 +27,9 @@ enum tc_module_category {
 #define TC_MODULE_INFO_FUNCTION_NAME "tc_get_module_handle"
 #define TC_MODULE_INFO_FUNCTION tc_get_module_handle
 
+// Maximum argument count for "overloaded" functions
+#define TC_MAX_FUNCTION_ARGC 16
+
 typedef struct tc_module_t {
   enum tc_module_category category;
   // Short name of the module like nvidia, qt
@@ -29,16 +39,28 @@ typedef struct tc_module_t {
 
   // Initializes the module's internal state
   int8_t (*init_callback)();
+  // Arguments for init_callback
+  uint8_t init_callback_argc;
+  enum tc_arg_types init_callback_args[TC_MAX_FUNCTION_ARGC];
+  
   // Frees the internal memory of the module
   int8_t (*close_callback)();
 
+  // Callback for category specific main data structure of the module
+  void *(*category_data_callback)();
 } tc_module_t;
 
 // Try to return the module handle matching the category and name. If it doesn't exist or there was a problem loading the module, returns NULL.
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name);
+// Try to return all module handles matching 'category'
+tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count);
 
 // Wrappers for platform-specific functions for loading libraries (modules) at runtime
 void *tc_dlopen(const char *path);
 void *tc_dlsym(void *handle, const char *name);
 void tc_dlclose(void *handle);
 char *tc_dlerror();
+
+#ifdef __cplusplus
+}
+#endif

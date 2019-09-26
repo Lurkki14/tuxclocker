@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -70,3 +74,7 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node);
 int8_t tc_assignable_node_add_child(tc_assignable_node_t *node, tc_assignable_node_t *child);
 
 /* Utility functions for range and property info*/
+
+#ifdef __cplusplus
+}
+#endif
