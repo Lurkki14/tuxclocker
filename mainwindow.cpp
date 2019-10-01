@@ -1193,4 +1193,8 @@ void MainWindow::closeEvent(QCloseEvent* e)
         e->ignore();
         return;
     }
+    else if (mb.clickedButton() == closeBtn)
+    {
+        QCoreApplication::quit();
+    }
 }
