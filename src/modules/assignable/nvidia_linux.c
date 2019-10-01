@@ -2,6 +2,7 @@
 //#include <nvml.h>
 #include <X11/Xlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <tc_assignable.h>
 #include <tc_common.h>
@@ -98,6 +99,7 @@ static int8_t generate_assignable_tree() {
     // Got the name, append the item to the root item
     tc_assignable_node_t *gpu_name_node = tc_assignable_node_new();
     gpu_name_node->name = strdup(gpu_name);
+    printf("%s\n", gpu_name_node->name);
     
     // Append to the root node
     if (tc_assignable_node_add_child(root_node, gpu_name_node) != TC_SUCCESS) {

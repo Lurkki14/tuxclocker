@@ -3,31 +3,23 @@
 
 #include <tc_module.h>
 
-// Local function for returning the top level paths to look for eg "/usr/lib/tuxclocker/modules/"
-static char **module_search_paths(uint8_t *count) {
-    return NULL;
-}
 
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name) {
-    // How do we find out where the library path is?
-    // Not like this, this is bad
-    char abs_path[128];
-    char abs_env_path[128];
-    
-    const char  *env_module_path = getenv(TC_MODULE_PATH_ENV);
+    // The library  is configured with runpath pointing to module root on posix
+    char mod_abs_path[128];
     
     // Find the folder where the module should reside
     switch (category) {
         case TC_CATEGORY_ASSIGNABLE:
-            snprintf(abs_env_path, 128, "%s/%s/%s", env_module_path, "assignable", name);
+            snprintf(mod_abs_path, 128, "%s/%s",  "assignable", name);
             break;
         case TC_CATEGORY_INTERFACE:
-            snprintf(abs_env_path, 128, "%s/%s/%s", env_module_path, "interface", name);
+            snprintf(mod_abs_path, 128, "%s/%s",  "interface", name);
             break;
         default:
             return NULL;
     }
-    void *handle = tc_dlopen(abs_env_path);
+    void *handle = tc_dlopen(mod_abs_path);
     if (handle == NULL) {
         return NULL;
     }
