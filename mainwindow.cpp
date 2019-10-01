@@ -24,10 +24,9 @@ along with TuxClocker.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "nvidia.h"
 #include <NVCtrl/NVCtrl.h>
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow), trayIcon(new QSystemTrayIcon(this))
 {
     ui->setupUi(this);
 
@@ -128,6 +127,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(tabHandler(int)));
     connect(monitorUpdater, SIGNAL(timeout()), SLOT(updateMonitor()));
+
+    /*Create tray icon */
+    {
+        auto appIcon = QIcon(QPixmap(":/icons/gpuonfire.svg"));
+
+        if (!QSystemTrayIcon::isSystemTrayAvailable())
+        {
+            qDebug() << "Qt: System tray unavailable";
+            ignore_closeEvent = false;
+            MainWindow::show();
+        }
+
+        this->trayIcon->setIcon(appIcon);
+        auto menu = this->createMenu();
+        this->trayIcon->setContextMenu(menu);
+        this->trayIcon->setToolTip(QString("TuxClocker"));
+        this->trayIcon->show();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1126,4 +1143,54 @@ void MainWindow::on_GPUComboBox_currentIndexChanged(int index)
     // Update maximum clocks
     curmaxmemclk->setText(1, QString::number(nv->GPUList[index].maxMemClk) + "MHz");
     curmaxclk->setText(1, QString::number(nv->GPUList[index].maxCoreClk) + "MHz");
+}
+
+QMenu* MainWindow::createMenu()
+{
+    auto menu = new QMenu(this);
+
+    QAction* show = new QAction("&Maximize TuxClocker", this);
+    connect(show, &QAction::triggered, this, [=]{MainWindow::show();});
+    menu->addAction(show);
+
+    QAction* quit = new QAction("&Quit", this);
+    connect(quit, &QAction::triggered, this, [=]{QApplication::quit();});
+    menu->addAction(quit);
+
+    return menu;
+}
+
+
+void MainWindow::closeEvent(QCloseEvent* e)
+{
+    if(!ignore_closeEvent)
+    {
+        //Just quit if system tray is unavailable
+        QApplication::quit();
+    }
+
+    QMessageBox mb(QMessageBox::Warning,
+                   QString("TuxClocker"),
+                   QString("Do you want to close or minimize to tray?"),
+                   QMessageBox::NoButton, this);
+
+    QPushButton *closeBtn = mb.addButton(QString("Close"), QMessageBox::YesRole);
+    QPushButton *minimizeBtn = mb.addButton(QString("Minimize"), QMessageBox::NoRole);
+    QPushButton *cancelBtn = mb.addButton(QString("Cancel"), QMessageBox::RejectRole);
+
+    mb.setDefaultButton(closeBtn);
+    mb.setEscapeButton(cancelBtn);
+    mb.exec();
+
+    if (mb.clickedButton() == minimizeBtn)
+    {
+        MainWindow::hide();
+        e->ignore();
+        return;
+    }
+    else if (mb.clickedButton() == cancelBtn)
+    {
+        e->ignore();
+        return;
+    }
 }

@@ -70,6 +70,8 @@ public:
         uint powerLim;
         int totalVRAM;
         int usedVRAM;
+
+        uint maxPerfMode;
     };
     QVector <GPU> GPUList;
 
@@ -94,6 +96,7 @@ public slots:
     void queryGPUFreqOffset(int GPUIndex);
     void queryGPUMemClkOffset(int GPUIndex);
     void queryGPUVoltageOffset(int GPUIndex);
+    void queryGPUMaxPerfMode(int GPUIndex);
 
     void queryGPUUtils(int GPUIndex);
     void queryGPUPowerDraw(int GPUIndex);
