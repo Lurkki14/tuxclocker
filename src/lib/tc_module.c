@@ -1,27 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <tc_module.h>
 
+// Local function for getting the path of the module. Requires freeing.
+static char *module_filename(const char *category, const char *mod_name);
+static char *module_filename(const char *category, const char *mod_name) {
+    // TC_MODULE_PATH should be defined as an absolute path
+    // Posix
+    char path[128];
+    snprintf(path, 128,  "%s/%s/lib%s.so", TC_MODULE_PATH, category, mod_name);
+    return strdup(path);
+}
 
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name) {
-    // The library  is configured with runpath pointing to module root on posix
-    char mod_abs_path[128];
+    char *mod_abs_path = NULL;
     
-    // Find the folder where the module should reside
-    // TC_MODULE_PATH should be defined as an absolute path
     switch (category) {
         case TC_CATEGORY_ASSIGNABLE:
-            snprintf(mod_abs_path, 128, "%s/%s/%s", TC_MODULE_PATH, "assignable", name);
+            mod_abs_path = module_filename("assignable", name);
             break;
         case TC_CATEGORY_INTERFACE:
-           snprintf(mod_abs_path, 128, "%s/%s/%s", TC_MODULE_PATH,  "interface", name);
-           // snprintf(mod_abs_path, 128, "/usr/lib/tuxclocker/modules/interface/%s", name);
-            //snprintf(mod_abs_path, 128, "%s", name);
+           mod_abs_path = module_filename("interface", name);
             break;
         default:
             return NULL;
     }
+    
     void *handle = tc_dlopen(mod_abs_path);
     if (handle == NULL) {
         printf("%s\n", tc_dlerror());
