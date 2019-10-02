@@ -8,15 +8,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// Provide default
-    
+  
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
   TC_CATEGORY_PROPERTY,
   TC_CATEGORY_INTERFACE
 };
+
+// Maximum amount of modules loaded at once
+#define TC_MAX_LOADED_MODULES 64
 
 // Default module path in case not defined
 #ifndef TC_MODULE_PATH
@@ -57,6 +58,9 @@ typedef struct tc_module_t {
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name);
 // Try to return all module handles matching 'category'
 tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count);
+
+// Close the module after successful find
+void tc_module_close(tc_module_t *module);
 
 // Wrappers for platform-specific functions for loading libraries (modules) at runtime
 void *tc_dlopen(const char *path);

@@ -24,7 +24,7 @@ AssignableWidget::~AssignableWidget() {
 }
 
 void AssignableWidget::genAssignableTree(QTreeView* treeView) {
-    tc_module_t *nv_mod = tc_module_find(TC_CATEGORY_ASSIGNABLE, "libnvidia.so");
+    tc_module_t *nv_mod = tc_module_find(TC_CATEGORY_ASSIGNABLE, "nvidia");
     
     if (nv_mod != NULL) {
         if (nv_mod->init_callback() != TC_SUCCESS) {
