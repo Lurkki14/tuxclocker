@@ -4,9 +4,9 @@ libtuxclocker_posix_sources = ['lib/posix/module.c']
 
 libtuxclocker_posix_libs = [cc.find_library('dl')]
 
-# Posix library uses runpath for specifying module directory root
-
-posix_rpath = get_option('libdir' ) + '/tuxclocker/modules'
+# Compile time definition for module path
+module_path_def_template = '-DTC_MODULE_PATH="@0@/@1@/tuxclocker/modules"'
+module_path_def = module_path_def_template.format(get_option('prefix'), get_option('libdir'))
 
 libtuxclocker = shared_library('libtuxclocker',
 	['lib/tc_assignable.c',
@@ -14,8 +14,8 @@ libtuxclocker = shared_library('libtuxclocker',
 	 libtuxclocker_posix_sources],
 	include_directories : incdir,
 	dependencies : libtuxclocker_posix_libs,
-	install_rpath : posix_rpath,
-	link_args : '-Wl,--enable-new-dtags')
+	c_args : module_path_def,
+	install : true)
 
 subdir('modules')
 subdir('main')

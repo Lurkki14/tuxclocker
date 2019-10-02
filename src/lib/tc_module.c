@@ -9,18 +9,22 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
     char mod_abs_path[128];
     
     // Find the folder where the module should reside
+    // TC_MODULE_PATH should be defined as an absolute path
     switch (category) {
         case TC_CATEGORY_ASSIGNABLE:
-            snprintf(mod_abs_path, 128, "%s/%s",  "assignable", name);
+            snprintf(mod_abs_path, 128, "%s/%s/%s", TC_MODULE_PATH, "assignable", name);
             break;
         case TC_CATEGORY_INTERFACE:
-            snprintf(mod_abs_path, 128, "%s/%s",  "interface", name);
+           snprintf(mod_abs_path, 128, "%s/%s/%s", TC_MODULE_PATH,  "interface", name);
+           // snprintf(mod_abs_path, 128, "/usr/lib/tuxclocker/modules/interface/%s", name);
+            //snprintf(mod_abs_path, 128, "%s", name);
             break;
         default:
             return NULL;
     }
     void *handle = tc_dlopen(mod_abs_path);
     if (handle == NULL) {
+        printf("%s\n", tc_dlerror());
         return NULL;
     }
     
@@ -30,5 +34,7 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
 }
 
 tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count) {
+    
+    
     return NULL;
 }

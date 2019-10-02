@@ -19,4 +19,6 @@ shared_library('qt',
     moc_files,
     include_directories : [incdir, local_qt_incdirs],
     dependencies : qt5_dep,
-    link_with : libtuxclocker)
+    link_with : libtuxclocker,
+    install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'interface',
+    install : true)

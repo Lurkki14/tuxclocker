@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+// Provide default
+    
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
@@ -16,9 +18,10 @@ enum tc_module_category {
   TC_CATEGORY_INTERFACE
 };
 
-// REPLACE THIS WITH SOMETHING MORE ROBUST
-// Default path for modules
-#define TC_MODULE_PATH "/usr/lib/tuxclocker"
+// Default module path in case not defined
+#ifndef TC_MODULE_PATH
+#define TC_MODULE_PATH "/usr/lib/tuxclocker/modules"
+#endif
 
 // Env variable name to load modules from in addition
 #define TC_MODULE_PATH_ENV "TC_MODULE_PATH"
