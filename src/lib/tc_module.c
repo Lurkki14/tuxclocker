@@ -83,7 +83,6 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
     
     // Call the function to get the module handle
     tc_module_t *(*mod_info_func)() = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME);
-    //return mod_info_func();
     tc_module_t *mod;
     if ((mod = mod_info_func()) == NULL) {
         tc_dlclose(handle);

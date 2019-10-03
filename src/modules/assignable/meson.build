@@ -17,5 +17,7 @@ if all_nvidia_linux_libs
 	shared_library('nvidia', 'nvidia_linux.c',
 		include_directories : incdir,
 		dependencies : nvidia_linux_libs,
-		link_with : libtuxclocker)
+		link_with : libtuxclocker,
+		install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'assignable',
+		install : true)
 endif

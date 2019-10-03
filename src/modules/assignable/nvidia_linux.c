@@ -32,7 +32,7 @@ tc_module_t mod_info = {
     .description = "Nvidia assignables",
     .init_callback = &init,
     .close_callback = &close,
-    .category_data_callback = (void *(*)())&category_callback
+    .category_data_callback = (void *(*)()) &category_callback
 };
 
 tc_module_t *TC_MODULE_INFO_FUNCTION() {

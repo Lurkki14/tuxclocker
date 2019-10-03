@@ -11,7 +11,7 @@ AssignableWidget::AssignableWidget(QWidget *parent) : QWidget(parent) {
     m_mainLayout->addWidget(m_splitter);
     
     m_assignableTreeView = new QTreeView;
-    //genAssignableTree(m_assignableTreeView);
+    genAssignableTree(m_assignableTreeView);
     m_splitter->addWidget(m_assignableTreeView);
     
     m_assignableEditor = new AssignableEditor;
@@ -31,6 +31,9 @@ void AssignableWidget::genAssignableTree(QTreeView* treeView) {
             return;
         }
         printf("opened nv mod\n");
+    }
+    else {
+        return;
     }
     
     QTreeWidgetItem *item = new QTreeWidgetItem;
