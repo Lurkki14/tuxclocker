@@ -43,7 +43,7 @@ int8_t tc_assignable_node_add_child(tc_assignable_node_t *parent, tc_assignable_
   if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count)) == NULL) {
     return TC_ENOMEM;
   }
-  parent->children_nodes[parent->children_count] = child;
+  parent->children_nodes[parent->children_count - 1] = child;
   child->parent = parent;
   return TC_SUCCESS;
 }
