@@ -1,10 +1,12 @@
 #pragma once
 
 #include "AssignableEditor.h"
+#include <AssignableData.h>
 
 #include <QWidget>
 #include <QSplitter>
 #include <QLayout>
+#include <QStandardItemModel>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
@@ -19,7 +21,8 @@ private:
     // Splitter for editor and viewer
     QSplitter *m_splitter;
     QTreeWidget *m_assignableTreeWidget;
+    QTreeView *m_assignableTreeView;
     AssignableEditor *m_assignableEditor;
     
-    void genAssignableTree(QTreeWidget *treeWidget);
+    void genAssignableTree(QTreeView *treeView);
 };
