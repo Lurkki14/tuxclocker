@@ -10,9 +10,9 @@ AssignableWidget::AssignableWidget(QWidget *parent) : QWidget(parent) {
     m_splitter = new QSplitter;
     m_mainLayout->addWidget(m_splitter);
     
-    m_assignableTreeView = new QTreeView;
-    genAssignableTree(m_assignableTreeView);
-    m_splitter->addWidget(m_assignableTreeView);
+    m_assignableTreeWidget = new QTreeWidget;
+    genAssignableTree(m_assignableTreeWidget);
+    m_splitter->addWidget(m_assignableTreeWidget);
     
     m_assignableEditor = new AssignableEditor;
     m_splitter->addWidget(m_assignableEditor);
@@ -23,7 +23,7 @@ AssignableWidget::AssignableWidget(QWidget *parent) : QWidget(parent) {
 AssignableWidget::~AssignableWidget() {
 }
 
-void AssignableWidget::genAssignableTree(QTreeView* treeView) {
+void AssignableWidget::genAssignableTree(QTreeWidget* treeWidget) {
     tc_module_t *nv_mod = tc_module_find(TC_CATEGORY_ASSIGNABLE, "nvidia");
     
     if (nv_mod != NULL) {
@@ -36,31 +36,42 @@ void AssignableWidget::genAssignableTree(QTreeView* treeView) {
         return;
     }
     
-    QTreeWidgetItem *item = new QTreeWidgetItem;
-    tc_assignable_node_t *parent = (tc_assignable_node_t*) nv_mod->category_data_callback();
+    tc_assignable_node_t *root= (tc_assignable_node_t*) nv_mod->category_data_callback();
     
-    if (parent == NULL) {
+    if (root == NULL) {
         return;
     }
     
-    std::function<void(tc_assignable_node_t*)> traverse;
-    traverse = [=, &traverse](tc_assignable_node_t *node) {
+    std::function<void(tc_assignable_node_t*, QTreeWidgetItem*)> traverse;
+    traverse = [=, &traverse](tc_assignable_node_t *node, QTreeWidgetItem *item) {
         if (node == NULL) {
             return;
         }
         
+        QTreeWidgetItem *newItem = new QTreeWidgetItem;
         if (node->name != NULL) { 
             qDebug() << node->name;
+            
+           newItem->setText(0, QString(node->name));
         }
+        item->addChild(newItem);
+        
         if (node->children_count == 0) {
             return;
         }
+        
         for (uint32_t i = 0; i < node->children_count; i++) {
-            traverse(node->children_nodes[i]);
+            traverse(node->children_nodes[i], newItem);
         }
     };
     
-    qDebug() << "traversing nodes" << parent->children_count << parent << parent->children_nodes[0];
+    qDebug() << "traversing nodes";
     
-    traverse(parent);
+    QTreeWidgetItem *item = new QTreeWidgetItem;
+    item->setText(0, root->name);
+    m_assignableTreeWidget->addTopLevelItem(item);
+    
+    traverse(root, item);
+    
+    connect(m_assignableTreeWidget, &QTreeWidget::currentItemChanged, []() {qDebug("item changed");});
 }

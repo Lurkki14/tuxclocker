@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
     if (mod != NULL) {
         printf("successful load for %s\n", mod->name);
         mod->init_callback(argc, argv);
+        
+        tc_module_close(mod);
     }
     
     return 0;
