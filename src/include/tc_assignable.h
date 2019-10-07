@@ -11,8 +11,9 @@ extern "C" {
    It is a tree structure provided by a module. */
 
 enum tc_assignable_value_category {
-  TC_ASSIGNABLE_RANGE,
-  TC_ASSIGNABLE_ENUM
+    TC_ASSIGNABLE_NONE,
+    TC_ASSIGNABLE_RANGE,
+    TC_ASSIGNABLE_ENUM
 };
 
 // Is the range double or integer
