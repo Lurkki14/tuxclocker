@@ -45,7 +45,7 @@ typedef struct tc_module_t {
   int8_t (*init_callback)();
   // Arguments for init_callback
   uint8_t init_callback_argc;
-  enum tc_arg_types init_callback_args[TC_MAX_FUNCTION_ARGC];
+  enum tc_data_types init_callback_args[TC_MAX_FUNCTION_ARGC];
   
   // Frees the internal memory of the module
   int8_t (*close_callback)();

@@ -12,13 +12,13 @@ extern "C" {
 #define TC_ENOMEM (-2)
 
 // Tagged union of data types for simulating function overloading
-enum tc_arg_types {
+enum tc_data_types {
     TC_TYPE_INT,
     TC_TYPE_STRING_ARR
 };
 
 typedef struct {
-    enum tc_arg_types arg_type;
+    enum tc_data_types arg_type;
     union {
         int int_arg;
         char **string_arr_arg;
