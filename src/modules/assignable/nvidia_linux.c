@@ -1,7 +1,9 @@
 #include "/opt/cuda/include/nvml.h"
 //#include <nvml.h>
 #include <X11/Xlib.h>
+#include <NVCtrl/NVCtrlLib.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include <tc_assignable.h>
@@ -20,6 +22,7 @@ static tc_assignable_node_t *category_callback();
 static int8_t generate_assignable_tree();
 // Functions for adding nodes to the GPU
 void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev);
+void add_fan_items(tc_assignable_node_t *parent, int32_t index);
 
 static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
@@ -88,6 +91,7 @@ static int8_t close() {
 static int8_t generate_assignable_tree() {
   // Allocate memory for root node
   root_node = tc_assignable_node_new();
+  root_node->value_category = TC_ASSIGNABLE_NONE;
 
   for (uint32_t i = 0; i < gpu_count; i++) {
     // Get GPU name and use it as the root item for GPU
@@ -108,6 +112,8 @@ static int8_t generate_assignable_tree() {
     }
     // Try to add tunables that don't have children first
     add_power_limit_item(gpu_name_node, nvml_handles[i]);
+    
+    add_fan_items(gpu_name_node, i);
   }
 
   return TC_SUCCESS;
@@ -125,6 +131,7 @@ void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev) {
   }
   // Assign the parent
   if (tc_assignable_node_add_child(parent, power_node) != TC_SUCCESS) {
+    tc_assignable_node_destroy(power_node);
     return;
   }
 
@@ -140,4 +147,64 @@ void add_power_limit_item(tc_assignable_node_t *parent, nvmlDevice_t dev) {
   power_node->value_category = TC_ASSIGNABLE_RANGE;
   power_node->range_info = range;
   power_node->name = "Power Limit";
+}
+
+void add_fan_items(tc_assignable_node_t* parent, int32_t index) {
+    // Query fan count for GPU
+    unsigned char *data;
+    int32_t data_len;
+    
+    if (!XNVCTRLQueryTargetBinaryData(dpy,
+                                                                              NV_CTRL_TARGET_TYPE_GPU,
+                                                                              0,
+                                                                              index,
+                                                                              NV_CTRL_BINARY_DATA_COOLERS_USED_BY_GPU,
+                                                                              &data,
+                                                                              &data_len)) {
+        return;
+    }
+    int gpu_fan_count = (int) *data;
+    
+    if (gpu_fan_count == 1) {
+        // Only add direct children
+        // Check if manual fan mode is available, if not there's no point in adding a node with one setting
+        NVCTRLAttributeValidValuesRec values;
+        
+        if (!XNVCTRLQueryValidTargetAttributeValues(dpy,
+                                                                                                    NV_CTRL_TARGET_TYPE_GPU,
+                                                                                                    index,
+                                                                                                    0,
+                                                                                                    NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+                                                                                                    &values)) {
+            return;
+        }
+        if ((values.permissions & ATTRIBUTE_TYPE_WRITE) == ATTRIBUTE_TYPE_WRITE) {
+            // Manual setting is available, add the node
+            tc_assignable_node_t *fanmode_node = tc_assignable_node_new();
+            if (fanmode_node == NULL) {
+                return;
+            }
+            if (tc_assignable_node_add_child(parent, fanmode_node) != TC_SUCCESS) {
+                tc_assignable_node_destroy(fanmode_node);
+                return;
+            }
+            // Create the string array of the options
+            char *m_auto = strdup("auto");
+            char *m_manual = strdup("manual");
+            
+            char **list = calloc(2, sizeof(char*));
+            
+            list[0] = m_auto;
+            list[1] = m_manual;
+            
+            tc_assignable_enum_t enum_info = {
+                2,
+                list};
+                
+            fanmode_node->value_category = TC_ASSIGNABLE_ENUM;
+            fanmode_node->enum_info = enum_info;
+            fanmode_node->name = "Fan Mode";
+            return;
+        }
+    }
 }
