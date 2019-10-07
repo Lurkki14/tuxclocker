@@ -1,4 +1,5 @@
 #include "AssignableWidget.h"
+
 #include <tc_module.h>
 #include <tc_assignable.h>
 #include <tc_common.h>
@@ -46,7 +47,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         return;
     }
     
-    std::function<void(tc_assignable_node_t*, QStandardItem *)> traverse;
+    std::function<void(tc_assignable_node_t*, QStandardItem*)> traverse;
     traverse = [=, &traverse](tc_assignable_node_t *node, QStandardItem *item) {
         if (node == NULL) {
             return;
@@ -58,8 +59,16 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         
         // Append as child to item
         QStandardItem *item_ = new QStandardItem;
+        
         item_->setText(node->name);
         item->appendRow(item_);
+        
+        qDebug() << node->value_category;
+        
+        AssignableData data(node);
+        QVariant v;
+        v.setValue(data);
+        item_->setData(v);
         
         if (node->children_count == 0) {
             return;
@@ -71,6 +80,8 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     };
     
     QStandardItemModel *assignableModel = new QStandardItemModel;
+    
+    connect(m_assignableTreeView, &QTreeView::activated, [=](QModelIndex index) {m_assignableEditor->setData(assignableModel->itemFromIndex(index)->data());});
     
     QStandardItem *parentItem = assignableModel->invisibleRootItem();
     

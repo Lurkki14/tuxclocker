@@ -4,15 +4,21 @@ qt5_dep = dependency('qt5',
     
 moc_files = qt5.preprocess(moc_headers : [ 'MainWindow.h',
         'widgets/AssignableWidget.h',
-        'widgets/AssignableEditor.h'],
-    dependencies : qt5_dep)
+        'widgets/AssignableEditor.h',
+        'widgets/IntRangeEditor.h',
+        'widgets/EnumEditor.h',
+        'data/AssignableData.h'],
+        dependencies : qt5_dep)
 
 sources = ['main.cpp',
     'MainWindow.cpp',
     'widgets/AssignableWidget.cpp',
-    'widgets/AssignableEditor.cpp']
+    'widgets/AssignableEditor.cpp',
+    'widgets/IntRangeEditor.cpp',
+    'widgets/EnumEditor.cpp',
+    'data/AssignableData.cpp']
     
-local_qt_incdirs = ['widgets']
+local_qt_incdirs = ['widgets', 'data']
     
 shared_library('qt', 
     sources,
