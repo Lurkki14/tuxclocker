@@ -14,9 +14,7 @@ EnumEditor::EnumEditor(QWidget *parent) : QWidget(parent) {
 
 void EnumEditor::setData(QStringList &strings) {
     // Remove old entries
-    for (uint16_t i = 0; i < m_comboBox->count(); i++) {
-        m_comboBox->removeItem(i);
-    }
+    m_comboBox->clear();
         
     // Add the new options for the combo box
     m_options = strings;
