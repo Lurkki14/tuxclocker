@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+    
 // Common definitions for tuxclocker
 
 // Error values
@@ -14,8 +16,19 @@ extern "C" {
 // Tagged union of data types for simulating function overloading
 enum tc_data_types {
     TC_TYPE_INT,
+    TC_TYPE_DOUBLE,
+    TC_TYPE_STRING,
     TC_TYPE_STRING_ARR
 };
+
+typedef struct {
+    enum tc_data_types data_type;
+    union {
+        int64_t int_value;
+        double double_value;
+        char *string_value;
+    };
+} tc_variant_t;
 
 typedef struct {
     enum tc_data_types arg_type;
