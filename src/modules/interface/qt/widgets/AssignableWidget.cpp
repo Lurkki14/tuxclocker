@@ -91,6 +91,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     }
     
     m_assignableTreeView->setModel(assignableModel);
-    
-   // connect(m_assignableTreeWidget, &QTreeWidget::currentItemChanged, []() {qDebug("item changed");});
+    m_assignableTreeView->setHeaderHidden(true);
+    // Don't allow editing the item names
+    m_assignableTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
