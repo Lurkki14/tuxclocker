@@ -1,10 +1,13 @@
 #pragma once
 
+#include <AssignableWidget.h>
+
 #include <QMainWindow>
 #include <QLayout>
 #include <QToolBar>
 #include <QToolButton>
 #include <QStackedWidget>
+#include <QMap>
 
 namespace Ui {
     class MainWindow;
@@ -20,9 +23,18 @@ private:
     QGridLayout *m_mainLayout;
     QStatusBar *m_mainStatusBar;
     QWidget *m_mainWidget;
+    
     QToolBar *m_mainToolBar;
     
     // Stacked widgets for the main view
     QStackedWidget *m_mainStackedWidget;
-    QVector <QWidget*> m_mainStackedWidgetWidgets;
+    AssignableWidget *m_assignableWidget;
+    QWidget *m_settingWidget;
+
+    // List of widget switch triggers so we know which ones to uncheck
+    QVector <QAction*>  m_widgetSwitchTriggers;
+    // Setup connections
+    void setupConnections();
+    // Change current stacked widget according to the action that was triggered
+    void changeActiveWidget(QWidget *widget, const QAction *action);
 };

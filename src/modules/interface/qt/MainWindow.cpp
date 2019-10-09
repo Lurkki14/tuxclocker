@@ -15,18 +15,51 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     m_mainToolBar->setFloatable(true);
     m_mainLayout->addWidget(m_mainToolBar);
     
-    // Add toolbar buttons
-    QToolButton *settingsButton = new QToolButton;
-    settingsButton->setCheckable(true);
-    settingsButton->setIcon(QIcon::fromTheme("configure"));
-    m_mainToolBar->addWidget(settingsButton);
+    m_mainStackedWidget = new QStackedWidget;
     
-    AssignableWidget *assignableWidget = new AssignableWidget;
-    m_mainLayout->addWidget(assignableWidget);
+    m_assignableWidget = new AssignableWidget;
+    m_mainStackedWidget->addWidget(m_assignableWidget);
+    
+    m_settingWidget = new QWidget;
+    m_mainStackedWidget->addWidget(m_settingWidget);
+    
+    m_mainLayout->addWidget(m_mainStackedWidget);
+    
+    // Add toolbar buttons
+    
+    // Connect tool buttons to changing the active stacked widget
+    QAction *activateSettings = new QAction;
+    activateSettings->setCheckable(true);
+    activateSettings->setIcon(QIcon::fromTheme("configure"));
+    m_mainToolBar->addAction(activateSettings);
+    
+    QAction *activateEditor = new QAction;
+    activateEditor->setCheckable(true);
+    activateEditor->setIcon(QIcon::fromTheme("edit-entry"));
+    m_mainToolBar->addAction(activateEditor);
+    
+    connect(activateSettings, &QAction::triggered, [=]() {
+        changeActiveWidget(m_settingWidget, activateSettings);
+    });
+    
+    /*connect(settingsButton, &QToolButton::toggled, [=](bool toggled) {
+        if (toggled) {
+            m_mainStackedWidget->setCurrentWidget(m_settingWidget);
+        }
+    });*/
     
     m_mainWidget->setLayout(m_mainLayout);
     setCentralWidget(m_mainWidget);
 }
 
 MainWindow::~MainWindow() {
+}
+
+void MainWindow::changeActiveWidget(QWidget *widget, const QAction *action) {
+    
+    // Replace this with list of actions that change widgets
+   for (QAction *i_actions : m_mainToolBar->actions()) {
+       
+   }
+   m_mainStackedWidget->setCurrentWidget(widget);
 }
