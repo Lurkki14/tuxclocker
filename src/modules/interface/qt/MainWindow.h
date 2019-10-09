@@ -33,8 +33,8 @@ private:
 
     // List of widget switch triggers so we know which ones to uncheck
     QVector <QAction*>  m_widgetSwitchTriggers;
-    // Setup connections
-    void setupConnections();
+    // Setup connections between actions and widgets
+    void setupWidgetTriggerAction(QAction *action, QWidget *widget, const QString &iconName);
     // Change current stacked widget according to the action that was triggered
-    void changeActiveWidget(QWidget *widget, const QAction *action);
+    void changeActiveWidget(QWidget *widget, QAction *action);
 };

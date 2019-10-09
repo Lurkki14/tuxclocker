@@ -28,25 +28,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Add toolbar buttons
     
     // Connect tool buttons to changing the active stacked widget
-    QAction *activateSettings = new QAction;
-    activateSettings->setCheckable(true);
-    activateSettings->setIcon(QIcon::fromTheme("configure"));
-    m_mainToolBar->addAction(activateSettings);
-    
     QAction *activateEditor = new QAction;
-    activateEditor->setCheckable(true);
-    activateEditor->setIcon(QIcon::fromTheme("edit-entry"));
-    m_mainToolBar->addAction(activateEditor);
+    setupWidgetTriggerAction(activateEditor, m_assignableWidget, "edit-entry");
     
-    connect(activateSettings, &QAction::triggered, [=]() {
-        changeActiveWidget(m_settingWidget, activateSettings);
-    });
+    QAction *activateSettings = new QAction;
+    setupWidgetTriggerAction(activateSettings, m_settingWidget, "configure");
     
-    /*connect(settingsButton, &QToolButton::toggled, [=](bool toggled) {
-        if (toggled) {
-            m_mainStackedWidget->setCurrentWidget(m_settingWidget);
-        }
-    });*/
+    // Set editor as default widget
+    changeActiveWidget(m_assignableWidget, activateEditor);
     
     m_mainWidget->setLayout(m_mainLayout);
     setCentralWidget(m_mainWidget);
@@ -55,11 +44,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 MainWindow::~MainWindow() {
 }
 
-void MainWindow::changeActiveWidget(QWidget *widget, const QAction *action) {
+void MainWindow::setupWidgetTriggerAction(QAction *action, QWidget *widget, const QString &iconName) {
+    // Add action to triggers
+    m_widgetSwitchTriggers.append(action);
     
-    // Replace this with list of actions that change widgets
-   for (QAction *i_actions : m_mainToolBar->actions()) {
-       
-   }
-   m_mainStackedWidget->setCurrentWidget(widget);
+    action->setCheckable(true);
+    action->setIcon(QIcon::fromTheme(iconName));
+    m_mainToolBar->addAction(action);
+    
+    // Connect action and widget switch
+    connect(action, &QAction::triggered, [=]() {
+        changeActiveWidget(widget, action);
+    });
+}
+
+void MainWindow::changeActiveWidget(QWidget *widget, QAction *action) {
+    action->setChecked(true);
+    
+    for (QAction *i_action : m_widgetSwitchTriggers) {
+        if (i_action != action) {
+            // Uncheck other switch actions
+            i_action->setChecked(false);
+        }
+    }
+    m_mainStackedWidget->setCurrentWidget(widget);
 }
