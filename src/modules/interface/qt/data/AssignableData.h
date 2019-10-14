@@ -24,8 +24,8 @@ public:
     
     tc_assignable_value_category m_valueCategory;
     union {
-    tc_assignable_enum_t m_enumInfo;
-    tc_assignable_range_t m_rangeInfo;
+        tc_assignable_enum_t m_enumInfo;
+        tc_assignable_range_t m_rangeInfo;
   };
 };
 
