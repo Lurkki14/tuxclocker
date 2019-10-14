@@ -1,4 +1,5 @@
 #include "AssignableWidget.h"
+#include <AssignableEditorDelegate.h>
 
 #include <tc_module.h>
 #include <tc_assignable.h>
@@ -10,10 +11,6 @@ AssignableWidget::AssignableWidget(QWidget *parent) : QWidget(parent) {
     
     m_splitter = new QSplitter;
     m_mainLayout->addWidget(m_splitter);
-    
-    /*m_assignableTreeWidget = new QTreeWidget;
-    genAssignableTree(m_assignableTreeWidget);
-    m_splitter->addWidget(m_assignableTreeWidget);*/
     
     m_assignableTreeView = new QTreeView;
     genAssignableTree(m_assignableTreeView);
@@ -47,6 +44,9 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         return;
     }
     
+    QStandardItemModel *assignableModel = new QStandardItemModel;
+    
+    
     std::function<void(tc_assignable_node_t*, QStandardItem*)> traverse;
     traverse = [=, &traverse](tc_assignable_node_t *node, QStandardItem *item) {
         if (node == NULL) {
@@ -57,29 +57,32 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
             qDebug() << node->name;
         }
         
-        // Append as child to item
-        QStandardItem *item_ = new QStandardItem;
+        // List for adding the name and editor on the same row
+        QList <QStandardItem*> rowItems;
         
-        item_->setText(node->name);
-        item->appendRow(item_);
+        QStandardItem *nameItem = new QStandardItem;
+        nameItem->setText(node->name);
+        //item->appendRow(nameItem);
+        rowItems.append(nameItem);
         
-        qDebug() << node->value_category;
-        
+        QStandardItem *editorItem = new QStandardItem;
+        editorItem->setText(node->name);
         AssignableData data(node);
         QVariant v;
         v.setValue(data);
-        item_->setData(v);
+        editorItem->setData(v);
+        
+        rowItems.append(editorItem);
+        item->appendRow(rowItems);
         
         if (node->children_count == 0) {
             return;
         }
         
         for (uint32_t i = 0; i < node->children_count; i++) {
-            traverse(node->children_nodes[i], item_);
+            traverse(node->children_nodes[i], nameItem);
         }
     };
-    
-    QStandardItemModel *assignableModel = new QStandardItemModel;
     
     connect(m_assignableTreeView, &QTreeView::activated, [=](QModelIndex index) {m_assignableEditor->setData(assignableModel->itemFromIndex(index)->data());});
     
@@ -91,7 +94,13 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     }
     
     m_assignableTreeView->setModel(assignableModel);
-    m_assignableTreeView->setHeaderHidden(true);
-    // Don't allow editing the item names
-    m_assignableTreeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    AssignableEditorDelegate *delegate = new AssignableEditorDelegate;
+    
+    //m_assignableTreeView->setItemDelegateForColumn(1, delegate);
+    m_assignableTreeView->setItemDelegate(delegate);
+    
+    //m_assignableTreeView->setHeaderHidden(true);
+    
+    m_assignableTreeView->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
