@@ -16,9 +16,6 @@ AssignableWidget::AssignableWidget(QWidget *parent) : QWidget(parent) {
     genAssignableTree(m_assignableTreeView);
     m_splitter->addWidget(m_assignableTreeView);
     
-    m_assignableEditor = new AssignableEditor;
-    m_splitter->addWidget(m_assignableEditor);
-    
     setLayout(m_mainLayout);
 }
 
@@ -44,8 +41,15 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         return;
     }
     
-    QStandardItemModel *assignableModel = new QStandardItemModel;
+    QStandardItemModel *assignableModel = new QStandardItemModel(0, 2);
+    // Add header items
+    QStandardItem *propertyHeader = new QStandardItem;
+    propertyHeader->setText("Property");
+    assignableModel->setHorizontalHeaderItem(0, propertyHeader);
     
+    QStandardItem *valueHeader = new QStandardItem;
+    valueHeader->setText("Value");
+    assignableModel->setHorizontalHeaderItem(1, valueHeader);
     
     std::function<void(tc_assignable_node_t*, QStandardItem*)> traverse;
     traverse = [=, &traverse](tc_assignable_node_t *node, QStandardItem *item) {
@@ -62,18 +66,26 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         
         QStandardItem *nameItem = new QStandardItem;
         nameItem->setText(node->name);
-        //item->appendRow(nameItem);
         rowItems.append(nameItem);
         
-        QStandardItem *editorItem = new QStandardItem;
-        editorItem->setText(node->name);
-        AssignableData data(node);
-        QVariant v;
-        v.setValue(data);
-        editorItem->setData(v);
+        // Don't add editor item for TC_ASSIGNABLE_NONE nodes
         
-        rowItems.append(editorItem);
+        
+        QStandardItem *editorItem = new QStandardItem;
+        QVariant v;
+        if (node->value_category != TC_ASSIGNABLE_NONE) {
+            editorItem->setText(node->name);
+            AssignableData data(node);
+            v.setValue(data);
+            editorItem->setData(v);
+            rowItems.append(editorItem);
+        }
+        else {
+            //delete editorItem;
+        }
+        
         item->appendRow(rowItems);
+        assignableModel->setData(assignableModel->indexFromItem(editorItem), v);
         
         if (node->children_count == 0) {
             return;
@@ -84,7 +96,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         }
     };
     
-    connect(m_assignableTreeView, &QTreeView::activated, [=](QModelIndex index) {m_assignableEditor->setData(assignableModel->itemFromIndex(index)->data());});
+    //connect(m_assignableTreeView, &QTreeView::activated, [=](QModelIndex index) {m_assignableEditor->setData(assignableModel->itemFromIndex(index)->data());});
     
     QStandardItem *parentItem = assignableModel->invisibleRootItem();
     
@@ -97,7 +109,6 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     
     AssignableEditorDelegate *delegate = new AssignableEditorDelegate;
     
-    //m_assignableTreeView->setItemDelegateForColumn(1, delegate);
     m_assignableTreeView->setItemDelegate(delegate);
     
     //m_assignableTreeView->setHeaderHidden(true);

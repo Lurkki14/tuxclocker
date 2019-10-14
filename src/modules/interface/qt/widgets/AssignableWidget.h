@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AssignableEditor.h"
 #include <AssignableData.h>
 
 #include <QWidget>
@@ -8,6 +7,7 @@
 #include <QLayout>
 #include <QStandardItemModel>
 #include <QTreeWidget>
+#include <QHeaderView>
 #include <QTreeWidgetItem>
 
 class AssignableWidget : public QWidget {
@@ -22,7 +22,6 @@ private:
     QSplitter *m_splitter;
     QTreeWidget *m_assignableTreeWidget;
     QTreeView *m_assignableTreeView;
-    AssignableEditor *m_assignableEditor;
     
     void genAssignableTree(QTreeView *treeView);
 };
