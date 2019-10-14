@@ -13,6 +13,7 @@ foreach lib : nvidia_linux_libs
 	endif
 endforeach
 
+
 if all_nvidia_linux_libs
 	shared_library('nvidia', 'nvidia_linux.c',
 		include_directories : incdir,
