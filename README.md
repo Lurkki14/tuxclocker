@@ -2,6 +2,9 @@ TuxClocker - A GUI overclocking utility for GNU/Linux
 ========================================
 TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-series cards and newer, and AMD GPUs using the amdgpu driver until (not including) Radeon VII.
 
+# Support
+Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/room/#tuxclocker:matrix.org)
+
 # Screenshots
 
 ![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/cZCNzmN.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
@@ -52,14 +55,14 @@ make install (installs into /opt/tuxclocker/bin)
 printf "0x%08x\n" $(cat /sys/module/amdgpu/parameters/ppfeaturemask)
 ```
 
+Example grub line (usually /etc/default/grub):	
 
-	Example grub line (usually /etc/default/grub):	
-	
 ```
 GRUB_CMDLINE_LINUX_DEFAULT="quiet radeon.si_support=0 amdgpu.si_support=1 amdgpu.dpm=1 amdgpu.ppfeaturemask=0xffffffff"
 ```
 	
-	After editing, update grub, usually 
+After editing, update grub, usually 
+
 ```
 sudo update-grub
 ```
