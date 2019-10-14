@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QStyledItemDelegate>
+#include <QStandardItem>
 
 class AssignableEditorDelegate : public QStyledItemDelegate {
     Q_OBJECT
