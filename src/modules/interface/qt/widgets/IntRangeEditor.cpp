@@ -2,6 +2,7 @@
 
 IntRangeEditor::IntRangeEditor(QWidget *parent) : QWidget(parent) {
     m_mainLayout = new QHBoxLayout;
+    m_mainLayout->setMargin(0);
     
     m_slider = new QSlider(Qt::Horizontal);
     m_slider->setRange(0, 0);
@@ -21,9 +22,29 @@ IntRangeEditor::IntRangeEditor(QWidget *parent) : QWidget(parent) {
     setLayout(m_mainLayout);
 }
 
-/*IntRangeEditor::IntRangeEditor(QWidget *parent, const tc_assignable_range_int_t *range) : QWidget(parent){
+IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : QWidget(parent) {
+    m_mainLayout = new QHBoxLayout;
+    m_mainLayout->setMargin(0);
     
-}*/
+    m_slider = new QSlider(Qt::Horizontal);
+    m_mainLayout->addWidget(m_slider);
+    
+    m_spinBox = new QSpinBox;
+    m_mainLayout->addWidget(m_spinBox);
+    
+    connect(m_slider, &QSlider::valueChanged, m_spinBox, &QSpinBox::setValue);
+    connect(m_slider, &QSlider::rangeChanged, m_spinBox, &QSpinBox::setRange);
+
+    connect(m_spinBox, QOverload<int>::of(&QSpinBox::valueChanged), m_slider, &QSlider::setValue);
+    
+    m_slider->setRange(data.m_rangeInfo.int_range.min, data.m_rangeInfo.int_range.max);
+    
+    setLayout(m_mainLayout);
+}
+    
+int IntRangeEditor::value() {
+    return m_slider->value();
+}
 
 void IntRangeEditor::setRange(const tc_assignable_range_int_t &range) {
     m_range = range;
