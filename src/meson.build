@@ -11,6 +11,8 @@ module_path_def = module_path_def_template.format(get_option('prefix'), get_opti
 libtuxclocker = shared_library('libtuxclocker',
 	['lib/tc_assignable.c',
 	 'lib/tc_module.c',
+	 'lib/tc_readable.c',
+	 'lib/tc_common.c',
 	 libtuxclocker_posix_sources],
 	include_directories : incdir,
 	dependencies : libtuxclocker_posix_libs,
