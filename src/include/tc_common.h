@@ -38,6 +38,10 @@ typedef struct {
     };
 } tc_arg_t;
 
+// Utility functions
+// Allocate a string array on the heap
+char **tc_str_arr_dup(int8_t str_count, char **const strings);
+
 #ifdef __cplusplus
 }
 #endif
