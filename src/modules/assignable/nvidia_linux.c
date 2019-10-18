@@ -85,7 +85,7 @@ static int8_t init() {
 }
 
 static int8_t close() {
-
+    
 }
 
 static int8_t generate_assignable_tree() {
@@ -189,13 +189,8 @@ void add_fan_items(tc_assignable_node_t* parent, int32_t index) {
                 return;
             }
             // Create the string array of the options
-            char *m_auto = strdup("auto");
-            char *m_manual = strdup("manual");
-            
-            char **list = calloc(2, sizeof(char*));
-            
-            list[0] = m_auto;
-            list[1] = m_manual;
+            char *opts[64] = {"auto", "manual"};
+            char **list = tc_str_arr_dup(2, opts);
             
             tc_assignable_enum_t enum_info = {
                 2,
