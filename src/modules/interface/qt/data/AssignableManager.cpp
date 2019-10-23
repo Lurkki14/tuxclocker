@@ -1,5 +1,7 @@
 #include "AssignableManager.h"
 
+#include <QDebug>
+
 AssignableManager::AssignableManager() {
     // Open all assignable modules
     uint16_t mod_count;
@@ -20,17 +22,26 @@ AssignableManager::AssignableManager() {
     for (tc_module_t *module : m_assignableModules) {
         tc_assignable_node_t *root = static_cast<tc_assignable_node_t*>(module->category_data_callback());
         if (root == NULL) {
-            m_assignableModules.remove(m_assignableModules.indexOf(module));
+            //m_assignableModules.remove(m_assignableModules.indexOf(module));
         }
         m_assignableRootNodes.append(root);
     }
-            
-    delete assignableModules;
+    printf("found %d modules\n", mod_count);
+    
+    qDebug() << m_assignableRootNodes.length();
+    
+    //delete assignableModules;
 }
 
 AssignableManager::~AssignableManager() {
+    qDebug() << "descructor";
     // Close all modules
     for (tc_module_t *module : m_assignableModules) {
+        qDebug() << "closing module at" << module;
         tc_module_close(module);
     }
+}
+
+QVector <tc_assignable_node_t*> AssignableManager::rootNodes() {
+    return m_assignableRootNodes;
 }

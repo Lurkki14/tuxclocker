@@ -1,3 +1,5 @@
+#pragma once
+
 #include <tc_assignable.h>
 #include <tc_module.h>
 
@@ -10,7 +12,7 @@ public:
     ~AssignableManager();
     
     // Return a list of root assignable nodes
-    QList <tc_assignable_node_t*> rootNodes();
+    QVector <tc_assignable_node_t*> rootNodes();
 private:
     QVector <tc_module_t*> m_assignableModules;
     QVector <tc_assignable_node_t*> m_assignableRootNodes;

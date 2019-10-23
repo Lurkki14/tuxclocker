@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AssignableData.h>
+#include <AssignableManager.h>
 
 #include <QWidget>
 #include <QSplitter>
@@ -22,6 +23,9 @@ private:
     QSplitter *m_splitter;
     QTreeWidget *m_assignableTreeWidget;
     QTreeView *m_assignableTreeView;
+    
+    // Assignable manager instance - maybe move this somewhere else?
+    AssignableManager *m_assignableManager;
     
     void genAssignableTree(QTreeView *treeView);
 };
