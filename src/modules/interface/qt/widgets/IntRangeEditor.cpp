@@ -20,6 +20,8 @@ IntRangeEditor::IntRangeEditor(QWidget *parent) : QWidget(parent) {
     m_slider->setDisabled(true);
     
     setLayout(m_mainLayout);
+    // Avoids the display text from overlapping during editing
+    setAutoFillBackground(true);
 }
 
 IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : QWidget(parent) {
@@ -40,10 +42,15 @@ IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : QW
     m_slider->setRange(data.m_rangeInfo.int_range.min, data.m_rangeInfo.int_range.max);
     
     setLayout(m_mainLayout);
+    setAutoFillBackground(true);
 }
     
 int IntRangeEditor::value() {
     return m_slider->value();
+}
+
+void IntRangeEditor::setValue(int64_t value) {
+    m_slider->setValue(value);
 }
 
 void IntRangeEditor::setRange(const tc_assignable_range_int_t &range) {

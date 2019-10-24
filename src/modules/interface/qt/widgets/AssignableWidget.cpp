@@ -26,7 +26,8 @@ AssignableWidget::~AssignableWidget() {
 }
 
 void AssignableWidget::genAssignableTree(QTreeView *treeView) {
-    /*tc_module_t *nv_mod = tc_module_find(TC_CATEGORY_ASSIGNABLE, "nvidia");
+    
+    tc_module_t *nv_mod = tc_module_find(TC_CATEGORY_ASSIGNABLE, "nvidia");
     
     if (nv_mod != NULL) {
         if (nv_mod->init_callback() != TC_SUCCESS) {
@@ -42,7 +43,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     
     if (root == NULL) {
         return;
-    }*/
+    }
     
     QStandardItemModel *assignableModel = new QStandardItemModel(0, 2);
     // Add header items
@@ -78,7 +79,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
             QVariant v;
             AssignableData data(node);
             v.setValue(data);
-            editorItem->setData(v, Qt::EditRole);
+            editorItem->setData(v, Qt::UserRole);
             //editorItem->setText(node->name);
             rowItems.append(editorItem);
         }
@@ -92,11 +93,8 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     
     QStandardItem *parentItem = assignableModel->invisibleRootItem();
     
-    
     // Get root nodes from manager
-    //QVector <tc_assignable_node_t*> rootNodes = m_assignableManager->rootNodes();
-    
-    //delete m_assignableManager;
+    //QList <tc_assignable_node_t*> rootNodes = m_assignableManager->rootNodes();
     
     /*for (tc_assignable_node_t *root : rootNodes) {
         traverse(root, parentItem);
@@ -104,9 +102,9 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
         
     
     // We don't want to display root nodes from the modules
-    /*for (uint32_t i = 0; i < root->children_count; i++) {
+    for (uint32_t i = 0; i < root->children_count; i++) {
         traverse(root->children_nodes[i], parentItem);
-    }*/
+    }
     
     m_assignableTreeView->setModel(assignableModel);
     

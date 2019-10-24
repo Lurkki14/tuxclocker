@@ -16,6 +16,7 @@ public:
     IntRangeEditor(QWidget *parent = nullptr);
     IntRangeEditor(QWidget *parent = nullptr, const AssignableData &data = nullptr);
     int value();
+    void setValue(int64_t value);
     void setRange(const tc_assignable_range_int_t &range);
 private:
     QHBoxLayout *m_mainLayout;
