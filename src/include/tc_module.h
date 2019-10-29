@@ -12,7 +12,7 @@ extern "C" {
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
-  TC_CATEGORY_PROPERTY,
+  TC_CATEGORY_READABLE,
   TC_CATEGORY_INTERFACE
 };
 
@@ -56,7 +56,7 @@ typedef struct tc_module_t {
 
 // Try to return the module handle matching the category and name. If it doesn't exist or there was a problem loading the module, returns NULL.
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name);
-// Try to return all module handles matching 'category'
+// Try to return all module handles matching 'category'. The return value needs to be freed in addition to tc_module_close()
 tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count);
 
 // Close the module after successful find
