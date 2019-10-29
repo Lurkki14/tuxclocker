@@ -6,18 +6,19 @@
 #include <QVariant>
 #include <QHBoxLayout>
 #include <QComboBox>
+
 #include <AssignableData.h>
+#include "AbstractAssignableEditor.h"
 
-
-class EnumEditor : public QWidget {
+class EnumEditor : public AbstractAssignableEditor {
     Q_OBJECT
 public:
     EnumEditor(QWidget *parent = nullptr);
-    EnumEditor(QWidget *parent = nullptr, const AssignableData &data = nullptr);
     
     // Return selected string
-    QString value();
-    void setData(QStringList &strings);
+    QVariant value();
+    void setValue(QVariant value) {}
+    void setAssignableData(const AssignableData &data);
 private:
     QHBoxLayout *m_mainLayout;
     

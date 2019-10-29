@@ -1,6 +1,6 @@
 #include "IntRangeEditor.h"
 
-IntRangeEditor::IntRangeEditor(QWidget *parent) : QWidget(parent) {
+IntRangeEditor::IntRangeEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
     m_mainLayout = new QHBoxLayout;
     m_mainLayout->setMargin(0);
     
@@ -24,7 +24,7 @@ IntRangeEditor::IntRangeEditor(QWidget *parent) : QWidget(parent) {
     setAutoFillBackground(true);
 }
 
-IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : QWidget(parent) {
+/*IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : AbstractAssignableEditor(parent) {
     m_mainLayout = new QHBoxLayout;
     m_mainLayout->setMargin(0);
     
@@ -43,14 +43,21 @@ IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : QW
     
     setLayout(m_mainLayout);
     setAutoFillBackground(true);
-}
+}*/
     
-int IntRangeEditor::value() {
+QVariant IntRangeEditor::value() {
     return m_slider->value();
 }
 
-void IntRangeEditor::setValue(int64_t value) {
-    m_slider->setValue(value);
+void IntRangeEditor::setValue(QVariant value) {
+    m_slider->setValue(value.toInt());
+}
+
+void IntRangeEditor::setAssignableData(const AssignableData &data) {
+    m_slider->setEnabled(true);
+    m_spinBox->setEnabled(true);
+    
+    m_slider->setRange(data.m_rangeInfo.int_range.min, data.m_rangeInfo.int_range.max);
 }
 
 void IntRangeEditor::setRange(const tc_assignable_range_int_t &range) {

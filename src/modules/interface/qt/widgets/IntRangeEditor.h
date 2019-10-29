@@ -4,20 +4,22 @@
 
 #include <tc_assignable.h>
 #include <AssignableData.h>
+#include "AbstractAssignableEditor.h"
 
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QSlider>
 #include <QSpinBox>
 
-class IntRangeEditor : public QWidget {
+class IntRangeEditor : public AbstractAssignableEditor {
     Q_OBJECT
 public:
     IntRangeEditor(QWidget *parent = nullptr);
-    IntRangeEditor(QWidget *parent = nullptr, const AssignableData &data = nullptr);
-    int value();
-    void setValue(int64_t value);
+    //IntRangeEditor(QWidget *parent = nullptr, const AssignableData &data = nullptr);
+    QVariant value();
+    void setValue(QVariant value);
     void setRange(const tc_assignable_range_int_t &range);
+    void setAssignableData(const AssignableData & data);
 private:
     QHBoxLayout *m_mainLayout;
     QSlider *m_slider;

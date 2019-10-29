@@ -6,6 +6,7 @@ moc_files = qt5.preprocess(moc_headers : [ 'MainWindow.h',
         'widgets/AssignableWidget.h',
         'widgets/IntRangeEditor.h',
         'widgets/EnumEditor.h',
+        'data/AssignableManager.h',
         'data/AssignableEditorDelegate.h'],
         dependencies : qt5_dep)
 
