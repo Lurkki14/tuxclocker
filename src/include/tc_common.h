@@ -40,7 +40,9 @@ typedef struct {
 
 // Utility functions
 // Allocate a string array on the heap
-char **tc_str_arr_dup(int8_t str_count, char **const strings);
+char **tc_str_arr_dup(uint16_t str_count, char **const strings);
+// Deallocate string array
+void tc_str_arr_free(uint16_t str_count, char **strings);
 
 #ifdef __cplusplus
 }
