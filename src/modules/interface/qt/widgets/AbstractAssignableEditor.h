@@ -13,4 +13,6 @@ public:
     virtual void setValue(QVariant value) = 0;
     virtual void setAssignableData(const AssignableData &data) = 0;
     virtual QVariant value() = 0;
+    // Get the textual representation of the current value
+    virtual QString text() = 0;
 };

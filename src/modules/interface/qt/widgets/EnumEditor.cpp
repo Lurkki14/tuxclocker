@@ -15,7 +15,15 @@ EnumEditor::EnumEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
 }
 
 QVariant EnumEditor::value() {
+    return m_comboBox->currentIndex();
+}
+
+QString EnumEditor::text() {
     return m_comboBox->currentText();
+}
+
+void EnumEditor::setValue(QVariant value) {
+    m_comboBox->setCurrentIndex(value.toInt());
 }
 
 void EnumEditor::setAssignableData(const AssignableData &data) {

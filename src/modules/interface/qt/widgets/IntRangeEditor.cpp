@@ -24,29 +24,12 @@ IntRangeEditor::IntRangeEditor(QWidget *parent) : AbstractAssignableEditor(paren
     setAutoFillBackground(true);
 }
 
-/*IntRangeEditor::IntRangeEditor(QWidget* parent, const AssignableData &data) : AbstractAssignableEditor(parent) {
-    m_mainLayout = new QHBoxLayout;
-    m_mainLayout->setMargin(0);
-    
-    m_slider = new QSlider(Qt::Horizontal);
-    m_mainLayout->addWidget(m_slider);
-    
-    m_spinBox = new QSpinBox;
-    m_mainLayout->addWidget(m_spinBox);
-    
-    connect(m_slider, &QSlider::valueChanged, m_spinBox, &QSpinBox::setValue);
-    connect(m_slider, &QSlider::rangeChanged, m_spinBox, &QSpinBox::setRange);
-
-    connect(m_spinBox, QOverload<int>::of(&QSpinBox::valueChanged), m_slider, &QSlider::setValue);
-    
-    m_slider->setRange(data.m_rangeInfo.int_range.min, data.m_rangeInfo.int_range.max);
-    
-    setLayout(m_mainLayout);
-    setAutoFillBackground(true);
-}*/
-    
 QVariant IntRangeEditor::value() {
     return m_slider->value();
+}
+
+QString IntRangeEditor::text() {
+    return QString::number(m_slider->value());
 }
 
 void IntRangeEditor::setValue(QVariant value) {

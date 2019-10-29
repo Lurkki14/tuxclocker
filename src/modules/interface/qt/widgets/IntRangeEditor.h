@@ -17,6 +17,7 @@ public:
     IntRangeEditor(QWidget *parent = nullptr);
     //IntRangeEditor(QWidget *parent = nullptr, const AssignableData &data = nullptr);
     QVariant value();
+    QString text();
     void setValue(QVariant value);
     void setRange(const tc_assignable_range_int_t &range);
     void setAssignableData(const AssignableData & data);

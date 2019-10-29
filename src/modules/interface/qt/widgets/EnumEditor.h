@@ -17,7 +17,8 @@ public:
     
     // Return selected string
     QVariant value();
-    void setValue(QVariant value) {}
+    QString text();
+    void setValue(QVariant value);
     void setAssignableData(const AssignableData &data);
 private:
     QHBoxLayout *m_mainLayout;
