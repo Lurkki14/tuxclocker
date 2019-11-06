@@ -56,5 +56,5 @@ void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
     v.setValue(data);
     
     s_model->setData(index, v, Qt::UserRole);
-    s_model->setData(index, a_editor->value(), Qt::DisplayRole);
+    s_model->setData(index, a_editor->text(), Qt::DisplayRole);
 }

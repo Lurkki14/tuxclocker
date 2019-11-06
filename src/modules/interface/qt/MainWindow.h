@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AssignableWidget.h>
+#include <ReadableWidget.h>
 
 #include <QMainWindow>
 #include <QLayout>
@@ -29,6 +30,7 @@ private:
     // Stacked widgets for the main view
     QStackedWidget *m_mainStackedWidget;
     AssignableWidget *m_assignableWidget;
+    ReadableWidget *m_readableWidget;
     QWidget *m_settingWidget;
 
     // List of widget switch triggers so we know which ones to uncheck

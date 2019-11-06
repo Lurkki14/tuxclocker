@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     m_assignableWidget = new AssignableWidget;
     m_mainStackedWidget->addWidget(m_assignableWidget);
     
+    m_readableWidget = new ReadableWidget;
+    m_mainStackedWidget->addWidget(m_readableWidget);
+    
     m_settingWidget = new QWidget;
     m_mainStackedWidget->addWidget(m_settingWidget);
     
@@ -33,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     
     QAction *activateSettings = new QAction;
     setupWidgetTriggerAction(activateSettings, m_settingWidget, "configure");
+    
+    QAction *activateViewer = new QAction;
+    setupWidgetTriggerAction(activateViewer, m_readableWidget, "document-properties");
     
     // Set editor as default widget
     changeActiveWidget(m_assignableWidget, activateEditor);

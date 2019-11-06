@@ -6,6 +6,8 @@ moc_files = qt5.preprocess(moc_headers : [ 'MainWindow.h',
         'widgets/AssignableWidget.h',
         'widgets/IntRangeEditor.h',
         'widgets/EnumEditor.h',
+        'widgets/ReadableWidget.h',
+        'widgets/ReadableBrowser.h',
         'data/AssignableManager.h',
         'data/AssignableEditorDelegate.h'],
         dependencies : qt5_dep)
@@ -15,9 +17,12 @@ sources = ['main.cpp',
     'widgets/AssignableWidget.cpp',
     'widgets/IntRangeEditor.cpp',
     'widgets/EnumEditor.cpp',
+    'widgets/ReadableWidget.cpp',
+    'widgets/ReadableBrowser.cpp',
     'data/AssignableData.cpp',
     'data/AssignableEditorDelegate.cpp',
-    'data/AssignableManager.cpp']
+    'data/AssignableManager.cpp',
+    'data/ReadableManager.cpp']
     
 local_qt_incdirs = ['widgets', 'data']
     

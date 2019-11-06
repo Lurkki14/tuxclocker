@@ -22,3 +22,11 @@ AssignableData::AssignableData() {
 
 AssignableData::~AssignableData() {
 }
+
+QVariant AssignableData::value() {
+    return m_currentValue;
+}
+
+void AssignableData::setValue(const QVariant &value) {
+    m_currentValue = value;
+}
