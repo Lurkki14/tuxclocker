@@ -15,7 +15,9 @@ extern "C" {
 
 // Tagged union of data types for simulating function overloading
 enum tc_data_types {
+    TC_TYPE_NONE,
     TC_TYPE_INT,
+    TC_TYPE_UINT,
     TC_TYPE_DOUBLE,
     TC_TYPE_STRING,
     TC_TYPE_STRING_ARR
@@ -25,6 +27,7 @@ typedef struct {
     enum tc_data_types data_type;
     union {
         int64_t int_value;
+        uint64_t uint_value;
         double double_value;
         char *string_value;
     };
@@ -43,6 +46,22 @@ typedef struct {
 char **tc_str_arr_dup(uint16_t str_count, char **const strings);
 // Deallocate string array
 void tc_str_arr_free(uint16_t str_count, char **strings);
+
+// Binary search tree whose left node contains the smaller value
+typedef struct tc_bin_node_ {
+    void *key;
+    void *value;
+    
+    struct tc_bin_node_ *left;
+    struct tc_bin_node_ *right;
+} tc_bin_node_t;
+
+// Create a new node with key and data in the appropriate position
+tc_bin_node_t *tc_bin_node_insert(tc_bin_node_t* node, void *key, void *value);
+// Find the value associated with the key
+void *tc_bin_node_find_value(tc_bin_node_t *node, void *key);
+// Destroy a node and its children
+void tc_bin_node_destroy(tc_bin_node_t *node);
 
 #ifdef __cplusplus
 }
