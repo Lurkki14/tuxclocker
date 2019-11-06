@@ -6,7 +6,7 @@
 #include <dirent.h>
 
 char **tc_fs_dir_filenames(const char *dir_name, uint16_t *file_count) {
-    char *file_names[512];
+    char *file_names[256];
     
     struct dirent *entry;
     DIR *dir = opendir(dir_name);
