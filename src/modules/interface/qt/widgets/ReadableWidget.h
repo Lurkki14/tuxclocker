@@ -19,5 +19,5 @@ private:
     
     QVBoxLayout *m_mainLayout;
     
-    ReadableManger *m_readableManager;
+    ReadableManager *m_readableManager;
 };

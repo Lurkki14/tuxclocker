@@ -8,7 +8,10 @@ ReadableWidget::ReadableWidget(QWidget *parent) : QWidget(parent) {
     
     m_tabWidget = new QTabWidget;
     
-    m_readableBrowser = new ReadableBrowser;
+    m_readableManager = new ReadableManager;
+    qDebug() << "rd nodes" << m_readableManager->rootNodes();
+    
+    m_readableBrowser = new ReadableBrowser(m_readableManager);
     
     m_tabWidget->addTab(m_readableBrowser, "Browser");
     
@@ -16,8 +19,6 @@ ReadableWidget::ReadableWidget(QWidget *parent) : QWidget(parent) {
     
     setLayout(m_mainLayout);
     
-    m_readableManager = new ReadableManger;
-    qDebug() << "rd nodes" << m_readableManager->rootNodes();
 }
 
 ReadableWidget::~ReadableWidget() {

@@ -175,10 +175,13 @@ void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev) {
     if (temp_node == NULL) {
         return;
     }
+    
     if (tc_readable_node_add_child(parent, temp_node) != TC_SUCCESS) {
         tc_readable_node_destroy(temp_node);
         return;
     }
+    
+    temp_node->name = strdup("Temperature");
 }
 
 tc_readable_result_t get_temp(tc_readable_node_t *node) {

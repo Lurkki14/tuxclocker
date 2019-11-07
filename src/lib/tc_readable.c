@@ -19,7 +19,8 @@ static void postorder_traverse(tc_readable_node_t *node, void (*func)(tc_readabl
 }
 
 tc_readable_node_t *tc_readable_node_new() {
-    return calloc(1, sizeof(tc_readable_node_t));
+    tc_readable_node_t *node = calloc(1, sizeof(tc_readable_node_t));
+    return node;
 }
 
 void tc_readable_node_destroy(tc_readable_node_t *node) {

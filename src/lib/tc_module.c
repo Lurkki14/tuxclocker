@@ -77,6 +77,9 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
             break;
         case TC_CATEGORY_INTERFACE:
            mod_abs_path = module_filename("interface", name);
+           break;
+        case TC_CATEGORY_READABLE:
+            mod_abs_path = module_filename("readable", name);
             break;
         default:
             return NULL;
@@ -120,10 +123,14 @@ tc_module_t **tc_module_find_all_from_category(enum tc_module_category category,
         case TC_CATEGORY_ASSIGNABLE:
             snprintf(mod_dir_name, 512, "%s/%s", TC_MODULE_PATH, "assignable");
             break;
+        case TC_CATEGORY_READABLE:
+            snprintf(mod_dir_name, 512, "%s/%s", TC_MODULE_PATH, "readable");
+            break;
         default:
             return NULL;
     }
     
+    // FIXME: file_names members are sometimes corrupted
     char **file_names = tc_fs_dir_filenames(mod_dir_name, &file_count);
     if (file_names == NULL) {
         return NULL;
@@ -156,7 +163,7 @@ void tc_module_close(tc_module_t* module) {
         if (module->close_callback() != TC_SUCCESS) {
             // Add some sort of log message here
             // It's probably good to abort here
-            abort();
+            //abort();
         }
     }
     
