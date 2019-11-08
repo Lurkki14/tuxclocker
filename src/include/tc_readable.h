@@ -45,6 +45,9 @@ void tc_readable_node_destroy(tc_readable_node_t *node);
 // Add a child to a node
 int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t *child);
 
+// Convinience function for creating a new node and adding it to parent
+tc_readable_node_t *tc_readable_node_add_new_child(tc_readable_node_t *parent);
+
 #ifdef __cplusplus
 }
 #endif

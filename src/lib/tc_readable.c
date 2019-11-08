@@ -27,6 +27,7 @@ void tc_readable_node_destroy(tc_readable_node_t *node) {
     postorder_traverse(node, &destroy_node);
 }
 
+
 int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t *child) {
     parent->children_count++;
     if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count)) == NULL) {
@@ -35,4 +36,17 @@ int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t
     parent->children_nodes[parent->children_count - 1] = child;
     child->parent = parent;
     return TC_SUCCESS;
+}
+
+tc_readable_node_t *tc_readable_node_add_new_child(tc_readable_node_t *parent) {
+    tc_readable_node_t *node = tc_readable_node_new();
+    
+    if (!node) {
+        return NULL;
+    }
+    if (tc_readable_node_add_child(parent, node) != TC_SUCCESS) {
+        tc_readable_node_destroy(node);
+        return NULL;
+    }
+    return node;
 }
