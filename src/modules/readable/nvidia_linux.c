@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #include <tc_readable.h>
 #include <tc_module.h>
 #include <tc_common.h>
@@ -19,42 +21,49 @@ int8_t close();
 tc_readable_node_t *category_callback();
 
 // Local data structure for mapping nodes to GPU's
-// Data type that other maps can "inherit" from
-typedef struct {
-    tc_readable_node_t *node;
-    nvmlDevice_t dev;
-    uint8_t device_index;
-} callback_map_base;
-
-typedef struct {
-    callback_map_base base_map;
-    uint8_t fan_index;
-} callback_map_fan;
 
 enum map_type {MAP_BASE,
-    MAP_FAN};
+    MAP_FAN,
+    MAP_CLOCK
+};
 
-// Tagged union that contains the specified type of map
 typedef struct {
-    enum map_type type;
+    struct base_map {
+        tc_readable_node_t *node;
+        nvmlDevice_t dev;
+        uint8_t device_index;
+    } base_map;
+    enum map_type map_type;
     union {
-        callback_map_base base_map;
-        callback_map_fan fan_map;
+        uint8_t fan_index;
+        nvmlClockType_t clock_type;
     };
-} callback_map;    
+} callback_map;
 
 // Create new callback map on the heap
-callback_map *callback_map_new() {
+static callback_map *callback_map_new() {
     return calloc(1, sizeof(callback_map));
 }
 
+static callback_map *callback_map_new_copy(const callback_map *map) {
+    callback_map *new_map = callback_map_new();
+    // FIXME : add copying not only the base map
+    new_map->base_map = map->base_map;
+    new_map->map_type = map->map_type;
+    
+    return new_map;
+}
 
 // Local functions
 void generate_readable_tree();
-void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev);
+void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *map);
+void add_power_item(tc_readable_node_t *parent, callback_map *map);
+void add_clock_items(tc_readable_node_t *parent, callback_map *map);
 
 // Value updating functions
-tc_readable_result_t get_temp(tc_readable_node_t *node);
+tc_readable_result_t get_temp(const tc_readable_node_t *node);
+tc_readable_result_t get_power(const tc_readable_node_t *node);
+tc_readable_result_t get_clock(const tc_readable_node_t *node);
 
 static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
@@ -81,7 +90,7 @@ tc_readable_node_t *category_callback() {
 }
 
 int8_t init() {
-      // Initialize library
+    // Initialize library
   if (nvmlInit_v2() != NVML_SUCCESS) {
     return TC_EGENERIC;
   }
@@ -148,55 +157,154 @@ void generate_readable_tree() {
     
     // Create the base map from this GPU
     callback_map *map = callback_map_new();
-    map->type = MAP_BASE;
+    map->map_type = MAP_BASE;
     map->base_map.dev = nvml_handles[i];
     map->base_map.device_index = i;
     
     // Add the root map  node
-    if (root_search_node == NULL) {
+    if (!root_search_node) {
         root_search_node = tc_bin_node_insert(root_search_node, gpu_name_node, map);
     }
-    else {
+    else if (root_search_node) {
         tc_bin_node_insert(root_search_node, gpu_name_node, map);
     }
     
     // Add nodes to the GPU
-    add_temp_item(gpu_name_node, nvml_handles[i]);
+    add_temp_item(gpu_name_node, nvml_handles[i], map);
+    
+    add_power_item(gpu_name_node, map);
+    
+    add_clock_items(gpu_name_node, map);
   }
 }
 
-void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev) {
+void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *map) {
     uint32_t reading;
     if (nvmlDeviceGetTemperature(dev, NVML_TEMPERATURE_GPU, &reading) != NVML_SUCCESS) {
         return;
     }
     // Create new node
-    tc_readable_node_t *temp_node = tc_readable_node_new();
-    if (temp_node == NULL) {
-        return;
-    }
+    tc_readable_node_t *temp_node = tc_readable_node_add_new_child(parent);
     
-    if (tc_readable_node_add_child(parent, temp_node) != TC_SUCCESS) {
-        tc_readable_node_destroy(temp_node);
+    if (!temp_node) {
         return;
     }
     
     temp_node->name = strdup("Temperature");
+    temp_node->value_callback = &get_temp;
+    
+    tc_bin_node_insert(root_search_node, temp_node, map);
 }
 
-tc_readable_result_t get_temp(tc_readable_node_t *node) {
+void add_power_item(tc_readable_node_t *parent, callback_map *map) {
+    uint32_t reading;
+    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &reading) != NVML_SUCCESS) {
+        return;
+    }
+    
+    tc_readable_node_t *node = tc_readable_node_add_new_child(parent);
+    if (!node) {
+        return;
+    }
+    
+    node->name = strdup("Power Usage");
+    node->value_callback = &get_power;
+    
+    tc_bin_node_insert(root_search_node, node, map);
+}
+
+void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
+    uint32_t reading;
+    // Create copy of the map
+    callback_map *c_map = callback_map_new_copy(map);
+    
+    if (nvmlDeviceGetClockInfo(c_map->base_map.dev, NVML_CLOCK_GRAPHICS, &reading) == NVML_SUCCESS) {
+        do {
+            // FIXME : make this a function
+            tc_readable_node_t *node = tc_readable_node_add_new_child(parent);
+            if (!node) {
+                free(c_map);
+                break;
+            }
+            tc_bin_node_t *s_node = NULL;
+            
+            if (!(s_node = tc_bin_node_insert(root_search_node, node, c_map))) {
+                tc_bin_node_destroy(s_node);
+                tc_readable_node_destroy(node);
+                free(c_map);
+                break;
+            }
+            node->name = strdup("Core Clock");
+            node->value_callback = &get_clock;
+            
+            c_map->map_type = MAP_CLOCK;
+            c_map->clock_type = NVML_CLOCK_GRAPHICS;
+        } while (0);
+    }
+    
+}
+
+tc_readable_result_t get_temp(const tc_readable_node_t *node) {
     // Find the data mapped to the node
     callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
     
     tc_readable_result_t res;
+    res.valid = false;
+    
+    if (!map) {
+        return res;
+    }
+    
     uint32_t temp;
     if (nvmlDeviceGetTemperature(map->base_map.dev, NVML_TEMPERATURE_GPU,  &temp) != NVML_SUCCESS) {
-        res.valid = false;
         return res;
     }
     res.valid = true;
     res.data.data_type = TC_TYPE_UINT;
     res.data.uint_value = temp;
+    
+    return res;
+}
+
+tc_readable_result_t get_power(const tc_readable_node_t *node) {
+    callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
+    
+    tc_readable_result_t res;
+    res.valid = false;
+    
+    if (!map) {
+        return res;
+    }
+    
+    uint32_t power;
+    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &power) != NVML_SUCCESS) {
+        return res;
+    }
+    
+    res.valid = true;
+    res.data.data_type = TC_TYPE_UINT;
+    res.data.uint_value = power;
+    
+    return res;
+}
+
+tc_readable_result_t get_clock(const tc_readable_node_t *node) {
+    tc_readable_result_t res;
+    res.valid = false;
+    
+    callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
+    
+    if (!map || map->map_type != MAP_CLOCK) {
+        return res;
+    }
+    
+    uint32_t reading;
+    if (nvmlDeviceGetClockInfo(map->base_map.dev, map->clock_type, &reading) != NVML_SUCCESS) {
+        return res;
+    }
+    res.valid = true;
+    res.data.data_type = TC_TYPE_UINT;
+    res.data.uint_value = reading;
     
     return res;
 }
