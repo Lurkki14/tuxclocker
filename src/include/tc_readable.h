@@ -26,7 +26,7 @@ typedef struct tc_readable_node_t_{
     bool constant;
     // Instead of an update callback store the value for constants
     union {
-        tc_readable_result_t (*value_callback)(struct tc_readable_node_t_*);
+        tc_readable_result_t (*value_callback)(const struct tc_readable_node_t_*);
         tc_variant_t data;
     };
     struct tc_readable_node_t_ *parent;
