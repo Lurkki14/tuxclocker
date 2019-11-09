@@ -13,7 +13,10 @@ ReadableWidget::ReadableWidget(QWidget *parent) : QWidget(parent) {
     
     m_readableBrowser = new ReadableBrowser(m_readableManager);
     
+    m_readableDisplay = new ReadableDisplay;
+    
     m_tabWidget->addTab(m_readableBrowser, "Browser");
+    m_tabWidget->addTab(m_readableDisplay, "Display");
     
     m_mainLayout->addWidget(m_tabWidget);
     

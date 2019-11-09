@@ -1,5 +1,6 @@
 #include "ReadableBrowser.h"
 
+#include <QMouseEvent>
 #include <QDebug>
 
 ReadableBrowser::ReadableBrowser(ReadableManager *readableManager, QWidget *parent) : QWidget(parent) {
@@ -30,32 +31,54 @@ void ReadableBrowser::genBrowserTree(QTreeView *treeView, QStandardItemModel *it
         if (node->name) {
             qDebug() << node->name;
         }
-        addBrowserItem(node, item);
+        QStandardItem *newItem = addBrowserItem(node, item);
+        
+        if (!node->constant && node->value_callback) {
+            tc_readable_result_t res = node->value_callback(node);
+            qDebug() << res.valid << res.data.uint_value;
+        }
         
         for (uint16_t i = 0; i < node->children_count; i++) {
-            traverse(node->children_nodes[i], item);
+            traverse(node->children_nodes[i], newItem);
         }
     };
     //tc_readable_node_t *root = m_readableManager->root();
     QVector <tc_readable_node_t*> rootNodes  = m_readableManager->rootNodes();
     
     for (tc_readable_node_t *node : m_readableManager->rootNodes()) {
-        traverse(node, parentItem);
+        // Start traversal from the first subitems of the root item
+        for (uint16_t i = 0; i < node->children_count; i++) {
+            traverse(node->children_nodes[i], parentItem);
+        }
     }
     
     treeView->setModel(itemModel);
+    
+    treeView->setDragEnabled(true);
 }
 
-void ReadableBrowser::addBrowserItem(tc_readable_node_t* node, QStandardItem *parent) {
+QStandardItem *ReadableBrowser::addBrowserItem(tc_readable_node_t* node, QStandardItem *parent) {
     // Don't add item for constants
     if (node->constant) {
-        return;
+        return nullptr;
     }
     if (!node->name) {
-        return;
+        return nullptr;
     }
     QStandardItem *item = new QStandardItem;
     item->setText(node->name);
     
+    item->setDragEnabled(true);
+    
     parent->appendRow(item);
+    
+    return item;
+}
+
+void ReadableBrowser::mousePressEvent(QMouseEvent *event) {
+    /*if (event->button() == Qt::LeftButton) {
+        QDrag *drag = new QDrag(this);
+        Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+        qDebug() << drag->mimeData();
+    }*/
 }

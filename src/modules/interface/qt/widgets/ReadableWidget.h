@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 
 #include "ReadableBrowser.h"
+#include "ReadableDisplay.h"
 #include <ReadableManager.h>
 
 class ReadableWidget : public QWidget {
@@ -20,4 +21,5 @@ private:
     QVBoxLayout *m_mainLayout;
     
     ReadableManager *m_readableManager;
+    ReadableDisplay *m_readableDisplay;
 };
