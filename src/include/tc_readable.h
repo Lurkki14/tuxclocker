@@ -48,6 +48,9 @@ int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t
 // Convinience function for creating a new node and adding it to parent
 tc_readable_node_t *tc_readable_node_add_new_child(tc_readable_node_t *parent);
 
+// Create a tc_readable_result from data, data type and validity. Avoids boilerplate in returning values from readable nodes.
+tc_readable_result_t tc_readable_result_create(enum tc_data_types type, void *data, bool valid);
+
 #ifdef __cplusplus
 }
 #endif
