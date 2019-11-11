@@ -54,6 +54,8 @@ static callback_map *callback_map_new_copy(const callback_map *map) {
     return new_map;
 }
 
+
+
 // Local functions
 void generate_readable_tree();
 void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *map);
@@ -247,64 +249,44 @@ void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
 tc_readable_result_t get_temp(const tc_readable_node_t *node) {
     // Find the data mapped to the node
     callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
-    
-    tc_readable_result_t res;
-    res.valid = false;
-    
-    if (!map) {
-        return res;
+    const enum tc_data_types type = TC_TYPE_UINT;
+    bool success = false;
+    if (!map || map->map_type != MAP_BASE) {
+        return tc_readable_result_create(type, NULL, success);
     }
-    
-    uint32_t temp;
-    if (nvmlDeviceGetTemperature(map->base_map.dev, NVML_TEMPERATURE_GPU,  &temp) != NVML_SUCCESS) {
-        return res;
+    uint32_t reading;
+    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &reading) == NVML_SUCCESS) {
+        success = true;
     }
-    res.valid = true;
-    res.data.data_type = TC_TYPE_UINT;
-    res.data.uint_value = temp;
-    
-    return res;
+    uint64_t val = reading;
+    return tc_readable_result_create(type, &val, success);
 }
 
 tc_readable_result_t get_power(const tc_readable_node_t *node) {
+    const enum tc_data_types type = TC_TYPE_UINT;
+    bool success = false;
     callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
-    
-    tc_readable_result_t res;
-    res.valid = false;
-    
-    if (!map) {
-        return res;
+    if (!map || map->map_type != MAP_BASE) {
+        return tc_readable_result_create(type, NULL, success);
     }
-    
-    uint32_t power;
-    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &power) != NVML_SUCCESS) {
-        return res;
+    uint32_t reading;
+    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &reading) == NVML_SUCCESS) {
+        success = true;
     }
-    
-    res.valid = true;
-    res.data.data_type = TC_TYPE_UINT;
-    res.data.uint_value = power;
-    
-    return res;
+    uint64_t val = reading;
+    return tc_readable_result_create(type, &val, success);
 }
 
 tc_readable_result_t get_clock(const tc_readable_node_t *node) {
-    tc_readable_result_t res;
-    res.valid = false;
-    
+    bool success = false;
     callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
-    
     if (!map || map->map_type != MAP_CLOCK) {
-        return res;
+        return tc_readable_result_create(TC_TYPE_UINT, NULL, success);
     }
-    
     uint32_t reading;
-    if (nvmlDeviceGetClockInfo(map->base_map.dev, map->clock_type, &reading) != NVML_SUCCESS) {
-        return res;
+    if (nvmlDeviceGetClockInfo(map->base_map.dev, map->clock_type, &reading) == NVML_SUCCESS) {
+        success = true;
     }
-    res.valid = true;
-    res.data.data_type = TC_TYPE_UINT;
-    res.data.uint_value = reading;
-    
-    return res;
+    uint64_t val = reading;
+    return tc_readable_result_create(TC_TYPE_UINT, &val, success);
 }
