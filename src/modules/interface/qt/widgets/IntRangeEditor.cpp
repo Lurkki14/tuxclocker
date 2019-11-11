@@ -13,6 +13,8 @@ IntRangeEditor::IntRangeEditor(QWidget *parent) : AbstractAssignableEditor(paren
     m_mainLayout->addWidget(m_spinBox);
     
     connect(m_slider, &QSlider::valueChanged, m_spinBox, &QSpinBox::setValue);
+    connect(m_spinBox, QOverload<int>::of(&QSpinBox::valueChanged), m_slider, &QSlider::setValue);
+    
     connect(m_slider, &QSlider::rangeChanged, m_spinBox, &QSpinBox::setRange);
     
     // No range specified at this point, so disable them
