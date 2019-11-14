@@ -83,6 +83,21 @@ tc_module_t mod_info = {
     .category_data_callback = (void *(*)()) &category_callback
 };
 
+// Add a GPU map to the search tree and readable node to parent. On failure, child is destroyed
+static int8_t add_map_and_gpu_item(callback_map *map, tc_readable_node_t *parent, tc_readable_node_t *child) {
+    if (tc_readable_node_add_child(parent, child) != TC_SUCCESS) {
+        tc_readable_node_destroy(child);
+        return TC_EGENERIC;
+    }
+    
+    tc_bin_node_t *s_node = NULL;
+    if (!(s_node = tc_bin_node_insert(root_search_node, child, map))) {
+        tc_readable_node_destroy(child);
+        return TC_EGENERIC;
+    }
+    return TC_SUCCESS;
+}
+
 tc_module_t *TC_MODULE_INFO_FUNCTION() {
     return &mod_info;
 }
@@ -204,15 +219,13 @@ void add_power_item(tc_readable_node_t *parent, callback_map *map) {
         return;
     }
     
-    tc_readable_node_t *node = tc_readable_node_add_new_child(parent);
-    if (!node) {
+    tc_readable_node_t *node = tc_readable_node_new();
+    if (add_map_and_gpu_item(map, parent, node) != TC_SUCCESS) {
         return;
     }
     
     node->name = strdup("Power Usage");
     node->value_callback = &get_power;
-    
-    tc_bin_node_insert(root_search_node, node, map);
 }
 
 void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
@@ -222,17 +235,8 @@ void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
     
     if (nvmlDeviceGetClockInfo(c_map->base_map.dev, NVML_CLOCK_GRAPHICS, &reading) == NVML_SUCCESS) {
         do {
-            // FIXME : make this a function
-            tc_readable_node_t *node = tc_readable_node_add_new_child(parent);
-            if (!node) {
-                free(c_map);
-                break;
-            }
-            tc_bin_node_t *s_node = NULL;
-            
-            if (!(s_node = tc_bin_node_insert(root_search_node, node, c_map))) {
-                tc_bin_node_destroy(s_node);
-                tc_readable_node_destroy(node);
+            tc_readable_node_t *node = tc_readable_node_new();
+            if (add_map_and_gpu_item(c_map, parent, node) != TC_SUCCESS) {
                 free(c_map);
                 break;
             }
@@ -242,8 +246,27 @@ void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
             c_map->map_type = MAP_CLOCK;
             c_map->clock_type = NVML_CLOCK_GRAPHICS;
         } while (0);
+    } 
+    else {
+        free(c_map);
     }
     
+    callback_map *m_map = callback_map_new_copy(map);
+    if (nvmlDeviceGetClockInfo(m_map->base_map.dev, NVML_CLOCK_MEM, &reading) == NVML_SUCCESS) {
+        tc_readable_node_t *node = tc_readable_node_new();
+        if (add_map_and_gpu_item(m_map, parent, node) != TC_SUCCESS) {
+            free(m_map);
+            return;
+        }
+        node->name = strdup("Memory Clock");
+        node->value_callback = &get_clock;
+        
+        m_map->map_type = MAP_CLOCK;
+        m_map->clock_type = NVML_CLOCK_MEM;
+    }
+    else {
+        free(m_map);
+    }
 }
 
 tc_readable_result_t get_temp(const tc_readable_node_t *node) {
