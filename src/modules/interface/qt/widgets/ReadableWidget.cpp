@@ -15,6 +15,12 @@ ReadableWidget::ReadableWidget(QWidget *parent) : QWidget(parent) {
     
     m_readableDisplay = new ReadableDisplay;
     
+    connect(m_readableBrowser, &ReadableBrowser::itemDragStarted, [=]() {
+        qDebug() << "drag started";
+        m_tabWidget->setCurrentWidget(m_readableDisplay);
+    });
+    
+    
     m_tabWidget->addTab(m_readableBrowser, "Browser");
     m_tabWidget->addTab(m_readableDisplay, "Display");
     
