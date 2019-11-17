@@ -6,9 +6,14 @@
 ReadableBrowser::ReadableBrowser(ReadableManager *readableManager, QWidget *parent) : QWidget(parent) {
     m_mainLayout = new QVBoxLayout;
     
-    m_readableTreeView = new QTreeView;
+    m_readableTreeView = new ReadableTreeView;
     
-    m_browserModel = new QStandardItemModel;
+    // Forward ReadableTreeView::itemDragStarted to ReadableWidget
+    connect(m_readableTreeView, &ReadableTreeView::itemDragStarted, [=]() {
+        emit itemDragStarted();
+    });
+    
+    m_browserModel = new ReadableItemModel;
     
     m_readableManager = readableManager;
     
@@ -17,13 +22,12 @@ ReadableBrowser::ReadableBrowser(ReadableManager *readableManager, QWidget *pare
     m_mainLayout->addWidget(m_readableTreeView);
     
     setLayout(m_mainLayout);
-    
 }
 
 ReadableBrowser::~ReadableBrowser() {
 }
 
-void ReadableBrowser::genBrowserTree(QTreeView *treeView, QStandardItemModel *itemModel) {
+void ReadableBrowser::genBrowserTree(ReadableTreeView *treeView, QStandardItemModel *itemModel) {
     QStandardItem *parentItem = itemModel->invisibleRootItem();
     
     std::function<void(tc_readable_node_t*, QStandardItem*)> traverse;
@@ -73,12 +77,4 @@ QStandardItem *ReadableBrowser::addBrowserItem(tc_readable_node_t* node, QStanda
     parent->appendRow(item);
     
     return item;
-}
-
-void ReadableBrowser::mousePressEvent(QMouseEvent *event) {
-    /*if (event->button() == Qt::LeftButton) {
-        QDrag *drag = new QDrag(this);
-        Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
-        qDebug() << drag->mimeData();
-    }*/
 }

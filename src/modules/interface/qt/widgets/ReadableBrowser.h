@@ -7,7 +7,9 @@
 #include <QDropEvent>
 #include <QVBoxLayout>
 #include <QTreeView>
-#include <QStandardItemModel>
+
+#include <ReadableItemModel.h>
+#include <ReadableTreeView.h>
 
 class ReadableBrowser : public QWidget {
     Q_OBJECT
@@ -15,16 +17,14 @@ public:
     ReadableBrowser(ReadableManager *readableManager, QWidget *parent = nullptr);
     ~ReadableBrowser();
 signals:
-    void itemDragStarted(QString &text);
+    void itemDragStarted();
 private:
     ReadableManager *m_readableManager; // ReadableManager instance that the browser is generated from
     
     QVBoxLayout *m_mainLayout;
-    QTreeView *m_readableTreeView;
-    QStandardItemModel *m_browserModel;
+    ReadableTreeView *m_readableTreeView;
+    ReadableItemModel *m_browserModel;
     
-    void genBrowserTree(QTreeView *treeView, QStandardItemModel *itemModel);
+    void genBrowserTree(ReadableTreeView *treeView, QStandardItemModel *itemModel);
     QStandardItem *addBrowserItem(tc_readable_node_t* node, QStandardItem *parent); // Return a newly created item that is a child of 'parent'
-    
-    void mousePressEvent(QMouseEvent *event); // Start the drag event for an item
 };
