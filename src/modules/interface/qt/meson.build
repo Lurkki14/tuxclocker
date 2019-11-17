@@ -1,6 +1,6 @@
 qt5 = import('qt5')
 qt5_dep = dependency('qt5',
-    modules : ['Widgets'])
+    modules : ['Widgets', 'Charts'])
     
 moc_files = qt5.preprocess(moc_headers : [ 'MainWindow.h',
         'widgets/AssignableWidget.h',
@@ -9,8 +9,11 @@ moc_files = qt5.preprocess(moc_headers : [ 'MainWindow.h',
         'widgets/ReadableWidget.h',
         'widgets/ReadableBrowser.h',
         'widgets/ReadableDisplay.h',
+        'widgets/ReadableTreeView.h',
         'data/AssignableManager.h',
-        'data/AssignableEditorDelegate.h'],
+        'data/AssignableEditorDelegate.h',
+        'data/ReadableMasterObservable.h',
+        'data/ReadableObservable.h'],
         dependencies : qt5_dep)
 
 sources = ['main.cpp',
@@ -21,10 +24,13 @@ sources = ['main.cpp',
     'widgets/ReadableWidget.cpp',
     'widgets/ReadableBrowser.cpp',
     'widgets/ReadableDisplay.cpp',
+    'widgets/ReadableGraphDisplay.cpp',
     'data/AssignableData.cpp',
     'data/AssignableEditorDelegate.cpp',
     'data/AssignableManager.cpp',
-    'data/ReadableManager.cpp']
+    'data/ReadableManager.cpp',
+    'data/ReadableMasterObservable.cpp',
+    'data/ReadableObservable.cpp']
     
 local_qt_incdirs = ['widgets', 'data']
     
