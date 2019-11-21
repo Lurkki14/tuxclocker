@@ -4,17 +4,20 @@
 #include <QTimer>
 
 #include "ReadableData.h"
+#include "ReadableMasterObservable.h"
+
+class ReadableMasterObservable;
 
 class ReadableObservable : public QObject {
 public:
-    ReadableObservable(ReadableData *data, QObject *parent = nullptr);
-    void setInterval(std::chrono::milliseconds msecs); // Set the emission interval
+    ReadableObservable(ReadableMasterObservable *masterObservable, QObject *parent = nullptr);
+    void setInterval(std::chrono::milliseconds interval); // Set the emission interval
 signals:
     void valueUpdated(tc_readable_result_t value);
+    void intervalChanged(std::chrono::milliseconds interval);
 private:
     Q_OBJECT
     
-    ReadableData *m_readableData;
     QTimer *m_emitTimer;
     tc_readable_result_t m_latestValue;
 };

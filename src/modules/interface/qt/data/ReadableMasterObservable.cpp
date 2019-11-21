@@ -1,11 +1,19 @@
 #include "ReadableMasterObservable.h"
 
+#include <QDebug>
+
 ReadableMasterObservable::ReadableMasterObservable(ReadableData *data, QObject *parent) : QObject(parent) {
     m_lowestInterval = std::chrono::milliseconds(-1);
     
-    m_readableData = data;
+    //m_readableData = data;
+    
+    m_readableData = ReadableData(*data);
     
     m_emitTimer = new QTimer;
+}
+
+ReadableMasterObservable::~ReadableMasterObservable() {
+    delete m_emitTimer;
 }
 
 void ReadableMasterObservable::notifyChangedInterval(std::chrono::milliseconds interval) {
@@ -17,16 +25,15 @@ void ReadableMasterObservable::notifyChangedInterval(std::chrono::milliseconds i
     m_emitTimer->start(m_lowestInterval);
     
     connect(m_emitTimer, &QTimer::timeout, [=]() {
-        emit valueUpdated(m_readableData->value());
+        emit valueUpdated(m_readableData.value());
     });
 }
 
-/*ReadableObservable *ReadableMasterObservable::observable(ReadableData *data, std::chrono::milliseconds updateInterval) {
-    QTimer *timer = new QTimer;
+ReadableObservable *ReadableMasterObservable::createObservable(std::chrono::milliseconds updateInterval) {
+    ReadableObservable *observable = new ReadableObservable(this, this); // Set as parent so it gets deleted along with this object and we can keep track of it
+    observable->setInterval(updateInterval);
     
-    ReadableObservable *masterObservable = new ReadableObservable(data, this); // Create master observable for this node
+    notifyChangedInterval(updateInterval);
     
-    connect(timer, &QTimer::timeout, [=]() {
-        
-    });
-}*/
+    return observable;
+}
