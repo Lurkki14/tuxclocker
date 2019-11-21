@@ -2,6 +2,7 @@
 
 #include <QMetaType>
 #include <QString>
+#include <QDataStream>
 
 #include <tc_readable.h>
 
@@ -9,6 +10,7 @@ class ReadableData {
 private:
     tc_readable_node_t *m_readableNode;
 public:
+    ReadableData() {m_readableNode = nullptr;}
     ReadableData(tc_readable_node_t *node) {m_readableNode = node;}
     static QString mimeType() {return QString("tc-readable-data");}
     bool isConstant() {return m_readableNode->constant;}
@@ -29,4 +31,19 @@ public:
         }
         return m_readableNode->value_callback(m_readableNode);
     }
+    
+    // Streaming operator for converting from QByteArray
+    friend QDataStream & operator << (QDataStream &out, const ReadableData &data) {
+        ReadableData dataCpy = data;
+        char *rawData = reinterpret_cast<char*>(&dataCpy);
+        out.writeRawData(rawData, sizeof(data));
+        return out;
+    }
+    
+    friend QDataStream & operator >> (QDataStream &in, ReadableData &data) {
+        in.readRawData(reinterpret_cast<char*>(&data), sizeof(ReadableData));
+        return in;
+    }
 };
+
+Q_DECLARE_METATYPE(ReadableData)
