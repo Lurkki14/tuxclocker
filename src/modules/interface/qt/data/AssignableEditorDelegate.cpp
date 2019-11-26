@@ -23,13 +23,13 @@ QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOpt
                     editor = new IntRangeEditor(parent);
                     return editor;
                 default:
-                    return QStyledItemDelegate::createEditor(parent, option, index);
+                    return nullptr;
             }
         case TC_ASSIGNABLE_ENUM:
             editor = new EnumEditor(parent);
             return editor;
         default:
-            return QStyledItemDelegate::createEditor(parent, option, index);
+            return nullptr;
     }
 }
 
