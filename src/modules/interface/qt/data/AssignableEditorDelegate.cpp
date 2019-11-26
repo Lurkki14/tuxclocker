@@ -1,6 +1,8 @@
 #include "AssignableEditorDelegate.h"
 #include "AssignableData.h"
-#include "AbstractAssignableEditor.h"
+#include "AssignableParametrizationData.h"
+#include <AbstractAssignableEditor.h>
+#include <AssignableParametrizationEditor.h>
 #include <EnumEditor.h>
 #include <IntRangeEditor.h>
 
@@ -11,6 +13,14 @@ AssignableEditorDelegate::AssignableEditorDelegate(QObject *parent) : QStyledIte
 
 QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    QVariant v_data = index.model()->data(index, Qt::UserRole);
+    qDebug() << v_data;
+    // Widget for parametrization data
+    if (v_data.canConvert<AssignableParametrizationData>()) {
+        //return new AssignableParametrizationEditor(parent);
+        return new QSlider(parent);
+    }
+    
     // Check which type the editor should be
     AssignableData data = qvariant_cast<AssignableData>(index.model()->data(index, Qt::UserRole));
  
@@ -38,15 +48,18 @@ void AssignableEditorDelegate::updateEditorGeometry(QWidget *editor, const QStyl
 }
 
 void AssignableEditorDelegate::setEditorData(QWidget* editor, const QModelIndex &index) const {
-    AssignableData data = qvariant_cast<AssignableData>(index.model()->data(index, Qt::UserRole));
+    QVariant v_data = index.model()->data(index, Qt::UserRole);
     
-    AbstractAssignableEditor *a_editor = static_cast<AbstractAssignableEditor*>(editor);
-    a_editor->setAssignableData(data);
-    a_editor->setValue(data.value());
+    if (v_data.canConvert<AssignableData>()) {
+        AssignableData data = qvariant_cast<AssignableData>(v_data);
+        AbstractAssignableEditor *a_editor = static_cast<AbstractAssignableEditor*>(editor);
+        a_editor->setAssignableData(data);
+        a_editor->setValue(data.value());
+    }
 }
 
 void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
-    AssignableData data = qvariant_cast<AssignableData>(index.model()->data(index, Qt::UserRole));
+    /*AssignableData data = qvariant_cast<AssignableData>(index.model()->data(index, Qt::UserRole));
     QVariant v;
     QStandardItemModel *s_model = static_cast<QStandardItemModel*>(model);
     
@@ -56,5 +69,19 @@ void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
     v.setValue(data);
     
     s_model->setData(index, v, Qt::UserRole);
-    s_model->setData(index, a_editor->text(), Qt::DisplayRole);
+    s_model->setData(index, a_editor->text(), Qt::DisplayRole);*/
+    
+    QVariant v_data = model->data(index, Qt::UserRole);
+    
+    if (v_data.canConvert<AssignableData>()) {
+        AbstractAssignableEditor *a_editor = static_cast<AbstractAssignableEditor*>(editor);
+        AssignableData data = qvariant_cast<AssignableData>(v_data);
+        data.setValue(a_editor->value());
+        
+        QVariant v;
+        v.setValue(data);
+        
+        model->setData(index, v, Qt::UserRole);
+        model->setData(index, a_editor->text(), Qt::DisplayRole);
+    }
 }
