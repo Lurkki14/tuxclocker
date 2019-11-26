@@ -65,29 +65,10 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
             qDebug() << node->name;
         }
         
-        // List for adding the name and editor on the same row
-        QList <QStandardItem*> rowItems;
-        
-        QStandardItem *nameItem = new QStandardItem;
-        nameItem->setText(node->name);
-        nameItem->setEditable(false);
-        rowItems.append(nameItem);
-        
-        // Don't add editor item for TC_ASSIGNABLE_NONE nodes
-        if (node->value_category != TC_ASSIGNABLE_NONE) {
-            QStandardItem *editorItem = new QStandardItem;
-            QVariant v;
-            AssignableData data(node);
-            v.setValue(data);
-            editorItem->setData(v, Qt::UserRole);
-            //editorItem->setText(node->name);
-            rowItems.append(editorItem);
-        }
-        
-        item->appendRow(rowItems);
+        QStandardItem *newItem = addAssignableItem(node, item);
         
         for (uint32_t i = 0; i < node->children_count; i++) {
-            traverse(node->children_nodes[i], nameItem);
+            traverse(node->children_nodes[i], newItem);
         }
     };
     
@@ -113,4 +94,30 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     m_assignableTreeView->setItemDelegateForColumn(1, delegate);
     
     m_assignableTreeView->setEditTriggers(QAbstractItemView::AllEditTriggers);
+}
+
+QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, QStandardItem *parent) {
+    if (!node || !node->name) {
+        return nullptr;
+    }
+    
+    QList <QStandardItem*> rowItems;
+    
+    QStandardItem *nameItem =  new QStandardItem;
+    nameItem->setText(node->name);
+    nameItem->setEditable(false);
+    rowItems.append(nameItem);
+    
+    // Don't add editor item for TC_ASSIGNABLE_NONE nodes
+    if (node->value_category != TC_ASSIGNABLE_NONE) {
+        QStandardItem *editorItem = new QStandardItem;
+        QVariant v;
+        v.setValue(AssignableData(node));
+        editorItem->setData(v, Qt::UserRole);
+        //editorItem->setText(node->name);
+        rowItems.append(editorItem);
+    }
+    parent->appendRow(rowItems);
+    
+    return nameItem;
 }

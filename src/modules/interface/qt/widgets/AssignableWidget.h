@@ -28,4 +28,6 @@ private:
     AssignableManager *m_assignableManager;
     
     void genAssignableTree(QTreeView *treeView);
+    
+    QStandardItem *addAssignableItem(tc_assignable_node_t *node, QStandardItem *parent);
 };
