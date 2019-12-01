@@ -1,5 +1,8 @@
 # Define libtuxclocker target here since others depend on it
 
+# OpenSSL is used for hash functions
+openssl_dep = dependency('openssl')
+
 libtuxclocker_posix_sources = ['lib/posix/module.c',
     'lib/posix/filesystem.c']
 
@@ -16,7 +19,7 @@ libtuxclocker = shared_library('libtuxclocker',
 	 'lib/tc_common.c',
 	 libtuxclocker_posix_sources],
 	include_directories : incdir,
-	dependencies : libtuxclocker_posix_libs,
+	dependencies : [libtuxclocker_posix_libs, openssl_dep],
 	c_args : module_path_def,
 	install : true)
 
