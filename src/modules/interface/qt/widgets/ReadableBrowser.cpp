@@ -37,10 +37,10 @@ void ReadableBrowser::genBrowserTree(ReadableTreeView *treeView, QStandardItemMo
         }
         QStandardItem *newItem = addBrowserItem(node, item);
         
-        if (!node->constant && node->value_callback) {
+        /*if (!node->constant && node->value_callback) {
             tc_readable_result_t res = node->value_callback(node);
             qDebug() << res.valid << res.data.uint_value;
-        }
+        }*/
         
         for (uint16_t i = 0; i < node->children_count; i++) {
             traverse(node->children_nodes[i], newItem);
@@ -73,6 +73,11 @@ QStandardItem *ReadableBrowser::addBrowserItem(tc_readable_node_t* node, QStanda
     item->setText(node->name);
     
     item->setDragEnabled(true);
+    
+    QVariant v;
+    v.setValue(ReadableData(node));
+    
+    item->setData(v, Qt::UserRole);
     
     parent->appendRow(item);
     

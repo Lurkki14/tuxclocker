@@ -1,11 +1,12 @@
- #include "ReadableDisplay.h"
+#include "ReadableDisplay.h"
+#include <ReadableObservableManager.h>
 
 ReadableDisplay::ReadableDisplay(QWidget *parent) : QWidget(parent) {
     setAcceptDrops(true);
     
     m_displayWidgetLayout = new QVBoxLayout;
     
-    m_displayWidgetLayout->addWidget(new ReadableGraphDisplay);
+    m_displayWidgetLayout->addWidget(new ReadableGraphDisplay(new ReadableObservableManager));
     
     setLayout(m_displayWidgetLayout);
 }
