@@ -20,9 +20,16 @@ int8_t init();
 int8_t close();
 tc_readable_node_t *category_callback();
 
+// Tunable enumerations for generating hashes from nodes
+enum tunable_id {
+    ID_POWER_USAGE,
+    ID_TEMP
+};
+
 // Local data structure for mapping nodes to GPU's
 
-enum map_type {MAP_BASE,
+enum map_type {
+    MAP_BASE,
     MAP_FAN,
     MAP_CLOCK
 };
@@ -38,6 +45,7 @@ typedef struct {
         uint8_t fan_index;
         nvmlClockType_t clock_type;
     };
+    enum tunable_id id;
 } callback_map;
 
 // Create new callback map on the heap
@@ -62,10 +70,14 @@ void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *m
 void add_power_item(tc_readable_node_t *parent, callback_map *map);
 void add_clock_items(tc_readable_node_t *parent, callback_map *map);
 
+
 // Value updating functions
 tc_readable_result_t get_temp(const tc_readable_node_t *node);
 tc_readable_result_t get_power(const tc_readable_node_t *node);
 tc_readable_result_t get_clock(const tc_readable_node_t *node);
+
+// Get the SHA-256 hash for a node
+const char *sha_256_hash(const tc_readable_node_t *node);
 
 static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
@@ -197,20 +209,17 @@ void generate_readable_tree() {
 
 void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *map) {
     uint32_t reading;
-    if (nvmlDeviceGetTemperature(dev, NVML_TEMPERATURE_GPU, &reading) != NVML_SUCCESS) {
+    if (nvmlDeviceGetTemperature(map->base_map.dev, NVML_TEMPERATURE_GPU, &reading) != NVML_SUCCESS) {
         return;
     }
     // Create new node
-    tc_readable_node_t *temp_node = tc_readable_node_add_new_child(parent);
-    
-    if (!temp_node) {
+    tc_readable_node_t *node = tc_readable_node_new();
+    if (add_map_and_gpu_item(map, parent, node) != TC_SUCCESS) {
         return;
     }
     
-    temp_node->name = strdup("Temperature");
-    temp_node->value_callback = &get_temp;
-    
-    tc_bin_node_insert(root_search_node, temp_node, map);
+    node->name = strdup("Temperature");
+    node->value_callback = &get_temp;
 }
 
 void add_power_item(tc_readable_node_t *parent, callback_map *map) {
@@ -245,6 +254,8 @@ void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
             
             c_map->map_type = MAP_CLOCK;
             c_map->clock_type = NVML_CLOCK_GRAPHICS;
+            
+            printf("%s\n", sha_256_hash(node));
         } while (0);
     } 
     else {
@@ -263,6 +274,8 @@ void add_clock_items(tc_readable_node_t *parent, callback_map *map) {
         
         m_map->map_type = MAP_CLOCK;
         m_map->clock_type = NVML_CLOCK_MEM;
+        
+        printf("%s\n", sha_256_hash(node));
     }
     else {
         free(m_map);
@@ -278,7 +291,7 @@ tc_readable_result_t get_temp(const tc_readable_node_t *node) {
         return tc_readable_result_create(type, NULL, success);
     }
     uint32_t reading;
-    if (nvmlDeviceGetPowerUsage(map->base_map.dev, &reading) == NVML_SUCCESS) {
+    if (nvmlDeviceGetTemperature(map->base_map.dev, NVML_TEMPERATURE_GPU, &reading) == NVML_SUCCESS) {
         success = true;
     }
     uint64_t val = reading;
@@ -286,7 +299,7 @@ tc_readable_result_t get_temp(const tc_readable_node_t *node) {
 }
 
 tc_readable_result_t get_power(const tc_readable_node_t *node) {
-    const enum tc_data_types type = TC_TYPE_UINT;
+    const enum tc_data_types type = TC_TYPE_DOUBLE;
     bool success = false;
     callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
     if (!map || map->map_type != MAP_BASE) {
@@ -296,7 +309,7 @@ tc_readable_result_t get_power(const tc_readable_node_t *node) {
     if (nvmlDeviceGetPowerUsage(map->base_map.dev, &reading) == NVML_SUCCESS) {
         success = true;
     }
-    uint64_t val = reading;
+    double val = reading / 1000;
     return tc_readable_result_create(type, &val, success);
 }
 
@@ -312,4 +325,37 @@ tc_readable_result_t get_clock(const tc_readable_node_t *node) {
     }
     uint64_t val = reading;
     return tc_readable_result_create(TC_TYPE_UINT, &val, success);
+}
+
+const char *sha_256_hash(const tc_readable_node_t *node) {
+    callback_map *map = (callback_map*) tc_bin_node_find_value(root_search_node, node);
+    
+    char gpu_uuid[NVML_DEVICE_UUID_BUFFER_SIZE];
+    
+    if (nvmlDeviceGetUUID(map->base_map.dev, gpu_uuid, NVML_DEVICE_UUID_BUFFER_SIZE) != NVML_SUCCESS) {
+        return NULL;
+    }
+    
+    char id_string[128];
+    
+    // Form a string that identifies the assignable and GPU
+    
+    switch (map->map_type) {
+        case MAP_CLOCK:
+            switch (map->clock_type) {
+                case NVML_CLOCK_GRAPHICS:
+                    snprintf(id_string, 128, "%score clock", gpu_uuid);
+                    break;
+                case NVML_CLOCK_MEM:
+                    snprintf(id_string, 128, "%smem clock", gpu_uuid);
+                    break;
+                default:
+                    return NULL;
+            }
+            break;
+        default:
+            return NULL;
+    }
+    
+    return tc_sha256(id_string, strlen(id_string));
 }
