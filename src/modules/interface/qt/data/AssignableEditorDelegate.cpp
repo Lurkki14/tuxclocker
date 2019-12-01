@@ -17,8 +17,7 @@ QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOpt
     qDebug() << v_data;
     // Widget for parametrization data
     if (v_data.canConvert<AssignableParametrizationData>()) {
-        //return new AssignableParametrizationEditor(parent);
-        return new QSlider(parent);
+        return new AssignableParametrizationEditor(parent);
     }
     
     // Check which type the editor should be
@@ -45,6 +44,8 @@ QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOpt
 
 void AssignableEditorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
     editor->setGeometry(option.rect);
+    //editor->setGeometry(QRect(QPoint(option.rect.topLeft()), QPoint(500, 500)));
+    //editor->setGeometry(option.widget->rect());
 }
 
 void AssignableEditorDelegate::setEditorData(QWidget* editor, const QModelIndex &index) const {
@@ -59,18 +60,6 @@ void AssignableEditorDelegate::setEditorData(QWidget* editor, const QModelIndex 
 }
 
 void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
-    /*AssignableData data = qvariant_cast<AssignableData>(index.model()->data(index, Qt::UserRole));
-    QVariant v;
-    QStandardItemModel *s_model = static_cast<QStandardItemModel*>(model);
-    
-    AbstractAssignableEditor *a_editor = static_cast<AbstractAssignableEditor*>(editor);
-    
-    data.setValue(a_editor->value());
-    v.setValue(data);
-    
-    s_model->setData(index, v, Qt::UserRole);
-    s_model->setData(index, a_editor->text(), Qt::DisplayRole);*/
-    
     QVariant v_data = model->data(index, Qt::UserRole);
     
     if (v_data.canConvert<AssignableData>()) {
@@ -84,4 +73,12 @@ void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
         model->setData(index, v, Qt::UserRole);
         model->setData(index, a_editor->text(), Qt::DisplayRole);
     }
+}
+
+QSize AssignableEditorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const {
+    //qDebug() << option.widget;
+    
+    return QStyledItemDelegate::sizeHint(option, index);
+    
+    //return QSize(150, 150);
 }
