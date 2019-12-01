@@ -2,6 +2,7 @@
 
 #include <AssignableData.h>
 #include <AssignableManager.h>
+#include <AssignableParametrizationData.h>
 
 #include <QWidget>
 #include <QSplitter>

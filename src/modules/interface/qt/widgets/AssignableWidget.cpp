@@ -55,6 +55,10 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     valueHeader->setText("Value");
     assignableModel->setHorizontalHeaderItem(1, valueHeader);
     
+    QStandardItem *parametrizationHeader = new QStandardItem;
+    parametrizationHeader->setText("Parametrization");
+    assignableModel->setHorizontalHeaderItem(2, parametrizationHeader);
+    
     std::function<void(tc_assignable_node_t*, QStandardItem*)> traverse;
     traverse = [=, &traverse](tc_assignable_node_t *node, QStandardItem *item) {
         if (node == NULL) {
@@ -92,8 +96,12 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     AssignableEditorDelegate *delegate = new AssignableEditorDelegate;
     
     m_assignableTreeView->setItemDelegateForColumn(1, delegate);
+    m_assignableTreeView->setItemDelegateForColumn(2, delegate);
     
     m_assignableTreeView->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    
+    m_assignableTreeView->header()->setStretchLastSection(true);
+    //m_assignableTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, QStandardItem *parent) {
@@ -111,11 +119,21 @@ QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, Q
     // Don't add editor item for TC_ASSIGNABLE_NONE nodes
     if (node->value_category != TC_ASSIGNABLE_NONE) {
         QStandardItem *editorItem = new QStandardItem;
+        AssignableData data(node);
+        
         QVariant v;
-        v.setValue(AssignableData(node));
+        v.setValue(data);
         editorItem->setData(v, Qt::UserRole);
         //editorItem->setText(node->name);
         rowItems.append(editorItem);
+        
+        // Add parametrization item
+        AssignableParametrizationData p_data(data);
+        QStandardItem *p_item = new QStandardItem;
+        QVariant pv;
+        pv.setValue(p_data);
+        p_item->setData(pv, Qt::UserRole);
+        rowItems.append(p_item);
     }
     parent->appendRow(rowItems);
     
