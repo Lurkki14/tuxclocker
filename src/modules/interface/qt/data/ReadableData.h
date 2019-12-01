@@ -16,6 +16,7 @@ public:
     bool isConstant() {return m_readableNode->constant;}
     QString name() {return QString(m_readableNode->name);}
     QString unit() {return QString(m_readableNode->unit);}
+    const tc_readable_node_t *node() {return m_readableNode;}
     const tc_variant_t constData() {
         if (!isConstant()) {
             tc_variant_t retval;
