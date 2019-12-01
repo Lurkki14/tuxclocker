@@ -59,9 +59,12 @@ typedef struct tc_bin_node_ {
 // Create a new node with key and data in the appropriate position
 tc_bin_node_t *tc_bin_node_insert(tc_bin_node_t* node, void *key, void *value);
 // Find the value associated with the key
-void *tc_bin_node_find_value(tc_bin_node_t *node, void *key);
+void *tc_bin_node_find_value(tc_bin_node_t *node, const void *key);
 // Destroy a node and its children
 void tc_bin_node_destroy(tc_bin_node_t *node);
+
+// Function for const char* -> SHA256. Don't free().
+const char *tc_sha256(const char *string, uint32_t string_length);
 
 #ifdef __cplusplus
 }

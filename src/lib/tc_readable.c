@@ -66,8 +66,9 @@ tc_readable_result_t tc_readable_result_create(enum tc_data_types type, void *da
             break;
         case TC_TYPE_INT:
             res.data.int_value = *(int64_t*) data;
+            break;
         case TC_TYPE_DOUBLE:
-            res.data.uint_value = *(double*) data;
+            res.data.double_value = *(double*) data;
             break;
         default:
             res.valid = false;

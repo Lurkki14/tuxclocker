@@ -1,7 +1,10 @@
 #include <tc_common.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+
+#include <openssl/sha.h>
 
 char **tc_str_arr_dup(uint16_t str_count, char **const strings) {
     char **ptr_arr = calloc(str_count, sizeof(char*));
@@ -54,7 +57,7 @@ tc_bin_node_t *tc_bin_node_insert(tc_bin_node_t *node, void *key, void *value) {
     return node;
 }
 
-void *tc_bin_node_find_value(tc_bin_node_t *node, void *key) {
+void *tc_bin_node_find_value(tc_bin_node_t *node, const void *key) {
     if (node == NULL) {
         return NULL;
     }
@@ -70,4 +73,16 @@ void *tc_bin_node_find_value(tc_bin_node_t *node, void *key) {
 
 void tc_bin_node_destroy(tc_bin_node_t *node) {
     traverse_postorder(node, &single_destroy);
+}
+
+const char *tc_sha256(const char *string, uint32_t string_length) {
+    unsigned char *d = SHA256((unsigned char*) string, string_length, 0);
+    
+    static char out[(SHA256_DIGEST_LENGTH * 2) + 1];
+    
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+        sprintf(out + (i * 2), "%02x", d[i]);
+    }
+    out[SHA256_DIGEST_LENGTH * 2] = '\0';
+    return out;
 }
