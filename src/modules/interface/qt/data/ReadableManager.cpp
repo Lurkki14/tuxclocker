@@ -12,11 +12,11 @@ ReadableManager::ReadableManager() {
         if (modules[i]->init_callback  && modules[i]->init_callback() == TC_SUCCESS) {
             // Module was initialized successfully
             
-            tc_readable_node_t *root_node = static_cast<tc_readable_node_t*>(modules[i]->category_data_callback());
-            if (root_node) {
+            tc_readable_module_data_t *mod_data = static_cast<tc_readable_module_data_t*>(modules[i]->category_data_callback());
+            if (mod_data && mod_data->root_node) {
                 // Add to the list
-                m_rootNodes.append(root_node);
-                m_root = root_node;
+                m_rootNodes.append(mod_data->root_node);
+                m_root = mod_data->root_node;
             }
         }
     }

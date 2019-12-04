@@ -18,7 +18,7 @@ tc_module_t *TC_MODULE_INFO_FUNCTION();
 
 int8_t init();
 int8_t close();
-tc_readable_node_t *category_callback();
+tc_readable_module_data_t *category_callback();
 
 // Tunable enumerations for generating hashes from nodes
 enum tunable_id {
@@ -62,8 +62,6 @@ static callback_map *callback_map_new_copy(const callback_map *map) {
     return new_map;
 }
 
-
-
 // Local functions
 void generate_readable_tree();
 void add_temp_item(tc_readable_node_t *parent, nvmlDevice_t dev, callback_map *map);
@@ -83,6 +81,8 @@ static uint32_t gpu_count;
 static nvmlDevice_t nvml_handles[MAX_GPUS];
 static Display *dpy;
 static tc_readable_node_t *root_node = NULL;
+// Data structure for module loader
+static tc_readable_module_data_t mod_data;
 // Root node for maps
 static tc_bin_node_t *root_search_node;
 
@@ -114,8 +114,9 @@ tc_module_t *TC_MODULE_INFO_FUNCTION() {
     return &mod_info;
 }
 
-tc_readable_node_t *category_callback() {
-    return root_node;
+tc_readable_module_data_t *category_callback() {
+    //return root_node;
+    return &mod_data;
 }
 
 int8_t init() {
@@ -149,7 +150,7 @@ int8_t init() {
   if ((dpy = XOpenDisplay(NULL)) == NULL) {
     return TC_EGENERIC;
   }
-
+  
   // Generate the tree structure of assignables for every GPU. Free in close().
     generate_readable_tree();
     
@@ -158,6 +159,10 @@ int8_t init() {
 
 void generate_readable_tree() {
     root_node = tc_readable_node_new();
+    
+    // Assign module data
+    mod_data.root_node = root_node;
+    mod_data.sha256_hash = &sha_256_hash;
     
     tc_variant_t data = {
         .data_type = TC_TYPE_NONE

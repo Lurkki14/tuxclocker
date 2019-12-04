@@ -35,6 +35,12 @@ typedef struct tc_readable_node_t_{
     struct tc_readable_node_t_ **children_nodes;
 } tc_readable_node_t;
 
+// Master data structure loaded by module loader
+typedef struct {
+    tc_readable_node_t *root_node;
+    const char *(*sha256_hash)(const tc_readable_node_t*); // Callback to get a unique hash for a node
+} tc_readable_module_data_t;
+
 // Utility functions
 // Create a new node
 tc_readable_node_t *tc_readable_node_new();
