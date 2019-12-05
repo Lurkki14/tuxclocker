@@ -7,8 +7,10 @@
 #include <IntRangeEditor.h>
 
 #include <QDebug>
+#include <QTreeView>
 
-AssignableEditorDelegate::AssignableEditorDelegate(QObject *parent) : QStyledItemDelegate(parent) {
+AssignableEditorDelegate::AssignableEditorDelegate(QTreeView *treeView, QObject *parent) : QStyledItemDelegate(parent) {
+    m_treeView = treeView;
 }
 
 QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -43,9 +45,35 @@ QWidget *AssignableEditorDelegate::createEditor(QWidget *parent, const QStyleOpt
 }
 
 void AssignableEditorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const {
-    editor->setGeometry(option.rect);
-    //editor->setGeometry(QRect(QPoint(option.rect.topLeft()), QPoint(500, 500)));
-    //editor->setGeometry(option.widget->rect());
+    if (index != m_spannedIndex) {
+        // Span editor across all columns        
+        const int maxCol = index.model()->columnCount(index.parent());
+        QRect tempRect = m_treeView->visualRect(index.model()->index(index.row(), 0, index.parent()));
+        int top = tempRect.top();
+        int left = tempRect.left();
+        int bottom = tempRect.bottom();
+        int right= tempRect.right();
+        
+        for(int i = 1; i < maxCol ; i++){
+            tempRect = m_treeView->visualRect(index.model()->index(index.row(), i, index.parent()));
+            if (tempRect.top()<top) {
+                top = tempRect.top();
+            }
+            if (Q_UNLIKELY(tempRect.left() < left)) {
+                left= tempRect.left();
+            }
+            if (tempRect.bottom() > bottom) {
+                bottom = tempRect.bottom();
+            }
+            if (Q_LIKELY(tempRect.right() > right)) {
+                right= tempRect.right();
+            }
+        }
+        editor->setGeometry(QRect(QPoint(left, top),QPoint(right, bottom)));
+    }
+    else {
+        editor->setGeometry(option.rect);
+    }
 }
 
 void AssignableEditorDelegate::setEditorData(QWidget* editor, const QModelIndex &index) const {
