@@ -93,7 +93,7 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     
     m_assignableTreeView->setModel(assignableModel);
     
-    AssignableEditorDelegate *delegate = new AssignableEditorDelegate;
+    AssignableEditorDelegate *delegate = new AssignableEditorDelegate(m_assignableTreeView);
     
     m_assignableTreeView->setItemDelegateForColumn(1, delegate);
     m_assignableTreeView->setItemDelegateForColumn(2, delegate);
@@ -102,6 +102,11 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     
     m_assignableTreeView->header()->setStretchLastSection(true);
     //m_assignableTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    
+    connect(m_assignableTreeView, &QTreeView::activated, [=](const QModelIndex &index) {
+        qDebug() << index;
+        delegate->setSpannedIndex(index);
+    });
 }
 
 QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, QStandardItem *parent) {

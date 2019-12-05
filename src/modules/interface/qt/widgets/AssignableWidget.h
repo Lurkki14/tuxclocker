@@ -8,7 +8,7 @@
 #include <QSplitter>
 #include <QLayout>
 #include <QStandardItemModel>
-#include <QTreeWidget>
+#include <QTreeView>
 #include <QHeaderView>
 #include <QTreeWidgetItem>
 
@@ -22,7 +22,6 @@ private:
     QGridLayout *m_mainLayout;
     // Splitter for editor and viewer
     QSplitter *m_splitter;
-    QTreeWidget *m_assignableTreeWidget;
     QTreeView *m_assignableTreeView;
     
     // Assignable manager instance - maybe move this somewhere else?
