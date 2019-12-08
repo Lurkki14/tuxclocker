@@ -19,6 +19,7 @@ private:
 public:
     AssignableParametrizationData() {};
     AssignableParametrizationData(AssignableData &data) {m_controlledAssignable = data;}
+    const AssignableData assignableData() {return m_controlledAssignable;}
 };
 
 Q_DECLARE_METATYPE(AssignableParametrizationData);

@@ -103,10 +103,10 @@ void AssignableWidget::genAssignableTree(QTreeView *treeView) {
     m_assignableTreeView->header()->setStretchLastSection(true);
     //m_assignableTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     
-    connect(m_assignableTreeView, &QTreeView::activated, [=](const QModelIndex &index) {
+    /*connect(m_assignableTreeView, &QTreeView::activated, [=](const QModelIndex &index) {
         qDebug() << index;
-        delegate->setSpannedIndex(index);
-    });
+        delegate->setSpanAllColumns(true);
+    });*/
 }
 
 QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, QStandardItem *parent) {
@@ -138,6 +138,7 @@ QStandardItem *AssignableWidget::addAssignableItem(tc_assignable_node_t *node, Q
         QVariant pv;
         pv.setValue(p_data);
         p_item->setData(pv, Qt::UserRole);
+        //p_item->setData(QSize(100, 100), Qt::SizeHintRole);
         rowItems.append(p_item);
     }
     parent->appendRow(rowItems);
