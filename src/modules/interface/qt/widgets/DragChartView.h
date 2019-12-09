@@ -18,6 +18,9 @@ protected:
     void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
     void wheelEvent(QWheelEvent*);
+/*signals:
+    void dragStarted(const QPointF point);
+    void dragEnded(const QPointF point);*/
 private:
     QVector <QPointF> sortPointFByAscendingX(const QVector <QPointF> points);
     void drawFillerLines(QScatterSeries *series);

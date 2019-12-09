@@ -36,29 +36,36 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
        m_latestScatterPoint = point;
     });
 
+
+    chart()->addSeries(&m_series);
+    
+    chart()->addAxis(&m_xAxis, Qt::AlignBottom);
+    chart()->addAxis(&m_yAxis, Qt::AlignLeft);
+    
+    m_series.attachAxis(&m_xAxis);
+    m_series.attachAxis(&m_yAxis);   
+    
     m_xAxis.setRange(0, 25);
     m_yAxis.setRange(0, 25);
 
-
-    m_series.attachAxis(&m_xAxis);
-    m_series.attachAxis(&m_yAxis);
-
-    chart()->addSeries(&m_series);
-
-    chart()->addAxis(&m_xAxis, Qt::AlignBottom);
-    chart()->addAxis(&m_yAxis, Qt::AlignLeft);
-
-
-
-    /*QLineF line(m_series.pointsVector()[0], m_series.pointsVector()[1]);
-    m_lineItem->setLine(line);
-    m_lineItem->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
-
-    chart()->scene()->addItem(m_lineItem);*/
+    chart()->setBackgroundRoundness(0);
+    
+    // Set theme colors
+    chart()->setBackgroundBrush(QBrush(QPalette().color(QPalette::Background)));
+    
+    chart()->legend()->setLabelColor(QPalette().color(QPalette::Text));
+    
+    m_yAxis.setLabelsColor(QPalette().color(QPalette::Text));
+    m_xAxis.setLabelsColor(QPalette().color(QPalette::Text));
+    
+    m_yAxis.setTitleBrush(QBrush(QPalette().color(QPalette::Text)));
+    m_xAxis.setTitleBrush(QBrush(QPalette().color(QPalette::Text)));
+    
+    //setCursor(Qt::CrossCursor);
 }
 
 bool DragChartView::event(QEvent *event) {
-    qDebug() << event->type();
+    //qDebug() << event->type();
 
     if (event->type() == QEvent::Resize || event->type() == QEvent::UpdateLater) {
         // Chart has a geometry when this is true
@@ -89,8 +96,10 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
     if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance() || !m_dragCanStart) {
         return;
     }
-    //qDebug() << "start drag";
-
+    // Start drag
+    // Set cursor to indicate dragging
+   // setCursor(Qt::ClosedHandCursor);
+    
     m_dragActive = true;
 
     //QToolTip::showText(mapToGlobal(event->pos()), QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
