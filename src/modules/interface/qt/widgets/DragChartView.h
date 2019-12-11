@@ -18,10 +18,25 @@ protected:
     void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
     void wheelEvent(QWheelEvent*);
-/*signals:
+    
+    bool eventFilter(QObject *obj, QEvent *event); // Get notified when chart has geometry
+signals:
     void dragStarted(const QPointF point);
-    void dragEnded(const QPointF point);*/
+    void dragEnded(const QPointF point);
+    
+    void limitAreaEntered();
+    void limitAreaExited();
 private:
+    Q_OBJECT
+    
+    static QPoint toolTipOffset() {return QPoint(0, 20);}
+    
+    qreal m_chartMargin; // Margin in pixels between a scatter point and axis edge. Add this value on either edge of the axes in order for chatter points to be unable to go partially out of the viewport.
+    QRectF m_limitRect; // Scatter points can't be moved outside this rect
+    bool m_mouseInLimitArea;
+    
+    bool m_scatterPressed; // For detecting if mouse release should delete or add a new point
+    
     QVector <QPointF> sortPointFByAscendingX(const QVector <QPointF> points);
     void drawFillerLines(QScatterSeries *series);
     QLabel *m_toolTipLabel;

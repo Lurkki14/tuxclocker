@@ -7,35 +7,109 @@
 
 DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
 {
+    chart()->installEventFilter(this);
+    
     setRenderHint(QPainter::Antialiasing);
 
     m_toolTipLabel = new QLabel;
     m_toolTipLabel->setWindowFlag(Qt::ToolTip);
 
     m_dragCanStart = false;
+    
+    m_mouseInLimitArea = false;
+    
+    m_scatterPressed = false;
 
     m_leftLineFillerItem = new QGraphicsLineItem;
     m_rightLineFillerItem = new QGraphicsLineItem;
 
     chart()->scene()->addItem(m_leftLineFillerItem);
     chart()->scene()->addItem(m_rightLineFillerItem);
+    
+    m_chartMargin = m_series.markerSize() / 2;
+    
+    // Resize axes by margin
+    connect(&m_xAxis, &QValueAxis::rangeChanged, [=](qreal min, qreal max) {
+        m_limitRect.setLeft(min);
+        m_limitRect.setRight(max);
+        
+        m_limitRect.setTopLeft(QPointF(min, m_limitRect.top()));
+        m_limitRect.setBottomRight(QPointF(max, m_limitRect.bottom()));
+        
+        if (chart()->rect().isNull()) {
+            return;
+        }
+        // Convert m_chartMargin to chart value
+        auto valueDelta = abs(chart()->mapToValue(QPointF(0, 0)).x() - chart()->mapToValue(QPointF(m_chartMargin, 0)).x());
+        qDebug() << "value delta:" << valueDelta;
+        
+        m_xAxis.blockSignals(true); // Don't go to an infinite loop
+        m_xAxis.setRange(min - valueDelta, max + valueDelta);
+        m_xAxis.blockSignals(false);
+    });
+    
+    connect(&m_yAxis, &QValueAxis::rangeChanged, [=](qreal min, qreal max) {
+        // Update limit rect
+        m_limitRect.setBottom(min);
+        m_limitRect.setTop(max);
+        
+        m_limitRect.setTopLeft(QPointF(m_limitRect.left(), max));
+        m_limitRect.setBottomRight(QPointF(m_limitRect.right(), min));
+        
+        if (chart()->rect().isNull()) {
+            return;
+        }
+        //auto valueDelta = abs(chart()->mapToValue(QPointF(0, 0)).y() - chart()->mapToValue(QPointF(0, m_chartMargin)).y());
+        auto valueDelta = abs(chart()->mapToValue(QPointF(0, 0)).x() - chart()->mapToValue(QPointF(m_chartMargin, 0)).x());
+        qDebug() << "value delta:" << valueDelta;
+        
+        m_yAxis.blockSignals(true); // Don't go to an infinite loop
+        m_yAxis.setRange(min - valueDelta, max + valueDelta);
+        m_yAxis.blockSignals(false);
+    });
 
+    // Delete filler items when points are removed
+    connect(&m_series, &QScatterSeries::pointRemoved, [=]() {
+        chart()->scene()->removeItem(m_lineFillerItems.last());
+        delete m_lineFillerItems.last();
+        m_lineFillerItems.pop_back();
+    });
+    
+    // Add filler item when point is added
+    connect(&m_series, &QScatterSeries::pointAdded, [=]() {
+        qDebug("item added");
+        auto item = new QGraphicsLineItem;
+        item->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
+        m_lineFillerItems.append(item);
+        chart()->scene()->addItem(item);
+    });
+    
     for (int i = 0; i < 5; i++) {
         m_series.append(i * 5, i * 5);
 
-        auto item = new QGraphicsLineItem;
+        /*auto item = new QGraphicsLineItem;
         item->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
-
         m_lineFillerItems.append(item);
-        chart()->scene()->addItem(item);
+        chart()->scene()->addItem(item);*/
     }
 
     connect(&m_series, &QScatterSeries::pressed, [=](QPointF point) {
-       qDebug() << "click at" << point;
        m_dragCanStart = true;
        m_latestScatterPoint = point;
+       m_scatterPressed = true;
     });
-
+    
+    connect(&m_series, &QScatterSeries::clicked, [=](const QPointF point) {
+        m_scatterPressed = false;
+        if (m_dragActive) {
+            m_dragActive = false;
+            emit dragEnded(point);
+        }
+        else {
+            // Just a click, delete point
+            m_series.remove(point);
+        }
+    });
 
     chart()->addSeries(&m_series);
     
@@ -62,6 +136,30 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
     m_xAxis.setTitleBrush(QBrush(QPalette().color(QPalette::Text)));
     
     //setCursor(Qt::CrossCursor);
+    
+    // Set cursor to indicate dragging
+    connect(this, &DragChartView::dragStarted, [=]() {
+        setCursor(Qt::ClosedHandCursor);
+    });
+    
+    connect(this, &DragChartView::dragEnded, [=]() {
+        if (m_mouseInLimitArea) {
+            setCursor(Qt::CrossCursor);
+        }
+        else {
+            setCursor(Qt::ArrowCursor);
+        }
+    });
+    
+    connect(this, &DragChartView::limitAreaEntered, [=]() {
+        setCursor(Qt::CrossCursor);
+    });
+    
+    connect(this, &DragChartView::limitAreaExited, [=]() {
+        if (cursor().shape() != Qt::ClosedHandCursor) {
+            setCursor(Qt::ArrowCursor);
+        }
+    });
 }
 
 bool DragChartView::event(QEvent *event) {
@@ -69,19 +167,18 @@ bool DragChartView::event(QEvent *event) {
 
     if (event->type() == QEvent::Resize || event->type() == QEvent::UpdateLater) {
         // Chart has a geometry when this is true
-        //qDebug() << chart()->mapToPosition(QPointF(5, 5), &m_series);
-
-        //QLineF line(chart()->mapToPosition(m_series.pointsVector()[0]), chart()->mapToPosition(m_series.pointsVector()[1]));
-
         drawFillerLines(&m_series);
+    }
+    
+    if (event->type() == QEvent::Leave && !m_dragActive) {
+        // Set to normal cursor
+        setCursor(Qt::ArrowCursor);
     }
 
     return QChartView::event(event);
 }
 
 void DragChartView::mousePressEvent(QMouseEvent *event) {
-    qDebug() << event->type();
-
     if (event->button() == Qt::LeftButton) {
         m_dragStartPosition = event->pos();
     }
@@ -89,44 +186,72 @@ void DragChartView::mousePressEvent(QMouseEvent *event) {
     QChartView::mousePressEvent(event);
 }
 
-void DragChartView::mouseMoveEvent(QMouseEvent *event) {
+void DragChartView::mouseMoveEvent(QMouseEvent *event) {    
+    if (m_limitRect.contains(chart()->mapToValue(event->pos())) && !m_mouseInLimitArea) {
+        m_mouseInLimitArea = true;
+        emit limitAreaEntered();
+    }
+    
+    if (!m_limitRect.contains(chart()->mapToValue(event->pos())) && m_mouseInLimitArea) {
+        m_mouseInLimitArea = false;
+        emit limitAreaExited();
+    }
+    
     if (!(event->buttons() & Qt::LeftButton)) {
         return;
     }
     if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance() || !m_dragCanStart) {
         return;
     }
-    // Start drag
-    // Set cursor to indicate dragging
-   // setCursor(Qt::ClosedHandCursor);
-    
-    m_dragActive = true;
 
-    //QToolTip::showText(mapToGlobal(event->pos()), QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
+    // Start drag
+   emit dragStarted(m_dragStartPosition);
+   
+    m_dragActive = true;
 
     if (m_toolTipLabel->isHidden()) {
         m_toolTipLabel->show();
     }
 
     m_toolTipLabel->setText(QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
-    m_toolTipLabel->move(event->screenPos().toPoint());
-    replaceMovedPoint(m_latestScatterPoint, chart()->mapToValue(event->pos(), &m_series));
+    m_toolTipLabel->move(event->screenPos().toPoint() + toolTipOffset());
+    
+    // Don't move point out of bounds
+    if (m_limitRect.contains(chart()->mapToValue(event->pos()))) {
+        replaceMovedPoint(m_latestScatterPoint, chart()->mapToValue(event->pos(), &m_series));
+    }
+    else {
+        QPointF point(chart()->mapToValue(event->pos()));
+        // Set the point value to the constraint where it exceeds it
+        if (chart()->mapToValue(event->pos()).x() > m_limitRect.right()) {
+            point.setX(m_limitRect.right());
+        }
+        if (chart()->mapToValue(event->pos()).x() < m_limitRect.left()) {
+            point.setX(m_limitRect.left());
+        }
+        if (chart()->mapToValue(event->pos()).y() > m_limitRect.top()) {
+            point.setY(m_limitRect.top());
+        }
+        if (chart()->mapToValue(event->pos()).y() < m_limitRect.bottom()) {
+            point.setY(m_limitRect.bottom());
+        }
+        replaceMovedPoint(m_latestScatterPoint, point);
+    }
 
     drawFillerLines(&m_series);
+    
+    qDebug() << m_limitRect << m_limitRect.contains(m_latestScatterPoint);
 }
 
 void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
-    qDebug() << event->type();
-
     m_dragCanStart = false;
 
-    qDebug() << chart()->mapToValue(event->pos(), &m_series);
-
-    if (m_dragActive) {
-        //replaceMovedPoint(m_latestScatterPoint, chart()->mapToValue(event->pos(), &m_series));
+    if (!m_scatterPressed) {
+        // Add a new point to series
+        m_series.append(chart()->mapToValue(event->pos()));
+        drawFillerLines(&m_series);
     }
-
-    //QToolTip::hideText();
+    
     m_toolTipLabel->hide();
     QChartView::mouseReleaseEvent(event);
 }
@@ -147,8 +272,6 @@ void DragChartView::replaceMovedPoint(const QPointF old, const QPointF new_) {
     m_series.replace(old, new_);
 
     m_latestScatterPoint = new_;
-
-    //m_dragActive = false;
 }
 
 QVector <QPointF> DragChartView::sortPointFByAscendingX(const QVector<QPointF> points) {
@@ -196,7 +319,16 @@ void DragChartView::drawFillerLines(QScatterSeries *series) {
     m_rightLineFillerItem->setLine(QLineF(chart()->mapToPosition(sorted.last()),
                                           chart()->mapToPosition(QPointF(m_xAxis.max(), sorted.last().y()))));
 
-    qDebug() << chart()->mapToValue(m_rightLineFillerItem->line().p2());
-
     chart()->update();
+}
+
+bool DragChartView::eventFilter(QObject *obj, QEvent *event) {
+    static bool resized = false;
+    
+    if (obj == chart() &&  event->type() == QEvent::WindowActivate && !resized) {
+        resized = true;
+        emit m_xAxis.rangeChanged(m_xAxis.min(), m_xAxis.max());
+        emit m_yAxis.rangeChanged(m_yAxis.min(), m_yAxis.max());
+    }
+    return QObject::eventFilter(obj, event);
 }
