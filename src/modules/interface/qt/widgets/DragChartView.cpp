@@ -77,22 +77,27 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
     
     // Add filler item when point is added
     connect(&m_series, &QScatterSeries::pointAdded, [=]() {
-        qDebug("item added");
         auto item = new QGraphicsLineItem;
         item->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
         m_lineFillerItems.append(item);
         chart()->scene()->addItem(item);
     });
     
-    for (int i = 0; i < 5; i++) {
-        m_series.append(i * 5, i * 5);
-
-        /*auto item = new QGraphicsLineItem;
-        item->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
-        m_lineFillerItems.append(item);
-        chart()->scene()->addItem(item);*/
-    }
-
+    connect(&m_series, &QScatterSeries::pointsReplaced, [=]() {
+        // Delete filler items
+        for (auto item : m_lineFillerItems) {
+            delete item;
+        }
+        m_lineFillerItems.clear();
+        // Create new ones
+        for (int i = 0; i < m_series.pointsVector().length(); i++) {
+            auto item = new QGraphicsLineItem;
+            item->setPen(QPen(QBrush(QColor(Qt::blue)), 3));
+            m_lineFillerItems.append(item);
+            chart()->scene()->addItem(item);
+        }
+    });
+    
     connect(&m_series, &QScatterSeries::pressed, [=](QPointF point) {
        m_dragCanStart = true;
        m_latestScatterPoint = point;
@@ -135,8 +140,6 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
     m_yAxis.setTitleBrush(QBrush(QPalette().color(QPalette::Text)));
     m_xAxis.setTitleBrush(QBrush(QPalette().color(QPalette::Text)));
     
-    //setCursor(Qt::CrossCursor);
-    
     // Set cursor to indicate dragging
     connect(this, &DragChartView::dragStarted, [=]() {
         setCursor(Qt::ClosedHandCursor);
@@ -160,6 +163,10 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
             setCursor(Qt::ArrowCursor);
         }
     });
+}
+
+void DragChartView::setVector(const QVector <QPointF> vector) {
+    m_series.replace(vector);
 }
 
 bool DragChartView::event(QEvent *event) {

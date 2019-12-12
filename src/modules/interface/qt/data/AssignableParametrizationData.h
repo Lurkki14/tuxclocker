@@ -14,12 +14,13 @@ private:
     ReadableData m_parameterReadable; // Readable node that the recepient is parametrized from
     AssignableData m_controlledAssignable;
     std::chrono::milliseconds m_updateInterval;
-    QVector <qreal> m_xVector;
-    QVector <qreal> m_yVector;
+    QVector <QPointF> m_pointsVector;
 public:
     AssignableParametrizationData() {};
     AssignableParametrizationData(AssignableData &data) {m_controlledAssignable = data;}
     const AssignableData assignableData() {return m_controlledAssignable;}
+    const QVector <QPointF> pointsVector() {return m_pointsVector;}
+    void setPointsVector(const QVector <QPointF> vector) {m_pointsVector = vector;}
 };
 
 Q_DECLARE_METATYPE(AssignableParametrizationData);

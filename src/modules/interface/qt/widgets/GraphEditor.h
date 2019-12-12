@@ -18,4 +18,5 @@ private:
     QPushButton *m_cancelButton;
 signals:
     void cancelled();
+    void saved();
 };

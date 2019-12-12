@@ -22,5 +22,9 @@ GraphEditor::GraphEditor(QWidget *parent) : QWidget(parent) {
         emit cancelled();
     });
     
+    connect(m_saveButton, &QPushButton::clicked, [=]() {
+        emit saved();
+    });
+    
     setLayout(m_layout);
 }

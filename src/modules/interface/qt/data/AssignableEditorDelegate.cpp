@@ -129,6 +129,16 @@ void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
         model->setData(index, a_editor->text(), Qt::DisplayRole);
     }
     
+    if (v_data.canConvert<AssignableParametrizationData>()) {
+        auto p_editor = static_cast<AssignableParametrizationEditor*>(editor);
+        auto data = qvariant_cast<AssignableParametrizationData>(v_data);
+        
+        QVariant v;
+        v.setValue(p_editor->data());
+        
+        model->setData(index, v, Qt::UserRole);
+    }
+    
     // Set original size
     model->setData(index, m_originalItemSize, Qt::SizeHintRole);
     m_spanAllColumns = false;

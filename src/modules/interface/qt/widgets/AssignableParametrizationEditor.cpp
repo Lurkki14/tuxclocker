@@ -33,6 +33,7 @@ AssignableParametrizationEditor::AssignableParametrizationEditor(QWidget *parent
     m_stackedWidget->addWidget((m_editorWidget = new GraphEditor));
     
     connect(m_editButton, &QPushButton::clicked, [=]() {
+        m_editorWidget->dragChartView()->setVector(m_parametrizationData.pointsVector());
         m_stackedWidget->setCurrentWidget(m_editorWidget);
         emit expansionSizeRequested(QSize(200, 300));
     });
@@ -40,6 +41,12 @@ AssignableParametrizationEditor::AssignableParametrizationEditor(QWidget *parent
     connect(m_editorWidget, &GraphEditor::cancelled, [=]() {
         m_stackedWidget->setCurrentWidget(m_initialWidget);
         emit expansionDisableRequested();
+    });
+    
+    connect(m_editorWidget, &GraphEditor::saved, [=]() {
+        m_stackedWidget->setCurrentWidget(m_initialWidget);
+        emit expansionDisableRequested();
+        m_parametrizationData.setPointsVector(m_editorWidget->dragChartView()->vector());
     });
     
     layout()->addWidget(m_stackedWidget);
@@ -50,4 +57,17 @@ void AssignableParametrizationEditor::setData(AssignableParametrizationData &dat
     m_parametrizationData = data;
     // Update y-axis label
     m_editorWidget->dragChartView()->yAxis()->setTitleText(m_parametrizationData.assignableData().name);
+    // Set y-axis range
+    switch (m_parametrizationData.assignableData().m_rangeInfo.range_data_type) {
+        case TC_ASSIGNABLE_RANGE_DOUBLE:
+            m_editorWidget->dragChartView()->yAxis()->setMin(m_parametrizationData.assignableData().m_rangeInfo.double_range.min);
+            m_editorWidget->dragChartView()->yAxis()->setMax(m_parametrizationData.assignableData().m_rangeInfo.double_range.max);
+            break;
+        case TC_ASSIGNABLE_RANGE_INT:
+            m_editorWidget->dragChartView()->yAxis()->setMin(m_parametrizationData.assignableData().m_rangeInfo.int_range.min);
+            m_editorWidget->dragChartView()->yAxis()->setMax(m_parametrizationData.assignableData().m_rangeInfo.int_range.max);
+            break;
+        default:
+            break;
+    }
 }

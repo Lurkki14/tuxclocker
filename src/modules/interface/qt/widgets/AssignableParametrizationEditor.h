@@ -14,6 +14,7 @@ class AssignableParametrizationEditor : public AbstractExpandableItemEditor {
 public:
     AssignableParametrizationEditor(QWidget *parent = nullptr);
     void setData(AssignableParametrizationData &data);
+    AssignableParametrizationData data() {return m_parametrizationData;}
 private:
     QVBoxLayout *m_layout;
     QCheckBox *m_enabledCheckBox;
