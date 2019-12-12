@@ -115,7 +115,6 @@ tc_module_t *TC_MODULE_INFO_FUNCTION() {
 }
 
 tc_readable_module_data_t *category_callback() {
-    //return root_node;
     return &mod_data;
 }
 
