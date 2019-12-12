@@ -4,6 +4,8 @@
 #include <QToolTip>
 #include <QApplication>
 #include <QValueAxis>
+#include <QScreen>
+#include <QWindow>
 
 DragChartView::DragChartView(QWidget *parent) : QChartView(parent)
 {
@@ -221,7 +223,8 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
     }
 
     m_toolTipLabel->setText(QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
-    m_toolTipLabel->move(event->screenPos().toPoint() + toolTipOffset());
+    // FIXME : doesn't work properly when screen is switched(?)
+    m_toolTipLabel->move(event->screenPos().toPoint() + toolTipOffset(this, event->windowPos().toPoint()));
     
     // Don't move point out of bounds
     if (m_limitRect.contains(chart()->mapToValue(event->pos()))) {
@@ -246,8 +249,6 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
     }
 
     drawFillerLines(&m_series);
-    
-    qDebug() << m_limitRect << m_limitRect.contains(m_latestScatterPoint);
 }
 
 void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
@@ -338,4 +339,18 @@ bool DragChartView::eventFilter(QObject *obj, QEvent *event) {
         emit m_yAxis.rangeChanged(m_yAxis.min(), m_yAxis.max());
     }
     return QObject::eventFilter(obj, event);
+}
+
+QPoint DragChartView::toolTipOffset(QWidget *widget, const QPoint windowCursorPos) {
+    QRect screenRect = widget->window()->windowHandle()->screen()->geometry();
+    
+    if (screenRect.width() > screenRect.height()) {
+        // Use x offset for screens that are wider than high
+        // Set the offset to the side that has more space
+        int xOffset = (windowCursorPos.x() > widget->window()->rect().width() / 2) ? -qRound(toolTipMargin() * screenRect.width()) : qRound(toolTipMargin() * screenRect.width());
+        return QPoint(xOffset, 0);
+    }
+    int yOffset = (windowCursorPos.y() > widget->window()->rect().height() / 2) ? -qRound(toolTipMargin() * screenRect.height()) :qRound(toolTipMargin() * screenRect.height());
+    
+    return QPoint(0, yOffset);
 }

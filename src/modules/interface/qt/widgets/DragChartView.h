@@ -32,7 +32,8 @@ signals:
 private:
     Q_OBJECT
     
-    static QPoint toolTipOffset() {return QPoint(0, 20);}
+    static QPoint toolTipOffset(QWidget *widget, const QPoint windowCursorPos); // Get tooltip offset based on current screen
+    static double toolTipMargin() {return 0.02;}
     
     qreal m_chartMargin; // Margin in pixels between a scatter point and axis edge. Add this value on either edge of the axes in order for chatter points to be unable to go partially out of the viewport.
     QRectF m_limitRect; // Scatter points can't be moved outside this rect
