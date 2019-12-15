@@ -16,11 +16,18 @@ private:
     std::chrono::milliseconds m_updateInterval;
     QVector <QPointF> m_pointsVector;
 public:
-    AssignableParametrizationData() {};
-    AssignableParametrizationData(AssignableData &data) {m_controlledAssignable = data;}
+    AssignableParametrizationData() {
+        m_active = false;
+    };
+    AssignableParametrizationData(AssignableData &data) {
+        m_controlledAssignable = data;
+        m_active = false;
+    }
     const AssignableData assignableData() {return m_controlledAssignable;}
     const QVector <QPointF> pointsVector() {return m_pointsVector;}
     void setPointsVector(const QVector <QPointF> vector) {m_pointsVector = vector;}
+    bool enabled() {return m_active;}
+    void setEnabled(bool enabled) {m_active = enabled;}
 };
 
 Q_DECLARE_METATYPE(AssignableParametrizationData);

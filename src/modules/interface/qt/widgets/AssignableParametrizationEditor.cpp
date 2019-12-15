@@ -49,6 +49,16 @@ AssignableParametrizationEditor::AssignableParametrizationEditor(QWidget *parent
         m_parametrizationData.setPointsVector(m_editorWidget->dragChartView()->vector());
     });
     
+    connect(m_enabledCheckBox, &QCheckBox::stateChanged, [=](int state) {
+        if (state == Qt::Unchecked) {
+            m_parametrizationData.setEnabled(false);
+            return;
+        }
+        if (state == Qt::Checked) {
+            m_parametrizationData.setEnabled(true);
+        }
+    });
+    
     layout()->addWidget(m_stackedWidget);
     layout()->setMargin(0);
 }
@@ -69,5 +79,13 @@ void AssignableParametrizationEditor::setData(AssignableParametrizationData &dat
             break;
         default:
             break;
+    }
+    qDebug() << "enable state:" << m_parametrizationData.enabled();
+    // Set enablement checkbox state
+    if (m_parametrizationData.enabled()) {
+        m_enabledCheckBox->setChecked(true);
+    }
+    else {
+        m_enabledCheckBox->setChecked(false);
     }
 }

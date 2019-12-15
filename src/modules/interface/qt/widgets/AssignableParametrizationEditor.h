@@ -15,6 +15,11 @@ public:
     AssignableParametrizationEditor(QWidget *parent = nullptr);
     void setData(AssignableParametrizationData &data);
     AssignableParametrizationData data() {return m_parametrizationData;}
+    // Get the text representation of data (enabled or not)
+    QString text() {
+        QString text = (data().enabled()) ? QString("Enabled") : QString("Disabled");
+        return text;
+    }
 private:
     QVBoxLayout *m_layout;
     QCheckBox *m_enabledCheckBox;

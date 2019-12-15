@@ -137,6 +137,7 @@ void AssignableEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
         v.setValue(p_editor->data());
         
         model->setData(index, v, Qt::UserRole);
+        model->setData(index, p_editor->text(), Qt::DisplayRole);
     }
     
     // Set original size
