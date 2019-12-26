@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 #include <dirent.h>
 
 char **tc_fs_dir_filenames(const char *dir_name, uint16_t *file_count) {
@@ -14,7 +16,7 @@ char **tc_fs_dir_filenames(const char *dir_name, uint16_t *file_count) {
     uint16_t i = 0;
     if (dir != NULL) {
         while ((entry = readdir(dir)) != NULL) {
-            file_names[i] = entry->d_name;
+            file_names[i] = strdup(entry->d_name);
             i++;
         }
         closedir(dir);
@@ -24,7 +26,14 @@ char **tc_fs_dir_filenames(const char *dir_name, uint16_t *file_count) {
         return NULL;
     }
     *file_count = i;
-    return tc_str_arr_dup(i, file_names);
+    
+    char **retval =  tc_str_arr_dup(i, file_names);
+    
+    for (int j = 0; j < i; j++) {
+	    free(file_names[j]);
+    }
+    
+    return retval;
 }
 
 bool tc_fs_file_exists(const char *path) {
