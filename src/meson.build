@@ -25,4 +25,11 @@ libtuxclocker = shared_library('libtuxclocker',
 
 subdir('modules')
 subdir('main')
-subdir('lib')
+
+if get_option('library')
+	subdir('lib')
+endif
+
+if get_option('daemon')
+	subdir('tuxclockerd')
+endif

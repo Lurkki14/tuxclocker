@@ -1,0 +1,6 @@
+# By default, library and modules (except interfaces) are built
+
+option('daemon', type: 'boolean', value: 'false', description: 'Build daemon')
+option('modules', type: 'boolean', value: 'true', description: 'Build modules')
+option('interfaces', type: 'boolean', value: 'false', description: 'Build interfaces')
+option('library', type: 'boolean', value: 'true', description: 'Build library')
