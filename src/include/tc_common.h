@@ -12,6 +12,9 @@ extern "C" {
 #define TC_SUCCESS 0
 #define TC_EGENERIC (-1)
 #define TC_ENOMEM (-2)
+#define TC_EINVAL (-3) // Invalid argument
+#define TC_ENOPERM (-4) // Insufficient permissions
+#define TC_EINVALPREREQ (-5) // Invalid prerequisite value (eg. trying to set fan speed with automatic mode active)
 
 // Tagged union of data types for simulating function overloading
 enum tc_data_types {
