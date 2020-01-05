@@ -40,10 +40,16 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node) {
 
 int8_t tc_assignable_node_add_child(tc_assignable_node_t *parent, tc_assignable_node_t *child) {
   parent->children_count++;
-  if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count)) == NULL) {
+  if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count * sizeof(parent))) == NULL) {
     return TC_ENOMEM;
   }
   parent->children_nodes[parent->children_count - 1] = child;
   child->parent = parent;
   return TC_SUCCESS;
+}
+
+void tc_assignable_node_set_data(tc_assignable_node_t* node, char* unit, char* name, int8_t (*assign_callback)(tc_variant_t, const tc_assignable_node_t*)) {
+	node->unit = unit;
+	node->name = name;
+	node->assign_callback = assign_callback;
 }
