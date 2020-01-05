@@ -19,6 +19,7 @@ tc_module_t *TC_MODULE_INFO_FUNCTION();
 int8_t init();
 int8_t close();
 tc_readable_module_data_t *category_callback();
+tc_readable_module_data_t cat_data_cb();
 
 // Tunable enumerations for generating hashes from nodes
 enum tunable_id {
@@ -86,6 +87,7 @@ static tc_readable_module_data_t mod_data;
 // Root node for maps
 static tc_bin_node_t *root_search_node;
 
+
 tc_module_t mod_info = {
     .category = TC_CATEGORY_READABLE,
     .name = "nvidia",
@@ -111,7 +113,24 @@ static int8_t add_map_and_gpu_item(callback_map *map, tc_readable_node_t *parent
 }
 
 tc_module_t *TC_MODULE_INFO_FUNCTION() {
-    return &mod_info;
+	tc_module_category_data_t cat_data = {
+		.category = TC_READABLE,
+		.readable_data = &cat_data_cb
+	};
+	
+	tc_module_category_info_t cat_info = {
+		.category_mask = TC_READABLE,
+		.num_categories = 1
+	};
+	cat_info.category_data_list[0] = cat_data;
+	
+	mod_info.category_info = cat_info;
+	
+	return &mod_info;
+}
+
+tc_readable_module_data_t cat_data_cb() {
+	return mod_data;
 }
 
 tc_readable_module_data_t *category_callback() {
@@ -180,6 +199,7 @@ void generate_readable_tree() {
     // Got the name, append the item to the root item
     tc_readable_node_t *gpu_name_node = tc_readable_node_new();
     gpu_name_node->name = strdup(gpu_name);
+    gpu_name_node->value_callback = NULL;
     
     // Append to the root node
     if (tc_readable_node_add_child(root_node, gpu_name_node) != TC_SUCCESS) {
