@@ -3,12 +3,19 @@
 #include <stdint.h>
 
 #include <tc_common.h>
+#include <tc_readable.h>
+#include <tc_assignable.h>
 
 // Use unmangled symbols for C++
 #ifdef __cplusplus
 extern "C" {
 #endif
   
+// Bitmask values for module categories
+#define TC_ASSIGNABLE (1)
+#define TC_READABLE (1 << 1)
+#define TC_INTERFACE (1 << 2)
+    
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
@@ -34,24 +41,42 @@ enum tc_module_category {
 // Maximum argument count for "overloaded" functions
 #define TC_MAX_FUNCTION_ARGC 16
 
+// Tagged union for category specific data
+typedef struct {
+	uint64_t category;
+	// Since category specific data might be generated after calling module's 'init' callback, use function pointers to fetch it.
+	union {
+		tc_readable_module_data_t (*readable_data)();
+		tc_assignable_module_data_t (*assignable_data)();
+	};
+} tc_module_category_data_t;
+
+typedef struct {
+	uint64_t category_mask;
+	uint16_t num_categories;
+	tc_module_category_data_t category_data_list[64];
+} tc_module_category_info_t;
+
 typedef struct tc_module_t {
-  enum tc_module_category category;
-  // Short name of the module like nvidia, qt
-  const char *name;
-  // Longer description
-  const char *description;
+	enum tc_module_category category;
+	// Short name of the module like nvidia, qt
+	const char *name;
+	// Longer description
+	const char *description;
 
-  // Initializes the module's internal state
-  int8_t (*init_callback)();
-  // Arguments for init_callback
-  uint8_t init_callback_argc;
-  enum tc_data_types init_callback_args[TC_MAX_FUNCTION_ARGC];
-  
-  // Frees the internal memory of the module
-  int8_t (*close_callback)();
+	// Initializes the module's internal state
+	int8_t (*init_callback)();
+	// Arguments for init_callback
+	uint8_t init_callback_argc;
+	enum tc_data_types init_callback_args[TC_MAX_FUNCTION_ARGC];
 
-  // Callback for category specific main data structure of the module
-  void *(*category_data_callback)();
+	// Frees the internal memory of the module
+	int8_t (*close_callback)();
+
+	// Callback for category specific main data structure of the module
+	void *(*category_data_callback)();
+	
+	tc_module_category_info_t category_info;
 } tc_module_t;
 
 // Try to return the module handle matching the category and name. If it doesn't exist or there was a problem loading the module, returns NULL.
