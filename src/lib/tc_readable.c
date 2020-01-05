@@ -30,7 +30,7 @@ void tc_readable_node_destroy(tc_readable_node_t *node) {
 
 int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t *child) {
     parent->children_count++;
-    if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count)) == NULL) {
+    if ((parent->children_nodes = realloc(parent->children_nodes, parent->children_count * sizeof(parent))) == NULL) {
         return TC_ENOMEM;
     }
     parent->children_nodes[parent->children_count - 1] = child;
