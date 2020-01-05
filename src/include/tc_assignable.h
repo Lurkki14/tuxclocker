@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#include <tc_common.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -49,9 +50,8 @@ typedef struct tc_assignable_node_t {
   // Unit for assignable
   char *unit;
 
-  bool assignable;
-  // Callback for assignment
-  int8_t (*assign_callback)();
+  // Callback for assignment (use NULL for a placeholder node)
+  int8_t (*assign_callback)(tc_variant_t value, const struct tc_assignable_node_t *node);
 
   // Possible values for tunables are either values from a range or enumerations
   enum tc_assignable_value_category value_category;
@@ -65,6 +65,12 @@ typedef struct tc_assignable_node_t {
   struct tc_assignable_node_t **children_nodes;
 } tc_assignable_node_t;
 
+// Master data structure loaded by module loader
+typedef struct {
+	tc_assignable_node_t *root_node;
+	const char *(*sha256_hash)(const tc_assignable_node_t*); // Callback to get a unique hash for a node
+} tc_assignable_module_data_t;
+
 /* Utility functions for assignables */
 // Allocates memory for a tunable node
 tc_assignable_node_t *tc_assignable_node_new();
@@ -75,6 +81,7 @@ void tc_assignable_node_destroy(tc_assignable_node_t *node);
 int8_t tc_assignable_node_add_child(tc_assignable_node_t *node, tc_assignable_node_t *child);
 
 /* Utility functions for range and property info*/
+void tc_assignable_node_set_data(tc_assignable_node_t *node, char *unit, char *name, int8_t (*assign_callback)(tc_variant_t, const tc_assignable_node_t*));
 
 #ifdef __cplusplus
 }
