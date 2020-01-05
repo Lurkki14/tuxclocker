@@ -89,7 +89,9 @@ void registerAssignables(QObject *parent, QDBusConnection conn) {
 	
 	std::function <void (tc_assignable_node_t*, tc_assignable_module_data_t, QString, int)> traverse;
 	traverse = [=, &traverse, &conn](tc_assignable_node_t *node, tc_assignable_module_data_t data, QString path, int n) {
-		path = path + "/" + QString::number(n);
+		//path = path + "/" + QString::number(n);
+		
+		path = path + "/" + QString(node->name).replace(" ", "");
 		
 		auto obj = new QObject(parent);
 		AssignableAdaptorFactory::assignableAdaptor(obj, node);
