@@ -34,7 +34,6 @@ int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t
         return TC_ENOMEM;
     }
     parent->children_nodes[parent->children_count - 1] = child;
-    child->parent = parent;
     return TC_SUCCESS;
 }
 

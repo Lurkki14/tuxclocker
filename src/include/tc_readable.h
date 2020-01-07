@@ -18,7 +18,7 @@ typedef struct {
     tc_variant_t data;
 } tc_readable_result_t;
     
-typedef struct tc_readable_node_t_{
+typedef struct tc_readable_node_t_ {
     char *name;
     char *unit;
     
@@ -29,7 +29,6 @@ typedef struct tc_readable_node_t_{
         tc_readable_result_t (*value_callback)(const struct tc_readable_node_t_*);
         tc_variant_t data;
     };
-    struct tc_readable_node_t_ *parent;
     
     uint16_t children_count;
     struct tc_readable_node_t_ **children_nodes;
