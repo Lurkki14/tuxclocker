@@ -21,7 +21,6 @@ enum node_type {
 typedef struct {
 	tc_assignable_node_t node;
 	struct base_data {
-		tc_readable_node_t *node;
 		nvmlDevice_t dev;
 		uint8_t device_index;
 	} base_data;
