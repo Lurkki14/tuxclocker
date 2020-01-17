@@ -170,3 +170,36 @@ void tc_module_close(tc_module_t* module) {
     // Free the library matching the module
     close_lib_by_module(module);
 }
+
+tc_module_category_info_t tc_module_category_info_create(uint64_t mask, uint16_t num_categories, const tc_module_category_data_t *categories) {
+	tc_module_category_info_t retval = {
+		.category_mask = mask,
+		.num_categories = num_categories
+	};
+	
+	if (num_categories > 0 && categories) {
+		for (uint16_t i = 0; i < num_categories; i++) {
+			retval.category_data_list[i] = categories[i];
+		}
+	}
+	
+	return retval;
+}
+
+tc_module_category_data_t tc_module_category_data_create(uint64_t category, union module_data_callback_t u) {
+	tc_module_category_data_t retval = {
+		.category = category
+	};
+	
+	switch (category) {
+		case TC_READABLE:
+			retval.readable_data = u.readable_data;
+			return retval;
+		case TC_ASSIGNABLE:
+			retval.assignable_data = u.assignable_data;
+			return retval;
+		default:
+			break;
+	}
+	return retval;
+}
