@@ -21,3 +21,17 @@ if all_nvidia_linux_libs
 		install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
 		install : true)
 endif
+
+# AMD modules
+
+libdrm_amdgpu = cc.find_library('libdrm_amdgpu', required : false)
+libdrm_dep = dependency('libdrm')
+
+if libdrm_amdgpu.found()
+	shared_library('amdgpu', 'amdgpu.c',
+	include_directories : incdir,
+	dependencies : [libdrm_amdgpu, libdrm_dep],
+	link_with : libtuxclocker,
+	install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
+	install : true)
+endif
