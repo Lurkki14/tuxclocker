@@ -36,8 +36,10 @@ typedef struct tc_readable_node_t_ {
 
 // Master data structure loaded by module loader
 typedef struct {
-    tc_readable_node_t *root_node;
-    const char *(*sha256_hash)(const tc_readable_node_t*); // Callback to get a unique hash for a node
+	uint64_t category_mask; // Which types of readable (dynamic or static) are implemented
+	tc_readable_node_t *root_static_node;
+	tc_readable_node_t *root_node;
+	const char *(*sha256_hash)(const tc_readable_node_t*); // Callback to get a unique hash for a node
 } tc_readable_module_data_t;
 
 // Utility functions
@@ -52,6 +54,9 @@ int8_t tc_readable_node_add_child(tc_readable_node_t *parent, tc_readable_node_t
 
 // Convinience function for creating a new node and adding it to parent
 tc_readable_node_t *tc_readable_node_add_new_child(tc_readable_node_t *parent);
+
+// Set node data
+void tc_readable_node_set_data(tc_readable_node_t *node, const char *name, const char *unit);
 
 // Create a tc_readable_result from data, data type and validity. Avoids boilerplate in returning values from readable nodes.
 tc_readable_result_t tc_readable_result_create(enum tc_data_types type, void *data, bool valid);

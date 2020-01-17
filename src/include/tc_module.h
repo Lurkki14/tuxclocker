@@ -15,7 +15,10 @@ extern "C" {
 #define TC_ASSIGNABLE (1)
 #define TC_READABLE (1 << 1)
 #define TC_INTERFACE (1 << 2)
-    
+
+#define TC_READABLE_DYNAMIC (1)
+#define TC_READABLE_STATIC (1 << 1)
+	
 // Categories for modules.
 enum tc_module_category {
   TC_CATEGORY_ASSIGNABLE,
@@ -40,6 +43,11 @@ enum tc_module_category {
 
 // Maximum argument count for "overloaded" functions
 #define TC_MAX_FUNCTION_ARGC 16
+
+union module_data_callback_t {
+	tc_readable_module_data_t (*readable_data)();
+	tc_assignable_module_data_t (*assignable_data)();
+};
 
 // Tagged union for category specific data
 typedef struct {
@@ -83,6 +91,11 @@ typedef struct tc_module_t {
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name);
 // Try to return all module handles matching 'category'. The return value needs to be freed in addition to tc_module_close()
 tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count);
+
+// Convenience functions
+tc_module_category_info_t tc_module_category_info_create(uint64_t mask, uint16_t num_categories, const tc_module_category_data_t *categories);
+
+tc_module_category_data_t tc_module_category_data_create(uint64_t category, union module_data_callback_t u);
 
 // Close the module after successful find
 void tc_module_close(tc_module_t *module);

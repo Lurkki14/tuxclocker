@@ -50,6 +50,11 @@ tc_readable_node_t *tc_readable_node_add_new_child(tc_readable_node_t *parent) {
     return node;
 }
 
+void tc_readable_node_set_data(tc_readable_node_t *node, const char *name, const char *unit) {
+	node->name = name;
+	node->unit = unit;
+}
+
 tc_readable_result_t tc_readable_result_create(enum tc_data_types type, void *data, bool valid) {
     tc_readable_result_t res;
     res.valid = valid;
