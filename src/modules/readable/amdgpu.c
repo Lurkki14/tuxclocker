@@ -146,7 +146,7 @@ static int8_t init() {
 	int i = 0;
 	
 	while (1) {
-		snprintf(dev_filename, 64, "%s%d", DEVICE_FILE_PREFIX, i + RENDERD_OFFSET);
+		//snprintf(dev_filename, 64, "%s%d", DEVICE_FILE_PREFIX, i + RENDERD_OFFSET);
 		if (stat(dev_filename, &buf) != 0) {
 			break;
 		}

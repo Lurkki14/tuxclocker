@@ -34,6 +34,10 @@ enum tc_module_category {
 #define TC_MODULE_PATH "/usr/lib/tuxclocker/modules"
 #endif
 
+#define TC_MODULE_DATABASE_NAME "tc_modules.json"
+
+#define TC_MODULE_DATABASE_PATH TC_MODULE_PATH "/" TC_MODULE_DATABASE_NAME
+
 // Env variable name to load modules from in addition
 #define TC_MODULE_PATH_ENV "TC_MODULE_PATH"
 

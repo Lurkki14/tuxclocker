@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <jansson.h>
 
 #include <tc_module.h>
 #include <tc_filesystem.h>
@@ -20,6 +21,88 @@ static char *module_filename(const char *category, const char *mod_name);
 static int8_t add_mod_handle_pair(mod_handle_pair pair);
 // Local function for closing a library matching mod
 static void close_lib_by_module(const tc_module_t *mod);
+
+// Get list of file names implementing category matching 'path'. Multiple levels is currently not used
+static char **mod_filenames_from_json(const char *path, uint16_t *file_count) {
+    json_t *root = json_load_file(TC_MODULE_DATABASE_PATH, JSON_DECODE_ANY, NULL);
+    
+    if (!root) {
+        return NULL;
+    }
+    
+    // All values except root should be arrays
+    json_t *category_arr;
+    if (!(category_arr = json_object_get(root, path))) {
+        return NULL;
+    }
+
+    const char *strings[64];
+    uint16_t i = 0;
+    json_t *value;
+    size_t s;
+    json_array_foreach(category_arr, s, value) {
+        strings[i] = json_string_value(value);
+        i++;
+    }
+    
+    *file_count = i;
+    return tc_str_arr_dup(i, strings);
+}
+
+// Create module json database
+static void maybe_create_module_database() {
+    /*if (tc_fs_file_exists(TC_MODULE_DATABASE_PATH)) {
+        return;
+    }*/
+    
+    // Try to open all files in the database
+    uint16_t count = 0;
+    char **file_names = tc_fs_dir_filenames(TC_MODULE_PATH, &count);
+    
+    if (!file_names) {
+        return;
+    }
+    
+    // Json document root
+    json_t *root = json_object();
+    
+    json_t *readables = json_array();
+    
+    char abs_path[128];
+    void *handle = NULL;
+    tc_module_t *(*mod_func)() = NULL;
+    tc_module_t *mod = NULL;
+    for (uint16_t i = 0; i < count; i++) {
+        snprintf(abs_path, 128, "%s/%s", TC_MODULE_PATH, file_names[i]);
+        puts(abs_path);
+        // Try to open the module
+        if (!(handle = tc_dlopen(abs_path))) {
+            continue;
+        }
+        if (!(mod_func = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME))) {
+            tc_dlclose(handle);
+            continue;
+        }
+        
+        if (!(mod = mod_func())) {
+            tc_dlclose(handle);
+            continue;
+        }
+        // Check what categories are implemented
+        if (mod->category_info.category_mask & TC_READABLE) {
+            json_array_append_new(readables, json_string(file_names[i]));
+        }
+        
+        tc_dlclose(handle);
+    }
+    
+    json_object_set(root, "TC_READABLE", readables);
+    
+    json_dump_file(root, TC_MODULE_DATABASE_PATH, JSON_INDENT(4));
+    
+    json_decref(readables);
+    json_decref(root);
+}
 
 static int8_t add_mod_handle_pair(mod_handle_pair pair) {
     mod_handle_pairs_len++;
@@ -69,6 +152,8 @@ static char *module_filename(const char *category, const char *mod_name) {
 }
 
 tc_module_t *tc_module_find(enum tc_module_category category, const char *name) {
+    maybe_create_module_database();
+    
     char *mod_abs_path = NULL;
     
     switch (category) {
@@ -115,8 +200,10 @@ tc_module_t *tc_module_find(enum tc_module_category category, const char *name) 
 }
 
 tc_module_t **tc_module_find_all_from_category(enum tc_module_category category, uint16_t *count) {
+    maybe_create_module_database();
+    
     // Get the file name list of the category modules
-    uint16_t file_count = 0;
+    /*uint16_t file_count = 0;
     char mod_dir_name[512];
     
     switch (category) {
@@ -134,18 +221,33 @@ tc_module_t **tc_module_find_all_from_category(enum tc_module_category category,
     char **file_names = tc_fs_dir_filenames(mod_dir_name, &file_count);
     if (file_names == NULL) {
         return NULL;
+    }*/
+
+    uint16_t file_count;
+    char **filenames;
+    switch (category) {
+        case TC_CATEGORY_READABLE:
+            filenames = mod_filenames_from_json("TC_READABLE", &file_count);
+            break;
+        case TC_CATEGORY_ASSIGNABLE:
+            filenames = mod_filenames_from_json("TC_ASSIGNABLE", &file_count);
+            break;
+        default:
+            return NULL;
     }
     // Open all modules using the file names
     tc_module_t *mod_list[TC_MAX_LOADED_MODULES];
     uint16_t mod_count = 0;
     tc_module_t *mod;
     for (uint16_t i = 0; i < file_count; i++) {
-        if ((mod = tc_module_find(category, file_names[i])) == NULL) {
+        if ((mod = tc_module_find(category, filenames[i])) == NULL) {
             continue;
         }
         mod_list[mod_count] = mod;
         mod_count++;
     }
+    
+    tc_str_arr_free(file_count, filenames);
     
     // Allocate pointer array on the heap
     tc_module_t **retval = calloc(mod_count, sizeof(tc_module_t*));
@@ -166,6 +268,8 @@ void tc_module_close(tc_module_t* module) {
             //abort();
         }
     }
+    
+    //TODO : add reference count check
     
     // Free the library matching the module
     close_lib_by_module(module);

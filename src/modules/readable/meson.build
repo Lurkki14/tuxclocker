@@ -18,7 +18,8 @@ if all_nvidia_linux_libs
 		include_directories : incdir,
 		dependencies : nvidia_linux_libs,
 		link_with : libtuxclocker,
-		install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
+		#install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
+		install_dir : get_option('libdir') / 'tuxclocker' / 'modules',
 		install : true)
 endif
 
@@ -32,6 +33,7 @@ if libdrm_amdgpu.found()
 	include_directories : incdir,
 	dependencies : [libdrm_amdgpu, libdrm_dep],
 	link_with : libtuxclocker,
-	install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
+	#install_dir : get_option('libdir') / 'tuxclocker' / 'modules' / 'readable',
+	install_dir : get_option('libdir') / 'tuxclocker' / 'modules',
 	install : true)
 endif
