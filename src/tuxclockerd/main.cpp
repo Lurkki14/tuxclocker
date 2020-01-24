@@ -27,7 +27,8 @@ void registerReadables(QObject *parent, QDBusConnection conn) {
 	QList <tc_readable_module_data_t> dataList;
 	
 	for (uint16_t i = 0; i < count; i++) {
-		if (modules[i]->init_callback  && modules[i]->init_callback() == TC_SUCCESS) {
+		auto mod = modules[i];
+		/*if (modules[i]->init_callback  && modules[i]->init_callback() == TC_SUCCESS) {
 			auto &module = modules[i];
 			// Module was initialized successfully
 			// TODO : make a function in the lib to get a list of category specific data
@@ -36,6 +37,14 @@ void registerReadables(QObject *parent, QDBusConnection conn) {
 					dataList.append(module->category_info.category_data_list[i].readable_data());
 					break;
 				}
+			}
+		}*/
+		for (uint16_t i = 0; i < mod->category_info.num_categories; i++) {
+			if (mod->category_info.category_data_list[i].category == TC_READABLE
+					&& mod->category_info.category_data_list[i].init
+					&& mod->category_info.category_data_list[i].init() == TC_SUCCESS) {
+				dataList.append(mod->category_info.category_data_list[i].readable_data());
+				break;	
 			}
 		}
 	}
@@ -65,8 +74,6 @@ void registerReadables(QObject *parent, QDBusConnection conn) {
 			traverse(data.root_node->children_nodes[i], data, p, 0);
 		}
 	}
-	
-	qDebug() << dataList.length();
 }
 
 void registerAssignables(QObject *parent, QDBusConnection conn) {
@@ -76,13 +83,22 @@ void registerAssignables(QObject *parent, QDBusConnection conn) {
 	QList <tc_assignable_module_data_t> dataList;
 	
 	for (uint16_t i = 0; i < count; i++) {
-		if (modules[i]->init_callback && modules[i]->init_callback() == TC_SUCCESS) {
+		/*if (modules[i]->init_callback && modules[i]->init_callback() == TC_SUCCESS) {
 			auto &module = modules[i];
 			for (uint16_t i = 0; i < module->category_info.num_categories; i++) {
 				if (module->category_info.category_data_list[i].category == TC_ASSIGNABLE) {
 					dataList.append(module->category_info.category_data_list[i].assignable_data());
 					break;
 				}
+			}
+		}*/
+		auto mod = modules[i];
+		for (uint16_t i = 0; i < mod->category_info.num_categories; i++) {
+			if (mod->category_info.category_data_list[i].category == TC_ASSIGNABLE
+					&& mod->category_info.category_data_list[i].init
+					&& mod->category_info.category_data_list[i].init() == TC_SUCCESS) {
+				dataList.append(mod->category_info.category_data_list[i].assignable_data());
+				break;	
 			}
 		}
 	}
