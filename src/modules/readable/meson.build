@@ -29,7 +29,7 @@ libdrm_amdgpu = cc.find_library('libdrm_amdgpu', required : false)
 libdrm_dep = dependency('libdrm')
 
 if libdrm_amdgpu.found()
-	shared_library('amdgpu', 'amdgpu.c',
+	shared_library('amdgpu', 'amdgpu.cpp',
 	include_directories : incdir,
 	dependencies : [libdrm_amdgpu, libdrm_dep],
 	link_with : libtuxclocker,
