@@ -6,10 +6,13 @@
 #include <tc_module.h>
 #include <tc_filesystem.h>
 
+#define FILENAME_SIZE 64
+
 // Local data structure that contains the handle of the module and the module data
 typedef struct {
     tc_module_t *module;
     void *lib_handle;
+    char filename[FILENAME_SIZE];
 } mod_handle_pair;
 
 static mod_handle_pair mod_handle_pairs[TC_MAX_LOADED_MODULES];
@@ -22,86 +25,135 @@ static int8_t add_mod_handle_pair(mod_handle_pair pair);
 // Local function for closing a library matching mod
 static void close_lib_by_module(const tc_module_t *mod);
 
+static tc_module_t *is_module_opened(const char *filename) {
+	for (uint32_t i = 0; i < mod_handle_pairs_len; i++) {
+		if (strcmp(filename, mod_handle_pairs[i].filename) == 0) {
+			return mod_handle_pairs[i].module;
+		}
+	}
+	return NULL;
+}
+
+// Try to open module by filename. dlopen's a module if returns non-null.
+tc_module_t *module_open(const char *filename) {
+	char mod_path[128];
+	snprintf(mod_path, 128, "%s/%s", TC_MODULE_PATH, filename);
+	void *handle = tc_dlopen(mod_path);
+	
+	if (!handle) {
+		return NULL;
+	}
+	// Call the function to get the module handle
+	tc_module_t *(*mod_info_func)() = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME);
+	tc_module_t *mod;
+	if (!(mod = mod_info_func())) {
+		tc_dlclose(handle);
+		return NULL;
+	}
+	// Loading was successful, save the data
+	mod_handle_pair pair = {
+		.module = mod,
+		.lib_handle = handle
+	};
+	snprintf(pair.filename, FILENAME_SIZE, "%s", filename);
+	
+	if (add_mod_handle_pair(pair) != TC_SUCCESS) {
+		// Not enough space to add to module list
+		tc_dlclose(handle);
+		return NULL;
+	}
+	printf("successful open of %s\n", mod_path);
+	return mod;
+}
+
 // Get list of file names implementing category matching 'path'. Multiple levels is currently not used
 static char **mod_filenames_from_json(const char *path, uint16_t *file_count) {
-    json_t *root = json_load_file(TC_MODULE_DATABASE_PATH, JSON_DECODE_ANY, NULL);
-    
-    if (!root) {
-        return NULL;
-    }
-    
-    // All values except root should be arrays
-    json_t *category_arr;
-    if (!(category_arr = json_object_get(root, path))) {
-        return NULL;
-    }
+	json_t *root = json_load_file(TC_MODULE_DATABASE_PATH, JSON_DECODE_ANY, NULL);
+	
+	if (!root) {
+		return NULL;
+	}
+	
+	// All values except root should be arrays
+	json_t *category_arr;
+	if (!(category_arr = json_object_get(root, path))) {
+		return NULL;
+	}
 
-    const char *strings[64];
-    uint16_t i = 0;
-    json_t *value;
-    size_t s;
-    json_array_foreach(category_arr, s, value) {
-        strings[i] = json_string_value(value);
-        i++;
-    }
-    
-    *file_count = i;
-    return tc_str_arr_dup(i, strings);
+	const char *strings[64];
+	uint16_t i = 0;
+	json_t *value;
+	size_t s;
+	json_array_foreach(category_arr, s, value) {
+		strings[i] = json_string_value(value);
+		i++;
+	}
+	
+	*file_count = i;
+	return tc_str_arr_dup(i, strings);
 }
 
 // Create module json database
 static void maybe_create_module_database() {
-    /*if (tc_fs_file_exists(TC_MODULE_DATABASE_PATH)) {
-        return;
-    }*/
+	/*if (tc_fs_file_exists(TC_MODULE_DATABASE_PATH)) {
+		return;
+	}*/
+	
+	// Try to open all files in the database
+	uint16_t count = 0;
+	char **file_names = tc_fs_dir_filenames(TC_MODULE_PATH, &count);
     
-    // Try to open all files in the database
-    uint16_t count = 0;
-    char **file_names = tc_fs_dir_filenames(TC_MODULE_PATH, &count);
+	if (!file_names) {
+		return;
+	}
+	
+	// Json document root
+	json_t *root = json_object();
+	
+	json_t *readables = json_array();
+	json_t *assignables = json_array();
+	
+	char abs_path[128];
+	void *handle = NULL;
+	tc_module_t *(*mod_func)() = NULL;
+	tc_module_t *mod = NULL;
+	for (uint16_t i = 0; i < count; i++) {
+		snprintf(abs_path, 128, "%s/%s", TC_MODULE_PATH, file_names[i]);
+		//puts(abs_path);
+		// Try to open the module
+		if (!(handle = tc_dlopen(abs_path))) {
+			continue;
+		}
+		if (!(mod_func = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME))) {
+			tc_dlclose(handle);
+			continue;
+		}
+
+		if (!(mod = mod_func())) {
+			tc_dlclose(handle);
+			continue;
+		}
+		// Check what categories are implemented
+		if (mod->category_info.category_mask & TC_READABLE) {
+			json_array_append_new(readables, json_string(file_names[i]));
+		}
+		
+		if (mod->category_info.category_mask & TC_ASSIGNABLE) {
+			json_array_append_new(assignables, json_string(file_names[i]));
+		}
+
+		tc_dlclose(handle);
+	}
     
-    if (!file_names) {
-        return;
-    }
-    
-    // Json document root
-    json_t *root = json_object();
-    
-    json_t *readables = json_array();
-    
-    char abs_path[128];
-    void *handle = NULL;
-    tc_module_t *(*mod_func)() = NULL;
-    tc_module_t *mod = NULL;
-    for (uint16_t i = 0; i < count; i++) {
-        snprintf(abs_path, 128, "%s/%s", TC_MODULE_PATH, file_names[i]);
-        puts(abs_path);
-        // Try to open the module
-        if (!(handle = tc_dlopen(abs_path))) {
-            continue;
-        }
-        if (!(mod_func = tc_dlsym(handle, TC_MODULE_INFO_FUNCTION_NAME))) {
-            tc_dlclose(handle);
-            continue;
-        }
-        
-        if (!(mod = mod_func())) {
-            tc_dlclose(handle);
-            continue;
-        }
-        // Check what categories are implemented
-        if (mod->category_info.category_mask & TC_READABLE) {
-            json_array_append_new(readables, json_string(file_names[i]));
-        }
-        
-        tc_dlclose(handle);
-    }
-    
-    json_object_set(root, "TC_READABLE", readables);
-    
-    json_dump_file(root, TC_MODULE_DATABASE_PATH, JSON_INDENT(4));
-    
-    json_decref(readables);
-    json_decref(root);
+	json_object_set(root, "TC_READABLE", readables);
+	json_object_set(root, "TC_ASSIGNABLE", assignables);
+
+	json_dump_file(root, TC_MODULE_DATABASE_PATH, JSON_INDENT(4));
+
+	json_decref(readables);
+	json_decref(root);
+	
+	tc_str_arr_free(count, file_names);
 }
 
 static int8_t add_mod_handle_pair(mod_handle_pair pair) {
@@ -223,40 +275,48 @@ tc_module_t **tc_module_find_all_from_category(enum tc_module_category category,
         return NULL;
     }*/
 
-    uint16_t file_count;
-    char **filenames;
-    switch (category) {
-        case TC_CATEGORY_READABLE:
-            filenames = mod_filenames_from_json("TC_READABLE", &file_count);
-            break;
-        case TC_CATEGORY_ASSIGNABLE:
-            filenames = mod_filenames_from_json("TC_ASSIGNABLE", &file_count);
-            break;
-        default:
-            return NULL;
-    }
-    // Open all modules using the file names
-    tc_module_t *mod_list[TC_MAX_LOADED_MODULES];
-    uint16_t mod_count = 0;
-    tc_module_t *mod;
-    for (uint16_t i = 0; i < file_count; i++) {
-        if ((mod = tc_module_find(category, filenames[i])) == NULL) {
-            continue;
-        }
-        mod_list[mod_count] = mod;
-        mod_count++;
-    }
-    
-    tc_str_arr_free(file_count, filenames);
-    
-    // Allocate pointer array on the heap
-    tc_module_t **retval = calloc(mod_count, sizeof(tc_module_t*));
-    for (uint16_t i = 0; i < mod_count; i++) {
-        retval[i] = mod_list[i];
-    }
-    
-    *count = mod_count;
-    return retval;
+	uint16_t file_count;
+	char **filenames;
+	switch (category) {
+		case TC_CATEGORY_READABLE:
+			filenames = mod_filenames_from_json("TC_READABLE", &file_count);
+			break;
+		case TC_CATEGORY_ASSIGNABLE:
+			filenames = mod_filenames_from_json("TC_ASSIGNABLE", &file_count);
+			break;
+		default:
+		return NULL;
+	}
+	// Open all modules using the file names
+	tc_module_t *mod_list[TC_MAX_LOADED_MODULES];
+	uint16_t mod_count = 0;
+	tc_module_t *mod;
+	for (uint16_t i = 0; i < file_count; i++) {
+		// Check if a module by this filename is already opened
+		if ((mod = is_module_opened(filenames[i]))) {
+			mod_list[mod_count] = mod;
+			mod_count++;
+			continue;
+		}
+		
+		// Try to get the module by this file name
+		if (!(mod = module_open(filenames[i]))) {
+			continue;
+		}
+		mod_list[mod_count] = mod;
+		mod_count++;
+	}
+	
+	tc_str_arr_free(file_count, filenames);
+	
+	// Allocate pointer array on the heap
+	tc_module_t **retval = calloc(mod_count, sizeof(tc_module_t*));
+	for (uint16_t i = 0; i < mod_count; i++) {
+		retval[i] = mod_list[i];
+	}
+	
+	*count = mod_count;
+	return retval;
 }
 
 void tc_module_close(tc_module_t* module) {

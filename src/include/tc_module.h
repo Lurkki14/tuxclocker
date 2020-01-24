@@ -55,6 +55,9 @@ union module_data_callback_t {
 
 // Tagged union for category specific data
 typedef struct {
+	// TODO : move initialization/close callback here
+	int8_t (*init)();
+	int8_t (*close)();
 	uint64_t category;
 	// Since category specific data might be generated after calling module's 'init' callback, use function pointers to fetch it.
 	union {
