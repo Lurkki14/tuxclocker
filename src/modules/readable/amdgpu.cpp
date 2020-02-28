@@ -23,6 +23,12 @@ extern int errno;
 
 // Prefix for device files eg. /dev/dri/renderD
 #define _AMDGPU_NAME "amdgpu"
+
+// For some reason some distros (Ubuntu only?) don't define this in xf86drm.h
+#ifndef DRM_RENDER_MINOR_NAME
+	#define DRM_RENDER_MINOR_NAME "renderD"
+#endif
+
 #define DEVICE_FILE_PREFIX DRM_DIR_NAME "/" DRM_RENDER_MINOR_NAME
 #define RENDERD_OFFSET 128
 
