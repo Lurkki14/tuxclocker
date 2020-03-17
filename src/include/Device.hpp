@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -7,6 +9,14 @@
 namespace TuxClocker {
 namespace Device {
 	
+enum class AssignmentError {
+	InvalidArgument
+};
+
+enum class ReadError {
+	UnknownError
+};
+
 template <typename T>
 struct Range {
 	Range();
@@ -20,15 +30,43 @@ struct Enumeration {
 	uint key;
 };
 
+using AssignmentArgument = std::variant<int, double, uint>;
+using ReadableValue = std::variant<int, double>;
 using RangeInfo = std::variant<Range<int>, Range<double>>;
 using AssignableInfo = std::variant<RangeInfo, std::vector<Enumeration>>;
 
 class Assignable {
 public:
-	Assignable();
+	Assignable(const std::function<std::optional<AssignmentError>(AssignmentArgument)> assignmentFunc) {
+		m_assignmentFunc = assignmentFunc;
+	}
+	std::optional<AssignmentError> assign(AssignmentArgument arg) {
+		return m_assignmentFunc(arg);
+	}
 private:
-	
+	std::function<std::optional<AssignmentError>(AssignmentArgument)> m_assignmentFunc;
 };
-	
+
+class DynamicReadable {
+public:
+	DynamicReadable(const std::function<std::variant<ReadError, ReadableValue>()> readFunc) {
+		m_readFunc = readFunc;
+	}
+	std::variant<ReadError, ReadableValue> read() {
+		return m_readFunc();
+	}
+private:
+	std::function<std::variant<ReadError, ReadableValue>()> m_readFunc;
+};
+
+// DeviceNode has a name, and optionally implements one of [Assignable, DynamicReadable]
+using DeviceInterface = std::variant<Assignable, DynamicReadable>;
+
+struct DeviceNode {
+	std::string name;
+	std::optional<DeviceInterface> interface;
+};
+
+
 };
 };

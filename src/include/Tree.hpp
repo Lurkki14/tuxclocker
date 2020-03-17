@@ -17,9 +17,14 @@ class FlatTree {
 
 template <typename T>
 class TreeNode {
+public:
+	TreeNode() {};
+	TreeNode(T value) {m_value = value;}
+	void appendChild(T value) {m_children.push_back(TreeNode{value});}
+	std::vector<TreeNode<T>> children() {return m_children;}
 private:
-	T value;
-	std::vector<TreeNode<T>> children;
+	T m_value;
+	std::vector<TreeNode<T>> m_children;
 };
 
 };

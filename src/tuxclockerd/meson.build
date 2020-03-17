@@ -2,23 +2,20 @@ qt5 = import('qt5')
 qt5_dep = dependency('qt5',
 	modules : ['DBus'])
 	
-moc_files = qt5.preprocess(moc_headers : ['ReadableDynamicVariantAdaptor.h',
-	'AssignableEnumAdaptor.h',
-	'AssignableVariantRangeAdaptor.h'],
-	dependencies : qt5_dep)
+boost_dep = dependency('boost', modules : ['system'])
 	
-sources = ['main.cpp',
-	'AssignableAdaptorFactory.cpp',
-	'AssignableEnumAdaptor.cpp',
-	'AssignableVariantRangeAdaptor.cpp',
-	'ReadableAdaptorFactory.cpp',
-	'ReadableDynamicVariantAdaptor.cpp']
-
+#moc_files = qt5.preprocess(moc_headers : #['ReadableDynamicVariantAdaptor.h',
+#	'AssignableEnumAdaptor.h',
+#	'AssignableVariantRangeAdaptor.h'],
+#	dependencies : qt5_dep)
+	
+sources = ['main.cpp']
+	
 executable('tuxclockerd',
-	moc_files,
 	sources,
+	override_options : ['cpp_std=c++17'],
 	include_directories : incdir,
-	dependencies : qt5_dep,
+	dependencies : [qt5_dep, boost_dep, dl],
 	link_with : libtuxclocker,
 	install : true)
 
