@@ -1,0 +1,3 @@
+[submodule "src/include/deps/patterns"]
+	path = src/include/deps/patterns
+	url = https://github.com/mpark/patterns
