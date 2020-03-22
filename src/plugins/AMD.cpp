@@ -1,3 +1,5 @@
+#include <Functional.hpp>
+#include <patterns.hpp>
 #include <Plugin.hpp>
 
 #include <errno.h>
@@ -21,13 +23,14 @@ extern int errno;
 #define DEVICE_FILE_PREFIX DRM_DIR_NAME "/" DRM_RENDER_MINOR_NAME
 #define RENDERD_OFFSET 128
 
+using namespace mpark::patterns;
 using namespace TuxClocker::Plugin;
 using namespace TuxClocker::Device;
 using namespace TuxClocker;
 
 namespace fs = std::filesystem;
 
-struct AMDAssignableInfo {
+struct AMDGPUInfo {
 	// Thus is Linux only
 	std::optional<std::string> hwmonPath;
 	amdgpu_device_handle devHandle;
@@ -42,13 +45,30 @@ public:
 	~AMDPlugin();
 private:
 	TreeNode<DeviceNode> m_rootNode;
-	std::vector<AMDAssignableInfo> m_assignableInfoVec;
+	std::vector<AMDGPUInfo> m_GPUInfoVec;
+	template <typename T>
+	static std::variant<ReadError, ReadableValue> libdrmRead(amdgpu_device_handle dev,
+		uint query,
+		std::optional<std::function<T(T)>> transformFunc = std::nullopt);
+	
 };
 
 AMDPlugin::~AMDPlugin() {
-	for (auto info : m_assignableInfoVec) {
+	for (auto info : m_GPUInfoVec) {
 		amdgpu_device_deinitialize(info.devHandle);
 	}
+}
+
+template <typename T>
+std::variant<ReadError, ReadableValue>AMDPlugin::libdrmRead(amdgpu_device_handle dev,
+		uint query,
+		std::optional<std::function<T(T)>> transformFunc) {
+	T value;
+	auto retval = amdgpu_query_sensor_info(dev, query, sizeof(T), &value);
+	if (retval != 0) return ReadError::UnknownError;
+	
+	if (!transformFunc.has_value()) return value;
+	return transformFunc.value()(value);
 }
 
 AMDPlugin::AMDPlugin() {
@@ -78,9 +98,10 @@ AMDPlugin::AMDPlugin() {
 		auto v_ptr = drmGetVersion(fd);
 		amdgpu_device_handle dev;
 		uint32_t m, n;
+		int devInitRetval;
 		if (fd > 0 &&
 		    v_ptr &&
-		    amdgpu_device_initialize(fd, &m, &n, &dev) == 0 &&
+		    (devInitRetval = amdgpu_device_initialize(fd, &m, &n, &dev)) == 0 &&
 		    std::string(v_ptr->name).find(_AMDGPU_NAME) != std::string::npos) {
 				// Device uses amdgpu
 				// Find hwmon path if available
@@ -98,10 +119,52 @@ AMDPlugin::AMDPlugin() {
 				}
 				// This exception is only abnormal to get on Linux
 				catch (fs::filesystem_error &e) {}
-				m_assignableInfoVec.push_back(AMDAssignableInfo{hwmonPath, dev});
+				m_GPUInfoVec.push_back(AMDGPUInfo{hwmonPath, dev});
+				continue;
 		}
+		if (devInitRetval == 0) amdgpu_device_deinitialize(dev);
 		close(fd);
 		drmFreeVersion(v_ptr);
+	}
+	
+	// Add nodes with successful queries to device node
+	
+	// Data structure for mapping to DynamicReadables
+	struct UnspecializedReadable {
+		std::function<std::variant<ReadError, ReadableValue>(AMDGPUInfo)> func;
+		std::optional<std::string> unit;
+	};
+	
+	// List of query functions for DynamicReadables
+	std::vector<UnspecializedReadable> rawNodes = {
+		{
+			[&](AMDGPUInfo info) {
+				return libdrmRead<uint>(info.devHandle,
+					AMDGPU_INFO_SENSOR_GPU_TEMP,
+					std::function<uint(uint)>([](uint val) {return val / 1000;}));
+			},
+			std::nullopt
+		}
+	};
+	
+	for (auto info : m_GPUInfoVec) {
+		auto availableReadables = filter(rawNodes,
+			std::function<bool(UnspecializedReadable)>([info](UnspecializedReadable ur) {
+				auto result = ur.func(info);
+				// Check if this node returns an error or not
+				match(result)(pattern(as<ReadError>(_)) = []{return false;},
+				              pattern(_) = []{return true;});
+				return true;
+			}));
+		auto specializedNodes = map(availableReadables,
+			std::function<DynamicReadable(UnspecializedReadable)>(
+			[info] (UnspecializedReadable ur) {
+				//auto specializedFunc = specializeFunction<std::variant<ReadError,
+					//ReadableValue>, AMDGPUInfo>(info, ur.func);
+				return DynamicReadable([info, ur]() {
+					return ur.func(info);
+				});
+			}));
 	}
 }
 
