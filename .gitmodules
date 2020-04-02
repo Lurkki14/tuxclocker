@@ -1,3 +1,6 @@
 [submodule "src/include/deps/patterns"]
 	path = src/include/deps/patterns
 	url = https://github.com/mpark/patterns
+[submodule "src/include/deps/FunctionalPlus"]
+	path = src/include/deps/FunctionalPlus
+	url = https://github.com/Dobiasd/FunctionalPlus
