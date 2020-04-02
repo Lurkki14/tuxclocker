@@ -36,7 +36,6 @@ class DevicePlugin {
 public:
 	// Communicate plugin initialization success in this way since constructors cannot communicate it.
 	virtual std::optional<InitializationError> initializationError() = 0;
-	virtual void foo() = 0;
 	virtual TreeNode<DeviceNode> deviceRootNode() = 0;
 	virtual ~DevicePlugin() {}
 	
