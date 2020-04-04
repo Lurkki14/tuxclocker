@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.tuxclocker
+Exec=tuxclockerd
+User=root
