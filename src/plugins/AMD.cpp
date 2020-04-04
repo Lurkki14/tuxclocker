@@ -72,13 +72,6 @@ std::variant<ReadError, ReadableValue>AMDPlugin::libdrmRead(amdgpu_device_handle
 }
 
 AMDPlugin::AMDPlugin() {
-	/*Assignable a([](auto arg) {
-		return std::nullopt;
-	});
-	
-	DeviceNode root{"AMD", a};
-	m_rootNode.appendChild(root);*/
-	
 	struct FSInfo {
 		std::string path;
 		std::string filename;
@@ -101,8 +94,8 @@ AMDPlugin::AMDPlugin() {
 		int devInitRetval;
 		if (fd > 0 &&
 		    v_ptr &&
-		    (devInitRetval = amdgpu_device_initialize(fd, &m, &n, &dev)) == 0 &&
-		    std::string(v_ptr->name).find(_AMDGPU_NAME) != std::string::npos) {
+		    std::string(v_ptr->name).find(_AMDGPU_NAME) != std::string::npos &&
+		    (devInitRetval = amdgpu_device_initialize(fd, &m, &n, &dev)) == 0) {
 				// Device uses amdgpu
 				// Find hwmon path if available
 				std::ostringstream stream;
@@ -122,7 +115,7 @@ AMDPlugin::AMDPlugin() {
 				m_GPUInfoVec.push_back(AMDGPUInfo{hwmonPath, dev});
 				continue;
 		}
-		if (devInitRetval == 0) amdgpu_device_deinitialize(dev);
+		//if (devInitRetval == 0) amdgpu_device_deinitialize(dev);
 		close(fd);
 		drmFreeVersion(v_ptr);
 	}
@@ -133,6 +126,7 @@ AMDPlugin::AMDPlugin() {
 	struct UnspecializedReadable {
 		std::function<std::variant<ReadError, ReadableValue>(AMDGPUInfo)> func;
 		std::optional<std::string> unit;
+		std::string nodeName;
 	};
 	
 	// List of query functions for DynamicReadables
@@ -143,7 +137,8 @@ AMDPlugin::AMDPlugin() {
 					AMDGPU_INFO_SENSOR_GPU_TEMP,
 					std::function<uint(uint)>([](uint val) {return val / 1000;}));
 			},
-			std::nullopt
+			std::nullopt,
+			"Temperature"
 		}
 	};
 	
@@ -169,7 +164,6 @@ AMDPlugin::AMDPlugin() {
 }
 
 TreeNode<DeviceNode> AMDPlugin::deviceRootNode() {
-;
 	return m_rootNode;
 }
 
