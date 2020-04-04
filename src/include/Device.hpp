@@ -32,6 +32,7 @@ struct Enumeration {
 
 using AssignmentArgument = std::variant<int, double, uint>;
 using ReadableValue = std::variant<int, uint, double>;
+using ReadResult = std::variant<ReadError, ReadableValue>;
 using RangeInfo = std::variant<Range<int>, Range<double>>;
 using AssignableInfo = std::variant<RangeInfo, std::vector<Enumeration>>;
 
@@ -53,7 +54,7 @@ public:
 	DynamicReadable(const std::function<std::variant<ReadError, ReadableValue>()> readFunc) {
 		m_readFunc = readFunc;
 	}
-	std::variant<ReadError, ReadableValue> read() {
+	/*std::variant<ReadError, ReadableValue>*/ ReadResult read() {
 		return m_readFunc();
 	}
 private:
