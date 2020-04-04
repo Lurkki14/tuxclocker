@@ -30,6 +30,7 @@ public:
 			preorder(child, func);
 		}
 	}
+	T value() {return m_value;}
 private:
 	T m_value;
 	std::vector<TreeNode<T>> m_children;
