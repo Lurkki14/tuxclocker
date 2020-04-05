@@ -172,7 +172,6 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		}
 	};
 	
-	
 	struct NvidiaGPUDataOpt {
 		std::string uuid;
 		std::string name;
@@ -247,7 +246,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		gi++;
 	};
 	
-	
+
 	
 	// [GPUOpt] -> [TreeNode DeviceNode]
 	// Map GPU data to readables
@@ -257,20 +256,24 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			
 			// Get nvml nodes if there is a device
 			if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
-				auto availableNVMLNodes = fp::keep_if([dev](auto rawNode) {
+				// These might be similar enough to make sense to be templates
+				auto availableNVMLNodes = fp::keep_if([&](auto rawNode) {
 						auto result = rawNode.func(dev);
 						match(result)(pattern(as<ReadError>(_)) = []() {return false;},
 								pattern(_) = []() {return true;});
 						return true;
 					}, rawNVMLNodes);
-				auto specializedNVMLNodes = fp::transform([&](auto rawNode) {
+				
+				// After a day of debugging, I found out that this needs to be captured by value instead of reference or we get a bad function call when this goes out of scope
+				auto specializedNVMLNodes = fp::transform([=](auto rawNode) {
 						auto readable = DynamicReadable(
-							[&]() {return rawNode.func(dev);});
+							[=]() {return rawNode.func(dev);});
 						auto devNode = DeviceNode{.name = rawNode.nodeName,
 							.interface = readable
 						};
 						return devNode;
 					}, availableNVMLNodes);
+
 				for (auto &specNode : specializedNVMLNodes) {
 					gpuRoot.appendChild(specNode);
 				}
@@ -284,9 +287,9 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 								pattern(_) = []() {return true;});
 						return true;
 					}, rawNVCTRLNodes);
-				auto specializedNodes = fp::transform([index](auto rawNode) {
+				auto specializedNodes = fp::transform([=](auto rawNode) {
 						auto readable = DynamicReadable(
-							[&]() {return rawNode.func(index);});
+							[=]() {return rawNode.func(index);});
 						auto devNode = DeviceNode{.name = rawNode.nodeName,
 							.interface = readable
 						};
@@ -297,8 +300,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			
 			return gpuRoot;
 		}, optDataVec);
-	for (auto &gpuNode : gpuNodes) rootNode.appendChild(gpuNode);
 	
+	//auto res = std::get<DynamicReadable>(gpuNodes[0].children()[0].value().interface.value()).read();
+	
+	for (auto &gpuNode : gpuNodes) rootNode.appendChild(gpuNode);
 	m_rootDeviceNode = rootNode;
 	/*std::cout << nvctrlGPUCount << "GPUs\n";
 	for (auto nvmlGPU : nvmlGPUVec) {
