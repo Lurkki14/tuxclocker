@@ -6,8 +6,7 @@ boost_dep = dependency('boost', modules : ['system'])
 	
 patterns_inc = include_directories('../include/deps/patterns/include/mpark')
 	
-moc_files = qt5.preprocess(moc_headers : ['Adaptors.hpp',
-		'DummyAdaptor.hpp'],
+moc_files = qt5.preprocess(moc_headers : ['Adaptors.hpp'],
 	dependencies : qt5_dep)
 	
 sources = ['main.cpp']
