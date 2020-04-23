@@ -10,7 +10,11 @@ namespace TuxClocker {
 namespace Device {
 	
 enum class AssignmentError {
-	InvalidArgument
+	InvalidArgument,
+	InvalidType,
+	NoPermission,
+	OutOfRange,
+	UnknownError
 };
 
 enum class ReadError {
@@ -19,7 +23,7 @@ enum class ReadError {
 
 template <typename T>
 struct Range {
-	Range();
+	Range() {};
 	Range(const T &min_, const T &max_) {min = min_, max = max_;}
 	T min, max;
 };
@@ -34,17 +38,22 @@ using AssignmentArgument = std::variant<int, double, uint>;
 using ReadableValue = std::variant<int, uint, double>;
 using ReadResult = std::variant<ReadError, ReadableValue>;
 using RangeInfo = std::variant<Range<int>, Range<double>>;
+using EnumerationVec = std::vector<Enumeration>;
 using AssignableInfo = std::variant<RangeInfo, std::vector<Enumeration>>;
 
 class Assignable {
 public:
-	Assignable(const std::function<std::optional<AssignmentError>(AssignmentArgument)> assignmentFunc) {
+	Assignable(const std::function<std::optional<AssignmentError>(AssignmentArgument)> assignmentFunc,
+			AssignableInfo info) {
 		m_assignmentFunc = assignmentFunc;
+		m_assignableInfo = info;
 	}
 	std::optional<AssignmentError> assign(AssignmentArgument arg) {
 		return m_assignmentFunc(arg);
 	}
+	AssignableInfo assignableInfo() {return m_assignableInfo;}
 private:
+	AssignableInfo m_assignableInfo;
 	std::function<std::optional<AssignmentError>(AssignmentArgument)> m_assignmentFunc;
 };
 
