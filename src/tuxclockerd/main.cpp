@@ -5,7 +5,6 @@
 #include <QDBusError>
 #include <QDBusMetaType>
 #include <QDebug>
-#include <QStack>
 #include <patterns.hpp>
 #include <Plugin.hpp>
 #include <Tree.hpp>
@@ -17,58 +16,57 @@ using namespace TuxClocker::Device;
 using namespace TuxClocker::Plugin;
 using namespace mpark::patterns;
 
+namespace TCDBus = TuxClocker::DBus;
+
 int main(int argc, char **argv) {
 	QCoreApplication a(argc, argv);
 	
 	auto connection = QDBusConnection::systemBus();
 	auto plugins = DevicePlugin::loadPlugins();
 	QVector<QDBusAbstractAdaptor*> adaptors;
-	
 	QObject root;
+	TreeNode<TCDBus::DeviceNode> dbusRootNode;
+	
+	std::function<void(TreeNode<DeviceNode>, QString, TreeNode<TCDBus::DeviceNode>*)> traverse;
+	traverse = [&traverse, &connection, &adaptors, &root, &dbusRootNode](
+			TreeNode<DeviceNode> node,
+			QString parentPath, TreeNode<TCDBus::DeviceNode> *dbusNode) {
+		auto obj = new QObject(&root); // Is destroyed when root goes out of scope
+		// Remove whitespaces to make valid object paths
+		auto objName = QString::fromStdString(node.value().name).replace(" ", "");
+		auto thisPath = parentPath + objName;
+		if_let(pattern(some(arg)) = node.value().interface) = [&](auto iface) {
+			if_let(pattern(some(arg)) = AdaptorFactory::adaptor(obj, iface)) = [&](auto adaptor) {
+				adaptors.append(adaptor);
+				connection.registerObject(thisPath, obj);	
+			};
+		};
+		auto thisDBusNode = new TreeNode<TCDBus::DeviceNode>{{thisPath, "org.tuxclocker"}};
+		dbusNode->appendChild(*thisDBusNode);
+		qDebug() << thisPath;
+		for (const auto &child : node.children())
+			traverse(child, thisPath + "/", &dbusNode->childrenPtr()->back());
+	};
+	
+	TreeNode<DeviceNode> lvl1nodes;
 	if (plugins.has_value()) {
 		qDebug() << "found " << plugins.value().size() << " plugins";
 		for (auto &plugin : plugins.value()) {
-			auto n = plugin->deviceRootNode();
-			TreeNode<DeviceNode>::preorder(plugin->deviceRootNode(), [](auto val) {qDebug() << QString::fromStdString(val.name);});
-			
-
-			/*TreeNode<DeviceNode>::preorder(plugin->deviceRootNode(), [&](auto nodeVal) {
-				auto obj = new QObject(&root); // Is destroyed when root goes out of scope
-				// Remove whitespaces to make valid object paths
-				auto objName = QString::fromStdString(nodeVal.name).replace(" ", "");
-				
-				if_let(pattern(some(arg)) = nodeVal.interface) = [&](auto iface) {
-					adaptors.append(AdaptorFactory::adaptor(obj, iface).value());
-				};
-				connection.registerObject("/" + objName, obj);
-			});*/
-			
-			std::function<void(TreeNode<DeviceNode>, QString)> traverse;
-			traverse = [&traverse, &connection, &adaptors, &root](
-					TreeNode<DeviceNode> node,
-					QString parentPath) {
-				auto obj = new QObject(&root); // Is destroyed when root goes out of scope
-				// Remove whitespaces to make valid object paths
-				auto objName = QString::fromStdString(node.value().name).replace(" ", "");
-				
-				if_let(pattern(some(arg)) = node.value().interface) = [&](auto iface) {
-					adaptors.append(AdaptorFactory::adaptor(obj, iface).value());
-				};
-				auto thisPath = parentPath + objName + "/";
-				connection.registerObject("/" + objName, obj);	
-				qDebug() << thisPath;
-				for (const auto &child : node.children()) traverse(child, thisPath);
-			};
+			//rootNodes.append(plugin->deviceRootNode());
 			// Root node should always be empty
-			for (const auto &node : plugin->deviceRootNode().children())
-				traverse(node, "/");
+			for (const auto &node : plugin->deviceRootNode().children()) {
+				lvl1nodes.appendChild(node);
+				traverse(node, "/", &dbusRootNode);
+				
+				TreeNode<DeviceNode>::preorder(node, [](auto val) {
+					qDebug() << QString::fromStdString(val.name);
+				});
+			}
 		}
 	}
-	
-	//registerReadables(&root, connection);
-	//registerAssignables(&root, connection);
-	
-	//DummyAdaptor ad(&root);
+	//qDebug() << dbusRootNode.toFlatTree().nodes.size();
+	//qDebug() << lvl1nodes.toFlatTree().nodes.size();
+	auto ma = new MainAdaptor(&root, dbusRootNode);
 	connection.registerObject("/", &root);
 	
 	if (!connection.registerService("org.tuxclocker")) {
