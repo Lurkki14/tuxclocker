@@ -36,6 +36,34 @@ struct UnspecializedReadable {
 	std::string nodeName;
 };
 
+template <typename T>
+struct UnspecializedAssignable {
+	// Method to get the AssignableInfo since they differ per GPU.
+	std::function<std::optional<AssignableInfo>(T)> assignableInfo;
+	std::function<std::optional<AssignmentError>(T, AssignableInfo, AssignmentArgument)> func;
+	std::optional<std::string> unit;
+	std::string nodeName;
+	
+	static std::vector<DeviceNode> toDeviceNodes(
+			std::vector<UnspecializedAssignable<T>> rawNodes,
+			T devData) {
+		std::vector<DeviceNode> retval;
+		for (auto &rawNode : rawNodes) {
+			if_let(pattern(some(arg)) = rawNode.assignableInfo(devData)) = [&](auto info) {
+				auto assignable = Assignable([=](auto arg) {
+					return rawNode.func(devData, info, arg);
+				}, info);
+				auto node = DeviceNode {
+					.name = rawNode.nodeName,
+					.interface = assignable
+				};
+				retval.push_back(node);
+			};
+		}
+		return retval;
+	}
+};
+
 class NvidiaPlugin : public DevicePlugin {
 public:
 	NvidiaPlugin();
@@ -52,6 +80,9 @@ private:
 		std::optional<std::function<Out(In)>> transformFunc = std::nullopt);
 	static std::variant<ReadError, ReadableValue> nvctlRead(uint index,
 		std::function<Bool(uint, int*)> readFunc);
+	std::optional<AssignmentError> nvctlWrite(uint index, int mask,
+		int target, int attribute, int value);
+	uint nvctrlPerfModes(uint index);
 };
 
 template <typename In, typename Out>
@@ -72,11 +103,36 @@ std::variant<ReadError, ReadableValue> NvidiaPlugin::nvctlRead(uint index,
 		std::function<Bool(uint, int*)> readFunc) {
 	int val;
 	if (!readFunc(index, &val)) {
-		// Get error from X error handler here
+		// TODO: Get error from X error handler here
 		return ReadError::UnknownError;
 	}
 	// All sensor readings through this make sense as uint
 	return static_cast<uint>(val);
+}
+
+std::optional<AssignmentError> NvidiaPlugin::nvctlWrite(uint index,
+		int mask, int target, int attribute, int value) {
+	if (XNVCTRLSetTargetAttributeAndGetStatus(m_dpy, target, index,
+			mask, attribute, value)) {
+		// Success
+		return std::nullopt;
+	}
+	return AssignmentError::UnknownError;
+	// Get error from X error handler
+}
+
+uint NvidiaPlugin::nvctrlPerfModes(uint index) {
+	// Thanks to Artifth for original code
+	char *result;
+	if (XNVCTRLQueryTargetStringAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
+			index, 0, NV_CTRL_STRING_PERFORMANCE_MODES, &result)) {
+		auto s = std::string(result);
+		auto modes = std::count(s.begin(), s.end(), ';');
+		delete result;
+		return modes; 
+	}
+	// Usually there's 3 perf modes
+	return 3;
 }
 
 NvidiaPlugin::~NvidiaPlugin() {
@@ -172,6 +228,117 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		}
 	};
 	
+	std::vector<UnspecializedAssignable<nvmlDevice_t>> rawNVMLAssignables = {
+		{
+			[](nvmlDevice_t dev) -> std::optional<AssignableInfo> {
+				uint min, max;
+				if (nvmlDeviceGetPowerManagementLimitConstraints(dev, &min, &max) !=
+						NVML_SUCCESS)
+					return std::nullopt;
+				// mW -> W
+				Range r(static_cast<double>(min / 1000), static_cast<double>(max / 1000));
+				return r;
+			},
+			[](nvmlDevice_t dev, AssignableInfo info, AssignmentArgument a_arg)
+					-> std::optional<AssignmentError> {
+				std::optional<AssignmentError> retval = AssignmentError::InvalidType;
+				if_let(pattern(as<double>(arg)) = a_arg) = [=, &retval](auto val) {
+					/* TODO: this is an unsafe conversion, either add a template parameter for
+						* range, check the type here or handle the possible exception. */
+					auto ri = std::get<RangeInfo>(info);
+					auto range = std::get<Range<double>>(ri);
+					if (range.min > val || range.max < val)
+						retval = AssignmentError::OutOfRange;
+					// W -> mW
+					switch (nvmlDeviceSetPowerManagementLimit(dev, round(val * 1000))) {
+						case NVML_SUCCESS: retval = std::nullopt; break;
+						case NVML_ERROR_NO_PERMISSION: retval = AssignmentError::NoPermission; break;
+						default: retval = AssignmentError::UnknownError; break;
+					}
+				};
+				return retval;
+			},
+			"W",
+			"Power Limit"
+		}
+	};
+	
+	struct NVClockInfo {
+		uint maxState;
+		uint index;
+	};
+	
+	std::vector<UnspecializedAssignable<NVClockInfo>> rawNVCTRLClockAssignables = {
+		{
+			[=](NVClockInfo info) -> std::optional<AssignableInfo> {
+				NVCTRLAttributeValidValuesRec values;
+				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, info.index, 0, 
+						NV_CTRL_TARGET_TYPE_GPU,
+						NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values)) {
+					// Transfer rate -> clock speed
+					Range<int> r(values.u.range.min / 2, values.u.range.max / 2);
+					return r;
+				}
+				return std::nullopt;
+			},
+			[=](NVClockInfo c_info, AssignableInfo info, AssignmentArgument a_arg) {
+				std::optional<AssignmentError> retval = AssignmentError::InvalidType;
+				if_let(pattern(as<int>(arg)) = a_arg) = [=, &retval](auto val){
+					auto ri = std::get<RangeInfo>(info);
+					auto range = std::get<Range<int>>(ri);
+					if (range.min > val || range.max < val)
+						retval = AssignmentError::OutOfRange;
+					// MHz -> transfer rate
+					else
+						retval =  nvctlWrite(c_info.index, c_info.maxState, 
+							NV_CTRL_TARGET_TYPE_GPU,
+							NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, val * 2);
+				};
+				return retval;
+			},
+			"MHz",
+			"Memory Clock Offset"
+		}
+	};
+	
+	std::vector<UnspecializedAssignable<uint>> rawNVCTRLAssignables = {
+		{
+			[=](uint index) -> std::optional<AssignableInfo> {
+				NVCTRLAttributeValidValuesRec values;
+				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
+						index, 0,
+						NV_CTRL_GPU_COOLER_MANUAL_CONTROL, &values) &&
+						(values.permissions & ATTRIBUTE_TYPE_WRITE)) {
+					std::vector<Enumeration> opts = {{"Automatic", 0}, {"Manual", 1}};
+					return opts;
+				}
+				return std::nullopt;
+			},
+			[=](uint index, AssignableInfo info, AssignmentArgument a_arg) {
+				(void) info;
+				std::optional<AssignmentError> ret = AssignmentError::InvalidType;
+				if_let(pattern(as<uint>(arg)) = a_arg) = [=, &ret](auto u) {
+					switch(u) {
+						case 0:
+							ret = nvctlWrite(index, 0, NV_CTRL_TARGET_TYPE_GPU,
+								NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+								NV_CTRL_GPU_COOLER_MANUAL_CONTROL_FALSE);
+							break;
+						case 1:
+							ret = nvctlWrite(index, 0, NV_CTRL_TARGET_TYPE_GPU,
+								NV_CTRL_GPU_COOLER_MANUAL_CONTROL,
+								NV_CTRL_GPU_COOLER_MANUAL_CONTROL_TRUE);
+							break;
+						default: ret = AssignmentError::OutOfRange;
+					}
+				};
+				return ret;
+			},
+			std::nullopt,
+			"Fan Mode"
+		}
+	};
+	
 	struct NvidiaGPUDataOpt {
 		std::string uuid;
 		std::string name;
@@ -264,19 +431,25 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						return true;
 					}, rawNVMLNodes);
 				
-				// After a day of debugging, I found out that this needs to be captured by value instead of reference or we get a bad function call when this goes out of scope
+				/* After a day of debugging, I found out that this needs to be captured by
+				 * value instead of reference or we get a bad function call 
+				 * when this goes out of scope */
 				auto specializedNVMLNodes = fp::transform([=](auto rawNode) {
 						auto readable = DynamicReadable(
 							[=]() {return rawNode.func(dev);});
-						auto devNode = DeviceNode{.name = rawNode.nodeName,
+						auto devNode = DeviceNode{
+							.name = rawNode.nodeName,
 							.interface = readable
 						};
 						return devNode;
 					}, availableNVMLNodes);
 
-				for (auto &specNode : specializedNVMLNodes) {
+				for (auto &specNode : specializedNVMLNodes)
 					gpuRoot.appendChild(specNode);
-				}
+				
+				for (auto &node : UnspecializedAssignable<nvmlDevice_t>::toDeviceNodes(
+							rawNVMLAssignables, dev))
+					gpuRoot.appendChild(node);
 			};
 			
 			// Same for NVCtrl
@@ -296,24 +469,22 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						return devNode;						
 					}, availableNodes);
 				for (auto &specNode : specializedNodes) gpuRoot.appendChild(specNode);
+								  
+				auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
+				for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
+						rawNVCTRLClockAssignables, clockInfo))
+					gpuRoot.appendChild(node);
+				
+				for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
+						rawNVCTRLAssignables, index))
+					gpuRoot.appendChild(node);
 			};
 			
 			return gpuRoot;
 		}, optDataVec);
 	
-	//auto res = std::get<DynamicReadable>(gpuNodes[0].children()[0].value().interface.value()).read();
-	
 	for (auto &gpuNode : gpuNodes) rootNode.appendChild(gpuNode);
 	m_rootDeviceNode = rootNode;
-	/*std::cout << nvctrlGPUCount << "GPUs\n";
-	for (auto nvmlGPU : nvmlGPUVec) {
-		auto res = rawNodes[0].func(NvidiaGPUData{nvmlGPU.identifier, 0});
-		if (auto vp = std::get_if<ReadableValue>(&res)) {
-			if (auto up = std::get_if<uint>(vp)) {
-				std::cout << *up << "\n";
-			}
-		}
-	}*/
 }
 
 TUXCLOCKER_PLUGIN_EXPORT(NvidiaPlugin)
