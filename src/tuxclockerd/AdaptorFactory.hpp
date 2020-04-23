@@ -13,15 +13,19 @@ using namespace mpark::patterns;
 
 class AdaptorFactory {
 public:
+	/* Returns a raw pointer since smart pointers caused some scope issues.
+	 * TODO: try to use smart pointers instead? */
 	static std::optional<QDBusAbstractAdaptor*> adaptor(QObject *obj,
 			DeviceInterface iface) {
 		std::optional<QDBusAbstractAdaptor*> retval = std::nullopt;
 		match(iface)
 			(pattern(as<DynamicReadable>(arg)) = [&](auto dr) {
-				qDebug() << "making rd adaptor";
 				retval = new DynamicReadableAdaptor(obj, dr);
 			},
-			(pattern(_)) = [] {});
+			pattern(as<Assignable>(arg)) = [&](auto a) {
+				retval = new AssignableAdaptor(obj, a);
+			},
+			pattern(_) = []{});
 		return retval;
 	}
 };
