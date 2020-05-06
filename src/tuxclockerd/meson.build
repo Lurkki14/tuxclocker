@@ -19,12 +19,23 @@ executable('tuxclockerd',
 	dependencies : [qt5_dep, boost_dep, dl],
 	link_with : libtuxclocker,
 	install : true)
-
-# DBus data directory
-
+	
+# DBus data directories
 dbus_data_dir = join_paths(get_option('prefix'), get_option('datadir'), 'dbus-1')
 dbus_system_services_dir = join_paths(dbus_data_dir, 'system.d')
 install_data('org.tuxclocker.conf', install_dir : dbus_system_services_dir)
 
 dbus_service_dir = join_paths(dbus_data_dir, 'system-services')
-install_data('org.tuxclocker.service', install_dir : dbus_service_dir)
+
+# Replace the binary path in dbus files
+dbus_conf_data = configuration_data()
+dbus_conf_data.set('tuxclocker_daemon_path',
+	join_paths(join_paths(get_option('prefix'), get_option('bindir')),
+		'tuxclockerd'))
+		
+configure_file(input : 'org.tuxclocker.service.in',
+	output : 'org.tuxclocker.service',
+	configuration : dbus_conf_data,
+	install_dir : dbus_service_dir)
+
+
