@@ -33,10 +33,11 @@ plugin_path_def = plugin_path_def_template.format(get_option('prefix'), get_opti
 #	install : true)
 
 libtuxclocker = shared_library('tuxclocker',
-	['lib/Plugin.cpp'],
+	['lib/Crypto.cpp',
+	 'lib/Plugin.cpp'],
 	override_options : ['cpp_std=c++17'],
 	include_directories : incdir,
-	dependencies : [boost_dep, dl],
+	dependencies : [boost_dep, dl, openssl_dep],
 	cpp_args : plugin_path_def,
 	install : true)
 
@@ -53,4 +54,8 @@ endif
 
 if get_option('daemon')
 	subdir('tuxclockerd')
+endif
+
+if get_option('gui')
+	subdir('tuxclocker-qt')
 endif
