@@ -34,5 +34,6 @@ if all_nvidia_linux_libs
 		include_directories : [incdir, patterns_inc, fplus_inc],
 		dependencies : [nvidia_linux_libs, boost_dep],
 		install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
-		install : true)
+		install : true,
+		link_with : libtuxclocker)
 endif

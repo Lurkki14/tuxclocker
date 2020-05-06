@@ -28,21 +28,36 @@ int main(int argc, char **argv) {
 	TreeNode<TCDBus::DeviceNode> dbusRootNode;
 	
 	std::function<void(TreeNode<DeviceNode>, QString, TreeNode<TCDBus::DeviceNode>*)> traverse;
-	traverse = [&traverse, &connection, &adaptors, &root, &dbusRootNode](
+	traverse = [&traverse, &connection, &adaptors, &root](
 			TreeNode<DeviceNode> node,
 			QString parentPath, TreeNode<TCDBus::DeviceNode> *dbusNode) {
 		auto obj = new QObject(&root); // Is destroyed when root goes out of scope
 		// Remove whitespaces to make valid object paths
 		auto objName = QString::fromStdString(node.value().name).replace(" ", "");
 		auto thisPath = parentPath + objName;
+		QString ifaceName;
 		if_let(pattern(some(arg)) = node.value().interface) = [&](auto iface) {
-			if_let(pattern(some(arg)) = AdaptorFactory::adaptor(obj, iface)) = [&](auto adaptor) {
+			if_let(pattern(some(arg)) = 
+					AdaptorFactory::adaptor(obj, iface, node.value())) = [&](auto adaptor) {
 				adaptors.append(adaptor);
-				connection.registerObject(thisPath, obj);	
+				connection.registerObject(thisPath, obj);
+				
+				// TODO: don't hardcode interface name
+				// Maybe create an intermediate class that contains the interface name to avoid this
+				// For some reason this throws a bad_cast when using 'as' with pointer type
+				match(*adaptor)
+					(pattern(as<AssignableAdaptor>(_)) = [&] {
+						ifaceName = "org.tuxclocker.Assignable";
+					},
+					pattern(as<DynamicReadableAdaptor>(_)) = [&] {
+						 ifaceName = "org.tuxclocker.DynamicReadable";
+					},
+					pattern(_) = [] {});
 			};
 		};
-		auto thisDBusNode = new TreeNode<TCDBus::DeviceNode>{{thisPath, "org.tuxclocker"}};
-		dbusNode->appendChild(*thisDBusNode);
+		
+		auto thisDBusNode = TreeNode<TCDBus::DeviceNode>{{thisPath, ifaceName}};
+		dbusNode->appendChild(thisDBusNode);
 		qDebug() << thisPath;
 		for (const auto &child : node.children())
 			traverse(child, thisPath + "/", &dbusNode->childrenPtr()->back());

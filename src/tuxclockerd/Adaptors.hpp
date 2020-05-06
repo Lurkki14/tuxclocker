@@ -63,8 +63,8 @@ Q_DECLARE_METATYPE(TCDBus::Result<int>)
 
 class AssignableAdaptor : public QDBusAbstractAdaptor {
 public:
-	explicit AssignableAdaptor(QObject *obj, Assignable a) : QDBusAbstractAdaptor(obj),
-			m_assignable(a) {
+	explicit AssignableAdaptor(QObject *obj, Assignable a, DeviceNode devNode) :
+			QDBusAbstractAdaptor(obj), m_assignable(a), m_devNode(devNode) {
 		qDBusRegisterMetaType<TCDBus::Range>();
 		qDBusRegisterMetaType<TCDBus::Enumeration>();
 		qDBusRegisterMetaType<QVector<TCDBus::Enumeration>>();
@@ -99,6 +99,7 @@ public:
 		m_dbusAssignableInfo = QDBusVariant(a_info);
 	}
 	QDBusVariant assignableInfo_() {return m_dbusAssignableInfo;}
+	QString hash_() {return QString::fromStdString(m_devNode.hash);}
 public Q_SLOTS:
 	TCDBus::Result<int> assign(QDBusVariant arg_) {
 		auto v = arg_.variant();
@@ -132,8 +133,10 @@ private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.Assignable")
 	Q_PROPERTY(QDBusVariant assignableInfo READ assignableInfo_)
+	Q_PROPERTY(QString hash READ hash_)
 	
 	Assignable m_assignable;
+	DeviceNode m_devNode;
 	QDBusVariant m_dbusAssignableInfo;
 };
 
@@ -155,7 +158,6 @@ public:
 				childIndices.append(i);
 				
 			TCDBus::FlatTreeNode<TCDBus::DeviceNode> fn{f_node.value, childIndices};
-			qDebug("Hello");
 			m_flatTree.append(fn);
 		}
 	}

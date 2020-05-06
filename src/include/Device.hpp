@@ -77,8 +77,8 @@ using DeviceInterface = std::variant<Assignable, DynamicReadable>;
 struct DeviceNode {
 	std::string name;
 	std::optional<DeviceInterface> interface;
+	std::string hash;
 };
-
 
 };
 };

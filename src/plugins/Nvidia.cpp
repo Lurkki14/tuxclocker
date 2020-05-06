@@ -1,3 +1,4 @@
+#include <Crypto.hpp>
 #include <Device.hpp>
 #include <Plugin.hpp>
 
@@ -10,6 +11,7 @@
 #include <nvml.h>
 
 using namespace TuxClocker;
+using namespace TuxClocker::Crypto;
 using namespace TuxClocker::Device;
 using namespace TuxClocker::Plugin;
 using namespace mpark::patterns;
@@ -34,6 +36,18 @@ struct UnspecializedReadable {
 	std::function<std::variant<ReadError, ReadableValue>(T)> func;
 	std::optional<std::string> unit;
 	std::string nodeName;
+	// One time function for getting a hash
+	std::function<std::string(T)> hash;
+	
+	static std::vector<DeviceNode> toDeviceNodes(
+			std::vector<UnspecializedReadable<T>> rawNodes, T data, std::string uuid) {
+		std::vector<DeviceNode> retval;
+		
+		for (const auto &rawNode : rawNodes) {
+			
+		}
+		return retval;
+	}
 };
 
 template <typename T>
@@ -43,10 +57,11 @@ struct UnspecializedAssignable {
 	std::function<std::optional<AssignmentError>(T, AssignableInfo, AssignmentArgument)> func;
 	std::optional<std::string> unit;
 	std::string nodeName;
+	std::function<std::string(std::string, T)> hash;
 	
 	static std::vector<DeviceNode> toDeviceNodes(
 			std::vector<UnspecializedAssignable<T>> rawNodes,
-			T devData) {
+			T devData, std::string uuid) {
 		std::vector<DeviceNode> retval;
 		for (auto &rawNode : rawNodes) {
 			if_let(pattern(some(arg)) = rawNode.assignableInfo(devData)) = [&](auto info) {
@@ -55,7 +70,8 @@ struct UnspecializedAssignable {
 				}, info);
 				auto node = DeviceNode {
 					.name = rawNode.nodeName,
-					.interface = assignable
+					.interface = assignable,
+					.hash = rawNode.hash(uuid, devData)
 				};
 				retval.push_back(node);
 			};
@@ -259,7 +275,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				return retval;
 			},
 			"W",
-			"Power Limit"
+			"Power Limit",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Power Limit");
+			}
 		}
 	};
 	
@@ -297,7 +316,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				return retval;
 			},
 			"MHz",
-			"Memory Clock Offset"
+			"Memory Clock Offset",
+			[](std::string uuid, NVClockInfo) {
+				return md5(uuid + "Memory Clock Offset");
+			}
 		}
 	};
 	
@@ -335,7 +357,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				return ret;
 			},
 			std::nullopt,
-			"Fan Mode"
+			"Fan Mode",
+			[](std::string uuid, uint) {
+				return md5(uuid + "Fan Mode");
+			}
 		}
 	};
 	
@@ -448,7 +473,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 					gpuRoot.appendChild(specNode);
 				
 				for (auto &node : UnspecializedAssignable<nvmlDevice_t>::toDeviceNodes(
-							rawNVMLAssignables, dev))
+							rawNVMLAssignables, dev, nvOpt.uuid))
 					gpuRoot.appendChild(node);
 			};
 			
@@ -472,11 +497,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 								  
 				auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
 				for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
-						rawNVCTRLClockAssignables, clockInfo))
+						rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
 					gpuRoot.appendChild(node);
 				
 				for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
-						rawNVCTRLAssignables, index))
+						rawNVCTRLAssignables, index, nvOpt.uuid))
 					gpuRoot.appendChild(node);
 			};
 			
