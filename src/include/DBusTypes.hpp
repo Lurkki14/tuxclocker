@@ -19,7 +19,7 @@ struct Result {
 		return arg;
 	}
 		
-	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Result<T> r) {
+	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Result<T> &r) {
 		arg.beginStructure();
 		arg >> r.error >> r.value;
 		arg.endStructure();
@@ -35,7 +35,7 @@ struct Range {
 		arg.endStructure();
 		return arg;
 	}
-	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Range r) {
+	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Range &r) {
 		arg.beginStructure();
 		arg >> r.min >> r.max;
 		arg.endStructure();
@@ -52,7 +52,7 @@ struct Enumeration {
 		arg.endStructure();
 		return arg;
 	}
-	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Enumeration e) {
+	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Enumeration &e) {
 		arg.beginStructure();
 		arg >> e.key >> e.name;
 		arg.endStructure();
@@ -69,7 +69,7 @@ struct DeviceNode {
 		arg.endStructure();
 		return arg;
 	}
-	friend const QDBusArgument &operator>>(const QDBusArgument &arg, DeviceNode d) {
+	friend const QDBusArgument &operator>>(const QDBusArgument &arg, DeviceNode &d) {
 		arg.beginStructure();
 		arg >> d.interface >> d.path;
 		arg.endStructure();
@@ -87,7 +87,7 @@ struct FlatTreeNode {
 		arg.endStructure();
 		return arg;
 	}
-	friend const QDBusArgument &operator>>(const QDBusArgument &arg, FlatTreeNode<T> f) {
+	friend const QDBusArgument &operator>>(const QDBusArgument &arg, FlatTreeNode<T> &f) {
 		arg.beginStructure();
 		arg >> f.value >> f.childIndices;
 		arg.endStructure();
@@ -96,5 +96,3 @@ struct FlatTreeNode {
 };
 
 };
-
-//Q_DECLARE_METATYPE(TuxClocker::DBus::ReadResult)
