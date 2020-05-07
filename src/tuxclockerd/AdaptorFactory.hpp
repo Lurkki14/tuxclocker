@@ -20,7 +20,7 @@ public:
 		std::optional<QDBusAbstractAdaptor*> retval = std::nullopt;
 		match(iface)
 			(pattern(as<DynamicReadable>(arg)) = [&](auto dr) {
-				retval = new DynamicReadableAdaptor(obj, dr);
+				retval = new DynamicReadableAdaptor(obj, dr, devNode);
 			},
 			pattern(as<Assignable>(arg)) = [&](auto a) {
 				retval = new AssignableAdaptor(obj, a, devNode);

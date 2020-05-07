@@ -37,14 +37,25 @@ struct UnspecializedReadable {
 	std::optional<std::string> unit;
 	std::string nodeName;
 	// One time function for getting a hash
-	std::function<std::string(T)> hash;
+	std::function<std::string(std::string, T)> hash;
 	
 	static std::vector<DeviceNode> toDeviceNodes(
 			std::vector<UnspecializedReadable<T>> rawNodes, T data, std::string uuid) {
 		std::vector<DeviceNode> retval;
 		
 		for (const auto &rawNode : rawNodes) {
-			
+			// Check if value can be read
+			if_let(pattern(as<ReadableValue>(_)) = rawNode.func(data)) = [=, &retval] {
+				auto readable = DynamicReadable([=] {
+					return rawNode.func(data);
+				});
+				auto devNode = DeviceNode{
+					.name = rawNode.nodeName,
+					.interface = readable,
+					.hash = rawNode.hash(uuid, data)
+				};
+				retval.push_back(devNode);
+			};
 		}
 		return retval;
 	}
@@ -198,7 +209,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				});
 			},
 			"mV",
-			"Core Voltage"
+			"Core Voltage",
+			[](std::string uuid, uint) {
+				return md5(uuid + "Core Voltage");
+			}
 		}
 	};
 	
@@ -210,7 +224,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				}, std::nullopt);
 			},
 			"°C",
-			"Temperature"
+			"Temperature",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Temperature");
+			}
 		},
 		{
 			[](nvmlDevice_t dev) {
@@ -222,7 +239,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				});
 			},
 			"W",
-			"Power Usage"
+			"Power Usage",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Power Usage");
+			}
 		},
 		{
 			[](nvmlDevice_t dev) {
@@ -231,7 +251,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				}, std::nullopt);
 			},
 			"MHz",
-			"Core Clock"
+			"Core Clock",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Core Clock");
+			}
 		},
 		{
 			[](nvmlDevice_t dev) {
@@ -240,7 +263,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				}, std::nullopt);
 			},
 			"MHz",
-			"Memory Clock"
+			"Memory Clock",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Memory Clock");
+			}
 		}
 	};
 	
@@ -441,36 +467,16 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 
 	
 	// [GPUOpt] -> [TreeNode DeviceNode]
-	// Map GPU data to readables
+	// Map GPU data to device nodes
 	TreeNode<DeviceNode> rootNode;
 	auto gpuNodes = fp::transform([&](auto nvOpt) {
 			TreeNode<DeviceNode> gpuRoot = TreeNode(DeviceNode{.name = nvOpt.name});
 			
 			// Get nvml nodes if there is a device
 			if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
-				// These might be similar enough to make sense to be templates
-				auto availableNVMLNodes = fp::keep_if([&](auto rawNode) {
-						auto result = rawNode.func(dev);
-						match(result)(pattern(as<ReadError>(_)) = []() {return false;},
-								pattern(_) = []() {return true;});
-						return true;
-					}, rawNVMLNodes);
-				
-				/* After a day of debugging, I found out that this needs to be captured by
-				 * value instead of reference or we get a bad function call 
-				 * when this goes out of scope */
-				auto specializedNVMLNodes = fp::transform([=](auto rawNode) {
-						auto readable = DynamicReadable(
-							[=]() {return rawNode.func(dev);});
-						auto devNode = DeviceNode{
-							.name = rawNode.nodeName,
-							.interface = readable
-						};
-						return devNode;
-					}, availableNVMLNodes);
-
-				for (auto &specNode : specializedNVMLNodes)
-					gpuRoot.appendChild(specNode);
+				for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
+						rawNVMLNodes, dev, nvOpt.uuid))
+					gpuRoot.appendChild(node);
 				
 				for (auto &node : UnspecializedAssignable<nvmlDevice_t>::toDeviceNodes(
 							rawNVMLAssignables, dev, nvOpt.uuid))
@@ -479,21 +485,9 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			
 			// Same for NVCtrl
 			if_let(pattern(some(arg)) = nvOpt.index) = [&](auto index) {
-				auto availableNodes = fp::keep_if([index](auto rawNode) {
-						auto result = rawNode.func(index);
-						match(result)(pattern(as<ReadError>(_)) = []() {return false;},
-								pattern(_) = []() {return true;});
-						return true;
-					}, rawNVCTRLNodes);
-				auto specializedNodes = fp::transform([=](auto rawNode) {
-						auto readable = DynamicReadable(
-							[=]() {return rawNode.func(index);});
-						auto devNode = DeviceNode{.name = rawNode.nodeName,
-							.interface = readable
-						};
-						return devNode;						
-					}, availableNodes);
-				for (auto &specNode : specializedNodes) gpuRoot.appendChild(specNode);
+				for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(rawNVCTRLNodes, index,
+						nvOpt.uuid))
+					gpuRoot.appendChild(node);
 								  
 				auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
 				for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(

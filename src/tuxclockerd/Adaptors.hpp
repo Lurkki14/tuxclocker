@@ -22,11 +22,13 @@ Q_DECLARE_METATYPE(TCDBus::Result<QDBusVariant>)
 
 class DynamicReadableAdaptor : public QDBusAbstractAdaptor {
 public:
-	explicit DynamicReadableAdaptor(QObject *obj, DynamicReadable dr) : QDBusAbstractAdaptor(obj) {
+	explicit DynamicReadableAdaptor(QObject *obj, DynamicReadable dr, DeviceNode node) :
+			QDBusAbstractAdaptor(obj), m_deviceNode(node) {
 		// Ideally this should be moved somewhere else but QMetaType does not handle namespaces well
 		qDBusRegisterMetaType<TCDBus::Result<QDBusVariant>>();
 		m_dynamicReadable = dr;
 	}
+	QString hash_() {return QString::fromStdString(m_deviceNode.hash);}
 public Q_SLOTS:
 	TCDBus::Result<QDBusVariant> value() {
 		QVariant v;
@@ -53,7 +55,9 @@ public Q_SLOTS:
 private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.DynamicReadable")
-
+	Q_PROPERTY(QString hash READ hash_)
+	
+	DeviceNode m_deviceNode;
 	DynamicReadable m_dynamicReadable;
 };
 
