@@ -1,10 +1,13 @@
 #pragma once
 
+#include <Device.hpp>
 #include <QDBusArgument>
 #include <QDBusVariant>
 #include <QDBusMetaType>
 #include <QVector>
-	
+
+namespace TC = TuxClocker;
+
 namespace TuxClocker::DBus {
 
 template <typename T>
@@ -41,6 +44,17 @@ struct Range {
 		arg.endStructure();
 		return arg;
 	}
+	TC::Device::AssignableInfo toAssignableInfo() {
+		auto min_v = min.variant();
+		auto max_v = max.variant();
+		
+		if (min_v.type() == QMetaType::Int && max_v.type() == QMetaType::Int)
+			return TC::Device::Range<int>(min_v.value<int>(), max_v.value<int>());
+		if (min_v.type() == QMetaType::Double && max_v.type() == QMetaType::Double)
+			return TC::Device::Range<double>(min_v.value<double>(), max_v.value<double>());
+		// Should never reach here
+		return TC::Device::Range<int>(0, 0);
+	}
 };
 
 struct Enumeration {
@@ -57,8 +71,17 @@ struct Enumeration {
 		arg >> e.key >> e.name;
 		arg.endStructure();
 		return arg;
-	}	
+	}
 };
+
+/* MOC crap doubles this somewhere
+TC::Device::AssignableInfo enumVecToAssignableInfo(QVector<Enumeration> enums) {
+	TC::Device::EnumerationVec v;
+	for (const auto &e : enums)
+		v.push_back(TC::Device::Enumeration(e.name.toStdString(), e.key));
+	return v;
+}
+*/
 
 struct DeviceNode {
 	QString interface;
