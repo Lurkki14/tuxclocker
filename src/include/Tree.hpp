@@ -13,8 +13,33 @@ struct FlatTreeNode {
 };
 	
 template <typename T>
+class TreeNode;
+
+template <typename T>
 struct FlatTree {
 	std::vector<FlatTreeNode<T>> nodes;
+	
+	static TreeNode<T> toTree(FlatTree<T> flatTree) {
+		std::function<void(TreeNode<T>*, uint)> recur;
+		recur = [&recur, flatTree](TreeNode<T> *node, uint i) {
+			auto c_indices = flatTree.nodes[i].childIndices;
+			for (auto index : c_indices)
+				node->appendChild(TreeNode<T>(flatTree.nodes[index].value));
+			
+			uint j = 0;
+			for (auto &c_node : *(node->childrenPtr())) {
+				recur(&c_node, c_indices[j]);
+				j++;
+			}
+		};
+		TreeNode<T> root;
+		if (flatTree.nodes.size() > 0) {
+			auto realRoot = TreeNode<T>(flatTree.nodes.front().value);
+			recur(&realRoot, 0);
+			root = realRoot;
+		}
+		return root;
+	}
 };
 
 template <typename T>
@@ -51,7 +76,6 @@ public:
 					j++;
 				});
 				node.childIndices.push_back(index);
-				//j = 0, index = 0;
 			}
 			nodes.push_back(node);
 		});
