@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Device.hpp>
+#include <optional>
 #include <QDBusArgument>
 #include <QDBusVariant>
 #include <QDBusMetaType>
@@ -28,6 +29,10 @@ struct Result {
 		arg.endStructure();
 		return arg;
 	}
+	std::optional<T> toOptional() {
+		std::optional<T> r = (error) ? std::optional(value) : std::nullopt;
+		return r;
+	}
 };
 
 struct Range {
@@ -48,9 +53,11 @@ struct Range {
 		auto min_v = min.variant();
 		auto max_v = max.variant();
 		
-		if (min_v.type() == QMetaType::Int && max_v.type() == QMetaType::Int)
+		auto im = static_cast<QVariant::Type>(QMetaType::Int);
+		auto dm = static_cast<QVariant::Type>(QMetaType::Double);
+		if (min_v.type() == im && max_v.type() == im)
 			return TC::Device::Range<int>(min_v.value<int>(), max_v.value<int>());
-		if (min_v.type() == QMetaType::Double && max_v.type() == QMetaType::Double)
+		if (min_v.type() == dm && max_v.type() == dm)
 			return TC::Device::Range<double>(min_v.value<double>(), max_v.value<double>());
 		// Should never reach here
 		return TC::Device::Range<int>(0, 0);
