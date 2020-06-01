@@ -32,16 +32,14 @@ int main(int argc, char **argv) {
 			TreeNode<DeviceNode> node,
 			QString parentPath, TreeNode<TCDBus::DeviceNode> *dbusNode) {
 		auto obj = new QObject(&root); // Is destroyed when root goes out of scope
-		// Remove whitespaces to make valid object paths
-		auto objName = QString::fromStdString(node.value().name).replace(" ", "");
+		auto objName = QString::fromStdString(node.value().hash).replace(" ", "");
 		auto thisPath = parentPath + objName;
 		QString ifaceName;
+		adaptors.append(new NodeAdaptor(obj, node.value()));
 		if_let(pattern(some(arg)) = node.value().interface) = [&](auto iface) {
 			if_let(pattern(some(arg)) = 
-					AdaptorFactory::adaptor(obj, iface, node.value())) = [&](auto adaptor) {
+					AdaptorFactory::adaptor(obj, iface)) = [&](auto adaptor) {
 				adaptors.append(adaptor);
-				connection.registerObject(thisPath, obj);
-				
 				// TODO: don't hardcode interface name
 				// Maybe create an intermediate class that contains the interface name to avoid this
 				// For some reason this throws a bad_cast when using 'as' with pointer type
@@ -50,13 +48,15 @@ int main(int argc, char **argv) {
 						ifaceName = "org.tuxclocker.Assignable";
 					},
 					pattern(as<DynamicReadableAdaptor>(_)) = [&] {
-						 ifaceName = "org.tuxclocker.DynamicReadable";
+						ifaceName = "org.tuxclocker.DynamicReadable";
 					},
 					pattern(_) = [] {});
 			};
 		};
+		if (!connection.registerObject(thisPath, obj))
+			qDebug() << "Couldn't register object at path" << thisPath << connection.lastError();
 		
-		auto thisDBusNode = TreeNode<TCDBus::DeviceNode>{{thisPath, ifaceName}};
+		auto thisDBusNode = TreeNode<TCDBus::DeviceNode>{{ifaceName, thisPath}};
 		dbusNode->appendChild(thisDBusNode);
 		qDebug() << thisPath;
 		for (const auto &child : node.children())
@@ -79,8 +79,6 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-	//qDebug() << dbusRootNode.toFlatTree().nodes.size();
-	//qDebug() << lvl1nodes.toFlatTree().nodes.size();
 	auto ma = new MainAdaptor(&root, dbusRootNode);
 	connection.registerObject("/", &root);
 	
