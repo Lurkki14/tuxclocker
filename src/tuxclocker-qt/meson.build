@@ -2,12 +2,17 @@ qt5 = import('qt5')
 qt5_dep = dependency('qt5', modules: ['DBus', 'Charts', 'Widgets'])
 
 moc_files = qt5.preprocess(moc_headers: ['MainWindow.hpp',
-		'data/AssignableItem.hpp'],
+		'data/AssignableItem.hpp',
+		'data/AssignableProxy.hpp',
+		'data/DeviceModel.hpp'],
 	dependencies: qt5_dep)
 
 sources = ['main.cpp',
+	'data/AssignableItem.cpp',
+	'data/AssignableProxy.cpp',
 	'data/DeviceModel.cpp',
 	'data/DeviceModelDelegate.cpp',
+	'widgets/DeviceTreeView.cpp',
 	'MainWindow.cpp']
 
 local_incdir = include_directories(['data',
@@ -17,6 +22,7 @@ local_incdir = include_directories(['data',
 executable('tuxclocker-qt',
 	moc_files,
 	sources,
+	override_options : ['cpp_std=c++17'],
 	dependencies: qt5_dep,
 	include_directories: [incdir, local_incdir],
 	install: true)

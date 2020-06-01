@@ -56,3 +56,15 @@ void DeviceModelDelegate::setModelData(QWidget *editor,
 		model->setData(index, v, DeviceModel::AssignableRole);
 	}
 }
+
+void DeviceModelDelegate::updateEditorGeometry(QWidget *editor,
+		const QStyleOptionViewItem &option, const QModelIndex&) const {
+	// Why do I need to override this to perform such a basic task?
+	editor->setGeometry(option.rect);
+}
+
+/*void DeviceModelDelegate::drawCheck(QPainter *painter,
+		const QStyleOptionViewItem &option, const QRect &rect,
+		Qt::CheckState state) const {
+	QStyledItemDelegate::drawCheck(painter, option, rect, state)
+}*/

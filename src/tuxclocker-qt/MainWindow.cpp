@@ -1,4 +1,9 @@
+#include "MainWindow.hpp"
+
 #include <DBusTypes.hpp>
+#include <DeviceBrowser.hpp>
+#include <DeviceModel.hpp>
+#include <DeviceModelDelegate.hpp>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusMetaType>
@@ -9,10 +14,6 @@
 #include <QTreeView>
 #include <QVector>
 #include <Tree.hpp>
-
-#include <DeviceModel.hpp>
-#include <DeviceModelDelegate.hpp>
-#include "MainWindow.hpp"
 
 namespace TCDBus = TuxClocker::DBus;
 
@@ -48,9 +49,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	
 	auto root = flatTree.toTree(flatTree);
 	
-	auto view = new QTreeView;
+	/*auto view = new QTreeView;
 	view->setItemDelegate(new DeviceModelDelegate);
-	auto model = new DeviceModel(root);
 	view->setModel(model);
-	setCentralWidget(view);
+	setCentralWidget(view);*/
+	
+	auto model = new DeviceModel(root);
+	auto browser = new DeviceBrowser(*model);
+	setCentralWidget(browser);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "AssignableItem.hpp"
+#include "AssignableItem.hpp"
 #include "AssignableItemData.hpp"
 
 #include <DBusTypes.hpp>
@@ -10,6 +10,7 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QStandardItemModel>
+#include <QPalette>
 
 namespace p = mpark::patterns;
 namespace TC = TuxClocker;
@@ -32,4 +33,17 @@ public:
 	enum class FilterFlag {
 		
 	};
+	// For decoupling AssignableItems created in the model
+	void applyChanges() {emit changesApplied();}
+signals:
+	void changesApplied();
+private:
+	Q_OBJECT
+	
+	constexpr int fadeOutTime() {return 5000;}
+	constexpr int transparency() {return 120;}
+	// Colors for items
+	QColor errorColor() {return QColor(255, 0, 0, transparency());} // red
+	QColor unappliedColor() {return QColor(255, 255, 0, transparency());} // yellow
+	QColor successColor() {return QColor(0, 255, 0, transparency());} // green
 };
