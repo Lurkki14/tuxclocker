@@ -22,13 +22,12 @@ Q_DECLARE_METATYPE(TCDBus::Result<QDBusVariant>)
 
 class DynamicReadableAdaptor : public QDBusAbstractAdaptor {
 public:
-	explicit DynamicReadableAdaptor(QObject *obj, DynamicReadable dr, DeviceNode node) :
-			QDBusAbstractAdaptor(obj), m_deviceNode(node) {
+	explicit DynamicReadableAdaptor(QObject *obj, DynamicReadable dr) :
+			QDBusAbstractAdaptor(obj) {
 		// Ideally this should be moved somewhere else but QMetaType does not handle namespaces well
 		qDBusRegisterMetaType<TCDBus::Result<QDBusVariant>>();
 		m_dynamicReadable = dr;
 	}
-	QString hash_() {return QString::fromStdString(m_deviceNode.hash);}
 public Q_SLOTS:
 	TCDBus::Result<QDBusVariant> value() {
 		QVariant v;
@@ -55,9 +54,7 @@ public Q_SLOTS:
 private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.DynamicReadable")
-	Q_PROPERTY(QString hash READ hash_)
 	
-	DeviceNode m_deviceNode;
 	DynamicReadable m_dynamicReadable;
 };
 
@@ -67,8 +64,8 @@ Q_DECLARE_METATYPE(TCDBus::Result<int>)
 
 class AssignableAdaptor : public QDBusAbstractAdaptor {
 public:
-	explicit AssignableAdaptor(QObject *obj, Assignable a, DeviceNode devNode) :
-			QDBusAbstractAdaptor(obj), m_assignable(a), m_devNode(devNode) {
+	explicit AssignableAdaptor(QObject *obj, Assignable a) :
+			QDBusAbstractAdaptor(obj), m_assignable(a) {
 		qDBusRegisterMetaType<TCDBus::Range>();
 		qDBusRegisterMetaType<TCDBus::Enumeration>();
 		qDBusRegisterMetaType<QVector<TCDBus::Enumeration>>();
@@ -103,7 +100,6 @@ public:
 		m_dbusAssignableInfo = QDBusVariant(a_info);
 	}
 	QDBusVariant assignableInfo_() {return m_dbusAssignableInfo;}
-	QString hash_() {return QString::fromStdString(m_devNode.hash);}
 public Q_SLOTS:
 	TCDBus::Result<int> assign(QDBusVariant arg_) {
 		auto v = arg_.variant();
@@ -137,15 +133,29 @@ private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.Assignable")
 	Q_PROPERTY(QDBusVariant assignableInfo READ assignableInfo_)
-	Q_PROPERTY(QString hash READ hash_)
 	
 	Assignable m_assignable;
-	DeviceNode m_devNode;
 	QDBusVariant m_dbusAssignableInfo;
 };
 
 Q_DECLARE_METATYPE(TCDBus::DeviceNode)
 Q_DECLARE_METATYPE(TCDBus::FlatTreeNode<TCDBus::DeviceNode>)
+
+// Holds the name and hash of nodes, even if they don't implement an interface
+class NodeAdaptor : public QDBusAbstractAdaptor {
+public:
+	NodeAdaptor(QObject *obj, DeviceNode devNode) : QDBusAbstractAdaptor(obj),
+		m_devNode(devNode) {}
+	QString name_() {return QString::fromStdString(m_devNode.name);}
+	QString hash_() {return QString::fromStdString(m_devNode.hash);}
+private:
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.Node")
+	Q_PROPERTY(QString hash READ hash_)
+	Q_PROPERTY(QString name READ name_)
+	
+	DeviceNode m_devNode;
+};
 
 // Holds the main tree and returns it as a list (because parsing XML sucks)
 class MainAdaptor : public QDBusAbstractAdaptor {
