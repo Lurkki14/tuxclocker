@@ -74,9 +74,14 @@ EnumerationVec toEnumVec(QVector<TCDBus::Enumeration> enums) {
 	}, enums.toStdVector());
 }
 
-void DeviceModel::connectAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
-		QDBusConnection conn, AssignableItem *ifaceItem) {
+QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
+		QDBusConnection conn, AssignableItemData itemData) {
+	auto ifaceItem = new AssignableItem(this);
 	auto proxy = new AssignableProxy(node.value().path, conn, this);
+	QVariant v;
+	v.setValue(itemData);
+	ifaceItem->setData(v, AssignableRole);
+	
 	connect(ifaceItem, &AssignableItem::assignableDataChanged,
 			[=](QVariant v) {
 		proxy->setValue(v);
@@ -103,6 +108,7 @@ void DeviceModel::connectAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
 	connect(this, &DeviceModel::changesApplied, [=] {
 		proxy->apply();
 	});
+	return ifaceItem;
 }
 
 std::optional<QStandardItem*> DeviceModel::setupAssignable(
@@ -118,61 +124,16 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 	auto d_arg = qvariant_cast<QDBusArgument>(a_info);
 	switch (d_arg.currentType()) {
 		case QDBusArgument::StructureType: {
-			auto ifaceItem = new AssignableItem;
-			ifaceItem->setEditable(true);
-			//ifaceItem->setCheckable(true);
-			/*auto proxy = new AssignableProxy(node.value().path, conn, this);
-			connect(ifaceItem, &AssignableItem::assignableDataChanged,
-					[=](QVariant v) {
-				proxy->setValue(v);
-				ifaceItem->setData(unappliedColor(), Qt::BackgroundRole);
-			});
-			
-			connect(proxy, &AssignableProxy::applied, [=](auto err) {
-				// Fade out result color
-				auto startColor = (err.has_value()) ? errorColor()
-					: successColor();
-				auto anim = new QVariantAnimation;
-				anim->setDuration(fadeOutTime());
-				anim->setStartValue(startColor);
-				anim->setEndValue(QPalette().color(QPalette::Base));
-				
-				connect(anim, &QVariantAnimation::valueChanged, [=](QVariant v) {
-					QVariant iv;
-					iv.setValue(v.value<QColor>());
-					ifaceItem->setData(iv, Qt::BackgroundRole);
-				});
-				anim->start(QAbstractAnimation::DeleteWhenStopped);
-			});
-			
-			connect(this, &DeviceModel::changesApplied, [=] {
-				proxy->apply();
-			});*/
-			
-			connectAssignable(node, conn, ifaceItem);
-
 			TCDBus::Range r;
 			d_arg >> r;
-			QVariant v;
 			AssignableItemData data(r.toAssignableInfo());
-			v.setValue(data);
-			ifaceItem->setData(v, Role::AssignableRole);
-			return ifaceItem;
+			return createAssignable(node, conn, data);
 		}
 		case QDBusArgument::ArrayType: {
-			auto ifaceItem = new AssignableItem;
-			
-			connectAssignable(node, conn, ifaceItem);
-			
 			QVector<TCDBus::Enumeration> e;
-			// TODO: convert to EnumerationVec
 			d_arg >> e;
-			QVariant v;
 			AssignableItemData data(toEnumVec(e));
-			v.setValue(data);
-			ifaceItem->setData(v, Role::AssignableRole);
-			ifaceItem->setText(e.first().name);
-			return ifaceItem;
+			return createAssignable(node, conn, data);
 		}
 		default:
 			return std::nullopt;

@@ -42,8 +42,8 @@ private:
 	Q_OBJECT
 	
 	// Separate handling interfaces since otherwise we run out of columns
-	void connectAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
-		QDBusConnection conn, AssignableItem *ifaceItem);
+	QStandardItem *createAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
+		QDBusConnection conn, AssignableItemData data);
 	std::optional<QStandardItem*> setupAssignable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
 	std::optional<QStandardItem*> setupDynReadable(
