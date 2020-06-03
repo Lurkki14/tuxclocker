@@ -2,6 +2,7 @@
 
 #include "DeviceModel.hpp"
 #include <DoubleRangeEditor.hpp>
+#include <EnumEditor.hpp>
 #include <IntRangeEditor.hpp>
 #include <patterns.hpp>
 
@@ -26,8 +27,13 @@ QWidget *DeviceModelDelegate::createEditor(QWidget *parent,
 					},
 					pattern(as<Range<double>>(arg)) = [&](auto dr) {	
 						editor = new DoubleRangeEditor(dr, parent);
-					});
-		});
+					}
+				);
+			},
+			pattern(as<EnumerationVec>(arg)) = [&](auto ev) {
+				editor = new EnumEditor(ev, parent);
+			}
+		);
 	}
 	return editor;
 }

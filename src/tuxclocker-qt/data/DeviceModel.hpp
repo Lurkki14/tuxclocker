@@ -12,10 +12,11 @@
 #include <QStandardItemModel>
 #include <QPalette>
 
-namespace p = mpark::patterns;
 namespace TC = TuxClocker;
 namespace TCDBus = TuxClocker::DBus;
 
+// Why the fuck do I have to forward declare this?
+class AssignableItem;
 
 class DeviceModel : public QStandardItemModel {
 public:
@@ -40,8 +41,15 @@ signals:
 private:
 	Q_OBJECT
 	
-	constexpr int fadeOutTime() {return 5000;}
-	constexpr int transparency() {return 120;}
+	// Separate handling interfaces since otherwise we run out of columns
+	void connectAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
+		QDBusConnection conn, AssignableItem *ifaceItem);
+	std::optional<QStandardItem*> setupAssignable(
+		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
+	std::optional<QStandardItem*> setupDynReadable(
+		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
+	constexpr int fadeOutTime() {return 5000;} // milliseconds
+	constexpr int transparency() {return 120;} // 0-255
 	// Colors for items
 	QColor errorColor() {return QColor(255, 0, 0, transparency());} // red
 	QColor unappliedColor() {return QColor(255, 255, 0, transparency());} // yellow
