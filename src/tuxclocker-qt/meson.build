@@ -4,7 +4,8 @@ qt5_dep = dependency('qt5', modules: ['DBus', 'Charts', 'Widgets'])
 moc_files = qt5.preprocess(moc_headers: ['MainWindow.hpp',
 		'data/AssignableItem.hpp',
 		'data/AssignableProxy.hpp',
-		'data/DeviceModel.hpp'],
+		'data/DeviceModel.hpp',
+		'data/DynamicReadableProxy.hpp'],
 	dependencies: qt5_dep)
 
 sources = ['main.cpp',
@@ -12,11 +13,14 @@ sources = ['main.cpp',
 	'data/AssignableProxy.cpp',
 	'data/DeviceModel.cpp',
 	'data/DeviceModelDelegate.cpp',
+	'data/DynamicReadableProxy.cpp',
 	'widgets/DeviceTreeView.cpp',
+	'widgets/EnumEditor.cpp',
 	'MainWindow.cpp']
 
 local_incdir = include_directories(['data',
 	'widgets',
+	'../include/deps/FunctionalPlus/include',
 	'../include/deps/patterns/include/mpark'])
 	
 executable('tuxclocker-qt',
