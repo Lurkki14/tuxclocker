@@ -13,6 +13,15 @@ public:
 	DeviceTreeView(DeviceModel &model, QWidget *parent = nullptr);
 	// Accessor method for connecting everything in the browser
 	const DeviceModel &deviceModel() {return m_deviceModel;}
+protected:
+	/* Workaround for the retarded behavior of waiting for a double click,
+	   you can't even disable it! */
+    bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger,
+			  QEvent *event) {
+        return QTreeView::edit(index,
+			trigger == QAbstractItemView::SelectedClicked ?
+			QAbstractItemView::AllEditTriggers : trigger, event);
+    }
 private:
 	DeviceModel &m_deviceModel;
 	DeviceModelDelegate *m_delegate;

@@ -7,6 +7,9 @@ Q_DECLARE_METATYPE(AssignableItemData)
 
 DeviceTreeView::DeviceTreeView(DeviceModel &model, QWidget *parent)
 		: QTreeView(parent), m_deviceModel(model) {
+	auto triggers = editTriggers() ^= DoubleClicked;
+	triggers |= SelectedClicked;
+	setEditTriggers(SelectedClicked | EditKeyPressed);
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QTreeView::customContextMenuRequested, [this](QPoint point) {
 		auto index = indexAt(point);
