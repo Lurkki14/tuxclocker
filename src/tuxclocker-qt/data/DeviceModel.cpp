@@ -140,23 +140,35 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 	}
 }
 
+template <typename T>
+void updateReadItemText(QStandardItem *item, T value,
+		std::optional<QString> unit) {
+	// TODO: this can be made a lot (around 3x) faster by using direct copying
+	// Form a string of the form "1000 MHz" if has unit
+	auto text = (unit.has_value()) ?
+		QString("%1 %2").arg(value).arg(unit.value()) :
+		QString("%1").arg(value);
+	item->setText(text);
+}
+
 std::optional<QStandardItem*> DeviceModel::setupDynReadable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
 	auto item = new QStandardItem;
 	auto proxy = new DynamicReadableProxy(node.value().path, conn, this);
+	auto unit = proxy->unit();
 	
 	connect(proxy, &DynamicReadableProxy::valueChanged, [=](ReadResult res) {
 		p::match(res)(
 			pattern(as<ReadableValue>(arg)) = [=](auto rv) {
 				p::match(rv)(
 					pattern(as<double>(arg)) = [=](auto d) {
-						item->setText(QString::number(d));
+						updateReadItemText(item, d, unit);
 					},
 					pattern(as<int>(arg)) = [=](auto i) {
-						item->setText(QString::number(i));
+						updateReadItemText(item, i, unit);
 					},
 					pattern(as<uint>(arg)) = [=](auto u) {
-						item->setText(QString::number(u));
+						updateReadItemText(item, u, unit);
 					},
 					pattern(_) = []{}
 				);

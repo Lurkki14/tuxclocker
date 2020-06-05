@@ -9,9 +9,7 @@ namespace TCD = TuxClocker::DBus;
 using namespace TuxClocker::Device;
 
 Q_DECLARE_METATYPE(TCD::Result<QDBusVariant>)
-Q_DECLARE_METATYPE(ReadableValue)
-Q_DECLARE_METATYPE(ReadError)
-Q_DECLARE_METATYPE(ReadResult)
+Q_DECLARE_METATYPE(TCD::Result<QString>)
 
 ReadResult toTCResult(TCD::Result<QDBusVariant> res) {
 	if (res.error)
@@ -37,6 +35,7 @@ DynamicReadableProxy::DynamicReadableProxy(QString path, QDBusConnection conn,
 		QObject *parent) : QObject(parent),
 		m_iface("org.tuxclocker", path, "org.tuxclocker.DynamicReadable", conn) {
 	qDBusRegisterMetaType<TCD::Result<QDBusVariant>>();
+	qDBusRegisterMetaType<TCD::Result<QString>>();
 	
 	m_timer.start(1000);
 	
@@ -49,4 +48,20 @@ DynamicReadableProxy::DynamicReadableProxy(QString path, QDBusConnection conn,
 			//qDebug() << QVariant::fromStdVariant(toTCResult(reply.value()));
 			emit valueChanged(toTCResult(reply.value()));
 	});
+}
+
+std::optional<QString> DynamicReadableProxy::unit() {
+	/* Workaround for QVariant, or whatever errors out braindeath by calling
+	   the method instead */
+	QDBusInterface propIface("org.tuxclocker", m_iface.path(),
+		"org.freedesktop.DBus.Properties", m_iface.connection());
+	QDBusReply<QDBusVariant> reply =
+		propIface.call("Get", "org.tuxclocker.DynamicReadable", "unit");
+	if (!reply.isValid()) {
+		return std::nullopt;
+	}
+	auto arg = reply.value().variant().value<QDBusArgument>();
+	TCD::Result<QString> value;
+	arg >> value;
+	return (value.error) ? std::nullopt : std::optional(value.value);
 }

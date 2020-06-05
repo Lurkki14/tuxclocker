@@ -10,6 +10,7 @@ class DynamicReadableProxy : public QObject {
 public:
 	DynamicReadableProxy(QString path, QDBusConnection conn,
 		QObject *parent = nullptr);
+	std::optional<QString> unit();
 signals:
 	void valueChanged(TuxClocker::Device::ReadResult val);
 private:
