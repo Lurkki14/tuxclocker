@@ -48,7 +48,7 @@ struct UnspecializedReadable {
 			if_let(pattern(as<ReadableValue>(_)) = rawNode.func(data)) = [=, &retval] {
 				auto readable = DynamicReadable([=] {
 					return rawNode.func(data);
-				});
+				}, rawNode.unit);
 				auto devNode = DeviceNode{
 					.name = rawNode.nodeName,
 					.interface = readable,
