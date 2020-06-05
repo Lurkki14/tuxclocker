@@ -19,14 +19,26 @@ using namespace mpark::patterns;
 namespace TCDBus = TuxClocker::DBus;
 
 Q_DECLARE_METATYPE(TCDBus::Result<QDBusVariant>)
+Q_DECLARE_METATYPE(TCDBus::Result<QString>)
 
+/* On success, returns the value, on error 'error' field is set and the error
+   code is stored in 'value' */
 class DynamicReadableAdaptor : public QDBusAbstractAdaptor {
 public:
 	explicit DynamicReadableAdaptor(QObject *obj, DynamicReadable dr) :
 			QDBusAbstractAdaptor(obj) {
 		// Ideally this should be moved somewhere else but QMetaType does not handle namespaces well
 		qDBusRegisterMetaType<TCDBus::Result<QDBusVariant>>();
+		qDBusRegisterMetaType<TCDBus::Result<QString>>();
 		m_dynamicReadable = dr;
+	}
+	// Might not have a unit
+	TCDBus::Result<QString> unit_() {
+		return (m_dynamicReadable.unit().has_value()) ?
+			TCDBus::Result<QString>{
+				false,
+				QString::fromStdString(m_dynamicReadable.unit().value())} :
+			TCDBus::Result<QString>{true, QString("")};
 	}
 public Q_SLOTS:
 	TCDBus::Result<QDBusVariant> value() {
@@ -54,6 +66,7 @@ public Q_SLOTS:
 private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.DynamicReadable")
+	Q_PROPERTY(TCDBus::Result<QString> unit READ unit_)
 	
 	DynamicReadable m_dynamicReadable;
 };
@@ -100,6 +113,7 @@ public:
 		m_dbusAssignableInfo = QDBusVariant(a_info);
 	}
 	QDBusVariant assignableInfo_() {return m_dbusAssignableInfo;}
+	//QString unit_() {return m_assignable.uni}
 public Q_SLOTS:
 	TCDBus::Result<int> assign(QDBusVariant arg_) {
 		auto v = arg_.variant();
