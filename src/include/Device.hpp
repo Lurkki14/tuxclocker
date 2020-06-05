@@ -35,7 +35,7 @@ struct Enumeration {
 };
 
 using AssignmentArgument = std::variant<int, double, uint>;
-using ReadableValue = std::variant<int, uint, double>;
+using ReadableValue = std::variant<int, uint, double, std::string>;
 using ReadResult = std::variant<ReadError, ReadableValue>;
 using RangeInfo = std::variant<Range<int>, Range<double>>;
 using EnumerationVec = std::vector<Enumeration>;
@@ -60,15 +60,24 @@ private:
 class DynamicReadable {
 public:
 	DynamicReadable() {}
-	DynamicReadable(const std::function<std::variant<ReadError, ReadableValue>()> readFunc) {
+	DynamicReadable(const std::function<std::variant<ReadError,
+			ReadableValue>()> readFunc,
+			std::optional<std::string> unit = std::nullopt) {
 		m_readFunc = readFunc;
+		m_unit = unit;
 	}
 	/*std::variant<ReadError, ReadableValue>*/ ReadResult read() {
 		return m_readFunc();
 	}
+	auto unit() {return m_unit;}
 private:
 	std::function<std::variant<ReadError, ReadableValue>()> m_readFunc;
 	std::optional<std::string> m_unit;
+};
+
+struct StaticReadable {
+	ReadableValue value;
+	std::optional<std::string> unit;
 };
 
 // DeviceNode has a name, and optionally implements one of [Assignable, DynamicReadable]
