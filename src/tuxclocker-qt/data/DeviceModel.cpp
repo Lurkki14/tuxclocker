@@ -102,6 +102,12 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 			iv.setValue(v.value<QColor>());
 			ifaceItem->setData(iv, Qt::BackgroundRole);
 		});
+		
+		connect(anim, &QVariantAnimation::finished, [=] {
+			// Set invalid color to 'reset' the color
+			ifaceItem->setData(QVariant(), Qt::BackgroundRole);
+		});
+		
 		anim->start(QAbstractAnimation::DeleteWhenStopped);
 	});
 	

@@ -5,6 +5,8 @@
 #include <EnumEditor.hpp>
 #include <IntRangeEditor.hpp>
 #include <patterns.hpp>
+#include <QDebug>
+#include <QPainter>
 
 using namespace TuxClocker::Device;
 using namespace mpark::patterns;
@@ -69,8 +71,54 @@ void DeviceModelDelegate::updateEditorGeometry(QWidget *editor,
 	editor->setGeometry(option.rect);
 }
 
-/*void DeviceModelDelegate::drawCheck(QPainter *painter,
-		const QStyleOptionViewItem &option, const QRect &rect,
-		Qt::CheckState state) const {
-	QStyledItemDelegate::drawCheck(painter, option, rect, state)
-}*/
+QColor alphaBlend(QColor top, QColor background) {
+	auto alpha = top.alphaF();
+	auto factor = 1 - alpha;
+	return QColor(
+		(top.red() * alpha) + (factor * background.red()),
+		(top.green() * alpha) + (factor * background.green()),
+		(top.blue() * alpha) + (factor * background.blue())
+	);
+}
+
+QColor filter(QColor filter, QColor color) {	
+	/* Dominant color lets 95% (in case of a theme using pure r/g/b) of that 
+	   channel through, the rest 70% */
+	auto factorR = filter.redF();
+	auto factorG = filter.greenF();
+	auto factorB = filter.blueF();
+	
+	Qt::GlobalColor dominant;
+	
+	if (factorR > qMax(factorG, factorB))
+		dominant = Qt::red;
+	if (factorG > qMax(factorR, factorB))
+		dominant = Qt::green;
+	if (factorB > qMax(factorR, factorG))
+		dominant = Qt::blue;
+	
+	factorR = (dominant == Qt::red) ? 0.95 : 0.7;
+	factorG = (dominant == Qt::green) ? 0.95 : 0.7;
+	factorB = (dominant == Qt::blue) ? 0.95 : 0.7;
+	
+	return QColor(
+		color.red() * factorR,
+		color.green() * factorG,
+		color.blue() * factorB
+	);
+}
+
+void DeviceModelDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+		const QModelIndex &index) const  {
+	auto optCpy = option;
+	auto baseColor = index.data(Qt::BackgroundRole).value<QColor>();
+	if (baseColor.isValid()) {
+		// Filter background color through the highlight color
+		auto topColor = option.palette.color(QPalette::Highlight);
+		auto color = filter(topColor, baseColor);
+		QPalette p = option.palette;
+		p.setColor(QPalette::Highlight, color);
+		optCpy.palette = p;
+	}
+	QStyledItemDelegate::paint(painter, optCpy, index);
+}
