@@ -84,8 +84,16 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 	
 	connect(ifaceItem, &AssignableItem::assignableDataChanged,
 			[=](QVariant v) {
+		// Only show checkbox when value has been changed
+		ifaceItem->setCheckable(true);
+		ifaceItem->setCheckState(Qt::Checked);
 		proxy->setValue(v);
 		ifaceItem->setData(unappliedColor(), Qt::BackgroundRole);
+	});
+	
+	connect(ifaceItem, &AssignableItem::committalChanged, [=](bool on) {
+		QVariant colorData = (on) ? unappliedColor() : QVariant();
+		ifaceItem->setData(colorData, Qt::BackgroundRole);
 	});
 	
 	connect(proxy, &AssignableProxy::applied, [=](auto err) {
@@ -112,7 +120,14 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 	});
 	
 	connect(this, &DeviceModel::changesApplied, [=] {
-		proxy->apply();
+		// Don't apply if unchecked
+		if (ifaceItem->checkState() == Qt::Checked) {
+			ifaceItem->setCheckState(Qt::Unchecked);
+			ifaceItem->setCheckable(false);
+			// What the fuck do I need to this for?
+			ifaceItem->setData(QVariant(), Qt::CheckStateRole);
+			proxy->apply();
+		}
 	});
 	return ifaceItem;
 }
