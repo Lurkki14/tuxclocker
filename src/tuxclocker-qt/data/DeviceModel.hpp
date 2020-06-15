@@ -9,6 +9,8 @@
 #include <Tree.hpp>
 #include <QDBusConnection>
 #include <QDBusInterface>
+#include <QFlags>
+#include <QIcon>
 #include <QStandardItemModel>
 #include <QPalette>
 
@@ -22,20 +24,33 @@ class DeviceModel : public QStandardItemModel {
 public:
 	DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent = nullptr);
 	enum ColumnType {
-		Name = 0, // Node name
-		Interface = 1 // Column for presenting interfaces
+		NameColumn = 0, // Node name
+		InterfaceColumn = 1 // Column for presenting interfaces
 	};
 	
 	enum Role {
 		AssignableRole = Qt::UserRole, // Holds the data about the assignable
-		ConnectionRole // Data about the connection
+		ConnectionRole, // Data about the connection
+		InterfaceTypeRole // InterfaceType
 	};
+	
+	enum InterfaceFlag {
+		Assignable = 1,
+		DynamicReadable = 2,
+		StaticReadable = 4,
+		AllInterfaces = (Assignable | DynamicReadable | StaticReadable)
+	};
+	typedef QFlags<InterfaceFlag> InterfaceFlags;
 	
 	enum class FilterFlag {
 		
 	};
 	// For decoupling AssignableItems created in the model
 	void applyChanges() {emit changesApplied();}
+	
+	static QIcon assignableIcon() {return QIcon::fromTheme("edit-entry");}
+	static QIcon dynamicReadableIcon() {return QIcon(":/ruler.svg");}
+	
 signals:
 	void changesApplied();
 private:

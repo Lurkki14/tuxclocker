@@ -3,7 +3,9 @@
 #include "AssignableProxy.hpp"
 #include "DynamicReadableProxy.hpp"
 #include <fplus/fplus.hpp>
+#include <QApplication>
 #include <QDebug>
+#include <QStyle>
 #include <QVariantAnimation>
 
 // 'match' is a method in QAbstractItemModel :(
@@ -46,12 +48,25 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 			pattern("org.tuxclocker.Assignable") = [=, &rowItems]{
 				if_let(pattern(some(arg)) = setupAssignable(node, conn))
 						= [&](auto item) {
+					nameItem->setData(Assignable, InterfaceTypeRole);
+					
+					//auto style = QApplication::style();
+					//auto icon = style->standardIcon(QStyle::SP_ComputerIcon);
+					auto icon = assignableIcon();
+					//QIcon icon("/home/jussi/Downloads/wrench.png");
+					nameItem->setData(icon, Qt::DecorationRole);
+					
 					rowItems.append(item);
 				};
 			},
 			pattern("org.tuxclocker.DynamicReadable") = [=, &rowItems] {
 				if_let(pattern(some(arg)) = setupDynReadable(node, conn))
 						= [&](auto item) {
+					auto icon = dynamicReadableIcon();
+					nameItem->setData(icon, Qt::DecorationRole);	
+					
+					nameItem->setData(DeviceModel::DynamicReadable,
+						InterfaceTypeRole);
 					rowItems.append(item);
 				};
 			},
@@ -81,6 +96,7 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 	QVariant v;
 	v.setValue(itemData);
 	ifaceItem->setData(v, AssignableRole);
+	ifaceItem->setText("No value set");
 	
 	connect(ifaceItem, &AssignableItem::assignableDataChanged,
 			[=](QVariant v) {

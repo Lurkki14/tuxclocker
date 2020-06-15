@@ -10,9 +10,9 @@
 // Class for handling menus on DeviceModel
 class DeviceTreeView : public QTreeView {
 public:
-	DeviceTreeView(DeviceModel &model, QWidget *parent = nullptr);
+	DeviceTreeView(QWidget *parent = nullptr);
 	// Accessor method for connecting everything in the browser
-	const DeviceModel &deviceModel() {return m_deviceModel;}
+	//const DeviceModel &deviceModel() {return m_deviceModel;}
 protected:
 	/* Workaround for the retarded behavior of waiting for a double click,
 	   you can't even disable it! */
@@ -23,6 +23,6 @@ protected:
 			QAbstractItemView::AllEditTriggers : trigger, event);
     }
 private:
-	DeviceModel &m_deviceModel;
+	//DeviceModel &m_deviceModel;
 	DeviceModelDelegate *m_delegate;
 };

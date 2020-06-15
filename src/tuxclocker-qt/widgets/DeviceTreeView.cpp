@@ -1,12 +1,13 @@
 #include "DeviceTreeView.hpp"
 
+#include <DragChartView.hpp>
 #include <QCheckBox>
 #include <QDebug>
 
 Q_DECLARE_METATYPE(AssignableItemData)
 
-DeviceTreeView::DeviceTreeView(DeviceModel &model, QWidget *parent)
-		: QTreeView(parent), m_deviceModel(model) {
+DeviceTreeView::DeviceTreeView(QWidget *parent)
+		: QTreeView(parent) {
 	auto triggers = editTriggers() ^= DoubleClicked;
 	triggers |= SelectedClicked;
 	setEditTriggers(SelectedClicked | EditKeyPressed);
@@ -16,7 +17,7 @@ DeviceTreeView::DeviceTreeView(DeviceModel &model, QWidget *parent)
 		auto data = index.data(DeviceModel::AssignableRole);
 		QMenu menu;
 		if (data.canConvert<AssignableItemData>()) {
-			auto a_data = data.value<AssignableItemData>();
+			/*auto a_data = data.value<AssignableItemData>();
 			QCheckBox commitCb("Commit");
 			auto commitAct = new QWidgetAction(&menu);
 			commitAct->setDefaultWidget(&commitCb);
@@ -26,17 +27,18 @@ DeviceTreeView::DeviceTreeView(DeviceModel &model, QWidget *parent)
 			});
 			// Write the committal value to the model only on menu close
 			connect(&menu, &QMenu::aboutToHide, [&] {
-				qDebug() << a_data.committal();
 				QVariant v;
 				v.setValue(a_data);
 				m_deviceModel.setData(index, v, DeviceModel::AssignableRole);
 			});
 			menu.addAction(commitAct);
-			menu.exec(QCursor::pos());
+			menu.exec(QCursor::pos());*/
+			
+			auto dragView = new DragChartView;
+			dragView->show();
 		}
 	});
 	m_delegate = new DeviceModelDelegate(this);
 	
 	setItemDelegate(m_delegate);
-	setModel(&m_deviceModel);
 }

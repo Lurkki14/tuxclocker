@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/">
+		<file>ruler.svg</file>
+	</qresource>
+</RCC>

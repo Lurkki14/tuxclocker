@@ -18,6 +18,7 @@ public:
 	void setData(const QVariant &v, int role = Qt::UserRole + 1);
 signals:
 	void assignableDataChanged(QVariant value);
+	void committalChanged(bool on);
 private:
 	Q_OBJECT
 	
