@@ -4,6 +4,7 @@
 #include "DynamicReadableProxy.hpp"
 #include <fplus/fplus.hpp>
 #include <QApplication>
+#include <QDBusReply>
 #include <QDebug>
 #include <QStyle>
 #include <QVariantAnimation>
@@ -66,6 +67,16 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 					nameItem->setData(icon, Qt::DecorationRole);	
 					
 					nameItem->setData(DeviceModel::DynamicReadable,
+						InterfaceTypeRole);
+					rowItems.append(item);
+				};
+			},
+			pattern("org.tuxclocker.StaticReadable") = [=, &rowItems] {
+				if_let(pattern(some(arg)) = setupStaticReadable(node, conn))
+						= [&](auto item) {
+					auto icon = staticReadableIcon();
+					nameItem->setData(icon, Qt::DecorationRole);
+					nameItem->setData(DeviceModel::StaticReadable,
 						InterfaceTypeRole);
 					rowItems.append(item);
 				};
@@ -214,5 +225,30 @@ std::optional<QStandardItem*> DeviceModel::setupDynReadable(
 		);
 	});
 	
+	return item;
+}
+
+std::optional<QStandardItem*> DeviceModel::setupStaticReadable(
+		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
+	QDBusInterface staticIface("org.tuxclocker", node.value().path,
+		"org.tuxclocker.StaticReadable", conn);
+	auto value = staticIface.property("value")
+		.value<QDBusVariant>().variant().toString();
+	// Workaround from DynamicReadableProxy for getting property with custom type
+	QDBusInterface propIface("org.tuxclocker", node.value().path,
+		"org.freedesktop.DBus.Properties", conn);
+	QDBusReply<QDBusVariant> reply =
+		propIface.call("Get", "org.tuxclocker.StaticReadable", "unit");
+	if (!reply.isValid())
+		return std::nullopt;
+	auto arg = reply.value().variant().value<QDBusArgument>();
+	TCDBus::Result<QString> unit;
+	arg >> unit;
+	
+	if (!unit.error)
+		value += " " + unit.value;
+	
+	auto item = new QStandardItem;
+	item->setData(value, Qt::DisplayRole);
 	return item;
 }

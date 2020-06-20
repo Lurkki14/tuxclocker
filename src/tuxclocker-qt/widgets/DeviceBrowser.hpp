@@ -4,6 +4,7 @@
 #include <DeviceModel.hpp>
 #include <DeviceProxyModel.hpp>
 #include <FlagEditor.hpp>
+#include <FunctionEditor.hpp>
 #include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
@@ -13,11 +14,11 @@
 // Class for viewing/editing the main tuxclocker tree
 class DeviceBrowser : public QWidget {
 public:
-	DeviceBrowser(DeviceModel &model,
-			QWidget *parent = nullptr) : QWidget(parent), m_deviceModel(model) {
+	DeviceBrowser(DeviceModel &model, QWidget *parent = nullptr)
+			: QWidget(parent), m_deviceModel(model) {
 		m_layout = new QGridLayout(this);
 		m_proxyModel = new DeviceProxyModel(model, this);
-		m_treeView = new DeviceTreeView(this);
+		m_treeView = new DeviceTreeView;
 		m_treeView->setModel(m_proxyModel);
 		m_flagLabel = new QLabel("Showing:");
 		m_apply = new QPushButton("Apply changes");
@@ -34,11 +35,21 @@ public:
 					QString("Dynamic Values"),
 					DeviceModel::dynamicReadableIcon(),
 					DeviceModel::DynamicReadable
+				),
+				std::tuple(
+					QString("Static Values"),
+					DeviceModel::staticReadableIcon(),
+					DeviceModel::StaticReadable
 				)
 			}), this);
 		
 		connect(m_apply, &QPushButton::pressed, &m_deviceModel,
 			&DeviceModel::applyChanges);
+		
+		m_treeView->functionEditorRequested.connect([this] {
+			auto f_editor = new FunctionEditor(m_deviceModel);
+			f_editor->show();
+		});
 		
 		m_flagEditor->setFlags(DeviceModel::AllInterfaces);
 		

@@ -50,7 +50,7 @@ public:
 	
 	static QIcon assignableIcon() {return QIcon::fromTheme("edit-entry");}
 	static QIcon dynamicReadableIcon() {return QIcon(":/ruler.svg");}
-	
+	static QIcon staticReadableIcon() {return QIcon::fromTheme("help-about");}
 signals:
 	void changesApplied();
 private:
@@ -62,6 +62,8 @@ private:
 	std::optional<QStandardItem*> setupAssignable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
 	std::optional<QStandardItem*> setupDynReadable(
+		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
+	std::optional<QStandardItem*> setupStaticReadable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
 	constexpr int fadeOutTime() {return 5000;} // milliseconds
 	constexpr int transparency() {return 120;} // 0-255

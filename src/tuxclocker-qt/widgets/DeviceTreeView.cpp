@@ -1,6 +1,7 @@
 #include "DeviceTreeView.hpp"
 
 #include <DragChartView.hpp>
+//#include <FunctionEditor.hpp>
 #include <QCheckBox>
 #include <QDebug>
 
@@ -8,6 +9,7 @@ Q_DECLARE_METATYPE(AssignableItemData)
 
 DeviceTreeView::DeviceTreeView(QWidget *parent)
 		: QTreeView(parent) {
+	setSortingEnabled(true);
 	auto triggers = editTriggers() ^= DoubleClicked;
 	triggers |= SelectedClicked;
 	setEditTriggers(SelectedClicked | EditKeyPressed);
@@ -34,8 +36,10 @@ DeviceTreeView::DeviceTreeView(QWidget *parent)
 			menu.addAction(commitAct);
 			menu.exec(QCursor::pos());*/
 			
-			auto dragView = new DragChartView;
-			dragView->show();
+			//auto dragView = new FunctionEditor;
+			//dragView->show();
+			
+			functionEditorRequested();
 		}
 	});
 	m_delegate = new DeviceModelDelegate(this);

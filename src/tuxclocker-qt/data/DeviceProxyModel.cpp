@@ -5,7 +5,7 @@
 Q_DECLARE_METATYPE(DeviceModel::InterfaceFlag)
 
 DeviceProxyModel::DeviceProxyModel(DeviceModel &model, QObject *parent) :
-		QSortFilterProxyModel(parent) {
+		QSortFilterProxyModel(parent), m_showIcons(true), m_showValueColumn(true) {
 	setSourceModel(&model);
 	m_flags = DeviceModel::AllInterfaces;
 }
@@ -35,4 +35,16 @@ bool DeviceProxyModel::filterAcceptsRow(int sourceRow,
 	traverse(thisItem);
 
 	return !shouldHide;
+}
+
+bool DeviceProxyModel::lessThan(const QModelIndex &left,
+		const QModelIndex &right) const {
+	// TODO: doesn't work as expected if sorted from interface column
+	auto leftChildren = sourceModel()->rowCount(left);
+	auto rightChildren = sourceModel()->rowCount(right);
+
+	if (leftChildren == 0 && rightChildren != 0)
+		// Left hand side is 'smaller' if right has children
+		return true;
+	return QSortFilterProxyModel::lessThan(left, right);
 }

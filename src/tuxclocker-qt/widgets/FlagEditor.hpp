@@ -7,6 +7,7 @@
 #include <fplus/fplus.hpp>
 #include <QAbstractItemView>
 #include <QComboBox>
+#include <QDebug>
 #include <QEvent>
 #include <QFlags>
 #include <QHash>
@@ -105,10 +106,11 @@ protected:
 		// Where the first icon is drawn
 		auto startY = opt.rect.top() + iconSize().height() / 2;
 		auto startX = opt.rect.left() + iconSize().width() / 2;
-		auto deltaX = iconSize().width() * 3;
+		auto deltaX = iconSize().width();
 
 		painter.drawComplexControl(QStyle::CC_ComboBox, opt);
 
+		// TODO: this probably breaks when drawRect goes over the combobox's right edge
 		// Draw icons of selected items
 		QRect drawRect(QPoint(startX, startY), iconSize());
 		for (const auto &item : checked) {
@@ -116,7 +118,7 @@ protected:
 				.value<QIcon>().pixmap(iconSize());
 			painter.drawItemPixmap(drawRect,
 				Qt::AlignCenter, pixmap);
-			drawRect.moveRight(deltaX);
+			drawRect.moveRight(drawRect.right() + deltaX);
 		}
 	}
 private:

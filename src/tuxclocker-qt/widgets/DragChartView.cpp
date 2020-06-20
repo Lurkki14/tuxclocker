@@ -313,7 +313,8 @@ QVector <QPointF> DragChartView::sortPointFByAscendingX(const QVector<QPointF> p
 }
 
 void DragChartView::drawFillerLines(QScatterSeries *series) {
-    // Sort points by ascending x
+    // TODO: line isn't drawn between points whose x is the same
+	// Sort points by ascending x
     QVector <QPointF> sorted = sortPointFByAscendingX(series->pointsVector());
 
     if (sorted.isEmpty()) {
