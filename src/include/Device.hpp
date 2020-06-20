@@ -75,13 +75,22 @@ private:
 	std::optional<std::string> m_unit;
 };
 
-struct StaticReadable {
-	ReadableValue value;
-	std::optional<std::string> unit;
+class StaticReadable {
+public:
+	StaticReadable(ReadableValue value, std::optional<std::string> unit) {
+		m_value = value;
+		m_unit = unit;
+	}
+	ReadableValue value() {return m_value;}
+	std::optional<std::string> unit() {return m_unit;}
+private:
+	ReadableValue m_value;
+	std::optional<std::string> m_unit;
 };
 
-// DeviceNode has a name, and optionally implements one of [Assignable, DynamicReadable]
-using DeviceInterface = std::variant<Assignable, DynamicReadable>;
+/* DeviceNode has a name, and optionally implements one of
+   [Assignable, DynamicReadable, StaticReadable] */
+using DeviceInterface = std::variant<Assignable, DynamicReadable, StaticReadable>;
 
 struct DeviceNode {
 	std::string name;

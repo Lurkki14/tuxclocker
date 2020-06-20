@@ -198,3 +198,35 @@ private:
 	TreeNode<TCDBus::DeviceNode> m_rootNode;
 	QVector<TCDBus::FlatTreeNode<TCDBus::DeviceNode>> m_flatTree;
 };
+
+class StaticReadableAdaptor : public QDBusAbstractAdaptor {
+public:
+	StaticReadableAdaptor(QObject *obj, StaticReadable readable)
+			: QDBusAbstractAdaptor(obj), m_readable(readable) {
+		qDBusRegisterMetaType<TCDBus::Result<QString>>();
+		// Unwrap the value and store in QDBusVariant
+		match(m_readable.value()) (
+			pattern(as<uint>(arg)) = [this](auto i) {
+				m_value = QDBusVariant(QVariant(i));
+			}
+		);
+		
+		m_unit = (m_readable.unit().has_value()) ? TCDBus::Result<QString>{
+			false,
+			QString::fromStdString(m_readable.unit().value())
+		} : TCDBus::Result<QString>{
+			true, ""
+		};
+	}
+	QDBusVariant value_() {return m_value;}
+	TCDBus::Result<QString> unit_() {return m_unit;}
+private:
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.StaticReadable")
+	Q_PROPERTY(TCDBus::Result<QString> unit READ unit_)
+	Q_PROPERTY(QDBusVariant value READ value_)
+	
+	StaticReadable m_readable;
+	TCDBus::Result<QString> m_unit;
+	QDBusVariant m_value;
+};

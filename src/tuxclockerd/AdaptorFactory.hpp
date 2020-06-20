@@ -18,14 +18,18 @@ public:
 	static std::optional<QDBusAbstractAdaptor*> adaptor(QObject *obj,
 			DeviceInterface iface) {
 		std::optional<QDBusAbstractAdaptor*> retval = std::nullopt;
-		match(iface)
-			(pattern(as<DynamicReadable>(arg)) = [&](auto dr) {
+		match(iface) (
+			pattern(as<StaticReadable>(arg)) = [&](auto sr) {
+				retval = new StaticReadableAdaptor(obj, sr);
+			},
+			pattern(as<DynamicReadable>(arg)) = [&](auto dr) {
 				retval = new DynamicReadableAdaptor(obj, dr);
 			},
 			pattern(as<Assignable>(arg)) = [&](auto a) {
 				retval = new AssignableAdaptor(obj, a);
 			},
-			pattern(_) = []{});
+			pattern(_) = []{}
+		);
 		return retval;
 	}
 };

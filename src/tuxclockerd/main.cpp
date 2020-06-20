@@ -50,6 +50,9 @@ int main(int argc, char **argv) {
 					pattern(as<DynamicReadableAdaptor>(_)) = [&] {
 						ifaceName = "org.tuxclocker.DynamicReadable";
 					},
+					pattern(as<StaticReadableAdaptor>(_)) = [&] {
+						ifaceName = "org.tuxclocker.StaticReadable";
+					},
 					pattern(_) = [] {});
 			};
 		};

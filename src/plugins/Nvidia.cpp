@@ -59,6 +59,28 @@ struct UnspecializedReadable {
 		}
 		return retval;
 	}
+	// Create StaticReadable nodes
+	static std::vector<DeviceNode> staticToDeviceNodes(
+			std::vector<UnspecializedReadable<T>> rawNodes, T data, std::string uuid) {
+		std::vector<DeviceNode> retval;
+		
+		for (const auto &rawNode : rawNodes) {
+			if_let(pattern(as<ReadableValue>(arg)) = rawNode.func(data)) =
+					[=, &retval] (ReadableValue value) {
+				auto staticReadable = StaticReadable(
+					value, rawNode.unit
+				);
+				auto devNode = DeviceNode{
+					.name = rawNode.nodeName,
+					.interface = staticReadable,
+					.hash = rawNode.hash(uuid, data)
+				};
+				retval.push_back(devNode);
+			};
+		}
+		return retval;
+	}
+		
 };
 
 template <typename T>
@@ -105,8 +127,10 @@ private:
 	static std::variant<ReadError, ReadableValue> nvmlRead(nvmlDevice_t dev,
 		std::function<nvmlReturn_t(nvmlDevice_t, In*)> readFunc,
 		std::optional<std::function<Out(In)>> transformFunc = std::nullopt);
+	template <typename Out>
 	static std::variant<ReadError, ReadableValue> nvctlRead(uint index,
-		std::function<Bool(uint, int*)> readFunc);
+		std::function<Bool(uint, int*)> readFunc,
+		std::optional<std::function<Out(int)>> transformFunc = std::nullopt);
 	std::optional<AssignmentError> nvctlWrite(uint index, int mask,
 		int target, int attribute, int value);
 	uint nvctrlPerfModes(uint index);
@@ -128,15 +152,18 @@ std::variant<ReadError, ReadableValue> NvidiaPlugin::nvmlRead(nvmlDevice_t dev,
 	return transformFunc.value()(value);
 }
 
+template <typename Out>
 std::variant<ReadError, ReadableValue> NvidiaPlugin::nvctlRead(uint index,
-		std::function<Bool(uint, int*)> readFunc) {
+		std::function<Bool(uint, int*)> readFunc,
+		std::optional<std::function<Out(int)>> transformFunc) {
 	int val;
 	if (!readFunc(index, &val)) {
 		// TODO: Get error from X error handler here
 		return ReadError::UnknownError;
 	}
-	// All sensor readings through this make sense as uint
-	return static_cast<uint>(val);
+	if (transformFunc.has_value())
+		return transformFunc.value()(val);
+	return static_cast<Out>(val);
 }
 
 std::optional<AssignmentError> NvidiaPlugin::nvctlWrite(uint index,
@@ -233,9 +260,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 	std::vector<UnspecializedReadable<uint>> rawNVCTRLNodes = {
 		{
 			[&](uint index) {
-				return nvctlRead(index, [&](uint index, int *value) {
+				return nvctlRead<double>(index, [&](uint index, int *value) {
 					return XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
 						index, 0, NV_CTRL_GPU_CURRENT_CORE_VOLTAGE, value);
+				}, [](int value) {
+					return static_cast<double>(value) / 1000;
 				});
 			},
 			"mV",
@@ -247,18 +276,6 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 	};
 	
 	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLNodes = {
-		{
-			[](nvmlDevice_t dev) {
-				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
-					return nvmlDeviceGetTemperature(dev, NVML_TEMPERATURE_GPU, value);
-				}, std::nullopt);
-			},
-			"°C",
-			"Temperature",
-			[](std::string uuid, nvmlDevice_t) {
-				return md5(uuid + "Temperature");
-			}
-		},
 		{
 			[](nvmlDevice_t dev) {
 				return nvmlRead<uint, double>(dev, [](nvmlDevice_t dev,
@@ -440,6 +457,50 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		}
 	};
 	
+	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLTempInfoNodes = {
+		{
+			[](nvmlDevice_t dev) {
+				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
+					return nvmlDeviceGetTemperatureThreshold(dev,
+							NVML_TEMPERATURE_THRESHOLD_SHUTDOWN, value);
+				}, std::nullopt);
+			},
+			"C",
+			"Shutdown Temperature",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Shutdown Temperature");
+			}
+		},
+		{
+			[](nvmlDevice_t dev) {
+				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
+					return nvmlDeviceGetTemperatureThreshold(dev,
+							NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, value);
+				}, std::nullopt);
+			},
+			"C",
+			"Slowdown Temperature",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Slowdown Temperature");
+			}
+		}
+	};
+	
+	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLTempNodes = {
+		{
+			[](nvmlDevice_t dev) {
+				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
+					return nvmlDeviceGetTemperature(dev, NVML_TEMPERATURE_GPU, value);
+				}, std::nullopt);
+			},
+			"°C",
+			"Temperature",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Temperature");
+			}
+		}
+	};
+	
 	struct NVCtrlFanInfo {
 		uint gpuIndex;
 		int fanIndex;
@@ -552,91 +613,106 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		gi++;
 	};
 	
-
-	
 	// [GPUOpt] -> [TreeNode DeviceNode]
 	// Map GPU data to device nodes
 	TreeNode<DeviceNode> rootNode;
 	auto gpuNodes = fp::transform([&](auto nvOpt) {
-			TreeNode<DeviceNode> gpuRoot = TreeNode(DeviceNode{
-				.name = nvOpt.name,
-				.hash = md5(nvOpt.uuid)
-			});
+		TreeNode<DeviceNode> gpuRoot = TreeNode(DeviceNode{
+			.name = nvOpt.name,
+			.hash = md5(nvOpt.uuid)
+		});
+		
+		std::vector<DeviceNode> nvmlFanNodes;
+		// Get nvml nodes if there is a device
+		if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
+			for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
+					rawNVMLNodes, dev, nvOpt.uuid))
+				gpuRoot.appendChild(node);
 			
+			for (auto &node : UnspecializedAssignable<nvmlDevice_t>::toDeviceNodes(
+						rawNVMLAssignables, dev, nvOpt.uuid))
+				gpuRoot.appendChild(node);
 			
-			std::vector<DeviceNode> nvmlFanNodes;
-			// Get nvml nodes if there is a device
-			if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
-				for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
-						rawNVMLNodes, dev, nvOpt.uuid))
-					gpuRoot.appendChild(node);
-				
-				for (auto &node : UnspecializedAssignable<nvmlDevice_t>::toDeviceNodes(
-							rawNVMLAssignables, dev, nvOpt.uuid))
-					gpuRoot.appendChild(node);
-				
-				for (uint i = 0; i < nvmlFanCount(dev); i++) {
-					NVMLFanInfo info{dev, i};
-					for (auto &node : UnspecializedReadable<NVMLFanInfo>::toDeviceNodes(
-							rawNVMLFanReadables, info, nvOpt.uuid))
-						nvmlFanNodes.push_back(node);
-				}
-			};
-			
-			std::vector<DeviceNode> nvctrlFanNodes;
-			// Same for NVCtrl
-			if_let(pattern(some(arg)) = nvOpt.index) = [&](auto index) {
-				for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(rawNVCTRLNodes, index,
-						nvOpt.uuid))
-					gpuRoot.appendChild(node);
-								  
-				auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
-				for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
-						rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
-					gpuRoot.appendChild(node);
-				
-				for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
-						rawNVCTRLAssignables, index, nvOpt.uuid))
-					gpuRoot.appendChild(node);
-				
-				for (int i = 0; i < nvctrlFanCount(index); i++) {
-					NVCtrlFanInfo info{index, i};
-					for (auto &node : UnspecializedAssignable<NVCtrlFanInfo>::toDeviceNodes(
-							rawNVCTRLFanAssignables, info, nvOpt.uuid))
-						nvctrlFanNodes.push_back(node);
-				}
-			};
-			TreeNode<DeviceNode> fanRoot = TreeNode(DeviceNode{
-				.name = "Fans",
-				.hash = md5(nvOpt.uuid + "Fans")
-			});
-			// Use a common subparent for readable and assignable fan nodes, if n > 1
-			auto maxFanCount = std::max(nvmlFanNodes.size(), nvctrlFanNodes.size());
-			if (1) {
-				for (uint i = 0; i < maxFanCount; i++) {
-					auto subFanRoot = TreeNode<DeviceNode>(DeviceNode{
-						.name = std::to_string(i),
-						.hash = md5(nvOpt.uuid + "Fan" + std::to_string(i))
-					});
-					if (i < nvctrlFanNodes.size())
-						subFanRoot.appendChild(nvctrlFanNodes[i]);
-					if (i < nvmlFanNodes.size())
-						subFanRoot.appendChild(nvmlFanNodes[i]);
-					fanRoot.appendChild(subFanRoot);
-				}
-				gpuRoot.appendChild(fanRoot);
+			for (uint i = 0; i < nvmlFanCount(dev); i++) {
+				NVMLFanInfo info{dev, i};
+				for (auto &node : UnspecializedReadable<NVMLFanInfo>::toDeviceNodes(
+						rawNVMLFanReadables, info, nvOpt.uuid))
+					nvmlFanNodes.push_back(node);
 			}
-			else {
-				// Add as direct children to GPU
-				for (auto &node : nvmlFanNodes)
-					gpuRoot.appendChild(node);
-				
-				for (auto &node : nvctrlFanNodes)
-					gpuRoot.appendChild(node);
-			}
+			auto tempInfoRoot = TreeNode(DeviceNode{
+				.name = "Temperatures",
+				.hash = md5(nvOpt.uuid + "Temperatures")
+			});
+			auto tempNodes = UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
+				rawNVMLTempNodes, dev, nvOpt.uuid);
 			
-			return gpuRoot;
-		}, optDataVec);
+			auto tempInfoNodes = UnspecializedReadable<nvmlDevice_t>::staticToDeviceNodes(
+				rawNVMLTempInfoNodes, dev, nvOpt.uuid);
+			
+			if (!tempNodes.empty() || !tempInfoNodes.empty()) { 
+				for (auto &infoNode : tempInfoNodes)
+					tempInfoRoot.appendChild(infoNode);
+				for (auto &tempNode : tempNodes)
+					tempInfoRoot.appendChild(tempNode);
+				
+				gpuRoot.appendChild(tempInfoRoot);
+			}
+		};
+		
+		std::vector<DeviceNode> nvctrlFanNodes;
+		// Same for NVCtrl
+		if_let(pattern(some(arg)) = nvOpt.index) = [&](auto index) {
+			for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(rawNVCTRLNodes, index,
+					nvOpt.uuid))
+				gpuRoot.appendChild(node);
+								
+			auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
+			for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
+					rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
+				gpuRoot.appendChild(node);
+			
+			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
+					rawNVCTRLAssignables, index, nvOpt.uuid))
+				gpuRoot.appendChild(node);
+			
+			for (int i = 0; i < nvctrlFanCount(index); i++) {
+				NVCtrlFanInfo info{index, i};
+				for (auto &node : UnspecializedAssignable<NVCtrlFanInfo>::toDeviceNodes(
+						rawNVCTRLFanAssignables, info, nvOpt.uuid))
+					nvctrlFanNodes.push_back(node);
+			}
+		};
+		TreeNode<DeviceNode> fanRoot = TreeNode(DeviceNode{
+			.name = "Fans",
+			.hash = md5(nvOpt.uuid + "Fans")
+		});
+		// Use a common subparent for readable and assignable fan nodes, if n > 1
+		auto maxFanCount = std::max(nvmlFanNodes.size(), nvctrlFanNodes.size());
+		if (1) {
+			for (uint i = 0; i < maxFanCount; i++) {
+				auto subFanRoot = TreeNode<DeviceNode>(DeviceNode{
+					.name = std::to_string(i),
+					.hash = md5(nvOpt.uuid + "Fan" + std::to_string(i))
+				});
+				if (i < nvctrlFanNodes.size())
+					subFanRoot.appendChild(nvctrlFanNodes[i]);
+				if (i < nvmlFanNodes.size())
+					subFanRoot.appendChild(nvmlFanNodes[i]);
+				fanRoot.appendChild(subFanRoot);
+			}
+			gpuRoot.appendChild(fanRoot);
+		}
+		else {
+			// Add as direct children to GPU
+			for (auto &node : nvmlFanNodes)
+				gpuRoot.appendChild(node);
+			
+			for (auto &node : nvctrlFanNodes)
+				gpuRoot.appendChild(node);
+		}
+		
+		return gpuRoot;
+	}, optDataVec);
 	
 	for (auto &gpuNode : gpuNodes) rootNode.appendChild(gpuNode);
 	m_rootDeviceNode = rootNode;
