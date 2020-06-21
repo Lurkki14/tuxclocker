@@ -2,8 +2,6 @@
 
 # OpenSSL is used for hash functions
 openssl_dep = dependency('openssl')
-# Jansson is used for module database
-jansson_dep = dependency('jansson')
 
 # For posix only
 dl = cppc.find_library('dl')
