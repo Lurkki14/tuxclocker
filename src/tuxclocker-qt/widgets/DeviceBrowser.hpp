@@ -4,7 +4,7 @@
 #include <DeviceModel.hpp>
 #include <DeviceProxyModel.hpp>
 #include <FlagEditor.hpp>
-#include <FunctionEditor.hpp>
+//#include <FunctionEditor.hpp>
 #include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
@@ -47,8 +47,8 @@ public:
 			&DeviceModel::applyChanges);
 		
 		m_treeView->functionEditorRequested.connect([this] {
-			auto f_editor = new FunctionEditor(m_deviceModel);
-			f_editor->show();
+			//auto f_editor = new FunctionEditor(m_deviceModel);
+			//f_editor->show();
 		});
 		
 		m_flagEditor->setFlags(DeviceModel::AllInterfaces);
