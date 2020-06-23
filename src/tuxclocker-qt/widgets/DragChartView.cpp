@@ -259,10 +259,11 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
     m_dragCanStart = false;
 
-    if (!m_scatterPressed) {
-        // Add a new point to series
-        m_series.append(chart()->mapToValue(event->pos()));
-        drawFillerLines(&m_series);
+    if (!m_scatterPressed && 
+			m_limitRect.contains(chart()->mapToValue(event->pos()))) {
+		// Add a new point to series
+		m_series.append(chart()->mapToValue(event->pos()));
+		drawFillerLines(&m_series);
     }
     
     m_toolTipLabel->hide();
