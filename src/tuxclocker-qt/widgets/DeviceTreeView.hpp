@@ -1,7 +1,9 @@
 #pragma once
 
 #include <AssignableItemData.hpp>
+#include <AssignableProxy.hpp>
 #include <boost/signals2.hpp>
+#include <Device.hpp>
 #include <DeviceModel.hpp>
 #include <DeviceModelDelegate.hpp>
 #include <QMenu>
@@ -14,7 +16,9 @@ public:
 	DeviceTreeView(QWidget *parent = nullptr);
 	// Accessor method for connecting everything in the browser
 	//const DeviceModel &deviceModel() {return m_deviceModel;}
-	boost::signals2::signal<void()> functionEditorRequested;
+	// TODO: make this more generalized
+	// Defers the complexity to DeviceBrowser
+	boost::signals2::signal<void(QModelIndex&)> functionEditorRequested;
 protected:
 	/* Workaround for the retarded behavior of waiting for a double click,
 	   you can't even disable it! */

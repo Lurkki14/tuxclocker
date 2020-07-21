@@ -1,45 +1,50 @@
 #include "DeviceTreeView.hpp"
+#include "qcheckbox.h"
 
 #include <DragChartView.hpp>
-//#include <FunctionEditor.hpp>
+#include <patterns.hpp>
 #include <QCheckBox>
 #include <QDebug>
+#include <QHeaderView>
+
+using namespace mpark::patterns;
+using namespace TuxClocker::Device;
 
 Q_DECLARE_METATYPE(AssignableItemData)
+Q_DECLARE_METATYPE(AssignableProxy*)
 
 DeviceTreeView::DeviceTreeView(QWidget *parent)
 		: QTreeView(parent) {
+	header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	setSortingEnabled(true);
-	auto triggers = editTriggers() ^= DoubleClicked;
-	triggers |= SelectedClicked;
 	setEditTriggers(SelectedClicked | EditKeyPressed);
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(this, &QTreeView::customContextMenuRequested, [this](QPoint point) {
 		auto index = indexAt(point);
 		auto data = index.data(DeviceModel::AssignableRole);
+		auto proxyData = index.data(DeviceModel::AssignableProxyRole);
 		QMenu menu;
-		if (data.canConvert<AssignableItemData>()) {
+		QCheckBox checkBox("Enable connection");
+		QAction editConn("Edit connection...");
+		auto enableConn = new QWidgetAction(&menu);
+		enableConn->setDefaultWidget(&checkBox);
+		menu.addActions({&editConn, enableConn});
+		if (data.canConvert<AssignableItemData>() &&
+				proxyData.canConvert<AssignableProxy*>()) {
+			functionEditorRequested(index);
 			/*auto a_data = data.value<AssignableItemData>();
-			QCheckBox commitCb("Commit");
-			auto commitAct = new QWidgetAction(&menu);
-			commitAct->setDefaultWidget(&commitCb);
-			commitCb.setChecked(a_data.committal());
-			connect(&commitCb, &QCheckBox::toggled, [&](bool toggled) {
-				a_data.setCommittal(toggled);
-			});
-			// Write the committal value to the model only on menu close
-			connect(&menu, &QMenu::aboutToHide, [&] {
-				QVariant v;
-				v.setValue(a_data);
-				m_deviceModel.setData(index, v, DeviceModel::AssignableRole);
-			});
-			menu.addAction(commitAct);
-			menu.exec(QCursor::pos());*/
+			auto proxy = proxyData.value<AssignableProxy*>();
+			match(a_data.assignableInfo()) (
+				pattern(as<RangeInfo>(arg)) = [this, &menu, proxy, &editConn](auto ri) {
+					//functionEditorRequested(*proxy, ri);
+					connect(&editConn, &QAction::triggered, [this, proxy, ri] {
+						functionEditorRequested(*proxy, ri);
+					});
+					menu.exec(QCursor::pos());
+				},
+				pattern(_) = []{}
+			);*/
 			
-			//auto dragView = new FunctionEditor;
-			//dragView->show();
-			
-			functionEditorRequested();
 		}
 	});
 	m_delegate = new DeviceModelDelegate(this);

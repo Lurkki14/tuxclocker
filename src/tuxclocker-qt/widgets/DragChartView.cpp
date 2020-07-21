@@ -176,6 +176,12 @@ void DragChartView::setVector(const QVector <QPointF> vector) {
     m_series.replace(vector);
 }
 
+void DragChartView::setRange(qreal xmin, qreal xmax, qreal ymin, qreal ymax) {
+	m_series.clear();
+	m_xAxis.setRange(xmin, xmax);
+	m_yAxis.setRange(ymin, ymax);
+}
+
 bool DragChartView::event(QEvent *event) {
     //qDebug() << event->type();
 
@@ -227,7 +233,10 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
         m_toolTipLabel->show();
     }
 
-    m_toolTipLabel->setText(QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
+    m_toolTipLabel->setText(QString("%1, %2")
+		.arg(QString::number(m_latestScatterPoint.x()),
+		QString::number(m_latestScatterPoint.y())));
+	
     // FIXME : doesn't work properly when screen is switched(?)
     m_toolTipLabel->move(event->screenPos().toPoint() + toolTipOffset(this, event->windowPos().toPoint()));
     
@@ -324,14 +333,17 @@ void DragChartView::drawFillerLines(QScatterSeries *series) {
 
     for (int i = 0; i < sorted.length() - 1; i++) {
         m_lineFillerItems[i]->setLine(QLineF(chart()->mapToPosition(sorted[i]),
-                                             chart()->mapToPosition(sorted[i + 1])));
+			chart()->mapToPosition(sorted[i + 1])));
     }
 
-    m_leftLineFillerItem->setLine(QLineF(chart()->mapToPosition(QPointF(m_xAxis.min(), sorted[0].y())),
-                                         chart()->mapToPosition(sorted[0])));
+    m_leftLineFillerItem->setLine(
+		QLineF(chart()->mapToPosition(QPointF(
+			m_xAxis.min(), sorted[0].y())),
+		chart()->mapToPosition(sorted[0])));
 
-    m_rightLineFillerItem->setLine(QLineF(chart()->mapToPosition(sorted.last()),
-                                          chart()->mapToPosition(QPointF(m_xAxis.max(), sorted.last().y()))));
+    m_rightLineFillerItem->setLine(
+		QLineF(chart()->mapToPosition(sorted.last()),
+        chart()->mapToPosition(QPointF(m_xAxis.max(), sorted.last().y()))));
 
     chart()->update();
 }

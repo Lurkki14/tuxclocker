@@ -94,6 +94,9 @@ protected:
 		QStylePainter painter(this);
 		QStyleOptionComboBox opt;
 		initStyleOption(&opt);
+		QPalette rp;
+		rp.setColor(QPalette::Highlight, Qt::red);
+		opt.palette = rp;
 		
 		// Show which flags are selected
 		auto items = m_flagHash.values();

@@ -10,11 +10,13 @@ using namespace QtCharts;
 class DragChartView : public QChartView {
 public:
     DragChartView(QWidget *parent = nullptr);
-    QValueAxis *xAxis() {return &m_xAxis;}
-    QValueAxis *yAxis() {return &m_yAxis;}
+    QValueAxis &xAxis() {return m_xAxis;}
+    QValueAxis &yAxis() {return m_yAxis;}
     
     void setVector(const QVector <QPointF> vector);
     QVector <QPointF> vector() {return m_series.pointsVector();}
+    // Clear the points and set new range
+    void setRange(qreal xmin, qreal xmax, qreal ymin, qreal ymax); 
 protected:
     bool event(QEvent*);
     void mousePressEvent(QMouseEvent*);

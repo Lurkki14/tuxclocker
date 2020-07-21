@@ -9,6 +9,8 @@ class DeviceProxyModel : public QSortFilterProxyModel {
 public:
 	DeviceProxyModel(DeviceModel &model, QObject *parent = nullptr);
 	DeviceModel::InterfaceFlags filterFlags() {return m_flags;}
+	// Disable items that don't contain the interface in m_flags
+	void setDisableFiltered(bool on) {m_disableFiltered = on;}
 	void setFlags(DeviceModel::InterfaceFlags flags) {
 		m_flags = flags;
 		invalidateFilter();
@@ -37,9 +39,12 @@ protected:
 			const override {
 		return !(!m_showValueColumn && sourceColumn == DeviceModel::InterfaceColumn);
 	}
+	// Optionally disable selection of items that don't have the wanted interface
+	Qt::ItemFlags flags(const QModelIndex &index) const override;
 	// Overridden for showing items with children last/first
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 private:
+	bool m_disableFiltered;
 	bool m_showIcons;
 	bool m_showValueColumn;
 	DeviceModel::InterfaceFlags m_flags;

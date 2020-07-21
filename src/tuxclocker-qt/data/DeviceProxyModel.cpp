@@ -5,7 +5,8 @@
 Q_DECLARE_METATYPE(DeviceModel::InterfaceFlag)
 
 DeviceProxyModel::DeviceProxyModel(DeviceModel &model, QObject *parent) :
-		QSortFilterProxyModel(parent), m_showIcons(true), m_showValueColumn(true) {
+		QSortFilterProxyModel(parent), m_disableFiltered(false),
+		m_showIcons(true), m_showValueColumn(true) {
 	setSourceModel(&model);
 	m_flags = DeviceModel::AllInterfaces;
 }
@@ -35,6 +36,22 @@ bool DeviceProxyModel::filterAcceptsRow(int sourceRow,
 	traverse(thisItem);
 
 	return !shouldHide;
+}
+
+Qt::ItemFlags DeviceProxyModel::flags(const QModelIndex &index) const {
+	if (!m_disableFiltered)
+		return QSortFilterProxyModel::flags(index);
+	
+	auto iface = 
+		QSortFilterProxyModel::data(index, DeviceModel::InterfaceTypeRole);
+	auto removedFlags = Qt::ItemIsSelectable;
+	auto itemFlags = QSortFilterProxyModel::flags(index);
+	if (!iface.isValid())
+		// Remove selectable flag
+		return itemFlags &(~removedFlags);
+	auto flags = iface.value<DeviceModel::InterfaceFlag>();
+	return (flags & m_flags) ? itemFlags :
+		itemFlags &(~removedFlags);
 }
 
 bool DeviceProxyModel::lessThan(const QModelIndex &left,

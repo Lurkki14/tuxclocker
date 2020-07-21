@@ -2,6 +2,8 @@
 
 #include "AssignableProxy.hpp"
 #include "DynamicReadableProxy.hpp"
+#include "qnamespace.h"
+#include "qstandarditemmodel.h"
 #include <fplus/fplus.hpp>
 #include <QApplication>
 #include <QDBusReply>
@@ -16,6 +18,8 @@ using namespace mpark::patterns;
 using namespace TuxClocker::Device;
 
 Q_DECLARE_METATYPE(AssignableItemData)
+Q_DECLARE_METATYPE(AssignableProxy*)
+Q_DECLARE_METATYPE(DynamicReadableProxy*)
 Q_DECLARE_METATYPE(TCDBus::Enumeration)
 Q_DECLARE_METATYPE(TCDBus::Range)
 Q_DECLARE_METATYPE(EnumerationVec)
@@ -50,13 +54,8 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 				if_let(pattern(some(arg)) = setupAssignable(node, conn))
 						= [&](auto item) {
 					nameItem->setData(Assignable, InterfaceTypeRole);
-					
-					//auto style = QApplication::style();
-					//auto icon = style->standardIcon(QStyle::SP_ComputerIcon);
 					auto icon = assignableIcon();
-					//QIcon icon("/home/jussi/Downloads/wrench.png");
 					nameItem->setData(icon, Qt::DecorationRole);
-					
 					rowItems.append(item);
 				};
 			},
@@ -69,6 +68,7 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 					nameItem->setData(DeviceModel::DynamicReadable,
 						InterfaceTypeRole);
 					rowItems.append(item);
+					//qDebug() << item->data(DynamicReadableProxyRole);
 				};
 			},
 			pattern("org.tuxclocker.StaticReadable") = [=, &rowItems] {
@@ -100,10 +100,35 @@ EnumerationVec toEnumVec(QVector<TCDBus::Enumeration> enums) {
 	}, enums.toStdVector());
 }
 
+std::optional<const AssignableProxy*>
+		DeviceModel::assignableProxyFromItem(QStandardItem *item) {
+	return (m_assignableProxyHash.contains(item)) ?
+		std::optional(m_assignableProxyHash.value(item)) :
+		std::nullopt;
+}
+
 QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
 		QDBusConnection conn, AssignableItemData itemData) {
 	auto ifaceItem = new AssignableItem(this);
 	auto proxy = new AssignableProxy(node.value().path, conn, this);
+	
+	connect(proxy, &AssignableProxy::connectionValueChanged, [=] (auto result, auto text) {
+		p::match(result) (
+			pattern(as<QVariant>(arg)) = [=](auto v) {
+				QVariant data;
+				data.setValue(connectionColor());
+				ifaceItem->setData(data, Qt::BackgroundRole);
+				ifaceItem->setText(text);
+				//qDebug() << text;
+			},
+			pattern(_) = []{}
+		);
+	});
+	
+	
+	QVariant pv;
+	pv.setValue(proxy);
+	ifaceItem->setData(pv, AssignableProxyRole);
 	QVariant v;
 	v.setValue(itemData);
 	ifaceItem->setData(v, AssignableRole);
@@ -159,6 +184,21 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 	return ifaceItem;
 }
 
+QVariant DeviceModel::data(const QModelIndex &index, int role) const {
+	if (index.row() != DeviceModel::NameColumn && role == DeviceModel::NodeNameRole) {
+		// Get name from adjacent column
+		auto nameIndex =
+			this->index(index.row(), DeviceModel::NameColumn, index.parent());
+		return nameIndex.data(Qt::DisplayRole);
+	}
+	if (index.column() != InterfaceColumn && role == DynamicReadableProxyRole) {
+		auto idx =
+			this->index(index.row(), DeviceModel::InterfaceColumn, index.parent());
+		return idx.data(DynamicReadableProxyRole);
+	}
+	return QStandardItemModel::data(index, role);
+}
+
 std::optional<QStandardItem*> DeviceModel::setupAssignable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
 	QDBusInterface ifaceNode("org.tuxclocker", node.value().path,
@@ -197,13 +237,17 @@ void updateReadItemText(QStandardItem *item, T value,
 		QString("%1 %2").arg(value).arg(unit.value()) :
 		QString("%1").arg(value);
 	item->setText(text);
+	//qDebug() << item->data(DeviceModel::DynamicReadableProxyRole);
 }
 
 std::optional<QStandardItem*> DeviceModel::setupDynReadable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
 	auto item = new QStandardItem;
 	auto proxy = new DynamicReadableProxy(node.value().path, conn, this);
-	auto unit = proxy->unit();
+	QVariant v;
+	v.setValue(proxy);
+	item->setData(v, DynamicReadableProxyRole);
+	auto unit = proxy->unit();	
 	
 	connect(proxy, &DynamicReadableProxy::valueChanged, [=](ReadResult res) {
 		p::match(res)(
