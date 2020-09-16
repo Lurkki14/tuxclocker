@@ -49,6 +49,7 @@ make install (installs into /opt/tuxclocker/bin)
 
 - NOTE: headers are usually included in a package named \*-dev, if they are separate
 - libdrm and headers
+- libqt5x11extras5
 - amdgpu.ppfeaturemask boot paramter set to the value you want. To view the current value, run 
 
 ```
