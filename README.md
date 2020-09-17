@@ -1,8 +1,9 @@
-TuxClocker - A GUI overclocking utility for GNU/Linux
-========================================
+# TuxClocker - A GUI overclocking utility for GNU/Linux
+
 TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-series cards and newer, and AMD GPUs using the amdgpu driver until (not including) Radeon VII.
 
 # Support
+
 Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/room/#tuxclocker:matrix.org)
 
 # Screenshots
@@ -10,6 +11,7 @@ Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/roo
 ![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/cZCNzmN.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
 
 # Current features
+
 - GPU monitoring (list and graph)
 - Overclocking
 - Overvolting
@@ -62,14 +64,14 @@ qmake rojekti.pro
 make
 make install (installs into /opt/tuxclocker/bin)
 ```
+
 ### Arch Linux
+
 #### AUR package
 [https://aur.archlinux.org/packages/tuxclocker/](https://aur.archlinux.org/packages/tuxclocker/)
 
 # Requirements (AMD)
 
-- NOTE: headers are usually included in a package named \*-dev, if they are separate
-- libdrm and headers
 - amdgpu.ppfeaturemask boot paramter set to the value you want. To view the current value, run 
 
 ```
