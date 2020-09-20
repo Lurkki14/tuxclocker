@@ -27,25 +27,25 @@ Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/roo
 For AMD under Ubuntu:
 
     sudo apt install --yes --quiet --quiet \
-    	libqt5x11extras5-dev \
-	qtbase5-dev \
-	libqt5x11extras5 \
-	libdrm-amdgpu1 \
-	libdrm-common \
-	libdrm-dev
+        libqt5x11extras5-dev \
+        qtbase5-dev \
+        libqt5x11extras5 \
+        libdrm-amdgpu1 \
+        libdrm-common \
+        libdrm-dev
 
 For Nvidia under Ubuntu:
 
     sudo apt install --yes --quiet --quiet \
-    	libqt5x11extras5-dev \
-	qtbase5-dev \
-	libqt5x11extras5 \
-	libdrm-amdgpu1 \
-	libdrm-common \
-	libdrm-dev \
-	nvidia-utils-440-server \
-	nvidia-settings \
-	libxnvctrl-dev
+        libqt5x11extras5-dev \
+        qtbase5-dev \
+        libqt5x11extras5 \
+        libdrm-amdgpu1 \
+        libdrm-common \
+        libdrm-dev \
+        nvidia-utils-440-server \
+        nvidia-settings \
+        libxnvctrl-dev
 
 # Requirements (nvidia)
 
