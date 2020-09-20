@@ -24,6 +24,11 @@ Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/roo
 
 # Prerequisites
 
+For AMD under any distribution:
+
+-   NOTE: headers are usually included in a package named \*-dev, if they are separate
+-   libdrm and headers
+
 For AMD under Ubuntu:
 
     sudo apt install --yes --quiet --quiet \
@@ -33,6 +38,14 @@ For AMD under Ubuntu:
         libdrm-amdgpu1 \
         libdrm-common \
         libdrm-dev
+
+For Nvidia under any distribution:
+
+-   NOTE: headers are usually included in a package named \*-dev, if they are separate
+-   nvidia-smi
+-   nvidia-settings
+-   libxnvctrl and headers (if not included in nvidia-settings)
+-   qt5base, x11extras and their headers
 
 For Nvidia under Ubuntu:
 
