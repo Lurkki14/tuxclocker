@@ -1,8 +1,9 @@
-TuxClocker - A GUI overclocking utility for GNU/Linux
-========================================
+# TuxClocker - A GUI overclocking utility for GNU/Linux
+
 TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-series cards and newer, and AMD GPUs using the amdgpu driver until (not including) Radeon VII.
 
 # Support
+
 Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/room/#tuxclocker:matrix.org)
 
 # Screenshots
@@ -10,6 +11,7 @@ Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/roo
 ![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/cZCNzmN.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
 
 # Current features
+
 - GPU monitoring (list and graph)
 - Overclocking
 - Overvolting
@@ -20,12 +22,46 @@ Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/roo
 - Provisional multi-GPU support
 - Profiles
 
+# Prerequisites
+
+For AMD under any distribution:
+
+-   NOTE: headers are usually included in a package named \*-dev, if they are separate
+-   libdrm and headers
+
+For AMD under Ubuntu:
+
+    sudo apt install --yes --quiet --quiet \
+        libqt5x11extras5-dev \
+        qtbase5-dev \
+        libqt5x11extras5 \
+        libdrm-amdgpu1 \
+        libdrm-common \
+        libdrm-dev
+
+For Nvidia under any distribution:
+
+-   NOTE: headers are usually included in a package named \*-dev, if they are separate
+-   nvidia-smi
+-   nvidia-settings
+-   libxnvctrl and headers (if not included in nvidia-settings)
+-   qt5base, x11extras and their headers
+
+For Nvidia under Ubuntu:
+
+    sudo apt install --yes --quiet --quiet \
+        libqt5x11extras5-dev \
+        qtbase5-dev \
+        libqt5x11extras5 \
+        libdrm-amdgpu1 \
+        libdrm-common \
+        libdrm-dev \
+        nvidia-utils-440-server \
+        nvidia-settings \
+        libxnvctrl-dev
+
 # Requirements (nvidia)
-- NOTE: headers are usually included in a package named \*-dev, if they are separate
-- nvidia-smi
-- nvidia-settings
-- libxnvctrl and headers (if not included in nvidia-settings)
-- qt5base, x11extras and their headers
+
 - [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to the value you want (31 for all functionality)
 
 # Installation (nvidia)
@@ -41,14 +77,14 @@ qmake rojekti.pro
 make
 make install (installs into /opt/tuxclocker/bin)
 ```
+
 ### Arch Linux
+
 #### AUR package
 [https://aur.archlinux.org/packages/tuxclocker/](https://aur.archlinux.org/packages/tuxclocker/)
 
 # Requirements (AMD)
 
-- NOTE: headers are usually included in a package named \*-dev, if they are separate
-- libdrm and headers
 - amdgpu.ppfeaturemask boot paramter set to the value you want. To view the current value, run 
 
 ```
