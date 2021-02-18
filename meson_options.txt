@@ -1,7 +1,7 @@
 # By default, library and modules (except interfaces) are built
 
-option('daemon', type: 'boolean', value: 'false', description: 'Build daemon')
+option('daemon', type: 'boolean', value: 'true', description: 'Build daemon')
 option('plugins', type: 'boolean', value: 'true', description: 'Build plugins')
-option('interfaces', type: 'boolean', value: 'false', description: 'Build interfaces')
+option('interfaces', type: 'boolean', value: 'true', description: 'Build interfaces')
 option('library', type: 'boolean', value: 'true', description: 'Build library')
-option('gui', type: 'boolean', value: 'false', description: 'Build Qt GUI')
+option('gui', type: 'boolean', value: 'true', description: 'Build Qt GUI')
