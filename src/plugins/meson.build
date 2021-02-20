@@ -14,10 +14,11 @@ if libdrm_dep.found() and libdrm_amdgpu.found()
 endif
 
 libnvml = cc.find_library('nvidia-ml', required : false)
+libxext = cc.find_library('Xext', required : false)
 libx = cc.find_library('X11', required : false)
 libxnvctrl = cc.find_library('XNVCtrl', required : false)
 
-nvidia_linux_libs = [libnvml, libx, libxnvctrl]
+nvidia_linux_libs = [libnvml, libx, libxext, libxnvctrl]
 
 all_nvidia_linux_libs = true
 
