@@ -5,6 +5,7 @@
 #include <fplus/fplus.hpp>
 #include <iostream>
 #include <patterns.hpp>
+#include <type_traits>
 // Need to break alphabetic order since nvidia couldn't put the required includes in their header
 #include <X11/Xlib.h> // Also breaks everything if it's in a different spot
 #include <NVCtrl/NVCtrlLib.h>
@@ -136,6 +137,7 @@ private:
 	uint nvctrlPerfModes(uint index);
 	static uint nvmlFanCount(nvmlDevice_t dev);
 	int nvctrlFanCount(uint index);
+	static ReadError fromNVMLError(nvmlReturn_t err);
 };
 
 template <typename In, typename Out>
@@ -148,8 +150,19 @@ std::variant<ReadError, ReadableValue> NvidiaPlugin::nvmlRead(nvmlDevice_t dev,
 		// Map to ReadError here
 		default: return ReadError::UnknownError;
 	}
+	// This is useless, just take a function of nvmlDevice_t -> a -> ReadableValue
+	// Because this isn't compile time we can't use nvmlUtilization_t 
 	if (!transformFunc.has_value()) return value;
 	return transformFunc.value()(value);
+}
+
+ReadError fromNVMLError(nvmlReturn_t err) {
+	// TODO: add conversions
+	switch (err) {
+		default:
+			return ReadError::UnknownError;
+	}
+
 }
 
 template <typename Out>
@@ -313,6 +326,20 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			"Memory Clock",
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Memory Clock");
+			}
+		},
+		{
+			[](nvmlDevice_t dev) -> ReadResult {
+				nvmlUtilization_t value;
+				nvmlReturn_t err;
+				if ((err = nvmlDeviceGetUtilizationRates(dev, &value)) != NVML_SUCCESS)
+					return fromNVMLError(err);
+				return value.gpu;
+			},
+			"%",
+			"Core Utilization",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Core Utilization");
 			}
 		}
 	};
