@@ -52,8 +52,8 @@ mkDerivation rec {
     cudatoolkit
     libdrm
     libXext
-    #libX11
-    #libXNVCtrl
+    libX11
+    libXNVCtrl
     meson
     ninja
     nvidia_x11
