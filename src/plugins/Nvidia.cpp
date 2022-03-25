@@ -156,13 +156,13 @@ std::variant<ReadError, ReadableValue> NvidiaPlugin::nvmlRead(nvmlDevice_t dev,
 	return transformFunc.value()(value);
 }
 
-ReadError fromNVMLError(nvmlReturn_t err) {
+ReadError NvidiaPlugin::fromNVMLError(nvmlReturn_t err) {
 	// TODO: add conversions
 	switch (err) {
 		default:
 			return ReadError::UnknownError;
 	}
-
+	return ReadError::UnknownError;
 }
 
 template <typename Out>
@@ -327,7 +327,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Memory Clock");
 			}
-		},
+		}
+	};
+
+	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLUtilNodes = {
 		{
 			[](nvmlDevice_t dev) -> ReadResult {
 				nvmlUtilization_t value;
@@ -341,9 +344,44 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Core Utilization");
 			}
+		},
+		{
+			[](nvmlDevice_t dev) -> ReadResult {
+				nvmlUtilization_t value;
+				nvmlReturn_t err;
+				if ((err = nvmlDeviceGetUtilizationRates(dev, &value)) != NVML_SUCCESS)
+					return fromNVMLError(err);
+				return value.memory;
+			},
+			"%",
+			"Memory Utilization",
+			[](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Memory Utilization");
+			}
 		}
 	};
-	
+
+
+	std::vector<UnspecializedReadable<uint>> rawNVCTRLUtilNodes = {
+		{
+			[&](uint index) -> ReadResult {
+				const std::string target("PCIe=");
+				char *val;
+				// We're looking for a format of PCIe=xxx
+				if (!XNVCTRLQueryTargetStringAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0, NV_CTRL_STRING_GPU_UTILIZATION, &val))
+					return ReadError::UnknownError;
+				// The index after the '=', rest of the string should be the number
+				auto strIndex = std::string(val).find(target) + target.length();
+				return static_cast<uint>(std::stoul(std::string(val).substr(strIndex)));
+			},
+			"%",
+			"PCIe Bandwidth Utilization",
+			[](std::string uuid, uint) {
+				return md5(uuid + "PCIe Bandwidth Utilization");
+			}
+		}
+	};
+
 	std::vector<UnspecializedAssignable<nvmlDevice_t>> rawNVMLAssignables = {
 		{
 			[](nvmlDevice_t dev) -> std::optional<AssignableInfo> {
@@ -648,7 +686,14 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			.name = nvOpt.name,
 			.hash = md5(nvOpt.uuid)
 		});
-		
+	
+
+		// Has nodes from NVML and NVCtrl
+		auto utilRoot = TreeNode(DeviceNode {
+			.name = "Utilizations",
+			.hash = md5(nvOpt.uuid + "Utilizations")
+		});
+
 		std::vector<DeviceNode> nvmlFanNodes;
 		// Get nvml nodes if there is a device
 		if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
@@ -666,6 +711,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						rawNVMLFanReadables, info, nvOpt.uuid))
 					nvmlFanNodes.push_back(node);
 			}
+
+			for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
+					rawNVMLUtilNodes, dev, nvOpt.uuid))
+				utilRoot.appendChild(node);
+
 			auto tempInfoRoot = TreeNode(DeviceNode{
 				.name = "Temperatures",
 				.hash = md5(nvOpt.uuid + "Temperatures")
@@ -708,7 +758,14 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						rawNVCTRLFanAssignables, info, nvOpt.uuid))
 					nvctrlFanNodes.push_back(node);
 			}
+			for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(
+					rawNVCTRLUtilNodes, index, nvOpt.uuid))
+				utilRoot.appendChild(node);
 		};
+	
+		if (!utilRoot.children().empty())
+			gpuRoot.appendChild(utilRoot);
+
 		TreeNode<DeviceNode> fanRoot = TreeNode(DeviceNode{
 			.name = "Fans",
 			.hash = md5(nvOpt.uuid + "Fans")
