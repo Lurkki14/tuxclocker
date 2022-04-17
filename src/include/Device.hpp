@@ -44,17 +44,22 @@ using AssignableInfo = std::variant<RangeInfo, std::vector<Enumeration>>;
 class Assignable {
 public:
 	Assignable(const std::function<std::optional<AssignmentError>(AssignmentArgument)> assignmentFunc,
-			AssignableInfo info) {
+			AssignableInfo info,
+			const std::function<std::optional<AssignmentArgument>()> currentValueFunc) {
 		m_assignmentFunc = assignmentFunc;
 		m_assignableInfo = info;
+		m_currentValueFunc = currentValueFunc;
 	}
 	std::optional<AssignmentError> assign(AssignmentArgument arg) {
 		return m_assignmentFunc(arg);
 	}
+	// What the Assignable is currently set to
+	std::optional<AssignmentArgument> currentValue() {return m_currentValueFunc();}
 	AssignableInfo assignableInfo() {return m_assignableInfo;}
 private:
 	AssignableInfo m_assignableInfo;
 	std::function<std::optional<AssignmentError>(AssignmentArgument)> m_assignmentFunc;
+	std::function<std::optional<AssignmentArgument>()> m_currentValueFunc;
 };
 
 class DynamicReadable {
@@ -86,6 +91,14 @@ public:
 private:
 	ReadableValue m_value;
 	std::optional<std::string> m_unit;
+};
+
+// Either a function to reset an Assignable or its default value
+using ResetInfo = std::variant<std::function<void()>, AssignmentArgument>;
+
+class Resettable {
+private:
+	
 };
 
 /* DeviceNode has a name, and optionally implements one of

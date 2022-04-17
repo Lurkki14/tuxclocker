@@ -74,6 +74,8 @@ private:
 Q_DECLARE_METATYPE(TCDBus::Range)
 Q_DECLARE_METATYPE(TCDBus::Enumeration)
 Q_DECLARE_METATYPE(TCDBus::Result<int>)
+Q_DECLARE_METATYPE(TCDBus::Result<double>)
+Q_DECLARE_METATYPE(TCDBus::Result<uint>)
 
 class AssignableAdaptor : public QDBusAbstractAdaptor {
 public:
@@ -83,6 +85,8 @@ public:
 		qDBusRegisterMetaType<TCDBus::Enumeration>();
 		qDBusRegisterMetaType<QVector<TCDBus::Enumeration>>();
 		qDBusRegisterMetaType<TCDBus::Result<int>>();
+		qDBusRegisterMetaType<TCDBus::Result<double>>();
+		qDBusRegisterMetaType<TCDBus::Result<uint>>();
 		QVariant a_info;
 		// Unwrap AssignableInfo :(
 		match(a.assignableInfo())
@@ -115,6 +119,36 @@ public:
 	QDBusVariant assignableInfo_() {return m_dbusAssignableInfo;}
 	//QString unit_() {return m_assignable.uni}
 public Q_SLOTS:
+	QDBusVariant currentValue() {
+		QDBusVariant retval;
+		// Indicate error by default
+		TCDBus::Result<int> defResult {
+			.error = true,
+			.value = 0
+		};
+		QVariant result;
+		result.setValue(defResult);
+		match(m_assignable.currentValue())
+			(pattern(some(arg)) = [&](auto aa) {
+				match(aa)
+					(pattern(as<double>(arg)) = [&](auto d) {
+					 	TCDBus::Result<double> r{false, d};
+						result.setValue(r);
+					},
+					pattern(as<int>(arg)) = [&](auto i) {
+					 	TCDBus::Result<int> r{false, i};
+						result.setValue(r);
+					},
+					pattern(as<uint>(arg)) = [&](auto u) {
+						TCDBus::Result<uint> r{false, u};
+						result.setValue(r);
+					}
+				);
+			}
+		);
+		retval.setVariant(result);
+		return retval;
+	}
 	TCDBus::Result<int> assign(QDBusVariant arg_) {
 		auto v = arg_.variant();
 		

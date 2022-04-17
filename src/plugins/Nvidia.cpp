@@ -89,6 +89,7 @@ struct UnspecializedAssignable {
 	// Method to get the AssignableInfo since they differ per GPU.
 	std::function<std::optional<AssignableInfo>(T)> assignableInfo;
 	std::function<std::optional<AssignmentError>(T, AssignableInfo, AssignmentArgument)> func;
+	std::function<std::optional<AssignmentArgument>(T)> currentValueFunc;
 	std::optional<std::string> unit;
 	std::string nodeName;
 	std::function<std::string(std::string, T)> hash;
@@ -99,9 +100,14 @@ struct UnspecializedAssignable {
 		std::vector<DeviceNode> retval;
 		for (auto &rawNode : rawNodes) {
 			if_let(pattern(some(arg)) = rawNode.assignableInfo(devData)) = [&](auto info) {
+				// Create an individual Assignable from a generalized Assignable
 				auto assignable = Assignable([=](auto arg) {
 					return rawNode.func(devData, info, arg);
-				}, info);
+				}, 
+				info,
+				[=]() {
+					return rawNode.currentValueFunc(devData);
+				});
 				auto node = DeviceNode {
 					.name = rawNode.nodeName,
 					.interface = assignable,
@@ -412,6 +418,12 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				};
 				return retval;
 			},
+			[](nvmlDevice_t dev) -> AssignmentArgument {
+				uint limit = 0;
+				nvmlDeviceGetPowerManagementLimit(dev, &limit);
+				// In correspondace with Range<double>
+				return static_cast<double>(limit) / 1000;
+			},
 			"W",
 			"Power Limit",
 			[](std::string uuid, nvmlDevice_t) {
@@ -424,7 +436,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		uint maxState;
 		uint index;
 	};
-	
+	/*
 	std::vector<UnspecializedAssignable<NVClockInfo>> rawNVCTRLClockAssignables = {
 		{
 			[=](NVClockInfo info) -> std::optional<AssignableInfo> {
@@ -501,6 +513,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			}
 		}
 	};
+	*/
 	
 	struct NVMLFanInfo {
 		nvmlDevice_t dev;
@@ -571,7 +584,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		int fanIndex;
 	};
 	
-	std::vector<UnspecializedAssignable<NVCtrlFanInfo>> rawNVCTRLFanAssignables = {
+	/*std::vector<UnspecializedAssignable<NVCtrlFanInfo>> rawNVCTRLFanAssignables = {
 		{
 			[=](NVCtrlFanInfo info) -> std::optional<AssignableInfo> {
 				NVCTRLAttributeValidValuesRec values;
@@ -602,7 +615,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				return md5(uuid + "Fan Speed Write" + std::to_string(info.fanIndex));
 			}
 		}
-	};
+	};*/
 	
 	struct NvidiaGPUDataOpt {
 		std::string uuid;
@@ -744,7 +757,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				gpuRoot.appendChild(node);
 								
 			auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
-			for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
+			/*for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
 					rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
 				gpuRoot.appendChild(node);
 			
@@ -757,7 +770,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				for (auto &node : UnspecializedAssignable<NVCtrlFanInfo>::toDeviceNodes(
 						rawNVCTRLFanAssignables, info, nvOpt.uuid))
 					nvctrlFanNodes.push_back(node);
-			}
+			}*/
 			for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(
 					rawNVCTRLUtilNodes, index, nvOpt.uuid))
 				utilRoot.appendChild(node);

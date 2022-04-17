@@ -13,7 +13,7 @@ std::string Plugin::pluginPath() {
 
 std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> DevicePlugin::loadPlugins() {
 	std::vector<boost::shared_ptr<DevicePlugin>> retval;
-	
+	//std::cout << pluginPath();
 	for (const fs::directory_entry &entry : fs::directory_iterator(Plugin::pluginPath())) {
 		// Bleh, have to catch this unless I do more manual checks
 		try {

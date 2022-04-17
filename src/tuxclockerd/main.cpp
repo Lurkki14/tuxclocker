@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
 	
 	if (!connection.registerService("org.tuxclocker")) {
 		qDebug() << "unable to register:" << connection.lastError().message();
+		qDebug() << "errcode" << connection.lastError().type();
 	}
 	
 	return a.exec();
