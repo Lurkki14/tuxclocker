@@ -1,9 +1,11 @@
 #include <Crypto.hpp>
 #include <Device.hpp>
+#include <NVCtrl/NVCtrl.h>
 #include <Plugin.hpp>
 
 #include <fplus/fplus.hpp>
 #include <iostream>
+#include <optional>
 #include <patterns.hpp>
 #include <type_traits>
 // Need to break alphabetic order since nvidia couldn't put the required includes in their header
@@ -418,11 +420,13 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				};
 				return retval;
 			},
-			[](nvmlDevice_t dev) -> AssignmentArgument {
-				uint limit = 0;
-				nvmlDeviceGetPowerManagementLimit(dev, &limit);
-				// In correspondace with Range<double>
+			[](nvmlDevice_t dev) -> std::optional<AssignmentArgument> {
+				uint limit;
+				auto retval = nvmlDeviceGetPowerManagementLimit(dev, &limit);
+				if (retval != NVML_SUCCESS)
+					return std::nullopt;
 				return static_cast<double>(limit) / 1000;
+				// In correspondance with Range<double>
 			},
 			"W",
 			"Power Limit",
@@ -436,14 +440,13 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		uint maxState;
 		uint index;
 	};
-	/*
+	
 	std::vector<UnspecializedAssignable<NVClockInfo>> rawNVCTRLClockAssignables = {
 		{
 			[=](NVClockInfo info) -> std::optional<AssignableInfo> {
 				NVCTRLAttributeValidValuesRec values;
-				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, info.index, 0, 
-						NV_CTRL_TARGET_TYPE_GPU,
-						NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values)) {
+				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, NV_CTRL_TARGET_TYPE_GPU, info.index, 
+						info.maxState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values)) {
 					// Transfer rate -> clock speed
 					Range<int> r(values.u.range.min / 2, values.u.range.max / 2);
 					return r;
@@ -464,6 +467,14 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 							NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, val * 2);
 				};
 				return retval;
+			},
+			[=](NVClockInfo c_info) -> std::optional<AssignmentArgument> {
+				int value;
+				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, c_info.index,
+						c_info.maxState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value);
+				if (valid)
+					return value / 2;
+				return std::nullopt;
 			},
 			"MHz",
 			"Memory Clock Offset",
@@ -486,8 +497,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				}
 				return std::nullopt;
 			},
-			[=](uint index, AssignableInfo info, AssignmentArgument a_arg) {
-				(void) info;
+			[=](uint index, AssignableInfo, AssignmentArgument a_arg) {
 				std::optional<AssignmentError> ret = AssignmentError::InvalidType;
 				if_let(pattern(as<uint>(arg)) = a_arg) = [=, &ret](auto u) {
 					switch(u) {
@@ -506,6 +516,15 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				};
 				return ret;
 			},
+			[=](uint index) -> std::optional<AssignmentArgument> {
+				int value;
+				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0,
+					NV_CTRL_GPU_COOLER_MANUAL_CONTROL, &value);
+				if (valid)
+					return (value == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_FALSE) ?
+						0 : 1;
+				return std::nullopt;
+			},
 			std::nullopt,
 			"Fan Mode",
 			[](std::string uuid, uint) {
@@ -513,7 +532,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			}
 		}
 	};
-	*/
+	
 	
 	struct NVMLFanInfo {
 		nvmlDevice_t dev;
@@ -584,7 +603,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		int fanIndex;
 	};
 	
-	/*std::vector<UnspecializedAssignable<NVCtrlFanInfo>> rawNVCTRLFanAssignables = {
+	std::vector<UnspecializedAssignable<NVCtrlFanInfo>> rawNVCTRLFanAssignables = {
 		{
 			[=](NVCtrlFanInfo info) -> std::optional<AssignableInfo> {
 				NVCTRLAttributeValidValuesRec values;
@@ -609,13 +628,22 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				
 				return retval;
 			},
+			[=](NVCtrlFanInfo info) -> std::optional<AssignmentArgument> {
+				int value;
+				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_COOLER,
+					info.gpuIndex, info.fanIndex,
+					NV_CTRL_THERMAL_COOLER_LEVEL, &value);
+				if (valid)
+					return value;
+				return std::nullopt;
+			},
 			"%",
 			"Fan Speed",
 			[](std::string uuid, NVCtrlFanInfo info) {
 				return md5(uuid + "Fan Speed Write" + std::to_string(info.fanIndex));
 			}
 		}
-	};*/
+	};
 	
 	struct NvidiaGPUDataOpt {
 		std::string uuid;
@@ -757,7 +785,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				gpuRoot.appendChild(node);
 								
 			auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
-			/*for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
+			for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
 					rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
 				gpuRoot.appendChild(node);
 			
@@ -770,7 +798,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				for (auto &node : UnspecializedAssignable<NVCtrlFanInfo>::toDeviceNodes(
 						rawNVCTRLFanAssignables, info, nvOpt.uuid))
 					nvctrlFanNodes.push_back(node);
-			}*/
+			}
 			for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(
 					rawNVCTRLUtilNodes, index, nvOpt.uuid))
 				utilRoot.appendChild(node);
