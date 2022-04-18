@@ -144,7 +144,8 @@ public Q_SLOTS:
 						result.setValue(r);
 					}
 				);
-			}
+			},
+			pattern(none) = [] {}
 		);
 		retval.setVariant(result);
 		return retval;
