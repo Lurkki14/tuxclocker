@@ -376,11 +376,15 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				const std::string target("PCIe=");
 				char *val;
 				// We're looking for a format of PCIe=xxx
-				if (!XNVCTRLQueryTargetStringAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0, NV_CTRL_STRING_GPU_UTILIZATION, &val))
+				if (!XNVCTRLQueryTargetStringAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0,
+						NV_CTRL_STRING_GPU_UTILIZATION, &val)) {
 					return ReadError::UnknownError;
+				}
 				// The index after the '=', rest of the string should be the number
 				auto strIndex = std::string(val).find(target) + target.length();
-				return static_cast<uint>(std::stoul(std::string(val).substr(strIndex)));
+				auto retval =  static_cast<uint>(std::stoul(std::string(val).substr(strIndex)));
+				delete val;
+				return retval;
 			},
 			"%",
 			"PCIe Bandwidth Utilization",
