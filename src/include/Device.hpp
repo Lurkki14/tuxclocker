@@ -45,10 +45,12 @@ class Assignable {
 public:
 	Assignable(const std::function<std::optional<AssignmentError>(AssignmentArgument)> assignmentFunc,
 			AssignableInfo info,
-			const std::function<std::optional<AssignmentArgument>()> currentValueFunc) {
+			const std::function<std::optional<AssignmentArgument>()> currentValueFunc,
+			std::optional<std::string> unit = std::nullopt) {
 		m_assignmentFunc = assignmentFunc;
 		m_assignableInfo = info;
 		m_currentValueFunc = currentValueFunc;
+		m_unit = unit;
 	}
 	std::optional<AssignmentError> assign(AssignmentArgument arg) {
 		return m_assignmentFunc(arg);
@@ -56,10 +58,12 @@ public:
 	// What the Assignable is currently set to
 	std::optional<AssignmentArgument> currentValue() {return m_currentValueFunc();}
 	AssignableInfo assignableInfo() {return m_assignableInfo;}
+	std::optional<std::string> unit() {return m_unit;}
 private:
 	AssignableInfo m_assignableInfo;
 	std::function<std::optional<AssignmentError>(AssignmentArgument)> m_assignmentFunc;
 	std::function<std::optional<AssignmentArgument>()> m_currentValueFunc;
+	std::optional<std::string> m_unit;
 };
 
 class DynamicReadable {
