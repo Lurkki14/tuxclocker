@@ -109,7 +109,8 @@ struct UnspecializedAssignable {
 				info,
 				[=]() {
 					return rawNode.currentValueFunc(devData);
-				});
+				},
+				rawNode.unit);
 				auto node = DeviceNode {
 					.name = rawNode.nodeName,
 					.interface = assignable,
