@@ -87,6 +87,7 @@ public:
 		qDBusRegisterMetaType<TCDBus::Result<int>>();
 		qDBusRegisterMetaType<TCDBus::Result<double>>();
 		qDBusRegisterMetaType<TCDBus::Result<uint>>();
+		qDBusRegisterMetaType<TCDBus::Result<QString>>();
 		QVariant a_info;
 		// Unwrap AssignableInfo :(
 		match(a.assignableInfo())
@@ -117,7 +118,19 @@ public:
 		m_dbusAssignableInfo = QDBusVariant(a_info);
 	}
 	QDBusVariant assignableInfo_() {return m_dbusAssignableInfo;}
-	//QString unit_() {return m_assignable.uni}
+	TCDBus::Result<QString> unit_() {
+		if (m_assignable.unit().has_value()) {
+			return TCDBus::Result<QString> {
+				.error = false,
+				.value = QString::fromStdString(m_assignable.unit().value())
+			};
+
+		}
+		return TCDBus::Result<QString> {
+			.error = true,
+			.value = QString("")
+		};
+	}
 public Q_SLOTS:
 	QDBusVariant currentValue() {
 		QDBusVariant retval;
@@ -178,10 +191,12 @@ public Q_SLOTS:
 		
 		return res;
 	}
+
 private:
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "org.tuxclocker.Assignable")
 	Q_PROPERTY(QDBusVariant assignableInfo READ assignableInfo_)
+	Q_PROPERTY(TCDBus::Result<QString> unit READ unit_)
 	
 	Assignable m_assignable;
 	QDBusVariant m_dbusAssignableInfo;
