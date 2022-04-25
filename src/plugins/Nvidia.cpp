@@ -527,7 +527,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 					NV_CTRL_GPU_COOLER_MANUAL_CONTROL, &value);
 				if (valid)
 					return (value == NV_CTRL_GPU_COOLER_MANUAL_CONTROL_FALSE) ?
-						0 : 1;
+						0u : 1u;
 				return std::nullopt;
 			},
 			std::nullopt,
