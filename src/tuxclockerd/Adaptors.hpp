@@ -88,6 +88,8 @@ public:
 		qDBusRegisterMetaType<TCDBus::Result<double>>();
 		qDBusRegisterMetaType<TCDBus::Result<uint>>();
 		qDBusRegisterMetaType<TCDBus::Result<QString>>();
+		qDBusRegisterMetaType<TCDBus::Result<QDBusVariant>>();
+
 		QVariant a_info;
 		// Unwrap AssignableInfo :(
 		match(a.assignableInfo())
@@ -132,35 +134,29 @@ public:
 		};
 	}
 public Q_SLOTS:
-	QDBusVariant currentValue() {
-		QDBusVariant retval;
+	TCDBus::Result<QDBusVariant> currentValue() {
 		// Indicate error by default
-		TCDBus::Result<int> defResult {
+		TCDBus::Result<QDBusVariant> retval {
 			.error = true,
-			.value = 0
+			.value = QDBusVariant(QVariant(0))
 		};
-		QVariant result;
-		result.setValue(defResult);
 		match(m_assignable.currentValue())
 			(pattern(some(arg)) = [&](auto aa) {
+			 	retval.error = false;
 				match(aa)
 					(pattern(as<double>(arg)) = [&](auto d) {
-					 	TCDBus::Result<double> r{false, d};
-						result.setValue(r);
+						retval.value = QDBusVariant(QVariant(d));	
 					},
 					pattern(as<int>(arg)) = [&](auto i) {
-					 	TCDBus::Result<int> r{false, i};
-						result.setValue(r);
+						retval.value = QDBusVariant(QVariant(i));	
 					},
 					pattern(as<uint>(arg)) = [&](auto u) {
-						TCDBus::Result<uint> r{false, u};
-						result.setValue(r);
+						retval.value = QDBusVariant(QVariant(u));	
 					}
 				);
 			},
 			pattern(none) = [] {}
 		);
-		retval.setVariant(result);
 		return retval;
 	}
 	TCDBus::Result<int> assign(QDBusVariant arg_) {
