@@ -2,8 +2,6 @@
 
 #include "AssignableProxy.hpp"
 #include "DynamicReadableProxy.hpp"
-#include "qnamespace.h"
-#include "qstandarditemmodel.h"
 #include <fplus/fplus.hpp>
 #include <QApplication>
 #include <QDBusReply>
@@ -23,12 +21,15 @@ Q_DECLARE_METATYPE(DynamicReadableProxy*)
 Q_DECLARE_METATYPE(TCDBus::Enumeration)
 Q_DECLARE_METATYPE(TCDBus::Range)
 Q_DECLARE_METATYPE(EnumerationVec)
+Q_DECLARE_METATYPE(TCDBus::Result<QString>)
 
 DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent) :
 		QStandardItemModel(parent) {
 	qDBusRegisterMetaType<TCDBus::Enumeration>();
 	qDBusRegisterMetaType<QVector<TCDBus::Enumeration>>();
 	qDBusRegisterMetaType<TCDBus::Range>();
+	qDBusRegisterMetaType<TCDBus::Result<QString>>();
+
 	/* Data storage:
 		- Interface column should store assignable info for editors
 		- Name colums should store the interface type for filtering 
@@ -107,6 +108,15 @@ std::optional<const AssignableProxy*>
 		std::nullopt;
 }
 
+QString fromAssignmentArgument(AssignmentArgument a_arg) {
+	return p::match(a_arg) (
+		pattern(as<int>(arg)) = [](auto i) {return QString::number(i);},
+		pattern(as<uint>(arg)) = [](auto u) {return QString::number(u);},
+		pattern(as<double>(arg)) = [](auto d) {return QString::number(d);},
+		pattern(_) = [] {return QString("");}
+	);
+}
+
 QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> node,
 		QDBusConnection conn, AssignableItemData itemData) {
 	auto ifaceItem = new AssignableItem(this);
@@ -132,8 +142,41 @@ QStandardItem *DeviceModel::createAssignable(TC::TreeNode<TCDBus::DeviceNode> no
 	QVariant v;
 	v.setValue(itemData);
 	ifaceItem->setData(v, AssignableRole);
-	ifaceItem->setText("No value set");
-	
+
+	// Set initial text to current value (one-time at startup)
+	QString text("No value set");
+	auto unit = itemData.unit();
+	auto currentValue = proxy->currentValue();
+
+	if (currentValue.has_value()) {
+		p::match(itemData.assignableInfo()) (
+			pattern(as<EnumerationVec>(arg)) = [&](auto e_vec) {
+				/* Find index from EnumVec (O(n) doesn't matter since we only search once here)
+				   This should never be anything other than an uint but in theory it could be
+				   whatever at this point */
+				try {
+					auto index = std::get<uint>(currentValue.value());
+					for (auto &e : e_vec) {
+						if (index == e.key) {
+							text = QString::fromStdString(e.name);
+							break;
+						}
+					}
+				} catch (std::bad_variant_access &e) {}
+
+				//text = QString::fromStdString(e_vec[std::get<uint>(currentValue.value())].name);
+			},
+			pattern(as<RangeInfo>(_)) = [&]() {
+				auto base = fromAssignmentArgument(currentValue.value());
+				if (unit.has_value())
+					text = QString("%1 %2").arg(base, unit.value());
+				else
+					text = base;
+			}
+		);
+	}
+	ifaceItem->setText(text);
+
 	connect(ifaceItem, &AssignableItem::assignableDataChanged,
 			[=](QVariant v) {
 		// Only show checkbox when value has been changed
@@ -199,6 +242,12 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
 	return QStandardItemModel::data(index, role);
 }
 
+std::optional<QString> fromDBusResult(TCDBus::Result<QString> res) {
+	if (res.error)
+		return std::nullopt;
+	return res.value;
+}
+
 std::optional<QStandardItem*> DeviceModel::setupAssignable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
 	QDBusInterface ifaceNode("org.tuxclocker", node.value().path,
@@ -207,6 +256,13 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 	auto a_info =
 		qvariant_cast<QDBusVariant>(ifaceNode.property("assignableInfo"))
 		.variant();
+	// Get unit of Assignable
+	auto dbusUnit = qvariant_cast<TCDBus::Result<QString>>(ifaceNode.property("unit"));
+	auto unit = fromDBusResult(dbusUnit);
+
+	// Get initial value
+	
+
 	/* TODO: bad hack: this code can only differentiate between
 		arrays and structs: make it based on signature instead */
 	auto d_arg = qvariant_cast<QDBusArgument>(a_info);
@@ -214,13 +270,13 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 		case QDBusArgument::StructureType: {
 			TCDBus::Range r;
 			d_arg >> r;
-			AssignableItemData data(r.toAssignableInfo());
+			AssignableItemData data(r.toAssignableInfo(), unit);
 			return createAssignable(node, conn, data);
 		}
 		case QDBusArgument::ArrayType: {
 			QVector<TCDBus::Enumeration> e;
 			d_arg >> e;
-			AssignableItemData data(toEnumVec(e));
+			AssignableItemData data(toEnumVec(e), unit);
 			return createAssignable(node, conn, data);
 		}
 		default:

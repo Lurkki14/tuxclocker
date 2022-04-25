@@ -60,7 +60,13 @@ void DeviceModelDelegate::setModelData(QWidget *editor,
 		data.setValue(a_editor->assignableData());
 		QVariant v;
 		v.setValue(data);
-		model->setData(index, a_editor->displayData(), Qt::DisplayRole);
+		// TODO: add unit
+
+		auto text = (data.unit().has_value()) ?
+			QString("%1 %2").arg(a_editor->displayData(), data.unit().value()) :
+			a_editor->displayData();
+
+		model->setData(index, text, Qt::DisplayRole);
 		model->setData(index, v, DeviceModel::AssignableRole);
 	}
 }

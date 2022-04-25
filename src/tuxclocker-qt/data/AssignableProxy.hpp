@@ -22,6 +22,7 @@ public:
 	// Stop connection and clear current connection
 	void stopConnection();
 	void setValue(QVariant v) {m_value = v;}
+	std::optional<TC::Device::AssignmentArgument> currentValue();
 signals:
 	void applied(std::optional<TC::Device::AssignmentError>);
 	void connectionValueChanged(std::variant<QVariant, TC::Device::AssignmentError>,
