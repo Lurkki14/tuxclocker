@@ -96,9 +96,10 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 }
 
 EnumerationVec toEnumVec(QVector<TCDBus::Enumeration> enums) {
+	std::vector<TCDBus::Enumeration> stdEnumVec(enums.begin(), enums.end());
 	return transform([](auto e) {
 		return Enumeration{e.name.toStdString(), e.key};
-	}, enums.toStdVector());
+	}, stdEnumVec);
 }
 
 std::optional<const AssignableProxy*>
