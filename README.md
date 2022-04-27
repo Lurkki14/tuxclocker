@@ -4,7 +4,7 @@ TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-
 
 # Support
 
-Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/room/#tuxclocker:matrix.org)
+Matrix room:  [#tuxclocker:matrix.org](https://matrix.to/#/#tuxclocker:matrix.org)
 
 # Screenshots
 
