@@ -17,7 +17,8 @@ std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> DevicePlugin::loadPl
 	for (const fs::directory_entry &entry : fs::directory_iterator(Plugin::pluginPath())) {
 		// Bleh, have to catch this unless I do more manual checks
 		try {
-			auto plugin = dll::import<DevicePlugin>(entry.path().string(), TUXCLOCKER_PLUGIN_SYMBOL_NAME);
+			auto plugin = boost::dll::import_symbol<DevicePlugin>(entry.path().string(),
+				TUXCLOCKER_PLUGIN_SYMBOL_NAME);
 			retval.push_back(plugin);
 		}
 		catch (boost::system::system_error &e) {}
