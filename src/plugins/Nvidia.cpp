@@ -486,7 +486,44 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			[](std::string uuid, NVClockInfo) {
 				return md5(uuid + "Memory Clock Offset");
 			}
+		},
+		{
+			[=](NVClockInfo c_info) -> std::optional<AssignableInfo> {
+				NVCTRLAttributeValidValuesRec values;
+				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
+						c_info.index, c_info.maxState, NV_CTRL_GPU_NVCLOCK_OFFSET, &values)) {
+					return Range<int>{values.u.range.min, values.u.range.max};
+				}
+				return std::nullopt;
+			},
+			[=](NVClockInfo c_info, AssignableInfo a_info, AssignmentArgument a_arg) {
+				std::optional<AssignmentError> retval = AssignmentError::InvalidType;
+				try {
+					auto arg = std::get<int>(a_arg);
+					auto range = std::get<Range<int>>(std::get<RangeInfo>(a_info));
+					if (arg < range.min || arg > range.max)
+						retval = AssignmentError::OutOfRange;
+					else
+						return nvctlWrite(c_info.index, c_info.maxState,
+							NV_CTRL_TARGET_TYPE_GPU, NV_CTRL_GPU_NVCLOCK_OFFSET, arg);
+				} catch (std::bad_variant_access&) {}
+				return retval;
+			},
+			[=](NVClockInfo c_info) -> std::optional<AssignmentArgument> {
+				int value;
+				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, c_info.index,
+						c_info.maxState, NV_CTRL_GPU_NVCLOCK_OFFSET, &value);
+				if (valid)
+					return value;
+				return std::nullopt;
+			},
+			"MHz",
+			"Core Clock Offset",
+			[](std::string uuid, NVClockInfo) {
+				return md5(uuid + "Core Clock Offset");
+			}
 		}
+
 	};
 	
 	std::vector<UnspecializedAssignable<uint>> rawNVCTRLAssignables = {
