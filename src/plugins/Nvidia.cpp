@@ -296,7 +296,35 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			}
 		}
 	};
-	
+
+	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLClockNodes = {
+		{
+			.func = [](nvmlDevice_t dev) {
+				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
+					return nvmlDeviceGetClockInfo(dev, NVML_CLOCK_GRAPHICS, value);
+				}, std::nullopt);
+			},
+			.unit = "MHz",
+			.nodeName = "Core Clock",
+			.hash = [](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Core Clock");
+			}
+		},
+		{
+			.func = [](nvmlDevice_t dev) {
+				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
+					return nvmlDeviceGetClockInfo(dev, NVML_CLOCK_MEM, value);
+				}, std::nullopt);
+			},
+			.unit = "MHz",
+			.nodeName = "Memory Clock",
+			.hash = [](std::string uuid, nvmlDevice_t) {
+				return md5(uuid + "Memory Clock");
+			}
+		}
+
+	};
+
 	std::vector<UnspecializedReadable<nvmlDevice_t>> rawNVMLNodes = {
 		{
 			[](nvmlDevice_t dev) {
@@ -311,30 +339,6 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			"Power Usage",
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Power Usage");
-			}
-		},
-		{
-			[](nvmlDevice_t dev) {
-				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
-					return nvmlDeviceGetClockInfo(dev, NVML_CLOCK_GRAPHICS, value);
-				}, std::nullopt);
-			},
-			"MHz",
-			"Core Clock",
-			[](std::string uuid, nvmlDevice_t) {
-				return md5(uuid + "Core Clock");
-			}
-		},
-		{
-			[](nvmlDevice_t dev) {
-				return nvmlRead<uint, uint>(dev, [](nvmlDevice_t dev, uint *value) {
-					return nvmlDeviceGetClockInfo(dev, NVML_CLOCK_MEM, value);
-				}, std::nullopt);
-			},
-			"MHz",
-			"Memory Clock",
-			[](std::string uuid, nvmlDevice_t) {
-				return md5(uuid + "Memory Clock");
 			}
 		}
 	};
@@ -777,6 +781,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			.hash = md5(nvOpt.uuid + "Utilizations")
 		});
 
+		auto clockRoot = TreeNode{DeviceNode {
+			.name = "Clocks",
+			.hash = md5(nvOpt.uuid + "Clocks")
+		}};
+
 		std::vector<DeviceNode> nvmlFanNodes;
 		// Get nvml nodes if there is a device
 		if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
@@ -794,6 +803,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						rawNVMLFanReadables, info, nvOpt.uuid))
 					nvmlFanNodes.push_back(node);
 			}
+
+			for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
+					rawNVMLClockNodes, dev, nvOpt.uuid))
+				clockRoot.appendChild(node);
 
 			for (auto &node : UnspecializedReadable<nvmlDevice_t>::toDeviceNodes(
 					rawNVMLUtilNodes, dev, nvOpt.uuid))
@@ -829,7 +842,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			auto clockInfo = NVClockInfo{nvctrlPerfModes(index), index};
 			for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
 					rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
-				gpuRoot.appendChild(node);
+				clockRoot.appendChild(node);
 			
 			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
 					rawNVCTRLAssignables, index, nvOpt.uuid))
@@ -848,6 +861,9 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 	
 		if (!utilRoot.children().empty())
 			gpuRoot.appendChild(utilRoot);
+
+		if (!clockRoot.children().empty())
+			gpuRoot.appendChild(clockRoot);
 
 		TreeNode<DeviceNode> fanRoot = TreeNode(DeviceNode{
 			.name = "Fans",
