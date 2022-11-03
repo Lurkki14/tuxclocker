@@ -374,6 +374,47 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		}
 	};
 
+	std::vector<UnspecializedAssignable<uint>> rawNVCTRLVoltageAssignables = {
+		{
+			.assignableInfo = [&](uint index) -> std::optional<AssignableInfo> {
+				NVCTRLAttributeValidValuesRec values;
+				auto valid = XNVCTRLQueryValidTargetAttributeValues(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
+					index, 0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &values);
+				if (valid)
+					// uV -> mV
+					return Range<int>{values.u.range.min / 1000, values.u.range.max / 1000};
+				return std::nullopt;
+			},
+			.func = [&](uint index, AssignableInfo info, AssignmentArgument a_arg) {
+				std::optional<AssignmentError> retval = AssignmentError::InvalidType;
+				try {
+					auto range = std::get<Range<int>>(std::get<RangeInfo>(info));
+					auto arg = std::get<int>(a_arg);
+					if (arg < range.min || arg > range.max)
+						retval = AssignmentError::OutOfRange;
+					else
+						// mV -> uV
+						retval = nvctlWrite(index, 0, NV_CTRL_TARGET_TYPE_GPU,
+							NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, arg * 1000);
+				} catch (std::bad_variant_access&) {}
+				return retval;
+			},
+			.currentValueFunc = [&](uint index) -> std::optional<AssignmentArgument> {
+				int value;
+				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0,
+					NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &value);
+				if (valid)
+					// uV -> mV
+					return value / 1000;
+				return std::nullopt;
+			},
+			.unit = "mV",
+			.nodeName = "Core Voltage Offset",
+			.hash = [](std::string uuid, uint) {
+				return md5(uuid + "Core Voltage Offset");
+			}
+		}
+	};
 
 	std::vector<UnspecializedReadable<uint>> rawNVCTRLUtilNodes = {
 		{
@@ -857,6 +898,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			for (auto &node : UnspecializedReadable<uint>::toDeviceNodes(
 					rawNVCTRLUtilNodes, index, nvOpt.uuid))
 				utilRoot.appendChild(node);
+
+			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
+					rawNVCTRLVoltageAssignables, index, nvOpt.uuid))
+				gpuRoot.appendChild(node);
 		};
 	
 		if (!utilRoot.children().empty())
