@@ -648,7 +648,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 							NVML_TEMPERATURE_THRESHOLD_SHUTDOWN, value);
 				}, std::nullopt);
 			},
-			"C",
+			"°C",
 			"Shutdown Temperature",
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Shutdown Temperature");
@@ -661,7 +661,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 							NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, value);
 				}, std::nullopt);
 			},
-			"C",
+			"°C",
 			"Slowdown Temperature",
 			[](std::string uuid, nvmlDevice_t) {
 				return md5(uuid + "Slowdown Temperature");
