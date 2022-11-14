@@ -570,10 +570,10 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		}
 
 	};
-	
-	std::vector<UnspecializedAssignable<uint>> rawNVCTRLAssignables = {
+
+	std::vector<UnspecializedAssignable<uint>> rawNVCTRLFanModeAssignables = {
 		{
-			[=](uint index) -> std::optional<AssignableInfo> {
+			.assignableInfo = [=](uint index) -> std::optional<AssignableInfo> {
 				NVCTRLAttributeValidValuesRec values;
 				if (XNVCTRLQueryValidTargetAttributeValues(m_dpy, NV_CTRL_TARGET_TYPE_GPU,
 						index, 0,
@@ -584,7 +584,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				}
 				return std::nullopt;
 			},
-			[=](uint index, AssignableInfo, AssignmentArgument a_arg) {
+			.func = [=](uint index, AssignableInfo, AssignmentArgument a_arg) {
 				std::optional<AssignmentError> ret = AssignmentError::InvalidType;
 				if_let(pattern(as<uint>(arg)) = a_arg) = [=, &ret](auto u) {
 					switch(u) {
@@ -603,7 +603,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 				};
 				return ret;
 			},
-			[=](uint index) -> std::optional<AssignmentArgument> {
+			.currentValueFunc = [=](uint index) -> std::optional<AssignmentArgument> {
 				int value;
 				auto valid = XNVCTRLQueryTargetAttribute(m_dpy, NV_CTRL_TARGET_TYPE_GPU, index, 0,
 					NV_CTRL_GPU_COOLER_MANUAL_CONTROL, &value);
@@ -612,14 +612,13 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 						0u : 1u;
 				return std::nullopt;
 			},
-			std::nullopt,
-			"Fan Mode",
-			[](std::string uuid, uint) {
+			.unit = std::nullopt,
+			.nodeName = "Fan Mode",
+			.hash = [](std::string uuid, uint) {
 				return md5(uuid + "Fan Mode");
 			}
 		}
 	};
-	
 	
 	struct NVMLFanInfo {
 		nvmlDevice_t dev;
@@ -826,7 +825,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			.name = "Clocks",
 			.hash = md5(nvOpt.uuid + "Clocks")
 		}};
-
+		
+		auto fanRoot = TreeNode(DeviceNode{
+			.name = "Fans",
+			.hash = md5(nvOpt.uuid + "Fans")
+		});
 		std::vector<DeviceNode> nvmlFanNodes;
 		// Get nvml nodes if there is a device
 		if_let(pattern(some(arg)) = nvOpt.devHandle) = [&](auto dev) {
@@ -884,11 +887,7 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			for (auto &node : UnspecializedAssignable<NVClockInfo>::toDeviceNodes(
 					rawNVCTRLClockAssignables, clockInfo, nvOpt.uuid))
 				clockRoot.appendChild(node);
-			
-			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
-					rawNVCTRLAssignables, index, nvOpt.uuid))
-				gpuRoot.appendChild(node);
-			
+		
 			for (int i = 0; i < nvctrlFanCount(index); i++) {
 				NVCtrlFanInfo info{index, i};
 				for (auto &node : UnspecializedAssignable<NVCtrlFanInfo>::toDeviceNodes(
@@ -902,6 +901,11 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
 					rawNVCTRLVoltageAssignables, index, nvOpt.uuid))
 				gpuRoot.appendChild(node);
+
+			// Fan mode node (really just one)
+			for (auto &node : UnspecializedAssignable<uint>::toDeviceNodes(
+					rawNVCTRLFanModeAssignables, index, nvOpt.uuid))
+				fanRoot.appendChild(node);
 		};
 	
 		if (!utilRoot.children().empty())
@@ -910,13 +914,9 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 		if (!clockRoot.children().empty())
 			gpuRoot.appendChild(clockRoot);
 
-		TreeNode<DeviceNode> fanRoot = TreeNode(DeviceNode{
-			.name = "Fans",
-			.hash = md5(nvOpt.uuid + "Fans")
-		});
 		// Use a common subparent for readable and assignable fan nodes, if n > 1
 		auto maxFanCount = std::max(nvmlFanNodes.size(), nvctrlFanNodes.size());
-		if (1) {
+		if (maxFanCount > 1) {
 			for (uint i = 0; i < maxFanCount; i++) {
 				auto subFanRoot = TreeNode<DeviceNode>(DeviceNode{
 					.name = std::to_string(i),
@@ -928,17 +928,18 @@ NvidiaPlugin::NvidiaPlugin() : m_dpy() {
 					subFanRoot.appendChild(nvmlFanNodes[i]);
 				fanRoot.appendChild(subFanRoot);
 			}
-			gpuRoot.appendChild(fanRoot);
 		}
 		else {
 			// Add as direct children to GPU
 			for (auto &node : nvmlFanNodes)
-				gpuRoot.appendChild(node);
+				fanRoot.appendChild(node);
 			
 			for (auto &node : nvctrlFanNodes)
-				gpuRoot.appendChild(node);
+				fanRoot.appendChild(node);
 		}
-		
+		if (!fanRoot.children().empty())
+			gpuRoot.appendChild(fanRoot);
+
 		return gpuRoot;
 	}, optDataVec);
 	
