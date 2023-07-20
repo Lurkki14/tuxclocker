@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QDBusReply>
 #include <QDebug>
+#include <QtGlobal>
 #include <QStyle>
 #include <QVariantAnimation>
 
@@ -253,30 +254,55 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 		TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn) {
 	QDBusInterface ifaceNode("org.tuxclocker", node.value().path,
 		"org.tuxclocker.Assignable", conn);
-	// Should never fail
-	auto a_info =
-		qvariant_cast<QDBusVariant>(ifaceNode.property("assignableInfo"))
-		.variant();
-	// Get unit of Assignable
-	auto dbusUnit = qvariant_cast<TCDBus::Result<QString>>(ifaceNode.property("unit"));
-	auto unit = fromDBusResult(dbusUnit);
 
-	// Get initial value
+	// Calling QObject::property used to work for getting (some) DBus properties but now we have to do this..
+	QDBusInterface propIface{"org.tuxclocker", node.value().path,
+		"org.freedesktop.DBus.Properties", conn};
+	QDBusReply<QDBusVariant> a_reply = propIface.call("Get", "org.tuxclocker.Assignable", "assignableInfo");
+	QDBusReply<QDBusVariant> u_reply = propIface.call("Get", "org.tuxclocker.Assignable", "unit");
+
+	if (!a_reply.isValid() || !u_reply.isValid()) {
+		// This code path shouldn't be reached
+		// The DBus path is contained in the error message
+		qWarning("Could not get assignableInfo or unit for Assignable "
+				"due to error(s) \"%s\" and \"%s\"",
+			qPrintable(a_reply.error().message()),
+			qPrintable(u_reply.error().message()));
+		return std::nullopt;
+	}
+	// Calling QDBusReply::value() should ge safe here
+	// Need to serialize manually into the proper types
+	auto unit =
+		fromDBusResult(
+			qdbus_cast<TCDBus::Result<QString>>(u_reply
+				.value()
+				.variant()
+				.value<QDBusArgument>()));
+
+	// What a mess...
+	auto assInfoRaw = a_reply
+		.value()
+		.variant()
+		.value<QDBusVariant>()
+		.variant()
+		.value<QDBusArgument>();
+	// TODO: get initial value
 	
 
 	/* TODO: bad hack: this code can only differentiate between
 		arrays and structs: make it based on signature instead */
-	auto d_arg = qvariant_cast<QDBusArgument>(a_info);
-	switch (d_arg.currentType()) {
+	/* Also TODO: use the completely undocumented(!)
+	 * QDBusArgument::currentSignature() */
+	switch (assInfoRaw.currentType()) {
 		case QDBusArgument::StructureType: {
 			TCDBus::Range r;
-			d_arg >> r;
+			assInfoRaw >> r;
 			AssignableItemData data(r.toAssignableInfo(), unit);
 			return createAssignable(node, conn, data);
 		}
 		case QDBusArgument::ArrayType: {
 			QVector<TCDBus::Enumeration> e;
-			d_arg >> e;
+			assInfoRaw >> e;
 			AssignableItemData data(toEnumVec(e), unit);
 			return createAssignable(node, conn, data);
 		}
