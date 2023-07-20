@@ -288,27 +288,19 @@ std::optional<QStandardItem*> DeviceModel::setupAssignable(
 		.value<QDBusArgument>();
 	// TODO: get initial value
 	
-
-	/* TODO: bad hack: this code can only differentiate between
-		arrays and structs: make it based on signature instead */
-	/* Also TODO: use the completely undocumented(!)
-	 * QDBusArgument::currentSignature() */
-	switch (assInfoRaw.currentType()) {
-		case QDBusArgument::StructureType: {
-			TCDBus::Range r;
-			assInfoRaw >> r;
-			AssignableItemData data(r.toAssignableInfo(), unit);
-			return createAssignable(node, conn, data);
-		}
-		case QDBusArgument::ArrayType: {
-			QVector<TCDBus::Enumeration> e;
-			assInfoRaw >> e;
-			AssignableItemData data(toEnumVec(e), unit);
-			return createAssignable(node, conn, data);
-		}
-		default:
-			return std::nullopt;
+	// Use DBus signature to know the type of Assignable
+	if (assInfoRaw.currentSignature() == "(vv)") {
+		// RangeInfo
+		auto range = qdbus_cast<TCDBus::Range>(assInfoRaw);
+		AssignableItemData data{range.toAssignableInfo(), unit};
+		return createAssignable(node, conn, data);
+	} else if (assInfoRaw.currentSignature() == "a(us)") {
+		// EnumerationVec
+		auto enumVec = qdbus_cast<QVector<TCDBus::Enumeration>>(assInfoRaw);
+		AssignableItemData data{toEnumVec(enumVec), unit};
+		return createAssignable(node, conn, data);
 	}
+	return std::nullopt;
 }
 
 template <typename T>
