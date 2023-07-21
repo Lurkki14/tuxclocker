@@ -9,7 +9,6 @@
 */
 
 #include "DynamicReadableProxy.hpp"
-#include "qnamespace.h"
 #include <AssignableConnection.hpp>
 #include <AssignableProxy.hpp>
 #include <boost/signals2.hpp>
@@ -60,6 +59,9 @@ public:
 		// Try not to cut off node names
 		treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
+		m_dependableLabel = new QLabel(QString("Connecting %1 with:").arg(nodeName));
+		m_layout->addWidget(m_dependableLabel, 0, 0, 1, 2);
+		m_layout->addWidget(m_dependableReadableComboBox, 1, 0, 1, 2);
 		m_dragView = new DragChartView;
 		
 		p::match(rangeInfo) (
