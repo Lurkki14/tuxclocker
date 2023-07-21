@@ -1,12 +1,15 @@
 #pragma once
 
 #include <boost/signals2.hpp>
+#include <QAbstractItemView>
 #include <QApplication>
 #include <QComboBox>
 #include <QDebug>
 #include <QEvent>
 #include <QMouseEvent>
 #include <QScrollBar>
+
+#include "DeviceModel.hpp"
 
 // TODO: If a disabled item is clicked, the item that is highlighted get selected instead
 class NodeSelector : public QComboBox {
