@@ -21,11 +21,13 @@
 #include <QAbstractItemView>
 #include <QComboBox>
 #include <QDebug>
+#include <QHeaderView>
 #include <QGridLayout>
 #include <QLabel>
 #include <QModelIndex>
 #include <QPushButton>
 #include <QTimer>
+#include <QTreeView>
 #include <QWidget>
 
 // Delet this
@@ -46,17 +48,18 @@ public:
 		m_proxyModel.setFlags(DeviceModel::DynamicReadable);
 		m_proxyModel.setShowIcons(false);
 		//m_proxyModel.setShowValueColumn(false);
+
 		m_layout = new QGridLayout(this);
-		m_functionComboBox = new QComboBox;
-		m_functionComboBox->addItem("Function of time");
 		m_dependableReadableComboBox = new NodeSelector;
+
+		// Tree view for device tree
 		auto treeView = new QTreeView;
 		m_dependableReadableComboBox->setModel(&m_proxyModel);
 		m_dependableReadableComboBox->setView(treeView);
 		treeView->expandAll();
-		m_dependableLabel = new QLabel("Connecting with:");
-		m_layout->addWidget(m_dependableReadableComboBox, 0, 0);
-		m_layout->addWidget(m_functionComboBox, 0, 1);
+		// Try not to cut off node names
+		treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
 		m_dragView = new DragChartView;
 		
 		p::match(rangeInfo) (
@@ -70,13 +73,13 @@ public:
 			}
 		);
 		//m_dragView->setRange(0, 100, 0, 100);
-		m_layout->addWidget(m_dragView, 1, 0, 1, 2);
+		m_layout->addWidget(m_dragView, 2, 0, 1, 2);
 		m_applyButton = new QPushButton("Apply");
 		// No connection to apply at first
 		m_applyButton->setEnabled(false);
 		m_cancelButton = new QPushButton("Cancel");
-		m_layout->addWidget(m_cancelButton, 2, 0, 1, 1);
-		m_layout->addWidget(m_applyButton, 2, 1, 1, 1);
+		m_layout->addWidget(m_cancelButton, 3, 0, 1, 1);
+		m_layout->addWidget(m_applyButton, 3, 1, 1, 1);
 		
 		connect(m_applyButton, &QPushButton::clicked, [this] {
 			auto proxy = m_latestNodeIndex
