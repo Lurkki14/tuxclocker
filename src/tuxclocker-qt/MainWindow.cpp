@@ -9,7 +9,9 @@
 #include <QDBusMetaType>
 #include <QDBusReply>
 #include <QDebug>
+#include <QSettings>
 #include <QStandardItemModel>
+#include <QStandardPaths>
 #include <QString>
 #include <QTreeView>
 #include <QVector>
@@ -26,7 +28,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	qDBusRegisterMetaType<TCDBus::DeviceNode>();
 	qDBusRegisterMetaType<TCDBus::FlatTreeNode<TCDBus::DeviceNode>>();
 	qDBusRegisterMetaType<QVector<TCDBus::FlatTreeNode<TCDBus::DeviceNode>>>();
-	
+
+	restoreGeometryFromCache(this);
+
 	auto conn = QDBusConnection::systemBus();
 	QDBusInterface tuxclockerd("org.tuxclocker", "/", "org.tuxclocker", conn);
 	
@@ -57,4 +61,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	auto model = new DeviceModel(root);
 	auto browser = new DeviceBrowser(*model);
 	setCentralWidget(browser);
+}
+
+void MainWindow::restoreGeometryFromCache(QWidget *widget) {
+	auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+	auto cacheFilePath = QString("%1/tuxclocker.conf").arg(cacheDir);
+
+	QSettings settings{cacheFilePath, QSettings::NativeFormat};
+	widget->restoreGeometry(settings.value("geometry").toByteArray());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
+	auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+	auto cacheFilePath = QString("%1/tuxclocker.conf").arg(cacheDir);
+
+	QSettings settings{cacheFilePath, QSettings::NativeFormat};
+	settings.setValue("geometry", saveGeometry());
+	QWidget::closeEvent(event);
 }
