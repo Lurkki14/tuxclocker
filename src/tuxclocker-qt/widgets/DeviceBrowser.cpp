@@ -17,6 +17,11 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 	m_proxyModel = new DeviceProxyModel(model, this);
 	m_treeView = new DeviceTreeView;
 	m_treeView->setModel(m_proxyModel);
+
+	// Expand all nodes
+	// TODO: remember collapsed nodes
+	m_treeView->expandAll();
+
 	m_flagLabel = new QLabel("Showing:");
 	m_apply = new QPushButton("Apply changes");
 	m_apply->setEnabled(true);
