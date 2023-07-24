@@ -18,16 +18,21 @@ public:
 	//const DeviceModel &deviceModel() {return m_deviceModel;}
 	// TODO: make this more generalized
 	// Defers the complexity to DeviceBrowser
+	// TODO: this can be handled in the delegate with QAbstractItemDelegate::editorEvent
 	boost::signals2::signal<void(QModelIndex&)> functionEditorRequested;
 protected:
 	/* Workaround for the retarded behavior of waiting for a double click,
 	   you can't even disable it! */
-    bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger,
-			  QEvent *event) {
-        return QTreeView::edit(index,
+	bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger,
+			QEvent *event) {
+		return QTreeView::edit(index,
 			trigger == QAbstractItemView::SelectedClicked ?
 			QAbstractItemView::AllEditTriggers : trigger, event);
-    }
+	}
+	// TODO: allow to start editing with the keyboard
+	EditTriggers editTriggers() {
+		return QAbstractItemView::AllEditTriggers;
+	}
 private:
 	//DeviceModel &m_deviceModel;
 	DeviceModelDelegate *m_delegate;
