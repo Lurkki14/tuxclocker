@@ -57,3 +57,5 @@ void EnumEditor::setAssignableData(QVariant data) {
 		}
 	}
 }
+
+// TODO: expand combobox when editor is requested
