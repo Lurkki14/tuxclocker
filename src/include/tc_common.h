@@ -5,43 +5,44 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-    
+
 // Common definitions for tuxclocker
 
 // Error values
 #define TC_SUCCESS 0
 #define TC_EGENERIC (-1)
 #define TC_ENOMEM (-2)
-#define TC_EINVAL (-3) // Invalid argument
+#define TC_EINVAL (-3)	// Invalid argument
 #define TC_ENOPERM (-4) // Insufficient permissions
-#define TC_EINVALPREREQ (-5) // Invalid prerequisite value (eg. trying to set fan speed with automatic mode active)
+#define TC_EINVALPREREQ                                                                            \
+	(-5) // Invalid prerequisite value (eg. trying to set fan speed with automatic mode active)
 
 // Tagged union of data types for simulating function overloading
 enum tc_data_types {
-    TC_TYPE_NONE,
-    TC_TYPE_INT,
-    TC_TYPE_UINT,
-    TC_TYPE_DOUBLE,
-    TC_TYPE_STRING,
-    TC_TYPE_STRING_ARR
+	TC_TYPE_NONE,
+	TC_TYPE_INT,
+	TC_TYPE_UINT,
+	TC_TYPE_DOUBLE,
+	TC_TYPE_STRING,
+	TC_TYPE_STRING_ARR
 };
 
 typedef struct {
-    enum tc_data_types data_type;
-    union {
-        int64_t int_value;
-        uint64_t uint_value;
-        double double_value;
-        char *string_value;
-    };
+	enum tc_data_types data_type;
+	union {
+		int64_t int_value;
+		uint64_t uint_value;
+		double double_value;
+		char *string_value;
+	};
 } tc_variant_t;
 
 typedef struct {
-    enum tc_data_types arg_type;
-    union {
-        int int_arg;
-        char **string_arr_arg;
-    };
+	enum tc_data_types arg_type;
+	union {
+		int int_arg;
+		char **string_arr_arg;
+	};
 } tc_arg_t;
 
 // Utility functions
@@ -52,15 +53,15 @@ void tc_str_arr_free(uint16_t str_count, char **strings);
 
 // Binary search tree whose left node contains the smaller value
 typedef struct tc_bin_node_ {
-    void *key;
-    void *value;
-    
-    struct tc_bin_node_ *left;
-    struct tc_bin_node_ *right;
+	void *key;
+	void *value;
+
+	struct tc_bin_node_ *left;
+	struct tc_bin_node_ *right;
 } tc_bin_node_t;
 
 // Create a new node with key and data in the appropriate position
-tc_bin_node_t *tc_bin_node_insert(tc_bin_node_t* node, void *key, void *value);
+tc_bin_node_t *tc_bin_node_insert(tc_bin_node_t *node, void *key, void *value);
 // Find the value associated with the key
 void *tc_bin_node_find_value(tc_bin_node_t *node, const void *key);
 // Destroy a node and its children

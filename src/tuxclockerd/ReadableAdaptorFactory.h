@@ -8,5 +8,6 @@
 
 class ReadableAdaptorFactory {
 public:
-	static QDBusAbstractAdaptor *readableAdaptor(QObject *parent, const tc_readable_node_t *node);
+	static QDBusAbstractAdaptor *readableAdaptor(
+	    QObject *parent, const tc_readable_node_t *node);
 };

@@ -11,18 +11,17 @@ namespace TC = TuxClocker;
 
 namespace TuxClocker::DBus {
 
-template <typename T>
-struct Result {
+template <typename T> struct Result {
 	bool error;
 	T value;
-	
+
 	friend QDBusArgument &operator<<(QDBusArgument &arg, const Result<T> r) {
 		arg.beginStructure();
 		arg << r.error << r.value;
 		arg.endStructure();
 		return arg;
 	}
-		
+
 	friend const QDBusArgument &operator>>(const QDBusArgument &arg, Result<T> &r) {
 		arg.beginStructure();
 		arg >> r.error >> r.value;
@@ -39,7 +38,7 @@ struct Range {
 	QDBusVariant min, max;
 	friend QDBusArgument &operator<<(QDBusArgument &arg, const Range r) {
 		arg.beginStructure();
-		arg << r.min<< r.max;
+		arg << r.min << r.max;
 		arg.endStructure();
 		return arg;
 	}
@@ -52,13 +51,14 @@ struct Range {
 	TC::Device::AssignableInfo toAssignableInfo() {
 		auto min_v = min.variant();
 		auto max_v = max.variant();
-		
+
 		auto im = static_cast<QVariant::Type>(QMetaType::Int);
 		auto dm = static_cast<QVariant::Type>(QMetaType::Double);
 		if (min_v.type() == im && max_v.type() == im)
 			return TC::Device::Range<int>(min_v.value<int>(), max_v.value<int>());
 		if (min_v.type() == dm && max_v.type() == dm)
-			return TC::Device::Range<double>(min_v.value<double>(), max_v.value<double>());
+			return TC::Device::Range<double>(
+			    min_v.value<double>(), max_v.value<double>());
 		// Should never reach here
 		return TC::Device::Range<int>(0, 0);
 	}
@@ -107,8 +107,7 @@ struct DeviceNode {
 	}
 };
 
-template <typename T>
-struct FlatTreeNode {
+template <typename T> struct FlatTreeNode {
 	T value;
 	QVector<int> childIndices;
 	friend QDBusArgument &operator<<(QDBusArgument &arg, const FlatTreeNode<T> f) {
@@ -125,4 +124,4 @@ struct FlatTreeNode {
 	}
 };
 
-};
+}; // namespace TuxClocker::DBus

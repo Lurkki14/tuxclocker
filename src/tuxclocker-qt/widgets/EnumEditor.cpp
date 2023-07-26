@@ -15,36 +15,33 @@ EnumEditor::EnumEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
 	setAutoFillBackground(true);
 	auto layout = new QHBoxLayout(this);
 	layout->setMargin(0);
-	
+
 	m_comboBox = new QComboBox;
 	layout->addWidget(m_comboBox);
 }
 
 EnumEditor::EnumEditor(TuxClocker::Device::EnumerationVec enums, QWidget *parent)
-		: EnumEditor(parent) {
-	auto qStrings = QVector<QString>::fromStdVector(transform([](auto e) {
-		return QString::fromStdString(e.name);
-	}, enums));
-	
+    : EnumEditor(parent) {
+	auto qStrings = QVector<QString>::fromStdVector(
+	    transform([](auto e) { return QString::fromStdString(e.name); }, enums));
+
 	for (uint i = 0; i < qStrings.length(); i++) {
 		auto item = new QStandardItem;
 		item->setText(qStrings[i]);
 		item->setData(i, KeyRole);
 		m_model.appendRow(item);
 	}
-	
+
 	m_model.sort(0);
 	m_comboBox->setModel(&m_model);
 }
 
 QVariant EnumEditor::assignableData() {
-	auto r = m_model.index(m_comboBox->currentIndex(), 0)
-		.data(KeyRole).toUInt();
+	auto r = m_model.index(m_comboBox->currentIndex(), 0).data(KeyRole).toUInt();
 	return r;
 }
 QString EnumEditor::displayData() {
-	auto r = m_model.index(m_comboBox->currentIndex(), 0)
-		.data(Qt::DisplayRole).toString();
+	auto r = m_model.index(m_comboBox->currentIndex(), 0).data(Qt::DisplayRole).toString();
 	return r;
 }
 void EnumEditor::setAssignableData(QVariant data) {

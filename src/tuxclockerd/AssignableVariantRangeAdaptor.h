@@ -7,8 +7,8 @@
 class AssignableVariantRangeAdaptor : public QDBusAbstractAdaptor {
 public:
 	explicit AssignableVariantRangeAdaptor(QObject *obj, const tc_assignable_node_t *node);
-	QString name_() {return QString(m_node->name);}
-	QString unit_() {return QString(m_node->unit);}
+	QString name_() { return QString(m_node->name); }
+	QString unit_() { return QString(m_node->unit); }
 	QDBusVariant min_();
 	QDBusVariant max_();
 public Q_SLOTS:
@@ -20,6 +20,6 @@ private:
 	Q_PROPERTY(QString unit READ unit_)
 	Q_PROPERTY(QDBusVariant min READ min_)
 	Q_PROPERTY(QDBusVariant max READ max_)
-	
+
 	const tc_assignable_node_t *m_node;
 };

@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 // Get filename list from a directory. Return value needs to be freed.
 char **tc_fs_dir_filenames(const char *dir_name, uint16_t *file_count);
 

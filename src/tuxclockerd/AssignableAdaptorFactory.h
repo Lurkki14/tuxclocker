@@ -5,5 +5,6 @@
 
 class AssignableAdaptorFactory {
 public:
-	static QDBusAbstractAdaptor *assignableAdaptor(QObject *parent, const tc_assignable_node_t *node);
+	static QDBusAbstractAdaptor *assignableAdaptor(
+	    QObject *parent, const tc_assignable_node_t *node);
 };

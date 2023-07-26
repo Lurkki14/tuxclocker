@@ -2,5 +2,4 @@
 
 class AbstractAssignableConnection {
 public:
-
 };

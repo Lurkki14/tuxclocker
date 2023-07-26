@@ -15,23 +15,22 @@ namespace TC = TuxClocker;
 
 class AssignableProxy : public QObject {
 public:
-	AssignableProxy(QString path, QDBusConnection conn,
-		QObject *parent = nullptr);
+	AssignableProxy(QString path, QDBusConnection conn, QObject *parent = nullptr);
 	void apply();
 	void startConnection(std::shared_ptr<AssignableConnection> conn);
 	// Stop connection and clear current connection
 	void stopConnection();
-	void setValue(QVariant v) {m_value = v;}
+	void setValue(QVariant v) { m_value = v; }
 	std::optional<TC::Device::AssignmentArgument> currentValue();
 signals:
 	void applied(std::optional<TC::Device::AssignmentError>);
-	void connectionValueChanged(std::variant<QVariant, TC::Device::AssignmentError>,
-		QString text);
+	void connectionValueChanged(
+	    std::variant<QVariant, TC::Device::AssignmentError>, QString text);
 	void connectionStarted();
 	void connectionStopped();
 private:
 	Q_OBJECT
-	
+
 	QVariant m_value;
 	QDBusInterface *m_iface;
 	// This is a bit of a peril but not sure if we can store interfaces any better...
