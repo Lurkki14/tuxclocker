@@ -2,6 +2,7 @@
 
 #include <fplus/fplus.hpp>
 #include <QDebug>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QStandardItem>
 #include <QVariant>
@@ -12,6 +13,8 @@ using namespace fplus;
 constexpr int KeyRole = Qt::UserRole + 1; // Stores the associated key (uint)
 
 EnumEditor::EnumEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
+	installEventFilter(this);
+
 	setAutoFillBackground(true);
 	auto layout = new QHBoxLayout(this);
 	layout->setMargin(0);
@@ -55,4 +58,8 @@ void EnumEditor::setAssignableData(QVariant data) {
 	}
 }
 
-// TODO: expand combobox when editor is requested
+bool EnumEditor::eventFilter(QObject *obj, QEvent *event) {
+	if (event->type() == QEvent::Show)
+		m_comboBox->showPopup();
+	return true;
+}

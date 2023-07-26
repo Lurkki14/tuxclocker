@@ -13,6 +13,8 @@ public:
 	virtual QVariant assignableData() override;
 	virtual QString displayData() override;
 	virtual void setAssignableData(QVariant data) override;
+protected:
+	bool eventFilter(QObject *, QEvent *) override;
 private:
 	QComboBox *m_comboBox;
 	QStandardItemModel m_model;
