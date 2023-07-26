@@ -1,0 +1,19 @@
+Language: Cpp
+
+# Unindent access modifiers after regular indenting
+AccessModifierOffset: -8
+AlignAfterOpenBracket: DontAlign
+AllowShortEnumsOnASingleLine: false
+ColumnLimit: 100
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Never
+IndentAccessModifiers: false
+IndentPPDirectives: BeforeHash
+IndentWrappedFunctionNames: true
+PointerAlignment: Right
+SortIncludes: Never # src/plugins/Nvidia.cpp breaks with this on
+
+# 8 column tabs
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
