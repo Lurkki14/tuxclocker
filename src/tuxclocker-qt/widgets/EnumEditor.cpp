@@ -21,6 +21,9 @@ EnumEditor::EnumEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
 
 	m_comboBox = new QComboBox;
 	layout->addWidget(m_comboBox);
+
+	connect(m_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+	    [this](int) { emit editingDone(); });
 }
 
 EnumEditor::EnumEditor(TuxClocker::Device::EnumerationVec enums, QWidget *parent)
