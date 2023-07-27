@@ -15,10 +15,17 @@ Q_DECLARE_METATYPE(AssignableItemData)
 
 DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
+void DeviceModelDelegate::commitAndClose() {
+	// It's also retarded to get the editor this way when we could just use it in the lambda
+	auto editor = qobject_cast<AbstractAssignableEditor *>(sender());
+	emit commitData(editor);
+	emit closeEditor(editor);
+}
+
 QWidget *DeviceModelDelegate::createEditor(
     QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const {
 	auto v = index.data(DeviceModel::AssignableRole);
-	QWidget *editor = nullptr;
+	AbstractAssignableEditor *editor = nullptr;
 	if (v.canConvert<AssignableItemData>()) {
 		match(v.value<AssignableItemData>().assignableInfo())(
 		    pattern(as<RangeInfo>(arg)) =
@@ -34,6 +41,11 @@ QWidget *DeviceModelDelegate::createEditor(
 		    pattern(as<EnumerationVec>(arg)) =
 			[&](auto ev) { editor = new EnumEditor(ev, parent); });
 	}
+
+	// This is really retarded, why can't we just do this in a lambda??? (Some const shit)
+	connect(editor, &AbstractAssignableEditor::editingDone, this,
+	    &DeviceModelDelegate::commitAndClose);
+
 	return editor;
 }
 
