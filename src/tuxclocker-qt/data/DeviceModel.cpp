@@ -220,12 +220,14 @@ QStandardItem *DeviceModel::createAssignable(
 	connect(this, &DeviceModel::changesApplied, [=] {
 		// Don't apply if unchecked
 		if (ifaceItem->checkState() == Qt::Checked) {
-			ifaceItem->setCheckState(Qt::Unchecked);
-			ifaceItem->setCheckable(false);
-			// What the fuck do I need to this for?
-			ifaceItem->setData(QVariant(), Qt::CheckStateRole);
 			proxy->apply();
 		}
+		// Make unchecked item uncheckable too
+		// TODO: do this as soon as item is unchecked, haven't found a good way so far
+		ifaceItem->setCheckState(Qt::Unchecked);
+		ifaceItem->setCheckable(false);
+		// What the fuck do I need to this for?
+		ifaceItem->setData(QVariant(), Qt::CheckStateRole);
 	});
 	return ifaceItem;
 }
