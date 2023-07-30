@@ -187,6 +187,9 @@ QStandardItem *DeviceModel::createAssignable(
 		// Don't apply if unchecked
 		if (ifaceItem->checkState() == Qt::Checked) {
 			proxy->apply();
+		} else {
+			// Note: gets current value, which something else might have changed
+			ifaceItem->setText(displayText(proxy, itemData));
 		}
 		// Make unchecked item uncheckable too
 		// TODO: do this as soon as item is unchecked, haven't found a good way so far
