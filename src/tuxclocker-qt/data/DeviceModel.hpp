@@ -74,6 +74,7 @@ private:
 	    TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
 	std::optional<QStandardItem *> setupStaticReadable(
 	    TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn);
+	QString displayText(AssignableProxy *proxy, AssignableItemData data);
 	constexpr int fadeOutTime() { return 5000; } // milliseconds
 	constexpr int transparency() { return 120; } // 0-255
 	// Colors for items

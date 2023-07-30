@@ -146,41 +146,7 @@ QStandardItem *DeviceModel::createAssignable(
 	ifaceItem->setData(v, AssignableRole);
 
 	// Set initial text to current value (one-time at startup)
-	QString text("No value set");
-	auto unit = itemData.unit();
-	auto currentValue = proxy->currentValue();
-
-	if (currentValue.has_value()) {
-		p::match(itemData.assignableInfo())(
-		    pattern(as<EnumerationVec>(arg)) =
-			[&](auto e_vec) {
-				/* Find index from EnumVec (O(n) doesn't matter since we only search
-				   once here) This should never be anything other than an uint but
-				   in theory it could be whatever at this point */
-				try {
-					auto index = std::get<uint>(currentValue.value());
-					for (auto &e : e_vec) {
-						if (index == e.key) {
-							text = QString::fromStdString(e.name);
-							break;
-						}
-					}
-				} catch (std::bad_variant_access &e) {
-				}
-
-				// text =
-				// QString::fromStdString(e_vec[std::get<uint>(currentValue.value())].name);
-			},
-		    pattern(as<RangeInfo>(_)) =
-			[&]() {
-				auto base = fromAssignmentArgument(currentValue.value());
-				if (unit.has_value())
-					text = QString("%1 %2").arg(base, unit.value());
-				else
-					text = base;
-			});
-	}
-	ifaceItem->setText(text);
+	ifaceItem->setText(displayText(proxy, itemData));
 
 	connect(ifaceItem, &AssignableItem::assignableDataChanged, [=](QVariant v) {
 		// Only show checkbox when value has been changed
@@ -230,6 +196,40 @@ QStandardItem *DeviceModel::createAssignable(
 		ifaceItem->setData(QVariant(), Qt::CheckStateRole);
 	});
 	return ifaceItem;
+}
+
+QString DeviceModel::displayText(AssignableProxy *proxy, AssignableItemData data) {
+	auto currentValue = proxy->currentValue();
+	auto defVal = "No value set";
+	if (!currentValue.has_value())
+		return defVal;
+
+	auto a_info = data.assignableInfo();
+	// Try to get text representation of current enum
+	if (std::holds_alternative<EnumerationVec>(a_info) &&
+	    std::holds_alternative<uint>(currentValue.value())) {
+		auto enumVec = std::get<EnumerationVec>(a_info);
+		auto index = std::get<uint>(currentValue.value());
+		// Find the key
+		for (auto &e : enumVec) {
+			if (index == e.key) {
+				return QString::fromStdString(e.name);
+			}
+		}
+		// TODO: not that helpful message without any name or DBus path
+		qWarning("Tried to get name for invalid Enumeration index %u", index);
+		return defVal;
+	}
+
+	auto unit = data.unit();
+	if (std::holds_alternative<RangeInfo>(a_info)) {
+		auto valueText = fromAssignmentArgument(currentValue.value());
+		if (unit.has_value())
+			return QString("%1 %2").arg(valueText, unit.value());
+		else
+			return valueText;
+	}
+	return defVal;
 }
 
 QVariant DeviceModel::data(const QModelIndex &index, int role) const {
