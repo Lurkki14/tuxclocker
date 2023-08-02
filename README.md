@@ -42,3 +42,13 @@ The scripts should be used in this order (they all have to be running simultaneo
 `dev/gui-start.sh` Launches the TuxClocker GUI making it connect to our separate DBus instance, so it can find the TuxClocker DBus service.
 
 You can also use a program like `d-feet` if you are only making changes to the daemon. (To be documented)
+
+# Screenshots
+
+### Main view
+
+![Main view](screenshots/mainview.png)
+
+### Editing an item
+
+![Editing an item](screenshots/itemedit.png)
