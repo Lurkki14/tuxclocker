@@ -273,10 +273,24 @@ void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
 	QChartView::mouseReleaseEvent(event);
 }
 
+void DragChartView::zoomX(qreal factor) {
+	auto newMax = m_xAxis.max() * factor;
+	// Don't zoom when points would be moved out of bounds
+	for (auto &point : m_series.points()) {
+		if (point.x() > newMax)
+			// TODO: indicate in the GUI when this happens
+			return;
+	}
+
+	// TODO: allow moving to negative x if that ever makes sense
+	m_xAxis.setMax(newMax);
+	m_xAxis.setMin(0);
+}
+
 void DragChartView::wheelEvent(QWheelEvent *event) {
 	qreal factor = event->angleDelta().y() > 0 ? 0.5 : 2.0;
 
-	// chart()->zoom(factor);
+	zoomX(factor);
 	event->accept();
 
 	drawFillerLines(&m_series);

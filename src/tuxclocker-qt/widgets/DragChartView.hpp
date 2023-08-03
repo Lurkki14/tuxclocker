@@ -51,6 +51,8 @@ private:
 
 	QVector<QPointF> sortPointFByAscendingX(const QVector<QPointF> points);
 	void drawFillerLines(QScatterSeries *series);
+	void zoomX(qreal);
+
 	QLabel *m_toolTipLabel;
 	QScatterSeries m_series;
 	QPoint m_dragStartPosition;
