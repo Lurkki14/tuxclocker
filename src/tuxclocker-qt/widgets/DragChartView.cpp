@@ -230,6 +230,9 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 
 	m_toolTipLabel->setText(QString("%1, %2").arg(
 	    QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
+	// Don't cut the label text off
+	// This is only actually needed on the first try (why though?)
+	m_toolTipLabel->adjustSize();
 
 	// FIXME : doesn't work properly when screen is switched(?)
 	m_toolTipLabel->move(
