@@ -2,7 +2,9 @@
 
 ## Dependencies
 
-boost-system, boost-filesystem, qtdbus
+`qt (charts, base, dbus), boost-system, boost-filesystem, libnvml  (cuda), libxnvctrl, xlib, libdrm, meson`
+
+Note that these packages are likely called something different on each distribution.
 
 ## Meson options
 
