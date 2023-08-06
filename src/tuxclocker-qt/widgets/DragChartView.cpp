@@ -228,15 +228,22 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 		m_toolTipLabel->show();
 	}
 
-	m_toolTipLabel->setText(QString("%1, %2").arg(
-	    QString::number(m_latestScatterPoint.x()), QString::number(m_latestScatterPoint.y())));
-	// Don't cut the label text off
-	// This is only actually needed on the first try (why though?)
-	m_toolTipLabel->adjustSize();
+	// Debounce label updates (limit frequency)
+	// TODO: time-based might be better?
+	static uint moveEventCount = 0;
+	if (moveEventCount % 5 == 0) {
+		m_toolTipLabel->setText(
+		    QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()),
+			QString::number(m_latestScatterPoint.y())));
+		// Don't cut the label text off
+		// This is only actually needed on the first try (why though?)
+		m_toolTipLabel->adjustSize();
 
-	// FIXME : doesn't work properly when screen is switched(?)
-	m_toolTipLabel->move(
-	    event->screenPos().toPoint() + toolTipOffset(this, event->windowPos().toPoint()));
+		// FIXME : doesn't work properly when screen is switched(?)
+		m_toolTipLabel->move(event->screenPos().toPoint() +
+				     toolTipOffset(this, event->windowPos().toPoint()));
+	}
+	moveEventCount++;
 
 	// Don't move point out of bounds
 	if (m_limitRect.contains(chart()->mapToValue(event->pos()))) {
