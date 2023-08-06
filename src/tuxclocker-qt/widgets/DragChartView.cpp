@@ -232,9 +232,10 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 	// TODO: time-based might be better?
 	static uint moveEventCount = 0;
 	if (moveEventCount % 5 == 0) {
-		m_toolTipLabel->setText(
-		    QString("%1, %2").arg(QString::number(m_latestScatterPoint.x()),
-			QString::number(m_latestScatterPoint.y())));
+		auto text = QString("%1, %2")
+				.arg(m_latestScatterPoint.x(), 0, 'f', 2)
+				.arg(m_latestScatterPoint.y(), 0, 'f', 2);
+		m_toolTipLabel->setText(text);
 		// Don't cut the label text off
 		// This is only actually needed on the first try (why though?)
 		m_toolTipLabel->adjustSize();
