@@ -4,6 +4,7 @@
 #include <QToolTip>
 #include <QApplication>
 #include <QValueAxis>
+#include <QPainterPath>
 #include <QScreen>
 #include <QWindow>
 
@@ -21,13 +22,6 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 
 	m_scatterPressed = false;
 
-	m_leftLineFillerItem = new QGraphicsLineItem;
-	m_rightLineFillerItem = new QGraphicsLineItem;
-	m_leftLineFillerItem->setPen(fillerLinePen());
-	m_rightLineFillerItem->setPen(fillerLinePen());
-
-	chart()->scene()->addItem(m_leftLineFillerItem);
-	chart()->scene()->addItem(m_rightLineFillerItem);
 	chart()->legend()->setVisible(false);
 
 	m_chartMargin = m_series.markerSize() / 2;
@@ -68,42 +62,6 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 		m_yAxis.blockSignals(true); // Don't go to an infinite loop
 		m_yAxis.setRange(min - valueDelta, max + valueDelta);
 		m_yAxis.blockSignals(false);
-	});
-
-	// Delete filler items when points are removed
-	connect(&m_series, &QScatterSeries::pointRemoved, [=]() {
-		chart()->scene()->removeItem(m_lineFillerItems.last());
-		delete m_lineFillerItems.last();
-		m_lineFillerItems.pop_back();
-		drawFillerLines(&m_series);
-	});
-
-	// Add filler item when point is added
-	connect(&m_series, &QScatterSeries::pointAdded, [=]() {
-		if (m_series.pointsVector().length() < 2)
-			return;
-
-		auto item = new QGraphicsLineItem;
-		item->setPen(fillerLinePen());
-		m_lineFillerItems.append(item);
-		chart()->scene()->addItem(item);
-		drawFillerLines(&m_series);
-	});
-
-	connect(&m_series, &QScatterSeries::pointsReplaced, [=]() {
-		// Delete filler items
-		for (auto item : m_lineFillerItems) {
-			delete item;
-		}
-		m_lineFillerItems.clear();
-		// Create new ones
-		for (int i = 0; i < m_series.pointsVector().length(); i++) {
-			auto item = new QGraphicsLineItem;
-			item->setPen(fillerLinePen());
-			m_lineFillerItems.append(item);
-			chart()->scene()->addItem(item);
-		}
-		drawFillerLines(&m_series);
 	});
 
 	connect(&m_series, &QScatterSeries::pressed, [=](QPointF point) {
@@ -180,7 +138,6 @@ bool DragChartView::event(QEvent *event) {
 
 	if (event->type() == QEvent::Resize || event->type() == QEvent::UpdateLater) {
 		// Chart has a geometry when this is true
-		drawFillerLines(&m_series);
 	}
 
 	if (event->type() == QEvent::Leave && !m_dragActive) {
@@ -267,8 +224,6 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 		}
 		replaceMovedPoint(m_latestScatterPoint, point);
 	}
-
-	drawFillerLines(&m_series);
 }
 
 void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
@@ -277,7 +232,6 @@ void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
 	if (!m_scatterPressed && m_limitRect.contains(chart()->mapToValue(event->pos()))) {
 		// Add a new point to series
 		m_series.append(chart()->mapToValue(event->pos()));
-		drawFillerLines(&m_series);
 	}
 
 	m_toolTipLabel->hide();
@@ -303,8 +257,6 @@ void DragChartView::wheelEvent(QWheelEvent *event) {
 
 	zoomX(factor);
 	event->accept();
-
-	drawFillerLines(&m_series);
 
 	QChartView::wheelEvent(event);
 }
@@ -341,28 +293,43 @@ QVector<QPointF> DragChartView::sortPointFByAscendingX(const QVector<QPointF> po
 	return sorted;
 }
 
-void DragChartView::drawFillerLines(QScatterSeries *series) {
-	// TODO: line isn't drawn between points whose x is the same
-	// Sort points by ascending x
-	QVector<QPointF> sorted = sortPointFByAscendingX(series->pointsVector());
+void DragChartView::drawForeground(QPainter *painter, const QRectF &rect) {
+	auto points = sortPointFByAscendingX(m_series.pointsVector());
 
-	if (sorted.isEmpty()) {
+	if (points.empty()) {
+		QChartView::drawForeground(painter, rect);
 		return;
 	}
 
-	for (int i = 0; i < sorted.length() - 1; i++) {
-		m_lineFillerItems[i]->setLine(QLineF(
-		    chart()->mapToPosition(sorted[i]), chart()->mapToPosition(sorted[i + 1])));
+	// TODO: filler line lingers around even without items, until the chart is updated
+	// Filler line between left edge and first point
+	auto first = chart()->mapToPosition(points.first());
+	auto start = chart()->mapToPosition(QPointF{m_xAxis.min(), points.first().y()});
+
+	QPainterPath path;
+	path.moveTo(start);
+	path.lineTo(first);
+
+	// Between points
+	if (points.length() > 1) {
+		for (auto &point : points) {
+			auto realPos = chart()->mapToPosition(point);
+			path.lineTo(realPos);
+			path.moveTo(realPos);
+		}
 	}
 
-	m_leftLineFillerItem->setLine(
-	    QLineF(chart()->mapToPosition(QPointF(m_xAxis.min(), sorted[0].y())),
-		chart()->mapToPosition(sorted[0])));
+	// Last point -> right edge
+	auto last = chart()->mapToPosition(points.last());
+	auto end = chart()->mapToPosition(QPointF{m_xAxis.max(), points.last().y()});
 
-	m_rightLineFillerItem->setLine(QLineF(chart()->mapToPosition(sorted.last()),
-	    chart()->mapToPosition(QPointF(m_xAxis.max(), sorted.last().y()))));
+	path.moveTo(last);
+	path.lineTo(end);
 
-	chart()->update();
+	painter->setPen(fillerLinePen());
+	painter->drawPath(path);
+
+	QChartView::drawForeground(painter, rect);
 }
 
 bool DragChartView::eventFilter(QObject *obj, QEvent *event) {

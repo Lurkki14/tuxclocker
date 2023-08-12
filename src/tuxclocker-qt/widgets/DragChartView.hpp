@@ -19,6 +19,7 @@ public:
 	void setRange(qreal xmin, qreal xmax, qreal ymin, qreal ymax);
 protected:
 	bool event(QEvent *);
+	void drawForeground(QPainter *, const QRectF &) override;
 	void mousePressEvent(QMouseEvent *);
 	void mouseMoveEvent(QMouseEvent *);
 	void mouseReleaseEvent(QMouseEvent *);
@@ -50,7 +51,6 @@ private:
 	bool m_scatterPressed; // For detecting if mouse release should delete or add a new point
 
 	QVector<QPointF> sortPointFByAscendingX(const QVector<QPointF> points);
-	void drawFillerLines(QScatterSeries *series);
 	void zoomX(qreal);
 
 	QLabel *m_toolTipLabel;
@@ -60,9 +60,5 @@ private:
 	bool m_dragActive;
 	QPointF m_latestScatterPoint;
 	void replaceMovedPoint(const QPointF old, const QPointF new_);
-	QVector<QGraphicsLineItem *>
-	    m_lineFillerItems; // Filler lines between points whose amount is n - 1 for nonzero n
-	QGraphicsLineItem *m_leftLineFillerItem;
-	QGraphicsLineItem *m_rightLineFillerItem;
 	QValueAxis m_xAxis, m_yAxis;
 };
