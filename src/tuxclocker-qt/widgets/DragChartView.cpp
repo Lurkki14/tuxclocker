@@ -13,7 +13,7 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 
 	setRenderHint(QPainter::Antialiasing);
 
-	m_toolTipLabel = new QLabel;
+	m_toolTipLabel = new QLabel{this};
 	m_toolTipLabel->setWindowFlag(Qt::ToolTip);
 
 	m_dragCanStart = false;
