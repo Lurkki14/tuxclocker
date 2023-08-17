@@ -168,11 +168,13 @@ void DragChartView::mouseMoveEvent(QMouseEvent *event) {
 	}
 
 	if (!(event->buttons() & Qt::LeftButton)) {
+		QChartView::mouseMoveEvent(event);
 		return;
 	}
 	if ((event->pos() - m_dragStartPosition).manhattanLength() <
 		QApplication::startDragDistance() ||
 	    !m_dragCanStart) {
+		QChartView::mouseMoveEvent(event);
 		return;
 	}
 
