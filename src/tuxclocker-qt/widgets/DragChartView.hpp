@@ -54,6 +54,13 @@ private:
 	void zoomX(qreal);
 
 	QLabel *m_toolTipLabel;
+	bool m_showToolTip;
+	QPoint m_toolTipPos; // Global position
+	void updateToolTipPos(const QPointF &chartPos);
+	// Place tooltip towards center of the chart
+	QPoint toolTipOffset1(const QPointF &chartPos);
+	static QString labelText(const QPointF &chartPoint);
+
 	QScatterSeries m_series;
 	QPoint m_dragStartPosition;
 	bool m_dragCanStart; // Was a point clicked and not released before drag should start

@@ -81,6 +81,15 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 		}
 	});
 
+	connect(&m_series, &QScatterSeries::hovered, [=](auto point, bool state) {
+		if (m_dragActive)
+			return;
+		// Show value when hovered
+		m_toolTipLabel->setText(labelText(point));
+		updateToolTipPos(point);
+		m_showToolTip = state;
+	});
+
 	chart()->addSeries(&m_series);
 
 	chart()->addAxis(&m_xAxis, Qt::AlignBottom);
@@ -123,6 +132,31 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 			setCursor(Qt::ArrowCursor);
 		}
 	});
+}
+
+QString DragChartView::labelText(const QPointF &point) {
+	return QString{"%1, %2"}.arg(point.x(), 0, 'f', 2).arg(point.y(), 0, 'f', 2);
+}
+
+QPoint DragChartView::toolTipOffset1(const QPointF &chartPos) {
+	m_toolTipLabel->adjustSize();
+	auto tooltipWidth = m_toolTipLabel->geometry().width();
+	auto tooltipHeight = m_toolTipLabel->geometry().height();
+
+	auto offset = m_series.pen().width() * 4;
+	// Position relative to point
+	auto dy = m_yAxis.max() - m_yAxis.min();
+	auto yCenter = m_yAxis.max() - (dy / 2);
+	auto placeTop = chartPos.y() < yCenter;
+	// y increases towards the bottom
+	auto yOffset = placeTop ? (-offset - tooltipHeight) : offset;
+
+	auto dx = m_xAxis.max() - m_xAxis.min();
+	auto xCenter = m_xAxis.max() - (dx / 2);
+	auto placeRight = chartPos.x() < xCenter;
+	auto xOffset = placeRight ? offset : (-offset - tooltipWidth);
+
+	return QPoint{xOffset, yOffset};
 }
 
 void DragChartView::setVector(const QVector<QPointF> vector) { m_series.replace(vector); }
@@ -240,6 +274,11 @@ void DragChartView::mouseReleaseEvent(QMouseEvent *event) {
 	QChartView::mouseReleaseEvent(event);
 }
 
+void DragChartView::updateToolTipPos(const QPointF &chartPos) {
+	auto realPos = mapToGlobal(chart()->mapToPosition(chartPos).toPoint());
+	m_toolTipPos = realPos + toolTipOffset1(chartPos);
+}
+
 void DragChartView::zoomX(qreal factor) {
 	auto newMax = m_xAxis.max() * factor;
 	// Don't zoom when points would be moved out of bounds
@@ -296,6 +335,12 @@ QVector<QPointF> DragChartView::sortPointFByAscendingX(const QVector<QPointF> po
 }
 
 void DragChartView::drawForeground(QPainter *painter, const QRectF &rect) {
+	if (m_showToolTip && !m_dragActive) {
+		m_toolTipLabel->move(m_toolTipPos);
+		m_toolTipLabel->show();
+	} else if (!m_dragActive)
+		m_toolTipLabel->hide();
+
 	auto points = sortPointFByAscendingX(m_series.pointsVector());
 
 	if (points.empty()) {
