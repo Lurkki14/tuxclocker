@@ -22,6 +22,7 @@ public:
 	void stopConnection();
 	void setValue(QVariant v) { m_value = v; }
 	std::optional<TC::Device::AssignmentArgument> currentValue();
+	QString dbusPath();
 signals:
 	void applied(std::optional<TC::Device::AssignmentError>);
 	void connectionValueChanged(

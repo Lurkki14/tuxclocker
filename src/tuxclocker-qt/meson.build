@@ -28,7 +28,8 @@ sources = ['main.cpp',
 	'widgets/DragChartView.cpp',
 	'widgets/EnumEditor.cpp',
 	'widgets/FlagEditor.cpp',
-	'MainWindow.cpp']
+	'MainWindow.cpp',
+        'Utils.cpp']
 
 local_incdir = include_directories(['data',
 	'widgets',

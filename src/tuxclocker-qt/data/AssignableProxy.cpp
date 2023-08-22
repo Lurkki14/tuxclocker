@@ -89,3 +89,5 @@ std::optional<AssignmentArgument> AssignableProxy::currentValue() {
 		return std::nullopt;
 	return toAssignmentArgument(reply.value());
 }
+
+QString AssignableProxy::dbusPath() { return m_iface->path(); }

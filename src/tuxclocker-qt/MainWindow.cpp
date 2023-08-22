@@ -16,6 +16,7 @@
 #include <QTreeView>
 #include <QVector>
 #include <Tree.hpp>
+#include <Utils.hpp>
 
 namespace TCDBus = TuxClocker::DBus;
 
@@ -59,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	auto model = new DeviceModel(root);
 	auto browser = new DeviceBrowser(*model);
 	setCentralWidget(browser);
+
+	Utils::writeAssignableDefaults(*model);
 }
 
 void MainWindow::restoreGeometryFromCache(QWidget *widget) {
