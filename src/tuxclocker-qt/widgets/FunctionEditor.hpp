@@ -79,14 +79,16 @@ public:
 		connect(m_applyButton, &QPushButton::clicked, [this] {
 			auto proxy = m_latestNodeIndex.data(DeviceModel::DynamicReadableProxyRole)
 					 .value<DynamicReadableProxy *>();
-			// qDebug() << proxy;
 			auto points = m_dragView->vector();
 			if (points.length() < 2)
 				return;
-			// qDebug() << points;
-			auto conn =
-			    std::make_shared<DynamicReadableConnection<int>>(*proxy, points);
-			assignableConnectionChanged(conn);
+
+			auto data = DynamicReadableConnectionData{
+			    .points = points,
+			    .dynamicReadablePath = proxy->dbusPath(),
+			};
+			emit connectionDataChanged(data);
+			this->close();
 		});
 
 		m_dragView->yAxis().setTitleText(nodeName);
@@ -102,7 +104,11 @@ public:
 	}
 	boost::signals2::signal<void(std::shared_ptr<AssignableConnection>)>
 	    assignableConnectionChanged;
+signals:
+	void connectionDataChanged(DynamicReadableConnectionData);
 private:
+	Q_OBJECT
+
 	AssignableProxy &m_assignableProxy;
 	DeviceModel &m_model;
 	DeviceProxyModel m_proxyModel;

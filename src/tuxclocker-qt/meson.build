@@ -12,7 +12,8 @@ moc_files = qt5.preprocess(moc_headers: ['MainWindow.hpp',
 		'data/DynamicReadableConnection.hpp',
 		'data/DynamicReadableProxy.hpp',
                 'widgets/AbstractAssignableEditor.hpp',
-		'widgets/DragChartView.hpp'],
+		'widgets/DragChartView.hpp',
+                'widgets/FunctionEditor.hpp'],
 	qresources : ['resources/resources.qrc'],
 	dependencies: qt5_dep)
 
