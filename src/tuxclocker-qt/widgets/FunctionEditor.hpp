@@ -32,6 +32,7 @@
 // Delet this
 namespace p = mpark::patterns;
 
+Q_DECLARE_METATYPE(DynamicReadableConnectionData)
 Q_DECLARE_METATYPE(DynamicReadableProxy *)
 
 // TODO: make constructor of the type data Editor a = Maybe (Range a)

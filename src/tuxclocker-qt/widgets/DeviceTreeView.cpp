@@ -17,9 +17,9 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	setSortingEnabled(true);
 	setEditTriggers(SelectedClicked | EditKeyPressed);
-	setContextMenuPolicy(Qt::CustomContextMenu);
+	setContextMenuPolicy(Qt::DefaultContextMenu);
 	connect(this, &QTreeView::customContextMenuRequested, [this](QPoint point) {
-		auto index = indexAt(point);
+		/*auto index = indexAt(point);
 		auto data = index.data(DeviceModel::AssignableRole);
 		auto proxyData = index.data(DeviceModel::AssignableProxyRole);
 		QMenu menu;
@@ -30,21 +30,7 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 		menu.addActions({&editConn, enableConn});
 		if (data.canConvert<AssignableItemData>() &&
 		    proxyData.canConvert<AssignableProxy *>()) {
-			functionEditorRequested(index);
-			/*auto a_data = data.value<AssignableItemData>();
-			auto proxy = proxyData.value<AssignableProxy*>();
-			match(a_data.assignableInfo()) (
-				pattern(as<RangeInfo>(arg)) = [this, &menu, proxy, &editConn](auto
-			ri) {
-					//functionEditorRequested(*proxy, ri);
-					connect(&editConn, &QAction::triggered, [this, proxy, ri] {
-						functionEditorRequested(*proxy, ri);
-					});
-					menu.exec(QCursor::pos());
-				},
-				pattern(_) = []{}
-			);*/
-		}
+		}*/
 	});
 	m_delegate = new DeviceModelDelegate(this);
 

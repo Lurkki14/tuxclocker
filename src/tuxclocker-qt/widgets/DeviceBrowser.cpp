@@ -51,8 +51,9 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 			[=](auto ri) {
 				auto f_editor = new FunctionEditor{m_deviceModel, ri, *proxy, name};
 				f_editor->show();
-				f_editor->assignableConnectionChanged.connect(
-				    [=](auto conn) { proxy->startConnection(conn); });
+
+				// f_editor->assignableConnectionChanged.connect(
+				//[=](auto conn) { proxy->startConnection(conn); });
 			},
 		    pattern(_) = [] {});
 

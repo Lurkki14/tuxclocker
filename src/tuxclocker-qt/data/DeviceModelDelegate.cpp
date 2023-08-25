@@ -3,9 +3,13 @@
 #include "DeviceModel.hpp"
 #include <DoubleRangeEditor.hpp>
 #include <EnumEditor.hpp>
+#include <FunctionEditor.hpp>
 #include <IntRangeEditor.hpp>
 #include <patterns.hpp>
 #include <QDebug>
+#include <QEvent>
+#include <QMenu>
+#include <QMouseEvent>
 #include <QPainter>
 
 using namespace TuxClocker::Device;
@@ -13,7 +17,11 @@ using namespace mpark::patterns;
 
 Q_DECLARE_METATYPE(AssignableItemData)
 
-DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
+DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {
+	m_parametrize = new QAction{"Parametrize...", this};
+
+	m_menu.addAction(m_parametrize);
+}
 
 void DeviceModelDelegate::commitAndClose() {
 	// It's also retarded to get the editor this way when we could just use it in the lambda
@@ -82,6 +90,54 @@ void DeviceModelDelegate::updateEditorGeometry(
     QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const {
 	// Why do I need to override this to perform such a basic task?
 	editor->setGeometry(option.rect);
+}
+
+bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+    const QStyleOptionViewItem &item, const QModelIndex &index) {
+	// Context menu handling
+	if (event->type() == QEvent::MouseButtonRelease) {
+		auto mouse = dynamic_cast<QMouseEvent *>(event);
+
+		auto data = index.data(DeviceModel::AssignableRole);
+		auto assInfo = data.value<AssignableItemData>();
+		auto proxyV = index.data(DeviceModel::AssignableProxyRole);
+		auto proxy = proxyV.value<AssignableProxy *>();
+		// TODO: need a different check for future 'Reset assignable' action
+		if (mouse->button() == Qt::RightButton && data.canConvert<AssignableItemData>() &&
+		    proxyV.canConvert<AssignableProxy *>() &&
+		    std::holds_alternative<RangeInfo>(assInfo.assignableInfo())) {
+			// FIXME: this obviously will keep creating and showing new windows :D
+			// change FunctionEditor to allow mutating params to stop malloc spam?
+			auto editor = new FunctionEditor(*static_cast<DeviceModel *>(model),
+			    std::get<RangeInfo>(assInfo.assignableInfo()), *proxy,
+			    index.data(DeviceModel::NodeNameRole).toString());
+			auto conn = connect(
+			    m_parametrize, &QAction::triggered, [=](auto) { editor->show(); });
+			m_menu.exec(mouse->globalPos());
+
+			// TODO: not handled in AssignableProxy
+			connect(editor, &FunctionEditor::connectionDataChanged, [=](auto data) {
+				setAssignableData(model, index, "(Parametrized)", data);
+			});
+		}
+	}
+
+	return QStyledItemDelegate::editorEvent(event, model, item, index);
+}
+
+template <typename T>
+void DeviceModelDelegate::setAssignableData(
+    QAbstractItemModel *model, const QModelIndex &index, QString text, T data) {
+	auto assData = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
+	QVariant assV;
+	assV.setValue(data);
+	assData.setValue(assV);
+
+	QVariant v;
+	v.setValue(assData);
+
+	model->setData(index, text, Qt::DisplayRole);
+	model->setData(index, v, DeviceModel::AssignableRole);
 }
 
 QColor alphaBlend(QColor top, QColor background) {
