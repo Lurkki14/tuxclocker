@@ -24,7 +24,8 @@ protected:
 private:
 	void commitAndClose();
 	template <typename T>
-	void setAssignableData(QAbstractItemModel *, const QModelIndex &, QString text, T data);
+	static void setAssignableData(
+	    QAbstractItemModel *, const QModelIndex &, QString text, T data);
 
 	QAction *m_parametrize;
 	QMenu m_menu;

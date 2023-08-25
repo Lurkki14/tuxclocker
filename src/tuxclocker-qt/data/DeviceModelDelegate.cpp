@@ -72,17 +72,12 @@ void DeviceModelDelegate::setModelData(
 	if (v.canConvert<AssignableItemData>()) {
 		auto a_editor = static_cast<AbstractAssignableEditor *>(editor);
 		auto data = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
-		data.setValue(a_editor->assignableData());
-		QVariant v;
-		v.setValue(data);
-		// TODO: add unit
 
 		auto text = (data.unit().has_value())
 				? QString("%1 %2").arg(a_editor->displayData(), data.unit().value())
 				: a_editor->displayData();
 
-		model->setData(index, text, Qt::DisplayRole);
-		model->setData(index, v, DeviceModel::AssignableRole);
+		setAssignableData(model, index, text, a_editor->assignableData());
 	}
 }
 
