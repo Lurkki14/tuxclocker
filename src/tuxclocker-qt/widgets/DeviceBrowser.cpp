@@ -37,35 +37,6 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 
 	connect(m_apply, &QPushButton::pressed, &m_deviceModel, &DeviceModel::applyChanges);
 
-	m_treeView->functionEditorRequested.connect([this](QModelIndex &index) {
-		auto a_data = index.data(DeviceModel::AssignableRole);
-		if (!a_data.isValid())
-			return;
-
-		auto a_info = a_data.value<AssignableItemData>();
-		auto proxy =
-		    index.data(DeviceModel::AssignableProxyRole).value<AssignableProxy *>();
-		auto name = index.data(DeviceModel::NodeNameRole).toString();
-		match(a_info.assignableInfo())(
-		    pattern(as<RangeInfo>(arg)) =
-			[=](auto ri) {
-				auto f_editor = new FunctionEditor{m_deviceModel, ri, *proxy, name};
-				f_editor->show();
-
-				// f_editor->assignableConnectionChanged.connect(
-				//[=](auto conn) { proxy->startConnection(conn); });
-			},
-		    pattern(_) = [] {});
-
-		/*auto f_editor = new FunctionEditor(m_deviceModel, rangeInfo, proxy);
-		f_editor->show();
-
-		f_editor->assignableConnectionChanged.connect(
-				[&proxy] (auto assignableConnection) {
-			proxy.startConnection(assignableConnection);
-		});*/
-	});
-
 	m_flagEditor->setFlags(DeviceModel::AllInterfaces);
 
 	m_flagEditor->flagsChanged.connect([=](auto flags) { m_proxyModel->setFlags(flags); });

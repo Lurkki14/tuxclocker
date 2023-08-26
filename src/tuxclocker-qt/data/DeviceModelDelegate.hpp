@@ -4,11 +4,13 @@
 #include <QStyledItemDelegate>
 
 class AssignableItemData;
+class FunctionEditor;
 
 // TODO: align checkbox to the right
 class DeviceModelDelegate : public QStyledItemDelegate {
 public:
 	DeviceModelDelegate(QObject *parent = nullptr);
+	~DeviceModelDelegate();
 	QWidget *createEditor(
 	    QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void updateEditorGeometry(
@@ -27,6 +29,7 @@ private:
 	static void setAssignableData(
 	    QAbstractItemModel *, const QModelIndex &, QString text, T data);
 
+	FunctionEditor *m_functionEditor;
 	QAction *m_parametrize;
 	QMenu m_menu;
 };

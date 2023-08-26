@@ -21,6 +21,13 @@ DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(
 	m_parametrize = new QAction{"Parametrize...", this};
 
 	m_menu.addAction(m_parametrize);
+	m_functionEditor = nullptr;
+}
+
+DeviceModelDelegate::~DeviceModelDelegate() {
+	// Need to delete manually since this isn't a widget
+	if (m_functionEditor)
+		delete m_functionEditor;
 }
 
 void DeviceModelDelegate::commitAndClose() {
@@ -95,25 +102,30 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 
 		auto data = index.data(DeviceModel::AssignableRole);
 		auto assInfo = data.value<AssignableItemData>();
-		auto proxyV = index.data(DeviceModel::AssignableProxyRole);
-		auto proxy = proxyV.value<AssignableProxy *>();
 		// TODO: need a different check for future 'Reset assignable' action
 		if (mouse->button() == Qt::RightButton && data.canConvert<AssignableItemData>() &&
-		    proxyV.canConvert<AssignableProxy *>() &&
 		    std::holds_alternative<RangeInfo>(assInfo.assignableInfo())) {
-			// FIXME: this obviously will keep creating and showing new windows :D
-			// change FunctionEditor to allow mutating params to stop malloc spam?
-			auto editor = new FunctionEditor(*static_cast<DeviceModel *>(model),
-			    std::get<RangeInfo>(assInfo.assignableInfo()), *proxy,
+			// Initialize FunctionEditor with model once
+			if (!m_functionEditor) {
+				// This cast should be valid since we can fetch AssignableData
+				auto devModel = static_cast<DeviceModel *>(model);
+				m_functionEditor = new FunctionEditor{*devModel};
+			}
+			m_functionEditor->setRangeInfo(
+			    std::get<RangeInfo>(assInfo.assignableInfo()));
+			m_functionEditor->setAssignableName(
 			    index.data(DeviceModel::NodeNameRole).toString());
-			auto conn = connect(
-			    m_parametrize, &QAction::triggered, [=](auto) { editor->show(); });
+
+			// TODO: show in main window as a page
+			connect(m_parametrize, &QAction::triggered,
+			    [=](auto) { m_functionEditor->show(); });
 			m_menu.exec(mouse->globalPos());
 
 			// TODO: not handled in AssignableProxy
-			connect(editor, &FunctionEditor::connectionDataChanged, [=](auto data) {
-				setAssignableData(model, index, "(Parametrized)", data);
-			});
+			connect(m_functionEditor, &FunctionEditor::connectionDataChanged,
+			    [=](auto data) {
+				    setAssignableData(model, index, "(Parametrized)", data);
+			    });
 		}
 	}
 

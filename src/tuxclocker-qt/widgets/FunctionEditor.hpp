@@ -38,14 +38,11 @@ Q_DECLARE_METATYPE(DynamicReadableProxy *)
 // TODO: make constructor of the type data Editor a = Maybe (Range a)
 class FunctionEditor : public QWidget {
 public:
-	FunctionEditor(DeviceModel &model, TuxClocker::Device::RangeInfo rangeInfo,
-	    AssignableProxy &proxy, QString nodeName, QWidget *parent = nullptr)
-	    : QWidget(parent), m_assignableProxy(proxy), m_model(model), m_proxyModel(model),
-	      m_rangeInfo(rangeInfo) {
+	FunctionEditor(DeviceModel &model, QWidget *parent = nullptr)
+	    : QWidget(parent), m_model(model), m_proxyModel(model) {
 		m_proxyModel.setDisableFiltered(true);
 		m_proxyModel.setFlags(DeviceModel::DynamicReadable);
 		m_proxyModel.setShowIcons(false);
-		// m_proxyModel.setShowValueColumn(false);
 
 		m_layout = new QGridLayout(this);
 		m_dependableReadableComboBox = new NodeSelector;
@@ -58,16 +55,11 @@ public:
 		// Try not to cut off node names
 		treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-		m_dependableLabel = new QLabel(QString("Connecting %1 with:").arg(nodeName));
+		m_dependableLabel = new QLabel;
 		m_layout->addWidget(m_dependableLabel, 0, 0, 1, 2);
 		m_layout->addWidget(m_dependableReadableComboBox, 1, 0, 1, 2);
 		m_dragView = new DragChartView;
 
-		p::match(rangeInfo)(
-		    p::pattern(p::as<TuxClocker::Device::Range<double>>(p::arg)) =
-			[this](auto dr) { m_dragView->setRange(0, 100, dr.min, dr.max); },
-		    p::pattern(p::as<TuxClocker::Device::Range<int>>(p::arg)) =
-			[this](auto ir) { m_dragView->setRange(0, 100, ir.min, ir.max); });
 		// m_dragView->setRange(0, 100, 0, 100);
 		m_layout->addWidget(m_dragView, 2, 0, 1, 2);
 		m_applyButton = new QPushButton("Apply");
@@ -92,8 +84,6 @@ public:
 			this->close();
 		});
 
-		m_dragView->yAxis().setTitleText(nodeName);
-
 		m_dependableReadableComboBox->indexChanged.connect([this](auto &index) {
 			m_latestNodeIndex = index;
 			m_applyButton->setEnabled(true);
@@ -103,6 +93,19 @@ public:
 
 		setLayout(m_layout);
 	}
+	// Somehow existing points disappear somewhere in these two?
+	void setRangeInfo(TuxClocker::Device::RangeInfo rangeInfo) {
+		p::match(rangeInfo)(
+		    p::pattern(p::as<TuxClocker::Device::Range<double>>(p::arg)) =
+			[this](auto dr) { m_dragView->setRange(0, 100, dr.min, dr.max); },
+		    p::pattern(p::as<TuxClocker::Device::Range<int>>(p::arg)) =
+			[this](auto ir) { m_dragView->setRange(0, 100, ir.min, ir.max); });
+	}
+	void setAssignableName(QString name) {
+		m_dependableLabel->setText(QString{"Connecting %1 with:"}.arg(name));
+		m_dragView->yAxis().setTitleText(name);
+	}
+
 	boost::signals2::signal<void(std::shared_ptr<AssignableConnection>)>
 	    assignableConnectionChanged;
 signals:
@@ -110,16 +113,13 @@ signals:
 private:
 	Q_OBJECT
 
-	AssignableProxy &m_assignableProxy;
 	DeviceModel &m_model;
 	DeviceProxyModel m_proxyModel;
 	DragChartView *m_dragView;
-	// NodeSelector *m_nodeSelector;
 	QComboBox *m_functionComboBox;
 	NodeSelector *m_dependableReadableComboBox;
 	QGridLayout *m_layout;
 	QLabel *m_dependableLabel;
 	QModelIndex m_latestNodeIndex;
 	QPushButton *m_applyButton, *m_cancelButton;
-	TuxClocker::Device::RangeInfo m_rangeInfo;
 };
