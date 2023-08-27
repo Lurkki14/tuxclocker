@@ -2,6 +2,7 @@
 
 #include <AssignableProxy.hpp>
 #include <DeviceModel.hpp>
+#include <functional>
 #include <QDebug>
 #include <QSettings>
 
@@ -19,13 +20,26 @@ QVariant fromAssignmentArgument(TuxClocker::Device::AssignmentArgument arg) {
 	return QVariant{};
 }
 
-void traverseModel(const QAbstractItemModel *model, QModelIndex parent = QModelIndex()) {
-	for (int i = 0; i < model->rowCount(parent); i++) {
-		auto index = model->index(i, DeviceModel::InterfaceColumn, parent);
-		// Only this index will have children
-		auto nameIndex = model->index(i, DeviceModel::NameColumn, parent);
+using ModelTraverseCallback = std::function<QModelIndex(QAbstractItemModel *, QModelIndex &, int)>;
 
-		auto assProxyV = index.data(DeviceModel::AssignableProxyRole);
+void traverseModel(const ModelTraverseCallback &cb, QAbstractItemModel *model,
+    QModelIndex parent = QModelIndex()) {
+	for (int i = 0; i < model->rowCount(parent); i++) {
+		// We get the next index we should traverse, and the funtion does
+		// its thing with the model and index
+		auto nextIndex = cb(model, parent, i);
+
+		if (model->hasChildren(nextIndex)) {
+			traverseModel(cb, model, nextIndex);
+		}
+	}
+}
+
+void writeAssignableDefaults(DeviceModel &model) {
+	ModelTraverseCallback cb = [](QAbstractItemModel *model, QModelIndex index, int row) {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+
+		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
 
 		if (assProxyV.isValid()) {
 			auto assProxy = qvariant_cast<AssignableProxy *>(assProxyV);
@@ -47,12 +61,11 @@ void traverseModel(const QAbstractItemModel *model, QModelIndex parent = QModelI
 				settings.endGroup();
 			}
 		}
+		auto nextIndex = model->index(row, DeviceModel::NameColumn, index);
 
-		if (model->hasChildren(nameIndex))
-			traverseModel(model, nameIndex);
-	}
+		return nextIndex;
+	};
+	traverseModel(cb, &model);
 }
-
-void writeAssignableDefaults(const DeviceModel &model) { traverseModel(&model); }
 
 } // namespace Utils

@@ -4,6 +4,6 @@
 
 namespace Utils {
 
-void writeAssignableDefaults(const DeviceModel &model);
+void writeAssignableDefaults(DeviceModel &model);
 
 }
