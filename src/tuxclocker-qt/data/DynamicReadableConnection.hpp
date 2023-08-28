@@ -25,6 +25,8 @@ public:
 	QString dynamicReadablePath;
 };
 
+Q_DECLARE_METATYPE(DynamicReadableConnectionData)
+
 // TODO: make DynamicReadableProxy type parametrized so we can be sure to only get numeric values
 // from it Connection of an Assignable with a DynamicReadable
 template <typename OutType> // Result of linear interpolation
@@ -39,16 +41,7 @@ public:
 	}
 	virtual QVariant connectionData() override { return QVariant(); }
 	virtual void start() override {
-		/*QObject::connect(&m_timer, &QTimer::timeout, [this] {
-			int rand = QRandomGenerator::global()->bounded(0, 10);
-
-			QDBusVariant arg{QVariant{rand}};
-			QVariant v;
-			v.setValue(arg);
-			emit targetValueChanged(v, QString::number(rand));
-		});
-		m_timer.start(1000);*/
-
+		// TODO: Something goes wrong here (not always!!)
 		connect(&m_proxy, &DynamicReadableProxy::valueChanged, [this](auto val) {
 			match(val)(pattern(as<ReadableValue>(arg)) = [this](auto rv) {
 				match(rv)(pattern(as<uint>(arg)) = [this](auto u) {
@@ -62,7 +55,7 @@ public:
 		v.setValue(arg);
 		emit targetValueChanged(v, "1");*/
 	}
-	virtual void stop() override {}
+	virtual void stop() override { disconnect(&m_proxy, nullptr, nullptr, nullptr); }
 private:
 	DynamicReadableProxy &m_proxy;
 	QTimer m_timer;

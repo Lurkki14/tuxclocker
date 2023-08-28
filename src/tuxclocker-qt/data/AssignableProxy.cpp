@@ -1,6 +1,9 @@
 #include "AssignableProxy.hpp"
 
 #include <DBusTypes.hpp>
+#include <DynamicReadableConnection.hpp>
+#include <Globals.hpp>
+#include <Utils.hpp>
 #include <QDBusReply>
 #include <QDBusMessage>
 
@@ -19,6 +22,8 @@ AssignableProxy::AssignableProxy(QString path, QDBusConnection conn, QObject *pa
 	qDBusRegisterMetaType<TCD::Result<QDBusVariant>>();
 	m_iface =
 	    new QDBusInterface("org.tuxclocker", path, "org.tuxclocker.Assignable", conn, this);
+
+	m_connection = nullptr;
 }
 
 std::optional<AssignmentError> AssignableProxy::doApply(const QVariant &v) {
@@ -34,10 +39,56 @@ std::optional<AssignmentError> AssignableProxy::doApply(const QVariant &v) {
 	return AssignmentError::UnknownError;
 }
 
+std::optional<DynamicReadableProxy *> fromPath(QString path) {
+	DynamicReadableProxy *retval = nullptr;
+
+	auto cb = [&](auto model, auto index, int row) {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+		auto dynProxyV = ifaceIndex.data(DeviceModel::DynamicReadableProxyRole);
+
+		if (dynProxyV.isValid()) {
+			auto dynProxy = qvariant_cast<DynamicReadableProxy *>(dynProxyV);
+			if (dynProxy->dbusPath() == path) {
+				// TODO: stop recursing here
+				retval = dynProxy;
+			}
+		}
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	Utils::traverseModel(cb, Globals::g_deviceModel);
+
+	if (retval)
+		return retval;
+	return std::nullopt;
+}
+
 void AssignableProxy::apply() {
 	// A value hasn't been set yet
 	if (m_value.isNull())
 		return;
+
+	// Stop existing parametrization
+	if (m_connection) {
+		disconnect(m_connection, nullptr, nullptr, nullptr);
+		m_connection->stop();
+		delete m_connection;
+		m_connection = nullptr;
+	}
+
+	// Parametrization
+	if (m_value.canConvert<DynamicReadableConnectionData>()) {
+		auto data = m_value.value<DynamicReadableConnectionData>();
+		auto opt = fromPath(data.dynamicReadablePath);
+
+		if (opt.has_value()) {
+			auto proxy = opt.value();
+			m_connection = new DynamicReadableConnection<uint>{*proxy, data.points};
+
+			startConnection();
+			m_value = QVariant();
+			return;
+		}
+	}
 
 	// Use QDBusVariant since otherwise tries to call with the wrong signature
 	QDBusVariant dv(m_value);
@@ -48,9 +99,8 @@ void AssignableProxy::apply() {
 	m_value = QVariant();
 }
 
-void AssignableProxy::startConnection(std::shared_ptr<AssignableConnection> conn) {
-	m_assignableConnection = conn;
-	connect(conn.get(), &AssignableConnection::targetValueChanged,
+void AssignableProxy::startConnection() {
+	QObject::connect(m_connection, &AssignableConnection::targetValueChanged,
 	    [this](auto targetValue, auto text) {
 		    auto err = doApply(targetValue);
 		    if (err.has_value())
@@ -60,7 +110,7 @@ void AssignableProxy::startConnection(std::shared_ptr<AssignableConnection> conn
 	    });
 	// Emit started signal in case a connection emits a new value right away
 	emit connectionStarted();
-	m_assignableConnection->start();
+	m_connection->start();
 }
 
 // DBus type to the more precise C++ type

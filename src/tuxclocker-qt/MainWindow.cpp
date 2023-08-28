@@ -15,6 +15,7 @@
 #include <QString>
 #include <QTreeView>
 #include <QVector>
+#include <Globals.hpp>
 #include <Tree.hpp>
 #include <Utils.hpp>
 
@@ -24,6 +25,8 @@ using namespace TuxClocker;
 
 Q_DECLARE_METATYPE(TCDBus::DeviceNode)
 Q_DECLARE_METATYPE(TCDBus::FlatTreeNode<TCDBus::DeviceNode>)
+
+DeviceModel *Globals::g_deviceModel;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	qDBusRegisterMetaType<TCDBus::DeviceNode>();
@@ -60,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	auto model = new DeviceModel(root);
 	auto browser = new DeviceBrowser(*model);
 	setCentralWidget(browser);
+
+	// TODO: make sure this is the only assignment
+	Globals::g_deviceModel = model;
 
 	Utils::writeAssignableDefaults(*model);
 }
