@@ -1,7 +1,9 @@
-# TODO: conditional import
 let
   sources = import ./npins;
-  pkgs = import sources.nixpkgs {};
+  pkgs =
+    if (builtins.pathExists ./npins)
+    then import sources.nixpkgs {}
+    else import <nixpkgs> {};
 in with pkgs;
   libsForQt5.callPackage ./default.nix {
     libXNVCtrl = linuxPackages.nvidia_x11.settings.libXNVCtrl;
