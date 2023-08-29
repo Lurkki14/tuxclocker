@@ -12,6 +12,7 @@ IndentPPDirectives: BeforeHash
 IndentWrappedFunctionNames: true
 PointerAlignment: Right
 SortIncludes: Never # src/plugins/Nvidia.cpp breaks with this on
+SpaceAfterCStyleCast: true
 
 # 8 column tabs
 IndentWidth: 8
