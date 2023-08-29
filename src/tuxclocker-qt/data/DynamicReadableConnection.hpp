@@ -41,7 +41,6 @@ public:
 	}
 	virtual QVariant connectionData() override { return QVariant(); }
 	virtual void start() override {
-		// TODO: Something goes wrong here (not always!!)
 		connect(&m_proxy, &DynamicReadableProxy::valueChanged, [this](auto val) {
 			match(val)(pattern(as<ReadableValue>(arg)) = [this](auto rv) {
 				match(rv)(pattern(as<uint>(arg)) = [this](auto u) {
@@ -49,17 +48,19 @@ public:
 				});
 			});
 		});
-
-		/*QDBusVariant arg{QVariant{1}};
-		QVariant v;
-		v.setValue(arg);
-		emit targetValueChanged(v, "1");*/
 	}
 	virtual void stop() override { disconnect(&m_proxy, nullptr, nullptr, nullptr); }
 private:
 	DynamicReadableProxy &m_proxy;
 	QTimer m_timer;
 	QVector<QPointF> m_points;
+
+	template <typename T> void doEmit(T targetValue) {
+		QDBusVariant arg{QVariant{targetValue}};
+		QVariant v;
+		v.setValue(arg);
+		emit targetValueChanged(v, QString::number(targetValue));
+	}
 
 	template <typename U> void emitTargetValue(U reading) {
 		// Find two points from the vector so that:
@@ -71,18 +72,29 @@ private:
 				break;
 			}
 		}
-		if (leftIndex == std::nullopt)
+		// Reading wasn't between points
+		if (reading > m_points.last().y()) {
+			// Use y of rightmost point
+			doEmit((uint) qRound(m_points.last().y()));
 			return;
+		} else if (reading < m_points.last().y()) {
+			// Leftmost
+			doEmit((uint) qRound(m_points.first().y()));
+			return;
+		}
+
+		if (leftIndex == std::nullopt) {
+			qWarning("Couldn't calculate target value from reading %s!",
+			    qPrintable(QString::number(reading)));
+			return;
+		}
 		int li = leftIndex.value();
 		// What percentage the value is from dx of left and right interp points
 		double dx = m_points[li + 1].x() - m_points[li].x();
 		double dvx = reading - m_points[li].x();
 		double p = dvx / dx;
 		OutType interp_y = lerp(m_points[li].y(), m_points[li + 1].y(), p);
-		QDBusVariant arg{QVariant{interp_y}};
-		QVariant v;
-		v.setValue(arg);
-		emit targetValueChanged(v, QString::number(interp_y));
+		doEmit(interp_y);
 	}
 
 	template <typename T> T lerp(T a, T b, double t) { return a + (t * (b - a)); }
