@@ -11,6 +11,8 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QSettings>
+#include <Utils.hpp>
 
 using namespace TuxClocker::Device;
 using namespace mpark::patterns;
@@ -19,8 +21,8 @@ Q_DECLARE_METATYPE(AssignableItemData)
 
 DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {
 	m_parametrize = new QAction{"Parametrize...", this};
+	m_resetAssignable = new QAction{"Reset to default", this};
 
-	m_menu.addAction(m_parametrize);
 	m_functionEditor = nullptr;
 }
 
@@ -98,7 +100,16 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
     const QStyleOptionViewItem &item, const QModelIndex &index) {
 	// Context menu handling
 	if (event->type() == QEvent::MouseButtonRelease) {
+		// TODO: remove menu connections
+		m_menu.clear();
+
 		auto mouse = dynamic_cast<QMouseEvent *>(event);
+
+		// Check if any children have saved default assignable values
+		if (mouse->button() == Qt::RightButton &&
+		    subtreeHasAssignableDefaults(model, index)) {
+			m_menu.addAction(m_resetAssignable);
+		}
 
 		auto data = index.data(DeviceModel::AssignableRole);
 		auto assInfo = data.value<AssignableItemData>();
@@ -116,10 +127,11 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 			m_functionEditor->setAssignableName(
 			    index.data(DeviceModel::NodeNameRole).toString());
 
+			m_menu.addAction(m_parametrize);
+
 			// TODO: show in main window as a page
 			connect(m_parametrize, &QAction::triggered,
 			    [=](auto) { m_functionEditor->show(); });
-			m_menu.exec(mouse->globalPos());
 
 			// TODO: not handled in AssignableProxy
 			connect(m_functionEditor, &FunctionEditor::connectionDataChanged,
@@ -127,6 +139,8 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 				    setAssignableData(model, index, "(Parametrized)", data);
 			    });
 		}
+		if (!m_menu.actions().empty())
+			m_menu.exec(mouse->globalPos());
 	}
 
 	return QStyledItemDelegate::editorEvent(event, model, item, index);
@@ -145,6 +159,33 @@ void DeviceModelDelegate::setAssignableData(
 
 	model->setData(index, text, Qt::DisplayRole);
 	model->setData(index, v, DeviceModel::AssignableRole);
+}
+
+bool DeviceModelDelegate::subtreeHasAssignableDefaults(
+    QAbstractItemModel *model, const QModelIndex &item) {
+	QSettings settings{"tuxclocker"};
+	settings.beginGroup("assignableDefaults");
+	bool hasDefaults = false;
+
+	auto cb = [&settings, &hasDefaults](
+		      QAbstractItemModel *model, const QModelIndex &index, int row) {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
+
+		qDebug() << model->index(row, DeviceModel::NameColumn, index).data();
+		if (assProxyV.isValid()) {
+			auto nodePath = qvariant_cast<AssignableProxy *>(assProxyV)->dbusPath();
+			if (settings.contains(nodePath.replace('/', '-'))) {
+				// TODO: break out of the function here
+				hasDefaults = true;
+			}
+		}
+
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	Utils::traverseModel(cb, model);
+
+	return hasDefaults;
 }
 
 QColor alphaBlend(QColor top, QColor background) {

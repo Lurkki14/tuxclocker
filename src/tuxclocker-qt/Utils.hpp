@@ -4,10 +4,11 @@
 
 namespace Utils {
 
-using ModelTraverseCallback = std::function<QModelIndex(QAbstractItemModel *, QModelIndex &, int)>;
+using ModelTraverseCallback =
+    std::function<QModelIndex(QAbstractItemModel *, const QModelIndex &, int)>;
 
 void traverseModel(
-    const ModelTraverseCallback &, QAbstractItemModel *, QModelIndex parent = QModelIndex());
+    const ModelTraverseCallback &, QAbstractItemModel *, const QModelIndex &parent = QModelIndex());
 void writeAssignableDefaults(DeviceModel &model);
 
 } // namespace Utils
