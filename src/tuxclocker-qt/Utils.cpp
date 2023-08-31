@@ -22,6 +22,9 @@ QVariant fromAssignmentArgument(TuxClocker::Device::AssignmentArgument arg) {
 
 void traverseModel(
     const ModelTraverseCallback &cb, QAbstractItemModel *model, const QModelIndex &parent) {
+	// Run callback on the index itself
+	(void) cb(model, parent.parent(), parent.row());
+
 	for (int i = 0; i < model->rowCount(parent); i++) {
 		auto nextOpt = cb(model, parent, i);
 		if (!nextOpt.has_value())
