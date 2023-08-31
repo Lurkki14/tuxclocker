@@ -162,28 +162,29 @@ void DeviceModelDelegate::setAssignableData(
 }
 
 bool DeviceModelDelegate::subtreeHasAssignableDefaults(
-    QAbstractItemModel *model, const QModelIndex &item) {
+    QAbstractItemModel *model, const QModelIndex &index) {
 	QSettings settings{"tuxclocker"};
 	settings.beginGroup("assignableDefaults");
 	bool hasDefaults = false;
 
-	auto cb = [&settings, &hasDefaults](
-		      QAbstractItemModel *model, const QModelIndex &index, int row) {
+	auto cb = [&settings, &hasDefaults](QAbstractItemModel *model, const QModelIndex &index,
+		      int row) -> std::optional<const QModelIndex> {
 		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
 		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
 
-		qDebug() << model->index(row, DeviceModel::NameColumn, index).data();
+		auto name = model->index(row, DeviceModel::NameColumn, index).data();
 		if (assProxyV.isValid()) {
 			auto nodePath = qvariant_cast<AssignableProxy *>(assProxyV)->dbusPath();
 			if (settings.contains(nodePath.replace('/', '-'))) {
-				// TODO: break out of the function here
+				// This stops traversing model
 				hasDefaults = true;
+				return std::nullopt;
 			}
 		}
-
 		return model->index(row, DeviceModel::NameColumn, index);
 	};
-	Utils::traverseModel(cb, model);
+	auto nameIndex = model->index(index.row(), DeviceModel::NameColumn, index.parent());
+	Utils::traverseModel(cb, model, nameIndex);
 
 	return hasDefaults;
 }

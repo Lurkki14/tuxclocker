@@ -20,16 +20,17 @@ QVariant fromAssignmentArgument(TuxClocker::Device::AssignmentArgument arg) {
 	return QVariant{};
 }
 
-using ModelTraverseCallback =
-    std::function<QModelIndex(QAbstractItemModel *, const QModelIndex &, int)>;
-
 void traverseModel(
     const ModelTraverseCallback &cb, QAbstractItemModel *model, const QModelIndex &parent) {
 	for (int i = 0; i < model->rowCount(parent); i++) {
+		auto nextOpt = cb(model, parent, i);
+		if (!nextOpt.has_value())
+			// Returning nothing is used as indication we should stop traversing
+			return;
+
 		// We get the next index we should traverse, and the funtion does
 		// its thing with the model and index
-		auto nextIndex = cb(model, parent, i);
-
+		auto nextIndex = nextOpt.value();
 		if (model->hasChildren(nextIndex)) {
 			traverseModel(cb, model, nextIndex);
 		}

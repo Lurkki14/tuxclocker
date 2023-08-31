@@ -5,7 +5,7 @@
 namespace Utils {
 
 using ModelTraverseCallback =
-    std::function<QModelIndex(QAbstractItemModel *, const QModelIndex &, int)>;
+    std::function<std::optional<QModelIndex>(QAbstractItemModel *, const QModelIndex &, int)>;
 
 void traverseModel(
     const ModelTraverseCallback &, QAbstractItemModel *, const QModelIndex &parent = QModelIndex());
