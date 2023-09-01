@@ -20,6 +20,10 @@ QVariant fromAssignmentArgument(TuxClocker::Device::AssignmentArgument arg) {
 	return QVariant{};
 }
 
+NodePath fromSettingsPath(QString path) { return path.replace('-', '/'); }
+
+QString toSettingsPath(NodePath path) { return path.replace('/', '-'); }
+
 void traverseModel(
     const ModelTraverseCallback &cb, QAbstractItemModel *model, const QModelIndex &parent) {
 	// Run callback on the index itself
@@ -57,11 +61,11 @@ void writeAssignableDefaults(DeviceModel &model) {
 				settings.beginGroup("assignableDefaults");
 
 				// QSettings doesn't want us to use slashes for keys
-				auto dbusPath = assProxy->dbusPath().replace('/', '-');
+				auto settingsPath = toSettingsPath(assProxy->dbusPath());
 				// Don't set again, so the program can be closed
 				// with assignables changed, and defaults still be set
-				if (!settings.contains(dbusPath))
-					settings.setValue(dbusPath, currentValueV);
+				if (!settings.contains(settingsPath))
+					settings.setValue(settingsPath, currentValueV);
 
 				settings.endGroup();
 			}

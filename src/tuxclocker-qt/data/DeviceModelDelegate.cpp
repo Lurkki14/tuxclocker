@@ -175,7 +175,7 @@ bool DeviceModelDelegate::subtreeHasAssignableDefaults(
 		auto name = model->index(row, DeviceModel::NameColumn, index).data();
 		if (assProxyV.isValid()) {
 			auto nodePath = qvariant_cast<AssignableProxy *>(assProxyV)->dbusPath();
-			if (settings.contains(nodePath.replace('/', '-'))) {
+			if (settings.contains(Utils::toSettingsPath(nodePath))) {
 				// This stops traversing model
 				hasDefaults = true;
 				return std::nullopt;
