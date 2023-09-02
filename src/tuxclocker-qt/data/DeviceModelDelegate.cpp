@@ -100,7 +100,11 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
     const QStyleOptionViewItem &item, const QModelIndex &index) {
 	// Context menu handling
 	if (event->type() == QEvent::MouseButtonRelease) {
-		// TODO: remove menu connections
+		// Disconnect so all the previous context menu actions don't go off
+		if (m_functionEditor)
+			disconnect(m_functionEditor, nullptr, nullptr, nullptr);
+		disconnect(m_parametrize, nullptr, nullptr, nullptr);
+		disconnect(m_resetAssignable, nullptr, nullptr, nullptr);
 		m_menu.clear();
 
 		auto mouse = dynamic_cast<QMouseEvent *>(event);
@@ -108,6 +112,11 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 		// Check if any children have saved default assignable values
 		if (mouse->button() == Qt::RightButton &&
 		    subtreeHasAssignableDefaults(model, index)) {
+			auto defaults = subtreeAssignableDefaults(model, index);
+
+			connect(m_resetAssignable, &QAction::triggered,
+			    [=]() { setAssignableDefaults(model, defaults); });
+
 			m_menu.addAction(m_resetAssignable);
 		}
 
@@ -161,6 +170,52 @@ void DeviceModelDelegate::setAssignableData(
 	model->setData(index, v, DeviceModel::AssignableRole);
 }
 
+void DeviceModelDelegate::setAssignableDefaults(
+    QAbstractItemModel *model, QVector<AssignableDefaultData> defaults) {
+	for (auto &def : defaults) {
+		auto data = def.index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
+
+		QString text;
+		// TODO: maybe move all this handling to AssignableItem once this works
+		if (std::holds_alternative<EnumerationVec>(data.assignableInfo())) {
+			auto index = def.defaultValue.toUInt();
+			auto enumVec = std::get<EnumerationVec>(data.assignableInfo());
+
+			if (enumVec.size() - 1 >= index) {
+				text = QString::fromStdString(enumVec[index].name);
+			} else {
+				// This could arise from the settings being edited manually
+				qWarning("Tried to reset %s with invalid index %u!",
+				    qPrintable(model
+						   ->index(def.index.row(), DeviceModel::NameColumn,
+						       def.index.parent())
+						   .data()
+						   .toString()),
+				    index);
+				continue;
+			}
+		} else {
+			text = (data.unit().has_value())
+				   ? QString("%1 %2").arg(
+					 def.defaultValue.toString(), data.unit().value())
+				   : def.defaultValue.toString();
+		}
+		setAssignableVariantData(model, def.index, text, def.defaultValue);
+	}
+}
+
+void DeviceModelDelegate::setAssignableVariantData(
+    QAbstractItemModel *model, const QModelIndex &index, QString text, QVariant data) {
+	auto assData = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
+	assData.setValue(data);
+
+	QVariant v;
+	v.setValue(assData);
+
+	model->setData(index, text, Qt::DisplayRole);
+	model->setData(index, v, DeviceModel::AssignableRole);
+}
+
 bool DeviceModelDelegate::subtreeHasAssignableDefaults(
     QAbstractItemModel *model, const QModelIndex &index) {
 	QSettings settings{"tuxclocker"};
@@ -187,6 +242,39 @@ bool DeviceModelDelegate::subtreeHasAssignableDefaults(
 	Utils::traverseModel(cb, model, nameIndex);
 
 	return hasDefaults;
+}
+
+QVector<AssignableDefaultData> DeviceModelDelegate::subtreeAssignableDefaults(
+    QAbstractItemModel *model, const QModelIndex &index) {
+	QVector<AssignableDefaultData> retval;
+	QSettings settings{"tuxclocker"};
+	settings.beginGroup("assignableDefaults");
+	auto paths = settings.childKeys();
+
+	auto cb = [&](auto model, auto index, int row) {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
+
+		if (assProxyV.isValid()) {
+			auto proxy = qvariant_cast<AssignableProxy *>(assProxyV);
+			// Check if there is a default for this node
+			// TODO: might need to make this faster by providing
+			// a hash table in DeviceModel for example
+			for (auto &path : paths) {
+				if (proxy->dbusPath() == Utils::fromSettingsPath(path)) {
+					retval.append(AssignableDefaultData{
+					    .index = ifaceIndex,
+					    .defaultValue = settings.value(path),
+					});
+				}
+			}
+		}
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	auto nameIndex = model->index(index.row(), DeviceModel::NameColumn, index.parent());
+	Utils::traverseModel(cb, model, nameIndex);
+
+	return retval;
 }
 
 QColor alphaBlend(QColor top, QColor background) {
