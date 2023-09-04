@@ -81,8 +81,11 @@ public:
 
 		connect(m_cancelButton, &QPushButton::clicked, this, &FunctionEditor::cancelled);
 
-		connect(this, &FunctionEditor::canApplyChanged, m_applyButton,
-		    &QPushButton::setEnabled);
+		connect(this, &FunctionEditor::canApplyChanged, [=](bool canApply) {
+			if (canApply)
+				m_applyButton->setToolTip("");
+			m_applyButton->setEnabled(canApply);
+		});
 
 		connect(m_applyButton, &QPushButton::clicked, [this] {
 			auto index = m_latestNodeIndex.value();
