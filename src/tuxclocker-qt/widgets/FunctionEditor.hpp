@@ -117,6 +117,10 @@ public:
 	}
 	// Somehow existing points disappear somewhere in these two?
 	void setRangeInfo(TuxClocker::Device::RangeInfo rangeInfo) {
+		// HACK: points get deleted somwhere when requesting editor
+		// for another node, but DragChartView::pointsChanged doesn't fire -_-
+		emit canApplyChanged(false);
+
 		p::match(rangeInfo)(
 		    p::pattern(p::as<TuxClocker::Device::Range<double>>(p::arg)) =
 			[this](auto dr) { m_dragView->setRange(0, 100, dr.min, dr.max); },

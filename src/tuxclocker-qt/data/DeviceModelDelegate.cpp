@@ -97,8 +97,10 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 	// Context menu handling
 	if (event->type() == QEvent::MouseButtonRelease) {
 		// Disconnect so all the previous context menu actions don't go off
+		// Private signals also get disconnected if we don't specify any signal
 		if (m_functionEditor)
-			disconnect(m_functionEditor, nullptr, nullptr, nullptr);
+			disconnect(m_functionEditor, &FunctionEditor::connectionDataChanged,
+				nullptr, nullptr);
 		disconnect(m_parametrize, nullptr, nullptr, nullptr);
 		disconnect(m_resetAssignable, nullptr, nullptr, nullptr);
 		m_menu.clear();
