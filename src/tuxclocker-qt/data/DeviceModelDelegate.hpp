@@ -17,7 +17,6 @@ struct AssignableDefaultData {
 class DeviceModelDelegate : public QStyledItemDelegate {
 public:
 	DeviceModelDelegate(QObject *parent = nullptr);
-	~DeviceModelDelegate();
 	QWidget *createEditor(
 	    QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void updateEditorGeometry(

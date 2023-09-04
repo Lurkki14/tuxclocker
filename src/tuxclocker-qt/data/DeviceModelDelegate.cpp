@@ -28,12 +28,6 @@ DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(
 	m_functionEditor = nullptr;
 }
 
-DeviceModelDelegate::~DeviceModelDelegate() {
-	// Need to delete manually since this isn't a widget
-	if (m_functionEditor)
-		delete m_functionEditor;
-}
-
 void DeviceModelDelegate::commitAndClose() {
 	// It's also retarded to get the editor this way when we could just use it in the lambda
 	auto editor = qobject_cast<AbstractAssignableEditor *>(sender());
