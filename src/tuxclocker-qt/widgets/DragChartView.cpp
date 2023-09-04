@@ -90,6 +90,12 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 		m_showToolTip = state;
 	});
 
+	connect(&m_series, &QScatterSeries::pointAdded,
+	    [=](auto) { emit pointsChanged(m_series.pointsVector()); });
+
+	connect(&m_series, &QScatterSeries::pointRemoved,
+	    [=](auto) { emit pointsChanged(m_series.pointsVector()); });
+
 	chart()->addSeries(&m_series);
 
 	chart()->addAxis(&m_xAxis, Qt::AlignBottom);

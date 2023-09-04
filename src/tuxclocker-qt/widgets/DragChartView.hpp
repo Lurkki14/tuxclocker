@@ -17,6 +17,9 @@ public:
 	QVector<QPointF> vector() { return m_series.pointsVector(); }
 	// Clear the points and set new range
 	void setRange(qreal xmin, qreal xmax, qreal ymin, qreal ymax);
+signals:
+	// Propagate m_series::{pointAdded, removed}
+	void pointsChanged(QVector<QPointF>);
 protected:
 	bool event(QEvent *);
 	void drawForeground(QPainter *, const QRectF &) override;

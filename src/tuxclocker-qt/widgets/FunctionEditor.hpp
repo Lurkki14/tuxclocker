@@ -39,6 +39,8 @@ class FunctionEditor : public QWidget {
 public:
 	FunctionEditor(DeviceModel &model, QWidget *parent = nullptr)
 	    : QWidget(parent), m_model(model), m_proxyModel(model) {
+		m_latestNodeIndex = std::nullopt;
+
 		m_proxyModel.setDisableFiltered(true);
 		m_proxyModel.setFlags(DeviceModel::DynamicReadable);
 		m_proxyModel.setShowIcons(false);
@@ -68,8 +70,21 @@ public:
 		m_layout->addWidget(m_cancelButton, 3, 0, 1, 1);
 		m_layout->addWidget(m_applyButton, 3, 1, 1, 1);
 
+		connect(m_dragView, &DragChartView::pointsChanged, [=](auto points) {
+			if (points.length() > 1 && m_latestNodeIndex.has_value())
+				emit canApplyChanged(true);
+			else {
+				emit canApplyChanged(false);
+				m_applyButton->setToolTip(disabledReason());
+			}
+		});
+
+		connect(this, &FunctionEditor::canApplyChanged, m_applyButton,
+		    &QPushButton::setEnabled);
+
 		connect(m_applyButton, &QPushButton::clicked, [this] {
-			auto proxy = m_latestNodeIndex.data(DeviceModel::DynamicReadableProxyRole)
+			auto index = m_latestNodeIndex.value();
+			auto proxy = index.data(DeviceModel::DynamicReadableProxyRole)
 					 .value<DynamicReadableProxy *>();
 			auto points = m_dragView->vector();
 			if (points.length() < 2)
@@ -85,9 +100,15 @@ public:
 
 		m_dependableReadableComboBox->indexChanged.connect([this](auto &index) {
 			m_latestNodeIndex = index;
-			m_applyButton->setEnabled(true);
 			auto nodeName = index.data(Qt::DisplayRole).toString();
 			m_dragView->xAxis().setTitleText(nodeName);
+
+			if (m_dragView->vector().length() > 1)
+				emit canApplyChanged(true);
+			else {
+				emit canApplyChanged(false);
+				m_applyButton->setToolTip(disabledReason());
+			}
 		});
 
 		setLayout(m_layout);
@@ -119,6 +140,21 @@ private:
 	NodeSelector *m_dependableReadableComboBox;
 	QGridLayout *m_layout;
 	QLabel *m_dependableLabel;
-	QModelIndex m_latestNodeIndex;
+	std::optional<QModelIndex> m_latestNodeIndex;
 	QPushButton *m_applyButton, *m_cancelButton;
+
+	QString disabledReason() {
+		QString reason;
+
+		if (!m_latestNodeIndex.has_value())
+			reason.append("A node to connect with needs to be selected");
+		if (m_dragView->vector().length() < 2) {
+			if (!reason.isEmpty())
+				reason.append('\n');
+			reason.append("At least two points need to be placed");
+		}
+		return reason;
+	}
+signals:
+	void canApplyChanged(bool);
 };
