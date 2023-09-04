@@ -100,7 +100,7 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 		// Private signals also get disconnected if we don't specify any signal
 		if (m_functionEditor)
 			disconnect(m_functionEditor, &FunctionEditor::connectionDataChanged,
-				nullptr, nullptr);
+			    nullptr, nullptr);
 		disconnect(m_parametrize, nullptr, nullptr, nullptr);
 		disconnect(m_resetAssignable, nullptr, nullptr, nullptr);
 		m_menu.clear();

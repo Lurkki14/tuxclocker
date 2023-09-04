@@ -70,6 +70,8 @@ public:
 		m_layout->addWidget(m_cancelButton, 3, 0, 1, 1);
 		m_layout->addWidget(m_applyButton, 3, 1, 1, 1);
 
+		m_applyButton->setToolTip(disabledReason());
+
 		connect(m_dragView, &DragChartView::pointsChanged, [=](auto points) {
 			if (points.length() > 1 && m_latestNodeIndex.has_value())
 				emit canApplyChanged(true);
@@ -129,6 +131,8 @@ public:
 			[this](auto dr) { m_dragView->setRange(0, 100, dr.min, dr.max); },
 		    p::pattern(p::as<TuxClocker::Device::Range<int>>(p::arg)) =
 			[this](auto ir) { m_dragView->setRange(0, 100, ir.min, ir.max); });
+
+		m_applyButton->setToolTip(disabledReason());
 	}
 	void setAssignableName(QString name) {
 		m_dependableLabel->setText(QString{"Connecting %1 with:"}.arg(name));
