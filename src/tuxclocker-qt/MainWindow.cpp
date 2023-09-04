@@ -10,6 +10,7 @@
 #include <QDBusReply>
 #include <QDebug>
 #include <QSettings>
+#include <QStackedWidget>
 #include <QStandardItemModel>
 #include <QStandardPaths>
 #include <QString>
@@ -27,6 +28,8 @@ Q_DECLARE_METATYPE(TCDBus::DeviceNode)
 Q_DECLARE_METATYPE(TCDBus::FlatTreeNode<TCDBus::DeviceNode>)
 
 DeviceModel *Globals::g_deviceModel;
+QStackedWidget *Globals::g_mainStack;
+QWidget *Globals::g_deviceBrowser;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	qDBusRegisterMetaType<TCDBus::DeviceNode>();
@@ -55,17 +58,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 	auto root = flatTree.toTree(flatTree);
 
-	/*auto view = new QTreeView;
-	view->setItemDelegate(new DeviceModelDelegate);
-	view->setModel(model);
-	setCentralWidget(view);*/
-
 	auto model = new DeviceModel(root);
 	auto browser = new DeviceBrowser(*model);
-	setCentralWidget(browser);
+
+	auto stack = new QStackedWidget(this);
+	stack->addWidget(browser);
+	setCentralWidget(stack);
 
 	// TODO: make sure this is the only assignment
+	Globals::g_deviceBrowser = browser;
 	Globals::g_deviceModel = model;
+	Globals::g_mainStack = stack;
 
 	Utils::writeAssignableDefaults(*model);
 }

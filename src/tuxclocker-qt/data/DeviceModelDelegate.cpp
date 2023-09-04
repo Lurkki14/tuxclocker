@@ -4,6 +4,7 @@
 #include <DoubleRangeEditor.hpp>
 #include <EnumEditor.hpp>
 #include <FunctionEditor.hpp>
+#include <Globals.hpp>
 #include <IntRangeEditor.hpp>
 #include <patterns.hpp>
 #include <QDebug>
@@ -11,6 +12,7 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QStackedWidget>
 #include <QSettings>
 #include <Utils.hpp>
 
@@ -130,6 +132,8 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 				// This cast should be valid since we can fetch AssignableData
 				auto devModel = static_cast<DeviceModel *>(model);
 				m_functionEditor = new FunctionEditor{*devModel};
+
+				Globals::g_mainStack->addWidget(m_functionEditor);
 			}
 			m_functionEditor->setRangeInfo(
 			    std::get<RangeInfo>(assInfo.assignableInfo()));
@@ -138,14 +142,20 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 
 			m_menu.addAction(m_parametrize);
 
-			// TODO: show in main window as a page
-			connect(m_parametrize, &QAction::triggered,
-			    [=](auto) { m_functionEditor->show(); });
+			connect(m_parametrize, &QAction::triggered, [=](auto) {
+				Globals::g_mainStack->setCurrentWidget(m_functionEditor);
+			});
+
+			connect(m_functionEditor, &FunctionEditor::cancelled, []() {
+				Globals::g_mainStack->setCurrentWidget(Globals::g_deviceBrowser);
+			});
 
 			// TODO: not handled in AssignableProxy
 			connect(m_functionEditor, &FunctionEditor::connectionDataChanged,
 			    [=](auto data) {
 				    setAssignableData(model, index, "(Parametrized)", data);
+				    Globals::g_mainStack->setCurrentWidget(
+					Globals::g_deviceBrowser);
 			    });
 		}
 		if (!m_menu.actions().empty())

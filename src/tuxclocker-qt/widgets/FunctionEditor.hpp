@@ -79,6 +79,8 @@ public:
 			}
 		});
 
+		connect(m_cancelButton, &QPushButton::clicked, this, &FunctionEditor::cancelled);
+
 		connect(this, &FunctionEditor::canApplyChanged, m_applyButton,
 		    &QPushButton::setEnabled);
 
@@ -129,6 +131,7 @@ public:
 	boost::signals2::signal<void(std::shared_ptr<AssignableConnection>)>
 	    assignableConnectionChanged;
 signals:
+	void cancelled();
 	void connectionDataChanged(DynamicReadableConnectionData);
 private:
 	Q_OBJECT
