@@ -36,7 +36,6 @@ public:
 	}
 
 	virtual QVariant assignableData() override { return m_slider->value(); }
-	virtual QString displayData() override { return QString::number(m_slider->value()); }
 	virtual void setAssignableData(QVariant data) override { m_slider->setValue(data.toInt()); }
 	void setRange(TC::Device::Range<int> range) { m_slider->setRange(range.min, range.max); }
 	int value() { return m_slider->value(); }

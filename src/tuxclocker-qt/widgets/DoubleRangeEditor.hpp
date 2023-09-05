@@ -36,7 +36,6 @@ public:
 		setRange(range);
 	}
 	virtual QVariant assignableData() override { return m_spinBox->value(); }
-	virtual QString displayData() override { return QString::number(m_spinBox->value()); }
 	virtual void setAssignableData(QVariant data) override {
 		m_spinBox->setValue(data.toDouble());
 	}

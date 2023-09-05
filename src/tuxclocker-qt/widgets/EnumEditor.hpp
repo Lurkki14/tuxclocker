@@ -11,7 +11,6 @@ public:
 	EnumEditor(QWidget *parent = nullptr);
 	EnumEditor(TuxClocker::Device::EnumerationVec enums, QWidget *parent = nullptr);
 	virtual QVariant assignableData() override;
-	virtual QString displayData() override;
 	virtual void setAssignableData(QVariant data) override;
 protected:
 	bool eventFilter(QObject *, QEvent *) override;

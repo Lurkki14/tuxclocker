@@ -2,6 +2,9 @@
 
 #include "DeviceModel.hpp"
 
+#include <AssignableItemData.hpp>
+#include <Device.hpp>
+#include <optional>
 #include <QObject>
 #include <QStandardItem>
 
@@ -10,7 +13,10 @@
 // Forgive me for the sin of multiple inheritance
 class AssignableItem : public QObject, public QStandardItem {
 public:
-	AssignableItem(QObject *parent = nullptr) : QObject(parent), QStandardItem() {}
+	AssignableItem(std::optional<QString> unit, QObject *parent = nullptr)
+	    : QObject(parent), QStandardItem() {
+		m_unit = unit;
+	}
 	bool committal() { return m_committed; }
 	// Whether or not the set value shall be applied. Doesn't reset or change it.
 	void setCommittal(bool on) { m_committed = on; }
@@ -21,5 +27,8 @@ signals:
 private:
 	Q_OBJECT
 
+	void updateText(AssignableItemData);
+
+	std::optional<QString> m_unit;
 	bool m_committed = false;
 };

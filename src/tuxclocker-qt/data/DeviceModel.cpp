@@ -122,7 +122,7 @@ QString fromAssignmentArgument(AssignmentArgument a_arg) {
 
 QStandardItem *DeviceModel::createAssignable(
     TC::TreeNode<TCDBus::DeviceNode> node, QDBusConnection conn, AssignableItemData itemData) {
-	auto ifaceItem = new AssignableItem(this);
+	auto ifaceItem = new AssignableItem(itemData.unit(), this);
 	auto proxy = new AssignableProxy(node.value().path, conn, this);
 
 	connect(proxy, &AssignableProxy::connectionValueChanged, [=](auto result, auto text) {

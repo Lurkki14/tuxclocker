@@ -78,11 +78,7 @@ void DeviceModelDelegate::setModelData(
 		auto a_editor = static_cast<AbstractAssignableEditor *>(editor);
 		auto data = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
 
-		auto text = (data.unit().has_value())
-				? QString("%1 %2").arg(a_editor->displayData(), data.unit().value())
-				: a_editor->displayData();
-
-		setAssignableData(model, index, text, a_editor->assignableData());
+		setAssignableData(model, index, a_editor->assignableData());
 	}
 }
 
@@ -149,7 +145,7 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 			// TODO: not handled in AssignableProxy
 			connect(m_functionEditor, &FunctionEditor::connectionDataChanged,
 			    [=](auto data) {
-				    setAssignableData(model, index, "(Parametrized)", data);
+				    setAssignableData(model, index, data);
 				    Globals::g_mainStack->setCurrentWidget(
 					Globals::g_deviceBrowser);
 			    });
@@ -163,7 +159,7 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 
 template <typename T>
 void DeviceModelDelegate::setAssignableData(
-    QAbstractItemModel *model, const QModelIndex &index, QString text, T data) {
+    QAbstractItemModel *model, const QModelIndex &index, T data) {
 	auto assData = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
 	QVariant assV;
 	assV.setValue(data);
@@ -172,7 +168,6 @@ void DeviceModelDelegate::setAssignableData(
 	QVariant v;
 	v.setValue(assData);
 
-	model->setData(index, text, Qt::DisplayRole);
 	model->setData(index, v, DeviceModel::AssignableRole);
 }
 
@@ -181,44 +176,18 @@ void DeviceModelDelegate::setAssignableDefaults(
 	for (auto &def : defaults) {
 		auto data = def.index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
 
-		QString text;
-		// TODO: maybe move all this handling to AssignableItem once this works
-		if (std::holds_alternative<EnumerationVec>(data.assignableInfo())) {
-			auto index = def.defaultValue.toUInt();
-			auto enumVec = std::get<EnumerationVec>(data.assignableInfo());
-
-			if (enumVec.size() - 1 >= index) {
-				text = QString::fromStdString(enumVec[index].name);
-			} else {
-				// This could arise from the settings being edited manually
-				qWarning("Tried to reset %s with invalid index %u!",
-				    qPrintable(model
-						   ->index(def.index.row(), DeviceModel::NameColumn,
-						       def.index.parent())
-						   .data()
-						   .toString()),
-				    index);
-				continue;
-			}
-		} else {
-			text = (data.unit().has_value())
-				   ? QString("%1 %2").arg(
-					 def.defaultValue.toString(), data.unit().value())
-				   : def.defaultValue.toString();
-		}
-		setAssignableVariantData(model, def.index, text, def.defaultValue);
+		setAssignableVariantData(model, def.index, def.defaultValue);
 	}
 }
 
 void DeviceModelDelegate::setAssignableVariantData(
-    QAbstractItemModel *model, const QModelIndex &index, QString text, QVariant data) {
+    QAbstractItemModel *model, const QModelIndex &index, QVariant data) {
 	auto assData = index.data(DeviceModel::AssignableRole).value<AssignableItemData>();
 	assData.setValue(data);
 
 	QVariant v;
 	v.setValue(assData);
 
-	model->setData(index, text, Qt::DisplayRole);
 	model->setData(index, v, DeviceModel::AssignableRole);
 }
 

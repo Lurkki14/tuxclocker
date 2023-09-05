@@ -32,10 +32,9 @@ protected:
 private:
 	void commitAndClose();
 	template <typename T>
-	static void setAssignableData(
-	    QAbstractItemModel *, const QModelIndex &, QString text, T data);
+	static void setAssignableData(QAbstractItemModel *, const QModelIndex &, T data);
 	static void setAssignableVariantData(
-	    QAbstractItemModel *, const QModelIndex &, QString text, QVariant data);
+	    QAbstractItemModel *, const QModelIndex &, QVariant data);
 	// Whether to show reset action for a node
 	bool subtreeHasAssignableDefaults(QAbstractItemModel *, const QModelIndex &);
 	QVector<AssignableDefaultData> subtreeAssignableDefaults(

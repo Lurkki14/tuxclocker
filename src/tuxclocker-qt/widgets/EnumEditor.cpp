@@ -46,10 +46,7 @@ QVariant EnumEditor::assignableData() {
 	auto r = m_model.index(m_comboBox->currentIndex(), 0).data(KeyRole).toUInt();
 	return r;
 }
-QString EnumEditor::displayData() {
-	auto r = m_model.index(m_comboBox->currentIndex(), 0).data(Qt::DisplayRole).toString();
-	return r;
-}
+
 void EnumEditor::setAssignableData(QVariant data) {
 	// TODO: make worst case better than O(n)
 	auto u = data.toUInt();
