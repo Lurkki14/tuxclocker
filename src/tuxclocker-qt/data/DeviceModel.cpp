@@ -131,9 +131,16 @@ QStandardItem *DeviceModel::createAssignable(
 			[=](auto v) {
 				QVariant data;
 				data.setValue(connectionColor());
-				ifaceItem->setData(data, Qt::BackgroundRole);
-				ifaceItem->setText(text);
-				// qDebug() << text;
+
+				if (!ifaceItem->committal()) {
+					// Don't set color when committed
+					ifaceItem->clearTargetText();
+					ifaceItem->setData(data, Qt::BackgroundRole);
+				}
+				// TODO: small annoyance: causes 10 W -> 11 W
+				// instead of desired 10 -> 11 W
+				// when committing
+				ifaceItem->setCurrentValueText(text);
 			},
 		    pattern(_) = [] {});
 	});
@@ -146,7 +153,8 @@ QStandardItem *DeviceModel::createAssignable(
 	ifaceItem->setData(v, AssignableRole);
 
 	// Set initial text to current value (one-time at startup)
-	ifaceItem->setText(displayText(proxy, itemData));
+	// Related to TODO above
+	ifaceItem->setCurrentValueText(displayText(proxy, itemData));
 
 	connect(ifaceItem, &AssignableItem::assignableDataChanged, [=](QVariant v) {
 		// Only show checkbox when value has been changed
@@ -162,6 +170,8 @@ QStandardItem *DeviceModel::createAssignable(
 	});
 
 	connect(proxy, &AssignableProxy::applied, [=](auto err) {
+		ifaceItem->applyTargetText();
+
 		// Fade out result color
 		auto startColor = (err.has_value()) ? errorColor() : successColor();
 		auto anim = new QVariantAnimation;
@@ -188,8 +198,7 @@ QStandardItem *DeviceModel::createAssignable(
 		if (ifaceItem->checkState() == Qt::Checked) {
 			proxy->apply();
 		} else {
-			// Note: gets current value, which something else might have changed
-			ifaceItem->setText(displayText(proxy, itemData));
+			ifaceItem->clearTargetText();
 		}
 		// Make unchecked item uncheckable too
 		// TODO: do this as soon as item is unchecked, haven't found a good way so far
@@ -226,11 +235,7 @@ QString DeviceModel::displayText(AssignableProxy *proxy, AssignableItemData data
 
 	auto unit = data.unit();
 	if (std::holds_alternative<RangeInfo>(a_info)) {
-		auto valueText = fromAssignmentArgument(currentValue.value());
-		if (unit.has_value())
-			return QString("%1 %2").arg(valueText, unit.value());
-		else
-			return valueText;
+		return fromAssignmentArgument(currentValue.value());
 	}
 	return defVal;
 }
