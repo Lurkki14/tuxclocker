@@ -36,6 +36,9 @@ ninja && sudo ninja install
 
 ![Editing an item](screenshots/itemedit.png)
 
+### Parametrizing an item
+![Parametrizing an item](screenshots/paramEditor.png)
+
 # Developing
 
 ### Formatting
