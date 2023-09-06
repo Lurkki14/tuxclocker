@@ -39,6 +39,9 @@ ninja && sudo ninja install
 ### Parametrizing an item
 ![Parametrizing an item](screenshots/paramEditor.png)
 
+### Showing pending changes
+![Showing pending changes](screenshots/stateChange.png)
+
 # Developing
 
 ### Formatting
