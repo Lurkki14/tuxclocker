@@ -100,6 +100,7 @@ public:
 			auto data = DynamicReadableConnectionData{
 			    .points = points,
 			    .dynamicReadablePath = proxy->dbusPath(),
+			    .rangeInfo = m_rangeInfo,
 			};
 			emit connectionDataChanged(data);
 			this->close();
@@ -133,6 +134,7 @@ public:
 			[this](auto ir) { m_dragView->setRange(0, 100, ir.min, ir.max); });
 
 		m_applyButton->setToolTip(disabledReason());
+		m_rangeInfo = rangeInfo;
 	}
 	void setAssignableName(QString name) {
 		m_dependableLabel->setText(QString{"Connecting %1 with:"}.arg(name));
@@ -147,6 +149,7 @@ signals:
 private:
 	Q_OBJECT
 
+	RangeInfo m_rangeInfo;
 	DeviceModel &m_model;
 	DeviceProxyModel m_proxyModel;
 	DragChartView *m_dragView;

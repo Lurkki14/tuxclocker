@@ -82,7 +82,7 @@ void AssignableProxy::apply() {
 
 		if (opt.has_value()) {
 			auto proxy = opt.value();
-			m_connection = new DynamicReadableConnection<uint>{*proxy, data.points};
+			m_connection = new DynamicReadableConnection<uint>{*proxy, data};
 
 			startConnection();
 			m_value = QVariant();
