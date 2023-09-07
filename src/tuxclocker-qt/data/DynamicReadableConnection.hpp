@@ -104,13 +104,13 @@ private:
 
 		if (!leftIndex.has_value()) {
 			// Reading wasn't between points
-			if (reading > m_points.last().y()) {
+			if (reading > m_points.last().x()) {
 				// Use y of rightmost point
 				emitWithType(m_points.last().y());
 				return;
-			} else if (reading < m_points.last().y()) {
+			} else if (reading < m_points.last().x()) {
 				// Leftmost
-				emitWithType(m_points.last().y());
+				emitWithType(m_points.first().y());
 				return;
 			}
 		}
