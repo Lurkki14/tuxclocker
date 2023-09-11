@@ -1,5 +1,6 @@
 <RCC>
 	<qresource prefix="/">
 		<file>ruler.svg</file>
+		<file>settings.svg</file>
 	</qresource>
 </RCC>

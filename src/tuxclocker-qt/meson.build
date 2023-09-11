@@ -13,7 +13,8 @@ moc_files = qt5.preprocess(moc_headers: ['MainWindow.hpp',
 		'data/DynamicReadableProxy.hpp',
                 'widgets/AbstractAssignableEditor.hpp',
 		'widgets/DragChartView.hpp',
-                'widgets/FunctionEditor.hpp'],
+                'widgets/FunctionEditor.hpp',
+                'widgets/Settings.hpp'],
 	qresources : ['resources/resources.qrc'],
 	dependencies: qt5_dep)
 
@@ -29,6 +30,7 @@ sources = ['main.cpp',
 	'widgets/DragChartView.cpp',
 	'widgets/EnumEditor.cpp',
 	'widgets/FlagEditor.cpp',
+        'widgets/Settings.cpp',
 	'MainWindow.cpp',
         'Utils.cpp']
 

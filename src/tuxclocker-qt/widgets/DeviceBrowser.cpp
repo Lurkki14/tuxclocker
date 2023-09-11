@@ -2,8 +2,12 @@
 #include "AssignableItemData.hpp"
 #include "qnamespace.h"
 
+#include <Globals.hpp>
 #include <patterns.hpp>
+#include <QStackedWidget>
+#include <QToolButton>
 #include <QVariant>
+#include <Settings.hpp>
 
 using namespace mpark::patterns;
 using namespace TuxClocker::Device;
@@ -41,10 +45,29 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 
 	m_flagEditor->flagsChanged.connect([=](auto flags) { m_proxyModel->setFlags(flags); });
 
-	m_layout->addWidget(m_flagLabel, 0, 0);
-	m_layout->addWidget(m_flagEditor, 0, 1);
-	m_layout->addWidget(m_treeView, 1, 0, 1, 2);
-	m_layout->addWidget(m_apply, 2, 0, 1, 2);
+	m_settings = nullptr;
+
+	auto icon = QIcon{":/settings.svg"};
+	auto toolButton = new QToolButton{this};
+	toolButton->setIcon(icon);
+
+	connect(toolButton, &QToolButton::released, [=] {
+		if (!m_settings) {
+			m_settings = new Settings{this};
+			Globals::g_mainStack->addWidget(m_settings);
+
+			connect(m_settings, &Settings::cancelled,
+			    [=] { Globals::g_mainStack->setCurrentWidget(this); });
+		}
+		Globals::g_mainStack->setCurrentWidget(m_settings);
+	});
+
+	m_layout->addWidget(toolButton, 0, 0);
+
+	m_layout->addWidget(m_flagLabel, 0, 1, 1, 1, Qt::AlignRight);
+	m_layout->addWidget(m_flagEditor, 0, 2);
+	m_layout->addWidget(m_treeView, 1, 0, 1, 3);
+	m_layout->addWidget(m_apply, 2, 0, 1, 3);
 
 	setLayout(m_layout);
 }

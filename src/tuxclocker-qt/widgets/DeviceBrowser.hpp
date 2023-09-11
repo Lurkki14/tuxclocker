@@ -11,6 +11,8 @@
 #include <QPushButton>
 #include <QWidget>
 
+class Settings;
+
 // Class for viewing/editing the main tuxclocker tree
 class DeviceBrowser : public QWidget {
 public:
@@ -23,4 +25,5 @@ private:
 	QLabel *m_flagLabel;
 	QPushButton *m_apply;
 	QGridLayout *m_layout;
+	Settings *m_settings;
 };
