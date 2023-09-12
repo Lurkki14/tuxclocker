@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Settings.hpp>
+
 class DeviceModel;
 class QStackedWidget;
 class QWidget;
@@ -11,5 +13,7 @@ namespace Globals {
 extern DeviceModel *g_deviceModel;
 extern QStackedWidget *g_mainStack;
 extern QWidget *g_deviceBrowser;
+// When applying successfully, we need to know which profile to save changes to
+extern SettingsData g_settingsData;
 
 } // namespace Globals

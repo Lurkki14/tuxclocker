@@ -20,7 +20,9 @@ public:
 	void apply();
 	// Stop connection and clear current connection
 	void stopConnection();
+	// TODO: rename to setTargetValue for congruency
 	void setValue(QVariant v) { m_value = v; }
+	QVariant targetValue() { return m_value; }
 	std::optional<TC::Device::AssignmentArgument> currentValue();
 	QString dbusPath();
 signals:

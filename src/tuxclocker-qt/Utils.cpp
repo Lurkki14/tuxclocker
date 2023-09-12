@@ -5,6 +5,7 @@
 #include <functional>
 #include <QDebug>
 #include <QSettings>
+#include <Settings.hpp>
 
 namespace Utils {
 
@@ -75,6 +76,17 @@ void writeAssignableDefaults(DeviceModel &model) {
 		return nextIndex;
 	};
 	traverseModel(cb, &model);
+}
+
+void writeAssignableSetting(SettingsData data, QVariant value, NodePath assignablePath) {
+	if (!data.currentProfile.has_value())
+		return;
+
+	QSettings settings{"tuxclocker"};
+	auto profile = data.currentProfile.value();
+	settings.beginGroup("profiles");
+	settings.beginGroup(profile);
+	settings.setValue(toSettingsPath(assignablePath), value);
 }
 
 } // namespace Utils

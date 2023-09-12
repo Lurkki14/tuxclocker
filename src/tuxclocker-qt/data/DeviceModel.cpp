@@ -3,6 +3,8 @@
 #include "AssignableProxy.hpp"
 #include "DynamicReadableProxy.hpp"
 #include <fplus/fplus.hpp>
+#include <Globals.hpp>
+#include <Utils.hpp>
 #include <QApplication>
 #include <QDBusReply>
 #include <QDebug>
@@ -172,8 +174,16 @@ QStandardItem *DeviceModel::createAssignable(
 	connect(proxy, &AssignableProxy::applied, [=](auto err) {
 		ifaceItem->applyTargetText();
 
+		bool success = !err.has_value();
+
+		if (success) {
+			// Write successfully changed value to settings
+			Utils::writeAssignableSetting(
+			    Globals::g_settingsData, proxy->targetValue(), proxy->dbusPath());
+		}
+
 		// Fade out result color
-		auto startColor = (err.has_value()) ? errorColor() : successColor();
+		auto startColor = !success ? errorColor() : successColor();
 		auto anim = new QVariantAnimation;
 		anim->setDuration(fadeOutTime());
 		anim->setStartValue(startColor);

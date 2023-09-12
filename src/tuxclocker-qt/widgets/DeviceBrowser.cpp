@@ -58,6 +58,9 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 
 			connect(m_settings, &Settings::cancelled,
 			    [=] { Globals::g_mainStack->setCurrentWidget(this); });
+
+			connect(m_settings, &Settings::settingsSaved,
+			    [=](auto) { Globals::g_mainStack->setCurrentWidget(this); });
 		}
 		Globals::g_mainStack->setCurrentWidget(m_settings);
 	});
