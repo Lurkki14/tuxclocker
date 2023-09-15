@@ -121,7 +121,7 @@ void writeAssignableDefaults(DeviceModel &model) {
 	traverseModel(cb, &model);
 }
 
-void writeAssignableSetting(SettingsData data, QVariant value, NodePath assignablePath) {
+void writeAssignableSetting(SettingsData data, AssignableSetting setting) {
 	if (!data.currentProfile.has_value())
 		return;
 
@@ -129,7 +129,7 @@ void writeAssignableSetting(SettingsData data, QVariant value, NodePath assignab
 	auto profile = data.currentProfile.value();
 	settings.beginGroup("profiles");
 	settings.beginGroup(profile);
-	settings.setValue(toSettingsPath(assignablePath), value);
+	settings.setValue(toSettingsPath(setting.assignablePath), setting.value);
 }
 
 } // namespace Utils

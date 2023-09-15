@@ -180,7 +180,10 @@ QStandardItem *DeviceModel::createAssignable(
 			// Write successfully changed value to settings
 			// TODO: parametrization won't be saved here
 			Utils::writeAssignableSetting(
-			    Globals::g_settingsData, proxy->targetValue(), proxy->dbusPath());
+			    Globals::g_settingsData, AssignableSetting{
+							 .assignablePath = proxy->dbusPath(),
+							 .value = proxy->targetValue(),
+						     });
 		}
 
 		// Fade out result color

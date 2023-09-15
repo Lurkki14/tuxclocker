@@ -18,7 +18,7 @@ QString toSettingsPath(NodePath);
 void traverseModel(
     const ModelTraverseCallback &, QAbstractItemModel *, const QModelIndex &parent = QModelIndex());
 void writeAssignableDefaults(DeviceModel &model);
-void writeAssignableSetting(SettingsData, QVariant value, NodePath assignablePath);
+void writeAssignableSetting(SettingsData, AssignableSetting);
 void setModelAssignableSettings(DeviceModel &model, QVector<AssignableSetting>);
 
 } // namespace Utils
