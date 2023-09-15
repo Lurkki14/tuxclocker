@@ -26,6 +26,8 @@ public:
 	    QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 	bool editorEvent(QEvent *, QAbstractItemModel *, const QStyleOptionViewItem &,
 	    const QModelIndex &) override;
+
+	static void setAssignableDefaults(QAbstractItemModel *, QVector<AssignableDefaultData>);
 protected:
 	void paint(QPainter *painter, const QStyleOptionViewItem &option,
 	    const QModelIndex &index) const override;
@@ -39,7 +41,6 @@ private:
 	bool subtreeHasAssignableDefaults(QAbstractItemModel *, const QModelIndex &);
 	QVector<AssignableDefaultData> subtreeAssignableDefaults(
 	    QAbstractItemModel *, const QModelIndex &);
-	static void setAssignableDefaults(QAbstractItemModel *, QVector<AssignableDefaultData>);
 
 	FunctionEditor *m_functionEditor;
 	QAction *m_parametrize;

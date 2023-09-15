@@ -2,6 +2,7 @@
 
 #include <AssignableProxy.hpp>
 #include <DeviceModel.hpp>
+#include <DeviceModelDelegate.hpp>
 #include <functional>
 #include <QDebug>
 #include <QSettings>
@@ -43,6 +44,48 @@ void traverseModel(
 			traverseModel(cb, model, nextIndex);
 		}
 	}
+}
+
+std::optional<QModelIndex> fromAssignablePath(DeviceModel &model, NodePath path) {
+	QModelIndex assIndex{};
+	// Find index from assignable path
+	auto cb = [&](auto model, auto index, int row) -> std::optional<QModelIndex> {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
+
+		if (assProxyV.isValid()) {
+			auto assProxy = qvariant_cast<AssignableProxy *>(assProxyV);
+			if (assProxy->dbusPath() == path) {
+				assIndex = ifaceIndex;
+				return std::nullopt;
+			}
+		}
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	traverseModel(cb, &model);
+
+	if (!assIndex.isValid()) {
+		qWarning("Couldn't find assignable with path %s from model!", qPrintable(path));
+		return std::nullopt;
+	}
+
+	return assIndex;
+}
+
+// Write profile's assignable settings to model
+void setModelAssignableSettings(DeviceModel &model, QVector<AssignableSetting> settings) {
+	QVector<AssignableDefaultData> assSettings;
+
+	for (auto &setting : settings) {
+		auto index = fromAssignablePath(model, setting.assignablePath);
+		if (index.has_value())
+			assSettings.append(AssignableDefaultData{
+			    .index = index.value(),
+			    .defaultValue = setting.value,
+			});
+	}
+	// TODO: misleading name when used here!
+	DeviceModelDelegate::setAssignableDefaults(&model, assSettings);
 }
 
 void writeAssignableDefaults(DeviceModel &model) {

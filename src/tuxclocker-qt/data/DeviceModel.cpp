@@ -178,6 +178,7 @@ QStandardItem *DeviceModel::createAssignable(
 
 		if (success) {
 			// Write successfully changed value to settings
+			// TODO: parametrization won't be saved here
 			Utils::writeAssignableSetting(
 			    Globals::g_settingsData, proxy->targetValue(), proxy->dbusPath());
 		}

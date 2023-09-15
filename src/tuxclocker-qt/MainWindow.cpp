@@ -16,6 +16,7 @@
 #include <QString>
 #include <QTreeView>
 #include <QVector>
+#include <DeviceModelDelegate.hpp>
 #include <Globals.hpp>
 #include <Tree.hpp>
 #include <Utils.hpp>
@@ -30,6 +31,7 @@ Q_DECLARE_METATYPE(TCDBus::FlatTreeNode<TCDBus::DeviceNode>)
 DeviceModel *Globals::g_deviceModel;
 QStackedWidget *Globals::g_mainStack;
 QWidget *Globals::g_deviceBrowser;
+SettingsData Globals::g_settingsData;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	qDBusRegisterMetaType<TCDBus::DeviceNode>();
@@ -69,7 +71,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	Globals::g_deviceBrowser = browser;
 	Globals::g_deviceModel = model;
 	Globals::g_mainStack = stack;
+	Globals::g_settingsData = Settings::readSettings();
 
+	Utils::setModelAssignableSettings(*model, Globals::g_settingsData.assignableSettings);
 	Utils::writeAssignableDefaults(*model);
 }
 

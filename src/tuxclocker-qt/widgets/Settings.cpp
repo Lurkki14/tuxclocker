@@ -9,8 +9,6 @@
 #include <QSettings>
 #include <Utils.hpp>
 
-SettingsData Globals::g_settingsData;
-
 Settings::Settings(QWidget *parent) : QWidget(parent) {
 	qRegisterMetaTypeStreamOperators<QVector<QString>>("QVector<QString>>");
 
@@ -141,6 +139,7 @@ void Settings::writeSettings(SettingsData data) {
 }
 
 SettingsData Settings::readSettings() {
+	qRegisterMetaTypeStreamOperators<QVector<QString>>("QVector<QString>>");
 	QSettings s{"tuxclocker"};
 
 	std::optional<QString> profile;
