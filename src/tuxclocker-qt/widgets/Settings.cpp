@@ -62,7 +62,6 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 	auto saveButton = new QPushButton{"Save", this};
 
 	connect(saveButton, &QPushButton::released, this, [=] {
-		// TODO: read assignableSettings from disk
 		auto settingsData = fromUIState();
 		writeSettings(fromUIState());
 
@@ -117,9 +116,15 @@ SettingsData Settings::fromUIState() {
 	};
 	Utils::traverseModel(cb, m_profileView->model());
 
+	// Read assignableSettings for wanted profile
+	QVector<AssignableSetting> assSettings;
+	if (currentProfile.has_value())
+		assSettings = readAssignableSettings(currentProfile.value());
+
 	return SettingsData{
 	    .autoApplyProfile = m_autoLoad->isChecked(),
 	    .currentProfile = currentProfile,
+	    .assignableSettings = assSettings,
 	    .profiles = profiles,
 	};
 }
@@ -138,6 +143,35 @@ void Settings::writeSettings(SettingsData data) {
 		settings.setValue("currentProfile", data.currentProfile.value());
 }
 
+SettingsData Settings::setAssignableSetting(SettingsData data, AssignableSetting setting) {
+	// Check if there is exising setting for path
+	for (auto &assSetting : data.assignableSettings) {
+		if (assSetting.assignablePath == setting.assignablePath) {
+			assSetting.value = setting.value;
+			return data;
+		}
+	}
+	data.assignableSettings.append(setting);
+	return data;
+}
+
+QVector<AssignableSetting> Settings::readAssignableSettings(QString profile) {
+	QVector<AssignableSetting> retval;
+	QSettings s{"tuxclocker"};
+	s.beginGroup(QString{"profiles/%1"}.arg(profile));
+
+	auto keys = s.allKeys();
+	for (auto &key : keys) {
+		AssignableSetting setting{
+		    .assignablePath = Utils::fromSettingsPath(key),
+		    .value = s.value(key),
+		};
+		retval.append(setting);
+	}
+	s.endGroup();
+	return retval;
+}
+
 SettingsData Settings::readSettings() {
 	qRegisterMetaTypeStreamOperators<QVector<QString>>("QVector<QString>>");
 	QSettings s{"tuxclocker"};
@@ -149,17 +183,7 @@ SettingsData Settings::readSettings() {
 		auto profileStr = s.value("currentProfile").toString();
 		profile = profileStr;
 		// Read possible assignable settings
-		s.beginGroup(QString{"profiles/%1"}.arg(profileStr));
-
-		auto keys = s.allKeys();
-		for (auto &key : keys) {
-			AssignableSetting setting{
-			    .assignablePath = Utils::fromSettingsPath(key),
-			    .value = s.value(key),
-			};
-			assignableSettings.append(setting);
-		}
-		s.endGroup();
+		assignableSettings = readAssignableSettings(profileStr);
 	} else
 		profile = std::nullopt;
 

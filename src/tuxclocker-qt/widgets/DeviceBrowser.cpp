@@ -8,6 +8,7 @@
 #include <QToolButton>
 #include <QVariant>
 #include <Settings.hpp>
+#include <Utils.hpp>
 
 using namespace mpark::patterns;
 using namespace TuxClocker::Device;
@@ -59,8 +60,11 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 			connect(m_settings, &Settings::cancelled,
 			    [=] { Globals::g_mainStack->setCurrentWidget(this); });
 
-			connect(m_settings, &Settings::settingsSaved,
-			    [=](auto) { Globals::g_mainStack->setCurrentWidget(this); });
+			connect(m_settings, &Settings::settingsSaved, [=](auto data) {
+				Globals::g_mainStack->setCurrentWidget(this);
+				Utils::setModelAssignableSettings(
+				    *Globals::g_deviceModel, data.assignableSettings);
+			});
 		}
 		Globals::g_mainStack->setCurrentWidget(m_settings);
 	});

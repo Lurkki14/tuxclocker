@@ -26,10 +26,12 @@ public:
 	explicit Settings(QWidget *parent = nullptr);
 
 	static SettingsData readSettings();
+	static SettingsData setAssignableSetting(SettingsData, AssignableSetting);
 signals:
 	void cancelled();
 	void settingsSaved(SettingsData);
 private:
+	static QVector<AssignableSetting> readAssignableSettings(QString profile);
 	SettingsData fromUIState();
 	void writeSettings(SettingsData);
 	void setUIState(SettingsData);
