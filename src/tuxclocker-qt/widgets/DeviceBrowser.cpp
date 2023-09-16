@@ -62,8 +62,12 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 
 			connect(m_settings, &Settings::settingsSaved, [=](auto data) {
 				Globals::g_mainStack->setCurrentWidget(this);
+				// No-op when data.assignableSettings is empty
 				Utils::setModelAssignableSettings(
 				    *Globals::g_deviceModel, data.assignableSettings);
+
+				if (data.autoApplyProfile && data.currentProfile.has_value())
+					m_deviceModel.applyChanges();
 			});
 		}
 		Globals::g_mainStack->setCurrentWidget(m_settings);

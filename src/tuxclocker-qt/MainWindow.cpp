@@ -74,6 +74,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	Globals::g_settingsData = Settings::readSettings();
 
 	Utils::setModelAssignableSettings(*model, Globals::g_settingsData.assignableSettings);
+
+	if (Globals::g_settingsData.autoApplyProfile)
+		model->applyChanges();
+
 	Utils::writeAssignableDefaults(*model);
 }
 

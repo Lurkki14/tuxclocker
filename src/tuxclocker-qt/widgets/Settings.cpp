@@ -101,7 +101,7 @@ void Settings::setUIState(SettingsData data) {
 SettingsData Settings::fromUIState() {
 	std::optional<QString> currentProfile = std::nullopt;
 
-	if (m_profileView->currentItem()) {
+	if (m_profileView->currentItem() && m_useProfile->isChecked()) {
 		auto data = m_profileView->currentItem()->data(Qt::DisplayRole);
 		if (data.isValid())
 			currentProfile = data.toString();
