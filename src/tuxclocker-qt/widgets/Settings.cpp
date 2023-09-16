@@ -44,6 +44,7 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 		auto item = new QListWidgetItem{"Unnamed"};
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		m_profileView->addItem(item);
+		m_profileView->editItem(item);
 	});
 
 	connect(removeButton, &QPushButton::released,
