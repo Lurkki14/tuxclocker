@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	restoreGeometryFromCache(this);
 
 	setWindowIcon(QIcon{":/tuxclocker-logo.svg"});
+	setWindowTitle("TuxClocker");
 
 	auto conn = QDBusConnection::systemBus();
 	QDBusInterface tuxclockerd("org.tuxclocker", "/", "org.tuxclocker", conn);
