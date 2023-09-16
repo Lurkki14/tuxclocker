@@ -42,6 +42,9 @@ ninja && sudo ninja install
 ### Showing pending changes
 ![Showing pending changes](screenshots/stateChange.png)
 
+### Settings
+![Settings](screenshots/settings.png)
+
 # Developing
 
 ### Formatting
