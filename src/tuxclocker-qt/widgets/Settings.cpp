@@ -30,8 +30,6 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 
 	// TODO: add delegate to make deleting a little nicer
 	m_profileView = new QListWidget{this};
-	auto triggers = QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed;
-	m_profileView->setEditTriggers(triggers);
 	m_profileView->setEnabled(false);
 	m_profileView->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -45,8 +43,12 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		m_profileView->addItem(item);
 		m_profileView->editItem(item);
+		// Disable editing since renaming wouldn't function as expected
+		// (doesn't rename profile's assignable settings)
+		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
 	});
 
+	// TODO: this doesn't remove the profile's assignableSettings from the file
 	connect(removeButton, &QPushButton::released,
 	    [=] { m_profileView->model()->removeRow(m_profileView->currentRow()); });
 
