@@ -147,6 +147,17 @@ QStandardItem *DeviceModel::createAssignable(
 		    pattern(_) = [] {});
 	});
 
+	connect(proxy, &AssignableProxy::connectionSucceeded, [=](auto value) {
+		// Write successful connection value to settings
+		auto assSetting = AssignableSetting{
+		    .assignablePath = proxy->dbusPath(),
+		    .value = value,
+		};
+		auto newSettings =
+		    Settings::setAssignableSetting(Globals::g_settingsData, assSetting);
+		Utils::writeAssignableSetting(newSettings, assSetting);
+	});
+
 	QVariant pv;
 	pv.setValue(proxy);
 	ifaceItem->setData(pv, AssignableProxyRole);

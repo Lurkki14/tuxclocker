@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssignableConnection.hpp"
+#include <DynamicReadableConnectionData.hpp>
 #include <DynamicReadableProxy.hpp>
 #include <fplus/fplus.hpp>
 #include <patterns.hpp>
@@ -17,23 +18,12 @@ using namespace fplus;
 using namespace mpark::patterns;
 using namespace TuxClocker::Device;
 
-struct DynamicReadableConnectionData {
-	// y = f(x)
-	QVector<QPointF> points;
-	// DBus path
-	QString dynamicReadablePath;
-	RangeInfo rangeInfo;
-};
-
 enum class TargetType {
 	IntType,
 	DoubleType
 };
 
-Q_DECLARE_METATYPE(DynamicReadableConnectionData)
-
-// TODO: make DynamicReadableProxy type parametrized so we can be sure to only get numeric values
-// from it Connection of an Assignable with a DynamicReadable
+// Connection of an Assignable with a DynamicReadable
 template <typename OutType> // Result of linear interpolation
 class DynamicReadableConnection : public AssignableConnection {
 public:

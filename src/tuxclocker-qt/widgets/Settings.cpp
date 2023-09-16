@@ -1,5 +1,6 @@
 #include "Settings.hpp"
 
+#include <DynamicReadableConnectionData.hpp>
 #include <Globals.hpp>
 #include <QCheckBox>
 #include <QGridLayout>
@@ -174,6 +175,9 @@ QVector<AssignableSetting> Settings::readAssignableSettings(QString profile) {
 
 SettingsData Settings::readSettings() {
 	qRegisterMetaTypeStreamOperators<QVector<QString>>("QVector<QString>>");
+	qRegisterMetaTypeStreamOperators<QVector<QPointF>>("QVector<QPointF>");
+	qRegisterMetaTypeStreamOperators<DynamicReadableConnectionData>(
+	    "DynamicReadableConnectionData");
 	QSettings s{"tuxclocker"};
 
 	std::optional<QString> profile;

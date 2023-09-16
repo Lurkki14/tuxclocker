@@ -3,6 +3,7 @@
 #include <AssignableProxy.hpp>
 #include <DeviceModel.hpp>
 #include <DeviceModelDelegate.hpp>
+#include <DynamicReadableConnectionData.hpp>
 #include <functional>
 #include <QDebug>
 #include <QSettings>
@@ -122,6 +123,12 @@ void writeAssignableDefaults(DeviceModel &model) {
 }
 
 void writeAssignableSetting(SettingsData data, AssignableSetting setting) {
+	qRegisterMetaType<DynamicReadableConnectionData>();
+
+	qRegisterMetaTypeStreamOperators<QVector<QPointF>>("QVector<QPointF>");
+	qRegisterMetaTypeStreamOperators<DynamicReadableConnectionData>(
+	    "DynamicReadableConnectionData");
+
 	if (!data.currentProfile.has_value())
 		return;
 

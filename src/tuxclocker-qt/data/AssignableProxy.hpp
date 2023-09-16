@@ -29,14 +29,17 @@ signals:
 	void applied(std::optional<TC::Device::AssignmentError>);
 	void connectionValueChanged(
 	    std::variant<QVariant, TC::Device::AssignmentError>, QString text);
+	void connectionSucceeded(QVariant);
 	void connectionStarted();
 	void connectionStopped();
 private:
 	Q_OBJECT
 
 	QVariant m_value;
+	QVariant m_connectionValue;
 	QDBusInterface *m_iface;
 	DynamicReadableConnection<uint> *m_connection;
+	bool m_signalConnectionSuccess;
 
 	// This is a bit of a peril but not sure if we can store interfaces any better...
 	std::shared_ptr<AssignableConnection> m_assignableConnection;

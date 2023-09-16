@@ -84,7 +84,11 @@ void AssignableProxy::apply() {
 			auto proxy = opt.value();
 			m_connection = new DynamicReadableConnection<uint>{*proxy, data};
 
+			// We use this to save succeeded parametrization data
+			// to settings, since keeping m_value around would affect the view
+			m_connectionValue = m_value;
 			startConnection();
+			m_signalConnectionSuccess = true;
 			m_value = QVariant();
 			return;
 		}
@@ -105,8 +109,13 @@ void AssignableProxy::startConnection() {
 		    auto err = doApply(targetValue);
 		    if (err.has_value())
 			    emit connectionValueChanged(err.value(), text);
-		    else
+		    else {
 			    emit connectionValueChanged(targetValue, text);
+			    if (m_signalConnectionSuccess) {
+				    emit connectionSucceeded(m_connectionValue);
+				    m_signalConnectionSuccess = false;
+			    }
+		    }
 	    });
 	// Emit started signal in case a connection emits a new value right away
 	emit connectionStarted();
