@@ -25,5 +25,7 @@ unset LD_LIBRARY_PATH && \
 sudo kill \$(pidof .tuxclockerd-wrapped)
 " > run.sh
 chmod +x run.sh
-tar cavf tuxclocker.tar ${storePaths[@]} ./.tuxclocker-qt-wrapped ./.tuxclockerd-wrapped ./run.sh ./dev/dbusconf.conf
+# Only copy libraries from Nix store (.so's)
+neededLibs=$(find $(nix-store -qR $(nix-build release.nix)) | grep ".*.so")
+tar cavf tuxclocker.tar ${neededLibs[@]} ./.tuxclocker-qt-wrapped ./.tuxclockerd-wrapped ./run.sh ./dev/dbusconf.conf
 
