@@ -25,13 +25,17 @@ sudo apt install --yes --quiet --quiet \
     libxnvctrl-dev
 ```
 
-## Meson options
+## Compiling
+
+#### Meson options
 
 ```
 --prefix=<path> (install location prefix, usually '/usr')
 -Dplugins=<true/false>
 -Ddaemon=<true/false> (builds and installs 'tuxclockerd' binary/daemon)
 ```
+
+#### Clone, build and install
 
 ```
 git clone https://github.com/Lurkki14/tuxclocker
