@@ -6,6 +6,21 @@
 
 Note that these packages are likely called something different on each distribution.
 
+#### For Ubuntu (possibly outdated)
+
+```
+sudo apt install --yes --quiet --quiet \
+    libqt5x11extras5-dev \
+    qtbase5-dev \
+    libqt5x11extras5 \
+    libdrm-amdgpu1 \
+    libdrm-common \
+    libdrm-dev \
+    nvidia-utils-440-server \
+    nvidia-settings \
+    libxnvctrl-dev
+```
+
 ## Meson options
 
 ```
