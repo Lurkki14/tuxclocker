@@ -6,6 +6,10 @@
 
 Note that these packages are likely called something different on each distribution.
 
+#### For Nix
+
+`nix-shell release.nix`
+
 #### For Ubuntu (possibly outdated)
 
 ```
