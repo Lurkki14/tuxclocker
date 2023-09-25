@@ -1,3 +1,45 @@
+# About
+TuxClocker is a hardware controlling and monitoring program. TuxClocker consists of a DBus daemon and a Qt GUI that uses the daemon.
+
+## Features
+- Supports any number of devices at once
+- Read and write device properties (Click on a selected node to edit)
+- Connect any writable property to any readable property, for more possibilities than just fan curves. Currently only possible with range-based writable properties (Right click on a node)
+- Reset writable properties to default (Right click on a node)
+- Profiles
+- Option to apply profile settings on startup/profile change
+
+### Currently missing from earlier releases
+These are missing from the 1.0.0 release, but present in the 0.1.1 release.
+Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/76369ef24283364b4111c5970797062432044cbc) if you wish to use these.
+
+- AMD GPU support
+- Minimize to tray
+- Graphs for properties
+
+## Currently supported devices and features
+
+### Nvidia GPUs
+
+#### 600 -series and above
+- Support for multiple fans on one GPU
+- Fan mode
+- Fan speed
+- Core and memory clocks
+- Power limit
+- Temperatures
+- Utilizations
+- Voltage reading
+
+#### 600 to 900 -series
+- Voltage setting
+
+## Possible future improvements
+- Support for more devices
+- Support for more platforms than Linux
+- Easier to discover UI
+- CLI interface
+
 # Installation
 
 ## Dependencies
