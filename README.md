@@ -97,7 +97,6 @@ sudo apt install --yes --quiet --quiet \
 ```
 git clone https://github.com/Lurkki14/tuxclocker
 cd tuxclocker
-git checkout cpplib
 git submodule init
 git submodule update
 meson build <meson options>
