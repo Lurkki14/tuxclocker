@@ -1,6 +1,11 @@
 # About
 TuxClocker is a hardware controlling and monitoring program. TuxClocker consists of a DBus daemon and a Qt GUI that uses the daemon.
 
+## Chat
+If you have any questions or suggestions, you can join the chat on [Matrix](https://matrix.to/#/#tuxclocker:matrix.org) or [IRC](https://webchat.oftc.net/?nick=&channels=%23tuxclocker&uio=d4)
+
+You can use IRC if you don't want to create an account. Both chats are bridged between each other.
+
 ## Features
 - Supports any number of devices at once
 - Read and write device properties (Click on a selected node to edit)
