@@ -27,5 +27,5 @@ sudo kill \$(pidof .tuxclockerd-wrapped)
 chmod +x run.sh
 # Only copy libraries from Nix store (.so's)
 neededLibs=$(find $(nix-store -qR $(nix-build release.nix)) | grep ".*.so")
-tar cavf tuxclocker.tar ${neededLibs[@]} ./.tuxclocker-qt-wrapped ./.tuxclockerd-wrapped ./run.sh ./dev/dbusconf.conf
+tar cavf tuxclocker.tar.xz ${neededLibs[@]} ./.tuxclocker-qt-wrapped ./.tuxclockerd-wrapped ./run.sh ./dev/dbusconf.conf
 
