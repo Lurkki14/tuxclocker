@@ -45,42 +45,7 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Easier to discover UI
 - CLI interface
 
-For AMD under Ubuntu:
-
-    sudo apt install --yes --quiet --quiet \
-        libqt5x11extras5-dev \
-        qtbase5-dev \
-        libqt5x11extras5 \
-        libdrm-amdgpu1 \
-        libdrm-common \
-        libdrm-dev
-
-For Nvidia under any distribution:
-
--   NOTE: headers are usually included in a package named \*-dev, if they are separate
--   nvidia-smi
--   nvidia-settings
--   libxnvctrl and headers (if not included in nvidia-settings)
--   qt5base, x11extras and their headers
-
-For Nvidia under Ubuntu:
-
-    sudo apt install --yes --quiet --quiet \
-        libqt5x11extras5-dev \
-        qtbase5-dev \
-        libqt5x11extras5 \
-        libdrm-amdgpu1 \
-        libdrm-common \
-        libdrm-dev \
-        nvidia-utils-440-server \
-        nvidia-settings \
-        libxnvctrl-dev
-
-# Requirements (nvidia)
-
-- [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to the value you want (31 for all functionality)
-
-# Installation (nvidia)
+# Installation
 
 ## Prerequisites
 NVIDIA GPUs require [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to enable editing of most writable properties (31 for all functionality)
