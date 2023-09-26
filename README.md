@@ -50,6 +50,13 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 ## Prerequisites
 NVIDIA GPUs require [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to enable editing of most writable properties (31 for all functionality)
 
+## Using prebuilt binaries
+You can use the `tuxclocker.tar` from the release page if you don't want to compile. The tarball is generated from the `mkTarball.sh` script.
+
+- Download the tarball into some empty directory
+- Extract the contents eg. (`tar xf tuxlocker.tar`)
+- Run `sudo echo && ./run.sh` in the same folder (sudo is needed for the daemon)
+
 ## Dependencies
 
 `qt (charts, base, dbus), boost-system, boost-filesystem, libnvml  (cuda), libxnvctrl, xlib, libdrm, meson`
