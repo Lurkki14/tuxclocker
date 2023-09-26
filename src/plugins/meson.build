@@ -1,0 +1,40 @@
+libdrm_amdgpu = cppc.find_library('libdrm_amdgpu', required : false)
+libdrm_dep = dependency('libdrm', required : false)
+
+patterns_inc = include_directories('../include/deps/patterns/include/mpark')
+fplus_inc = include_directories('../include/deps/FunctionalPlus/include')
+
+if libdrm_dep.found() and libdrm_amdgpu.found()
+	shared_library('amd', 'AMD.cpp',
+		override_options : ['cpp_std=c++17'],
+		include_directories : [incdir, patterns_inc],
+		dependencies : [libdrm_amdgpu, libdrm_dep, boost_dep],
+		install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
+		install : true)
+endif
+
+libnvml = cc.find_library('nvidia-ml', required : false)
+libxext = cc.find_library('Xext', required : false)
+libx = cc.find_library('X11', required : false)
+libxnvctrl = cc.find_library('XNVCtrl', required : false)
+
+nvidia_linux_libs = [libnvml, libx, libxext, libxnvctrl]
+
+all_nvidia_linux_libs = true
+
+foreach lib : nvidia_linux_libs
+	if not lib.found()
+		all_nvidia_linux_libs = false
+		break
+	endif
+endforeach
+
+if all_nvidia_linux_libs
+	shared_library('nvidia', 'Nvidia.cpp',
+		override_options : ['cpp_std=c++17'],
+		include_directories : [incdir, patterns_inc, fplus_inc],
+		dependencies : [nvidia_linux_libs, boost_dep],
+		install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
+		install : true,
+		link_with : libtuxclocker)
+endif

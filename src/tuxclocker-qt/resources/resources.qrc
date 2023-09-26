@@ -1,0 +1,7 @@
+<RCC>
+	<qresource prefix="/">
+		<file>ruler.svg</file>
+		<file>settings.svg</file>
+		<file>tuxclocker-logo.svg</file>
+	</qresource>
+</RCC>

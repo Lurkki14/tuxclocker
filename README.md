@@ -1,33 +1,49 @@
-# TuxClocker - A GUI overclocking utility for GNU/Linux
+# About
+TuxClocker is a hardware controlling and monitoring program. TuxClocker consists of a DBus daemon and a Qt GUI that uses the daemon.
 
-TuxClocker is a Qt5 overclocking tool. Currently supported cards are nvidia 600-series cards and newer, and AMD GPUs using the amdgpu driver until (not including) Radeon VII.
+## Chat
+If you have any questions or suggestions, you can join the chat on [Matrix](https://matrix.to/#/#tuxclocker:matrix.org) or [IRC](https://webchat.oftc.net/?nick=&channels=%23tuxclocker&uio=d4)
 
-# Support
+You can use IRC if you don't want to create an account. Both chats are bridged between each other.
 
-Matrix room: #tuxclocker:matrix.org [Direct Riot link](https://riot.im/app/#/room/#tuxclocker:matrix.org)
-
-# Screenshots
-
-![Imgur](https://i.imgur.com/fn8MoNj.png) ![Imgur](https://i.imgur.com/fuKIVW7.png) ![Imgur](https://i.imgur.com/cZCNzmN.png) ![Imgur](https://i.imgur.com/qkp2p7V.png) ![Imgur](https://i.imgur.com/TpmU8PD.png)
-
-# Current features
-
-- GPU monitoring (list and graph)
-- Overclocking
-- Overvolting
-- Change power limit
-- (AMD) pstate editing
-- Fan mode selection
-- Custom fan curve
-- Provisional multi-GPU support
+## Features
+- Supports any number of devices at once
+- Read and write device properties (Click on a selected node to edit)
+- Connect any writable property to any readable property, for more possibilities than just fan curves. Currently only possible with range-based writable properties (Right click on a node)
+- Reset writable properties to default (Right click on a node)
 - Profiles
+- Option to apply profile settings on startup/profile change
 
-# Prerequisites
+### Currently missing from earlier releases
+These are missing from the 1.0.0 release, but present in the 0.1.1 release.
+Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/76369ef24283364b4111c5970797062432044cbc) if you wish to use these.
 
-For AMD under any distribution:
+- AMD GPU support
+- Minimize to tray
+- Graphs for properties
 
--   NOTE: headers are usually included in a package named \*-dev, if they are separate
--   libdrm and headers
+## Currently supported devices and features
+
+### Nvidia GPUs
+
+#### 600 -series and above
+- Support for multiple fans on one GPU
+- Fan mode
+- Fan speed
+- Core and memory clocks
+- Power limit
+- Temperatures
+- Utilizations
+- Voltage reading
+
+#### 600 to 900 -series
+- Voltage setting
+
+## Possible future improvements
+- Support for more devices
+- Support for more platforms than Linux
+- Easier to discover UI
+- CLI interface
 
 For AMD under Ubuntu:
 
@@ -66,55 +82,118 @@ For Nvidia under Ubuntu:
 
 # Installation (nvidia)
 
-### Compilation
+## Prerequisites
+NVIDIA GPUs require [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to enable editing of most writable properties (31 for all functionality)
 
-NOTE: on some systems, qmake is linked to qt4-qmake. If qmake fails, run qmake-qt5 in place of qmake
+## Using prebuilt binaries
+You can use the `tuxclocker.tar` from the release page if you don't want to compile. The tarball is generated from the `mkTarball.sh` script.
+
+- Download the tarball into some empty directory
+- Extract the contents eg. (`tar xf tuxlocker.tar`)
+- Run `sudo echo && ./run.sh` in the same folder (sudo is needed for the daemon)
+
+## Dependencies
+
+`qt (charts, base, dbus), boost-system, boost-filesystem, libnvml  (cuda), libxnvctrl, xlib, libdrm, meson`
+
+Note that these packages are likely called something different on each distribution.
+
+#### For Nix
+
+`nix-shell release.nix`
+
+#### For Ubuntu (possibly outdated)
+
+```
+sudo apt install --yes --quiet --quiet \
+    libqt5x11extras5-dev \
+    qtbase5-dev \
+    libqt5x11extras5 \
+    libdrm-amdgpu1 \
+    libdrm-common \
+    libdrm-dev \
+    nvidia-utils-440-server \
+    nvidia-settings \
+    libxnvctrl-dev
+```
+
+## Compiling
+
+#### Meson options
+
+```
+--prefix=<path> (install location prefix, usually '/usr')
+-Dplugins=<true/false>
+-Ddaemon=<true/false> (builds and installs 'tuxclockerd' binary/daemon)
+```
+
+#### Clone, build and install
 
 ```
 git clone https://github.com/Lurkki14/tuxclocker
 cd tuxclocker
-qmake rojekti.pro
-make
-make install (installs into /opt/tuxclocker/bin)
+git checkout cpplib
+git submodule init
+git submodule update
+meson build <meson options>
+cd build
+ninja && sudo ninja install
 ```
 
-### Arch Linux
+#### Running
+Once you have installed everything into a proper location, TuxClocker is available with `tuxclocker-qt` from the terminal. There is currently no desktop entry so TuxClocker won't come up in any launcher.
 
-#### AUR package
-[https://aur.archlinux.org/packages/tuxclocker/](https://aur.archlinux.org/packages/tuxclocker/)
+If TuxClocker shows up with no items, there may be a problem with connecting to the DBus daemon. Refer to your system documentation on where DBus system service entries should be located. Alternatively, you can launch the needed components manually as explained in the Developing/Scripts section of the README.
 
-# Requirements (AMD)
+# Screenshots
 
-- amdgpu.ppfeaturemask boot paramter set to the value you want. To view the current value, run 
+### Main view
 
+![Main view](screenshots/mainview.png)
+
+### Editing an item
+
+![Editing an item](screenshots/itemedit.png)
+
+### Parametrizing an item
+![Parametrizing an item](screenshots/paramEditor.png)
+
+### Showing pending changes
+![Showing pending changes](screenshots/stateChange.png)
+
+### Settings
+![Settings](screenshots/settings.png)
+
+# Developing
+
+### Formatting
+
+TuxClocker uses `clang-format`. Code should be formatted with the provided `clangFormat.sh` script.
+
+NOTE: to get designated initializers formatted like so:
+``` cpp
+auto Foo = Foo{
+    .bar = 1,
+    .baz = 2,
+};
 ```
-printf "0x%08x\n" $(cat /sys/module/amdgpu/parameters/ppfeaturemask)
-```
+a trailing comma should be used after the last member (`clang-format` weirdness).
 
-Example grub line (usually /etc/default/grub):	
+### Scripts
 
-```
-GRUB_CMDLINE_LINUX_DEFAULT="quiet radeon.si_support=0 amdgpu.si_support=1 amdgpu.dpm=1 amdgpu.ppfeaturemask=0xffffffff"
-```
-	
-After editing, update grub, usually 
+There are a few scripts in `dev/` for development convenience, mainly to deal with DBus. A separate DBus instance and custom config file is used, so the TuxClocker daemon is able to be registered without installing service files into the system.
 
-```
-sudo update-grub
-```
+Note: the following scripts assume TuxClocker is installed to `inst/`, so `meson` should be called as follows:
 
-# Installation (AMD)
+`meson build --prefix=$(pwd)/inst`
 
-### Compilation
 
-NOTE: on some, systems, qmake is linked to qt4-qmake. If qmake fails, run qmake-qt5 in place of qmake
+The scripts should be used in this order (they all have to be running simultaneously, so probably best to run in separate terminals):
 
-```
-git clone https://github.com/Lurkki14/tuxclocker
-cd tuxclocker
-git checkout pstatetest
-qmake rojekti.pro
-make
-make install (installs into /opt/tuxclocker/bin)
-```
-NOTE: to use fancurves on the AMD version, you need to run as root.
+`dev/dbus-start.sh` Starts a separate DBus instance.
+
+`dev/tuxclockerd-start.sh` Launches `tuxclockerd` making it connect to our separate DBus instance and LD_LIBRARY_PATH set to find the built `libtuxclocker`.
+
+`dev/gui-start.sh` Launches the TuxClocker GUI making it connect to our separate DBus instance, so it can find the TuxClocker DBus service.
+
+You can also use a program like `d-feet` if you are only making changes to the daemon. (To be documented)
