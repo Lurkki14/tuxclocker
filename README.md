@@ -19,7 +19,6 @@ These are missing from the 1.0.0 release, but present in the 0.1.1 release.
 Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/76369ef24283364b4111c5970797062432044cbc) if you wish to use these.
 
 - AMD GPU support
-- Minimize to tray
 - Graphs for properties
 
 ## Currently supported devices and features
