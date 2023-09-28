@@ -14,6 +14,7 @@
 #include <QStandardItemModel>
 #include <QStandardPaths>
 #include <QString>
+#include <QSystemTrayIcon>
 #include <QTreeView>
 #include <QVector>
 #include <DeviceModelDelegate.hpp>
@@ -29,6 +30,7 @@ Q_DECLARE_METATYPE(TCDBus::DeviceNode)
 Q_DECLARE_METATYPE(TCDBus::FlatTreeNode<TCDBus::DeviceNode>)
 
 DeviceModel *Globals::g_deviceModel;
+MainWindow *Globals::g_mainWindow;
 QStackedWidget *Globals::g_mainStack;
 QWidget *Globals::g_deviceBrowser;
 SettingsData Globals::g_settingsData;
@@ -75,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	Globals::g_deviceModel = model;
 	Globals::g_mainStack = stack;
 	Globals::g_settingsData = Settings::readSettings();
+	Globals::g_mainWindow = this;
 
 	Utils::setModelAssignableSettings(*model, Globals::g_settingsData.assignableSettings);
 
@@ -82,6 +85,40 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 		model->applyChanges();
 
 	Utils::writeAssignableDefaults(*model);
+
+	// Enable tray icon when enabled in settings
+	m_trayIcon = nullptr;
+	setTrayIconEnabled(Globals::g_settingsData.useTrayIcon);
+}
+
+void MainWindow::setTrayIconEnabled(bool enable) {
+	if (enable) {
+		if (!m_trayIcon)
+			// This seems to make the main window not close during closeEvent
+			m_trayIcon = new QSystemTrayIcon{this};
+		m_trayIcon->setIcon(QIcon{QPixmap{":/tuxclocker-logo.svg"}});
+		m_trayIcon->setToolTip("TuxClocker");
+		m_trayIcon->setContextMenu(createTrayMenu());
+		m_trayIcon->show();
+		return;
+	}
+	// Remove tray icon
+	if (m_trayIcon)
+		delete m_trayIcon;
+}
+
+QMenu *MainWindow::createTrayMenu() {
+	auto menu = new QMenu{this};
+
+	auto show = new QAction{"&Maximize TuxClocker", this};
+	connect(show, &QAction::triggered, this, &MainWindow::show);
+	menu->addAction(show);
+
+	auto quit = new QAction{"&Quit", this};
+	connect(quit, &QAction::triggered, this, &QApplication::quit);
+	menu->addAction(quit);
+
+	return menu;
 }
 
 void MainWindow::restoreGeometryFromCache(QWidget *widget) {

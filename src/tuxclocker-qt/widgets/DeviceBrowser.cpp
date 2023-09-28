@@ -3,6 +3,7 @@
 #include "qnamespace.h"
 
 #include <Globals.hpp>
+#include <MainWindow.hpp>
 #include <patterns.hpp>
 #include <QStackedWidget>
 #include <QToolButton>
@@ -68,6 +69,8 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 
 				if (data.autoApplyProfile && data.currentProfile.has_value())
 					m_deviceModel.applyChanges();
+
+				Globals::g_mainWindow->setTrayIconEnabled(data.useTrayIcon);
 			});
 		}
 		Globals::g_mainStack->setCurrentWidget(m_settings);

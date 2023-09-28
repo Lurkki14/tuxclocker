@@ -59,6 +59,10 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 		m_profileView->setEnabled(enable);
 	});
 
+	m_useTrayIcon = new QCheckBox{"Use tray icon", this};
+	m_useTrayIcon->setToolTip("Enabling this hides TuxClocker into the tray instead of exiting "
+				  "when closing the window.");
+
 	auto cancelButton = new QPushButton{"Cancel", this};
 
 	connect(cancelButton, &QPushButton::released, this, &Settings::cancelled);
@@ -82,8 +86,9 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 	layout->addWidget(m_profileView, 2, 1, 1, 2);
 	layout->addWidget(addButton, 3, 1);
 	layout->addWidget(removeButton, 3, 2);
-	layout->addWidget(cancelButton, 4, 0, 1, 1, Qt::AlignBottom);
-	layout->addWidget(saveButton, 4, 1, 1, 2, Qt::AlignBottom);
+	layout->addWidget(m_useTrayIcon, 4, 0, 1, 1, Qt::AlignLeft);
+	layout->addWidget(cancelButton, 5, 0, 1, 1, Qt::AlignBottom);
+	layout->addWidget(saveButton, 5, 1, 1, 2, Qt::AlignBottom);
 
 	this->setLayout(layout);
 }
@@ -92,6 +97,8 @@ void Settings::setUIState(SettingsData data) {
 	m_useProfile->setChecked(data.currentProfile.has_value());
 
 	m_autoLoad->setChecked(data.autoApplyProfile);
+
+	m_useTrayIcon->setChecked(data.useTrayIcon);
 
 	for (auto &profile : data.profiles) {
 		auto item = new QListWidgetItem{profile};
@@ -130,6 +137,7 @@ SettingsData Settings::fromUIState() {
 	    .currentProfile = currentProfile,
 	    .assignableSettings = assSettings,
 	    .profiles = profiles,
+	    .useTrayIcon = m_useTrayIcon->isChecked(),
 	};
 }
 
@@ -142,6 +150,7 @@ void Settings::writeSettings(SettingsData data) {
 	settings.setValue("usingProfile", usingProfile);
 	// We need to save this in case nothing is changed in current run
 	settings.setValue("profiles", QVariant::fromValue(data.profiles));
+	settings.setValue("useTrayIcon", QVariant::fromValue(data.useTrayIcon));
 
 	if (usingProfile)
 		settings.setValue("currentProfile", data.currentProfile.value());
@@ -201,5 +210,6 @@ SettingsData Settings::readSettings() {
 	    .currentProfile = profile,
 	    .assignableSettings = assignableSettings,
 	    .profiles = profiles,
+	    .useTrayIcon = s.value("useTrayIcon").toBool(),
 	};
 }

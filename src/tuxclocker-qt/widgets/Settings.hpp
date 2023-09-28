@@ -19,6 +19,7 @@ struct SettingsData {
 	QVector<AssignableSetting> assignableSettings;
 	// Only needed for interaction with settings file
 	QVector<QString> profiles;
+	bool useTrayIcon;
 };
 
 class Settings : public QWidget {
@@ -38,6 +39,7 @@ private:
 
 	QCheckBox *m_autoLoad;
 	QCheckBox *m_useProfile;
+	QCheckBox *m_useTrayIcon;
 	QListWidget *m_profileView;
 
 	Q_OBJECT

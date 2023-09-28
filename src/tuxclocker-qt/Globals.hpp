@@ -3,6 +3,7 @@
 #include <Settings.hpp>
 
 class DeviceModel;
+class MainWindow;
 class QStackedWidget;
 class QWidget;
 
@@ -11,6 +12,7 @@ namespace Globals {
 
 // This is used to search nodes by their DBus path to avoid passing pointers through many levels
 extern DeviceModel *g_deviceModel;
+extern MainWindow *g_mainWindow;
 extern QStackedWidget *g_mainStack;
 extern QWidget *g_deviceBrowser;
 // When applying successfully, we need to know which profile to save changes to
