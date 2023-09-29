@@ -58,7 +58,9 @@ You can use the `tuxclocker.tar` from the release page if you don't want to comp
 
 ## Dependencies
 
-`qt (charts, base, dbus), boost-system, boost-filesystem, libnvml  (cuda), libxnvctrl, xlib, libdrm, meson`
+`qt (charts, base, dbus), boost-system, boost-filesystem, libnvml, libxnvctrl, xlib, libdrm, meson`
+
+NOTE: some distros like NixOS only contain `libnvml` as part of a fully featured CUDA package.
 
 Note that these packages are likely called something different on each distribution.
 
