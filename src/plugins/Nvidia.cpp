@@ -409,6 +409,40 @@ std::vector<TreeNode<DeviceNode>> getMemoryUtilization(NvidiaGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getPcieUtilization(NvidiaGPUData data) {
+	uint linkSpeed, linkWidth;
+	auto widthRet = nvmlDeviceGetCurrPcieLinkWidth(data.devHandle, &linkWidth);
+	auto speedRet = nvmlDeviceGetPcieSpeed(data.devHandle, &linkSpeed);
+	if (speedRet != NVML_SUCCESS || widthRet != NVML_SUCCESS)
+		return {};
+
+	auto func = [=]() -> ReadResult{
+		uint rx, tx;
+		auto rxret = nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_RX_BYTES, &rx);
+		auto txret = nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_TX_BYTES, &tx);
+
+		if (txret == NVML_SUCCESS && rxret == NVML_SUCCESS) {
+			auto totalMBs = (rx + tx) / 1000;
+			auto maxMBs = (linkSpeed / 8) * linkWidth;
+			auto percentage =
+				(static_cast<double>(totalMBs) / static_cast<double>(maxMBs)) * 100;
+			// We could display this more granularly now, but is that really needed?
+			return static_cast<uint>(round(percentage));
+		}
+		return ReadError::UnknownError;
+	};
+
+	DynamicReadable dr{func, "%"};
+
+	if (hasReadableValue(func()))
+		return {DeviceNode{
+			.name = "PCIe Bandwidth Utilization",
+			.interface = dr,
+			.hash = md5(data.uuid + "PCIe Bandwidth Utilization"),
+		}};
+	return {};
+}
+
 std::vector<TreeNode<DeviceNode>> getPowerUsage(NvidiaGPUData data) {
 	auto func = [data]() -> ReadResult{
 		uint value;
@@ -645,6 +679,7 @@ std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(NvidiaGPUData data) {
 auto gpuTree = TreeConstructor<NvidiaGPUData, DeviceNode>{
 	getGPUName, {
 		{getUtilizationsRoot, {
+			{getPcieUtilization, {}},
 			{getCoreUtilization, {}},
 			{getMemoryUtilization, {}},
 		}},
