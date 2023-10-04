@@ -16,7 +16,7 @@ executable('tuxclockerd',
 	moc_files,
 	override_options : ['cpp_std=c++17'],
 	include_directories : [incdir, patterns_inc],
-	dependencies : [qt5_dep, boost_dep, dl],
+	dependencies : [qt5_dep, boost_dep],
 	link_with : libtuxclocker,
 	install : true)
 	
