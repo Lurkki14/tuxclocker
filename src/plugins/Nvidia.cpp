@@ -607,11 +607,13 @@ std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 
 	Assignable a{setFunc, range, getFunc, "mV"};
 
-	return {DeviceNode{
-		.name = "Core Voltage Offset",
-		.interface = a,
-		.hash = md5(data.uuid + "Core Voltage Offset"),
-	}};
+	if (getFunc().has_value())
+		return {DeviceNode{
+			.name = "Core Voltage Offset",
+			.interface = a,
+			.hash = md5(data.uuid + "Core Voltage Offset"),
+		}};
+	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getMultiFanRoots(NvidiaGPUData data) {
