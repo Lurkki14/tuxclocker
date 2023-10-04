@@ -68,9 +68,7 @@ uint nvmlFanCount(nvmlDevice_t dev) {
 	return fanCount;
 }
 
-bool hasReadableValue(ReadResult res) {
-	return std::holds_alternative<ReadableValue>(res);
-}
+bool hasReadableValue(ReadResult res) { return std::holds_alternative<ReadableValue>(res); }
 
 std::optional<NvidiaGPUData> fromIndex(Display *dpy, uint i) {
 	nvmlDevice_t dev;
@@ -83,11 +81,11 @@ std::optional<NvidiaGPUData> fromIndex(Display *dpy, uint i) {
 		return std::nullopt;
 
 	return NvidiaGPUData{
-		.devHandle = dev,
-		.index = i,
-		.uuid = uuid,
-		.maxPerfState = nvctrlPerfModes(dpy, i),
-		.fanCount = nvmlFanCount(dev),
+	    .devHandle = dev,
+	    .index = i,
+	    .uuid = uuid,
+	    .maxPerfState = nvctrlPerfModes(dpy, i),
+	    .fanCount = nvmlFanCount(dev),
 	};
 }
 
@@ -95,18 +93,18 @@ std::vector<TreeNode<DeviceNode>> getGPUName(NvidiaGPUData data) {
 	char name[NVML_DEVICE_NAME_BUFFER_SIZE];
 	if (nvmlDeviceGetName(data.devHandle, name, NVML_DEVICE_NAME_BUFFER_SIZE) == NVML_SUCCESS)
 		return {DeviceNode{
-			.name = name,
-			.interface = std::nullopt,
-			.hash = md5(data.uuid),
+		    .name = name,
+		    .interface = std::nullopt,
+		    .hash = md5(data.uuid),
 		}};
 	// Use GPU index for name, eg. "GPU 0"
 	// Hopefully no one has over 999 GPUs :D
 	char buf[8];
 	snprintf(buf, 8, "GPU %u", data.index);
 	return {DeviceNode{
-		.name = buf,
-		.interface = std::nullopt,
-		.hash = md5(data.uuid),
+	    .name = buf,
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid),
 	}};
 }
 
@@ -119,7 +117,7 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 	// but setting does
 	NVCTRLAttributeValidValuesRec values;
 	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-			maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values))
+		maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values))
 		return {};
 
 	// Transfer rate -> clock speed
@@ -127,8 +125,8 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 
 	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
 		int value;
-		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-		    data.index, maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
+		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
+			maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
 			return std::nullopt;
 		return value / 2;
 	};
@@ -145,18 +143,13 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 		return fromNVMLRet(ret);
 	};
 
-	Assignable a{
-		setFunc,
-		range,
-		getFunc,
-		"MHz"
-	};
+	Assignable a{setFunc, range, getFunc, "MHz"};
 
 	if (getFunc().has_value())
 		return {DeviceNode{
-			.name = "Memory Clock Offset",
-			.interface = a,
-			.hash = md5(data.uuid + "Memory Clock Offset"),
+		    .name = "Memory Clock Offset",
+		    .interface = a,
+		    .hash = md5(data.uuid + "Memory Clock Offset"),
 		}};
 	return {};
 }
@@ -169,7 +162,7 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 	// TODO: NVML has functions for core clock as well but they're borked as of writing
 	NVCTRLAttributeValidValuesRec values;
 	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-			maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, &values)) {
+		maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, &values)) {
 		std::cout << "b" << maxPerfState << "\n";
 		return {};
 	}
@@ -179,8 +172,8 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 
 	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
 		int value;
-		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-		    data.index, maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
+		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
+			maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
 			return std::nullopt;
 		return value;
 	};
@@ -193,27 +186,22 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 			return AssignmentError::OutOfRange;
 
 		if (!XNVCTRLSetTargetAttributeAndGetStatus(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-				data.index, maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, target))
+			data.index, maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, target))
 			return AssignmentError::UnknownError;
 		return std::nullopt;
 	};
 
-	Assignable a{
-		setFunc,
-		range,
-		getFunc,
-		"MHz"
-	};
+	Assignable a{setFunc, range, getFunc, "MHz"};
 
 	return {DeviceNode{
-		.name = "Core Clock Offset",
-		.interface = a,
-		.hash = md5(data.uuid + "Core Clock Offset"),
+	    .name = "Core Clock Offset",
+	    .interface = a,
+	    .hash = md5(data.uuid + "Core Clock Offset"),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getCoreClockRead(NvidiaGPUData data) {
-	auto func = [data]() -> ReadResult{
+	auto func = [data]() -> ReadResult {
 		uint clock;
 		nvmlReturn_t ret;
 		ret = nvmlDeviceGetClockInfo(data.devHandle, NVML_CLOCK_GRAPHICS, &clock);
@@ -226,15 +214,15 @@ std::vector<TreeNode<DeviceNode>> getCoreClockRead(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Core Clock",
-			.interface = dr,
-			.hash = md5(data.uuid + "Core Clock"),
+		    .name = "Core Clock",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Core Clock"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getMemClockRead(NvidiaGPUData data) {
-	auto func = [data]() -> ReadResult{
+	auto func = [data]() -> ReadResult {
 		uint clock;
 		nvmlReturn_t ret;
 		ret = nvmlDeviceGetClockInfo(data.devHandle, NVML_CLOCK_MEM, &clock);
@@ -247,9 +235,9 @@ std::vector<TreeNode<DeviceNode>> getMemClockRead(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Memory Clock",
-			.interface = dr,
-			.hash = md5(data.uuid + "Memory Clock"),
+		    .name = "Memory Clock",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Memory Clock"),
 		}};
 	return {};
 }
@@ -261,9 +249,9 @@ std::vector<TreeNode<DeviceNode>> getClocksRoot(NvidiaGPUData data) {
 	// Another option would be to check from here if any children would get added,
 	// but that's spaghetti and inefficient.
 	return {DeviceNode{
-		.name = "Clocks",
-		.interface = std::nullopt,
-		.hash = md5(data.uuid + "Clocks"),
+	    .name = "Clocks",
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid + "Clocks"),
 	}};
 }
 
@@ -286,9 +274,9 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedRead(NvidiaGPUData data) {
 	fanId++;
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Fan Speed",
-			.interface = dr,
-			.hash = md5(data.uuid + "Fan Speed Read" + std::to_string(id)),
+		    .name = "Fan Speed",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Fan Speed Read" + std::to_string(id)),
 		}};
 	return {};
 }
@@ -321,9 +309,9 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(NvidiaGPUData data) {
 	fanId++;
 	if (getFunc().has_value())
 		return {DeviceNode{
-			.name = "Fan Speed",
-			.interface = a,
-			.hash = md5(data.uuid + "Fan Speed Write" + std::to_string(id)),
+		    .name = "Fan Speed",
+		    .interface = a,
+		    .hash = md5(data.uuid + "Fan Speed Write" + std::to_string(id)),
 		}};
 	return {};
 }
@@ -363,14 +351,14 @@ std::vector<TreeNode<DeviceNode>> getFanMode(NvidiaGPUData data) {
 
 	fanId++;
 	return {DeviceNode{
-		.name = "Fan Mode",
-		.interface = a,
-		.hash = md5(data.uuid + "Fan Mode" + std::to_string(id)),
+	    .name = "Fan Mode",
+	    .interface = a,
+	    .hash = md5(data.uuid + "Fan Mode" + std::to_string(id)),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getCoreUtilization(NvidiaGPUData data) {
-	auto func = [data]() -> ReadResult{
+	auto func = [data]() -> ReadResult {
 		nvmlUtilization_t value;
 		auto ret = nvmlDeviceGetUtilizationRates(data.devHandle, &value);
 		if (ret != NVML_SUCCESS)
@@ -382,15 +370,15 @@ std::vector<TreeNode<DeviceNode>> getCoreUtilization(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Core Utilization",
-			.interface = dr,
-			.hash = md5(data.uuid + "Core Utilization"),
+		    .name = "Core Utilization",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Core Utilization"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getMemoryUtilization(NvidiaGPUData data) {
-	auto func = [data]() -> ReadResult{
+	auto func = [data]() -> ReadResult {
 		nvmlUtilization_t value;
 		auto ret = nvmlDeviceGetUtilizationRates(data.devHandle, &value);
 		if (ret != NVML_SUCCESS)
@@ -402,9 +390,9 @@ std::vector<TreeNode<DeviceNode>> getMemoryUtilization(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Memory Utilization",
-			.interface = dr,
-			.hash = md5(data.uuid + "Memory Utilization"),
+		    .name = "Memory Utilization",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Memory Utilization"),
 		}};
 	return {};
 }
@@ -416,16 +404,18 @@ std::vector<TreeNode<DeviceNode>> getPcieUtilization(NvidiaGPUData data) {
 	if (speedRet != NVML_SUCCESS || widthRet != NVML_SUCCESS)
 		return {};
 
-	auto func = [=]() -> ReadResult{
+	auto func = [=]() -> ReadResult {
 		uint rx, tx;
-		auto rxret = nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_RX_BYTES, &rx);
-		auto txret = nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_TX_BYTES, &tx);
+		auto rxret =
+		    nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_RX_BYTES, &rx);
+		auto txret =
+		    nvmlDeviceGetPcieThroughput(data.devHandle, NVML_PCIE_UTIL_TX_BYTES, &tx);
 
 		if (txret == NVML_SUCCESS && rxret == NVML_SUCCESS) {
 			auto totalMBs = (rx + tx) / 1000;
 			auto maxMBs = (linkSpeed / 8) * linkWidth;
 			auto percentage =
-				(static_cast<double>(totalMBs) / static_cast<double>(maxMBs)) * 100;
+			    (static_cast<double>(totalMBs) / static_cast<double>(maxMBs)) * 100;
 			// We could display this more granularly now, but is that really needed?
 			return static_cast<uint>(round(percentage));
 		}
@@ -436,15 +426,15 @@ std::vector<TreeNode<DeviceNode>> getPcieUtilization(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "PCIe Bandwidth Utilization",
-			.interface = dr,
-			.hash = md5(data.uuid + "PCIe Bandwidth Utilization"),
+		    .name = "PCIe Bandwidth Utilization",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "PCIe Bandwidth Utilization"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getPowerUsage(NvidiaGPUData data) {
-	auto func = [data]() -> ReadResult{
+	auto func = [data]() -> ReadResult {
 		uint value;
 		auto ret = nvmlDeviceGetPowerUsage(data.devHandle, &value);
 		if (ret != NVML_SUCCESS)
@@ -456,17 +446,17 @@ std::vector<TreeNode<DeviceNode>> getPowerUsage(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Power Usage",
-			.interface = dr,
-			.hash = md5(data.uuid + "Power Usage"),
+		    .name = "Power Usage",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Power Usage"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getPowerLimit(NvidiaGPUData data) {
 	uint min, max;
-	if (nvmlDeviceGetPowerManagementLimitConstraints(data.devHandle, &min, &max)
-			!= NVML_SUCCESS)
+	if (nvmlDeviceGetPowerManagementLimitConstraints(data.devHandle, &min, &max) !=
+	    NVML_SUCCESS)
 		return {};
 
 	// mW -> W
@@ -496,9 +486,9 @@ std::vector<TreeNode<DeviceNode>> getPowerLimit(NvidiaGPUData data) {
 	Assignable a{setFunc, range, getFunc, "W"};
 
 	return {DeviceNode{
-		.name = "Power Limit",
-		.interface = a,
-		.hash = md5(data.uuid + "Power Limit"),
+	    .name = "Power Limit",
+	    .interface = a,
+	    .hash = md5(data.uuid + "Power Limit"),
 	}};
 }
 
@@ -515,48 +505,48 @@ std::vector<TreeNode<DeviceNode>> getTemperature(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Temperature",
-			.interface = dr,
-			.hash = md5(data.uuid + "Temperature"),
+		    .name = "Temperature",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Temperature"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getSlowdownTemperature(NvidiaGPUData data) {
 	uint temp;
-	if (nvmlDeviceGetTemperatureThreshold(data.devHandle,
-			NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, &temp) != NVML_SUCCESS)
+	if (nvmlDeviceGetTemperatureThreshold(
+		data.devHandle, NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, &temp) != NVML_SUCCESS)
 		return {};
 
 	StaticReadable sr{temp, "°C"};
 
 	return {DeviceNode{
-		.name = "Slowdown Temperature",
-		.interface = sr,
-		.hash = md5(data.uuid + "Slowdown Temperature"),
+	    .name = "Slowdown Temperature",
+	    .interface = sr,
+	    .hash = md5(data.uuid + "Slowdown Temperature"),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getShutdownTemperature(NvidiaGPUData data) {
 	uint temp;
-	if (nvmlDeviceGetTemperatureThreshold(data.devHandle,
-			NVML_TEMPERATURE_THRESHOLD_SHUTDOWN, &temp) != NVML_SUCCESS)
+	if (nvmlDeviceGetTemperatureThreshold(
+		data.devHandle, NVML_TEMPERATURE_THRESHOLD_SHUTDOWN, &temp) != NVML_SUCCESS)
 		return {};
 
 	StaticReadable sr{temp, "°C"};
 
 	return {DeviceNode{
-		.name = "Shutdown Temperature",
-		.interface = sr,
-		.hash = md5(data.uuid + "Shutdown Temperature"),
+	    .name = "Shutdown Temperature",
+	    .interface = sr,
+	    .hash = md5(data.uuid + "Shutdown Temperature"),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltage(NvidiaGPUData data) {
 	auto func = [data]() -> ReadResult {
 		int value;
-		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-				0, NV_CTRL_GPU_CURRENT_CORE_VOLTAGE, &value))
+		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index, 0,
+			NV_CTRL_GPU_CURRENT_CORE_VOLTAGE, &value))
 			return ReadError::UnknownError;
 		return static_cast<double>(value) / 1000;
 	};
@@ -565,17 +555,17 @@ std::vector<TreeNode<DeviceNode>> getVoltage(NvidiaGPUData data) {
 
 	if (hasReadableValue(func()))
 		return {DeviceNode{
-			.name = "Core Voltage",
-			.interface = dr,
-			.hash = md5(data.uuid + "Core Voltage"),
+		    .name = "Core Voltage",
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Core Voltage"),
 		}};
 	return {};
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 	NVCTRLAttributeValidValuesRec values;
-	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-			data.index, 0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &values))
+	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
+		0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &values))
 		return {};
 
 	// uV -> mV
@@ -583,8 +573,8 @@ std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 
 	auto getFunc = [data]() -> std::optional<AssignmentArgument> {
 		int value;
-		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-				data.index, 0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &value))
+		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index, 0,
+			NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &value))
 			return std::nullopt;
 		// uV -> mV
 		return value / 1000;
@@ -600,7 +590,7 @@ std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 
 		// mV -> uV
 		if (!XNVCTRLSetTargetAttributeAndGetStatus(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-				data.index, 0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, target * 1000))
+			data.index, 0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, target * 1000))
 			return AssignmentError::UnknownError;
 		return std::nullopt;
 	};
@@ -609,9 +599,9 @@ std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 
 	if (getFunc().has_value())
 		return {DeviceNode{
-			.name = "Core Voltage Offset",
-			.interface = a,
-			.hash = md5(data.uuid + "Core Voltage Offset"),
+		    .name = "Core Voltage Offset",
+		    .interface = a,
+		    .hash = md5(data.uuid + "Core Voltage Offset"),
 		}};
 	return {};
 }
@@ -624,9 +614,9 @@ std::vector<TreeNode<DeviceNode>> getMultiFanRoots(NvidiaGPUData data) {
 	for (uint i = 0; i < data.fanCount; i++) {
 		auto index = std::to_string(i);
 		nodes.push_back(DeviceNode{
-			.name = index,
-			.interface = std::nullopt,
-			.hash = md5(data.uuid + "Fan" + index),
+		    .name = index,
+		    .interface = std::nullopt,
+		    .hash = md5(data.uuid + "Fan" + index),
 		});
 	}
 	return nodes;
@@ -656,28 +646,30 @@ std::vector<TreeNode<DeviceNode>> getSingleFanMode(NvidiaGPUData data) {
 
 std::vector<TreeNode<DeviceNode>> getTemperaturesRoot(NvidiaGPUData data) {
 	return {DeviceNode{
-		.name = "Temperatures",
-		.interface = std::nullopt,
-		.hash = md5(data.uuid + "Temperatures"),
+	    .name = "Temperatures",
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid + "Temperatures"),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getFanRoot(NvidiaGPUData data) {
 	return {DeviceNode{
-		.name = "Fans",
-		.interface = std::nullopt,
-		.hash = md5(data.uuid + "Fans"),
+	    .name = "Fans",
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid + "Fans"),
 	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(NvidiaGPUData data) {
 	return {DeviceNode{
-		.name = "Utilizations",
-		.interface = std::nullopt,
-		.hash = md5(data.uuid + "Utilizations"),
+	    .name = "Utilizations",
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid + "Utilizations"),
 	}};
 }
 
+// clang-format wants to cram some this to the same line
+// clang-format off
 auto gpuTree = TreeConstructor<NvidiaGPUData, DeviceNode>{
 	getGPUName, {
 		{getUtilizationsRoot, {
@@ -712,6 +704,7 @@ auto gpuTree = TreeConstructor<NvidiaGPUData, DeviceNode>{
 		{getVoltageOffset, {}}
 	}
 };
+// clang-format on
 
 class NvidiaPlugin : public DevicePlugin {
 public:
