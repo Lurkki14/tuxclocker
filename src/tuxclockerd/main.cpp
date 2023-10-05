@@ -1,5 +1,6 @@
 #include <DBusTypes.hpp>
 #include <iostream>
+#include <libintl.h>
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include <QDBusError>
@@ -20,6 +21,12 @@ namespace TCDBus = TuxClocker::DBus;
 
 int main(int argc, char **argv) {
 	QCoreApplication a(argc, argv);
+
+	// TODO: should numbers here be localized or not?
+	setlocale(LC_MESSAGES, "");
+	bindtextdomain("tuxclocker", TUXCLOCKER_LOCALE_PATH);
+	bind_textdomain_codeset("tuxclocker", "UTF-8");
+	textdomain("tuxclocker");
 
 	auto connection = QDBusConnection::systemBus();
 	auto plugins = DevicePlugin::loadPlugins();

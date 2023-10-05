@@ -6,4 +6,5 @@ cppc = meson.get_compiler('cpp')
 
 incdir = include_directories('src/include', 'src/include/deps')
 
+subdir('po')
 subdir('src')
