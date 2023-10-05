@@ -6,6 +6,9 @@ If you have any questions or suggestions, you can join the chat on [Matrix](http
 
 You can use IRC if you don't want to create an account. Both chats are bridged between each other.
 
+## Translations
+TuxClocker uses GNU gettext for translations. You can use [Weblate](https://hosted.weblate.org/projects/tuxclocker/) or edit them locally, and make a pull request.
+
 ## Features
 - Supports any number of devices at once
 - Read and write device properties (Click on a selected node to edit)
