@@ -26,11 +26,11 @@ msgstr "MHz"
 
 #: src/plugins/Nvidia.cpp:153
 msgid "Memory Clock Offset"
-msgstr "Muistikellon taajuuspoikkeama"
+msgstr "Muistin kellotaajuuspoikkeama"
 
 #: src/plugins/Nvidia.cpp:200
 msgid "Core Clock Offset"
-msgstr "Ydinkellon taajuuspoikkeama"
+msgstr "Ytimen kellotaajuuspoikkeama"
 
 #: src/plugins/Nvidia.cpp:220
 msgid "Core Clock"
