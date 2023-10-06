@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-05 18:07+0300\n"
-"PO-Revision-Date: 2023-10-05 18:12+0000\n"
+"PO-Revision-Date: 2023-10-06 14:12+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -84,11 +84,11 @@ msgstr "W"
 
 #: src/plugins/Nvidia.cpp:452
 msgid "Power Usage"
-msgstr "Virrankäyttö"
+msgstr "Toimintateho"
 
 #: src/plugins/Nvidia.cpp:492
 msgid "Power Limit"
-msgstr "Virrankäyttörajoitus"
+msgstr "Tehorajoitus"
 
 #: src/plugins/Nvidia.cpp:507 src/plugins/Nvidia.cpp:524
 #: src/plugins/Nvidia.cpp:539
