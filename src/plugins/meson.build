@@ -38,3 +38,9 @@ if all_nvidia_linux_libs
 		install : true,
 		link_with : libtuxclocker)
 endif
+
+shared_library('cpu', 'CPU.cpp',
+        include_directories : [incdir, fplus_inc],
+        install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
+        install : true,
+        link_with : libtuxclocker)
