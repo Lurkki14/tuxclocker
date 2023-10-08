@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tuxclocker package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tuxclocker\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-05 18:07+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: nb_NO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/plugins/Nvidia.cpp:149 src/plugins/Nvidia.cpp:197
+#: src/plugins/Nvidia.cpp:216 src/plugins/Nvidia.cpp:237
+msgid "MHz"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:153
+msgid "Memory Clock Offset"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:200
+msgid "Core Clock Offset"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:220
+msgid "Core Clock"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:241
+msgid "Memory Clock"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:255
+msgid "Clocks"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:275 src/plugins/Nvidia.cpp:310
+#: src/plugins/Nvidia.cpp:372 src/plugins/Nvidia.cpp:392
+#: src/plugins/Nvidia.cpp:428
+msgid "%"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:280 src/plugins/Nvidia.cpp:315
+msgid "Fan Speed"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:351
+msgid "Automatic"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:351
+msgid "Manual"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:357
+msgid "Fan Mode"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:376
+msgid "Core Utilization"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:396
+msgid "Memory Utilization"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:432
+msgid "PCIe Bandwidth Utilization"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:448 src/plugins/Nvidia.cpp:489
+msgid "W"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:452
+msgid "Power Usage"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:492
+msgid "Power Limit"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:507 src/plugins/Nvidia.cpp:524
+#: src/plugins/Nvidia.cpp:539
+msgid "°C"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:511
+msgid "Temperature"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:527
+msgid "Slowdown Temperature"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:542
+msgid "Shutdown Temperature"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:557 src/plugins/Nvidia.cpp:601
+msgid "mV"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:561
+msgid "Core Voltage"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:605
+msgid "Core Voltage Offset"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:622
+msgid "Fan"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:652
+msgid "Temperatures"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:660
+msgid "Fans"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:668
+msgid "Utilizations"
+msgstr ""
