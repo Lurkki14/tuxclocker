@@ -1,4 +1,5 @@
 #include <Crypto.hpp>
+#include <filesystem>
 #include <fplus/fplus.hpp>
 #include <fstream>
 #include <libintl.h>
@@ -135,6 +136,24 @@ std::vector<CPUInfoData> parseCPUInfo() {
 	return retval;
 }
 
+// TODO: this might be useful for other hwmon stuff too
+std::optional<std::string> coretempHwmonPath() {
+	auto hwmonDirs = std::filesystem::directory_iterator("/sys/class/hwmon");
+	for (auto &dir : hwmonDirs) {
+		// See if 'name' file contains 'coretemp'
+		auto namePath = dir.path().string() + "/name";
+		std::ifstream file{namePath};
+		if (file.good()) {
+			std::stringstream buf;
+			buf << file.rdbuf();
+
+			if (buf.str().find("coretemp") != std::string::npos)
+				return dir.path().string();
+		}
+	}
+	return std::nullopt;
+}
+
 std::optional<DynamicReadable> frequencyReadable(uint coreIndex) {
 	char path[64];
 	snprintf(path, 64, "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_cur_freq", coreIndex);
@@ -156,6 +175,92 @@ std::optional<DynamicReadable> frequencyReadable(uint coreIndex) {
 	};
 
 	return DynamicReadable{func, _("MHz")};
+}
+
+std::optional<DynamicReadable> coretempReadable(const char *hwmonPath, uint index) {
+	char path[64];
+	snprintf(path, 64, "%s/temp%u_input", hwmonPath, index);
+
+	auto func = [=]() -> ReadResult {
+		std::ifstream file{path};
+		if (!file.good())
+			return ReadError::UnknownError;
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+
+		auto value = static_cast<uint>(std::stoi(buffer.str()));
+		// millicelcius -> celcius
+		return value / 1000;
+	};
+
+	// TODO: use the function from nvidia code here
+	if (std::holds_alternative<ReadableValue>(func()))
+		return DynamicReadable{func, _("°C")};
+	return std::nullopt;
+}
+
+std::vector<TreeNode<DeviceNode>> getCoretempTemperatures(CPUData data) {
+	// Temperature nodes for Intel CPUs
+
+	// There seem to be coreCount + 1 files, where the first is
+	// called 'Package id 0' meaning overall temp, rest are for individual cores
+	auto hwmonPathO = coretempHwmonPath();
+	if (!hwmonPathO.has_value())
+		return {};
+
+	auto hwmonPath = hwmonPathO.value().c_str();
+	std::vector<TreeNode<DeviceNode>> retval;
+	// Get max (slowdown) temp, assumed to be the same for all cores
+	char maxTempPath[64];
+	snprintf(maxTempPath, 64, "%s/temp%u_crit", hwmonPath, data.firstCoreIndex + 1);
+
+	std::ifstream file{maxTempPath};
+	if (file.good()) {
+		std::stringstream buf;
+		buf << file.rdbuf();
+
+		StaticReadable sr{static_cast<uint>(std::stoi(buf.str())) / 1000, "°C"};
+
+		DeviceNode node{
+		    .name = _("Slowdown Temperature"),
+		    .interface = sr,
+		    .hash = md5(data.identifier + "Slowdown Temperature"),
+		};
+		retval.push_back(node);
+	}
+
+	// Indices start at 1
+	auto overallTemp = coretempReadable(hwmonPath, data.firstCoreIndex + 1);
+	if (overallTemp.has_value()) {
+		DeviceNode node{
+		    .name = _("Overall Temperature"),
+		    .interface = overallTemp.value(),
+		    .hash = md5(data.identifier + "Overall Temperature"),
+		};
+		retval.push_back(node);
+	}
+
+	// Nodes for individual cores
+	auto firstId = data.firstCoreIndex + 2;
+	for (uint i = firstId; i < firstId + data.coreCount; i++) {
+		auto dr = coretempReadable(hwmonPath, i);
+		if (dr.has_value()) {
+			auto realId = i - 2;
+			char idStr[64];
+			snprintf(idStr, 64, "%sCore%uTemperature", data.identifier.c_str(), realId);
+
+			auto coreStr = _("Core");
+			char name[32];
+			snprintf(name, 32, "%s %u", coreStr, realId);
+			DeviceNode node{
+			    .name = name,
+			    .interface = overallTemp.value(),
+			    .hash = md5(idStr),
+			};
+			retval.push_back(node);
+		}
+	}
+	return retval;
 }
 
 std::vector<TreeNode<DeviceNode>> getFreqs(CPUData data) {
@@ -189,6 +294,14 @@ std::vector<TreeNode<DeviceNode>> getFreqsRoot(CPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getTemperaturesRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Temperatures"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Temperatures"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getCPUName(CPUData data) {
 	return {DeviceNode{
 	    .name = data.name,
@@ -199,6 +312,7 @@ std::vector<TreeNode<DeviceNode>> getCPUName(CPUData data) {
 
 // Temperatures: /sys/class/hwmon/hwmonX where =||=/name = coretemp
 // Frequencies: /sys/devices/system/cpu/cpuX/cpufreq/ where X is the
+// Utilizations: /proc/stat ?
 // 'processor' field in /proc/cpuinfo
 
 // clang-format off
@@ -206,6 +320,9 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 	getCPUName, {
 		{getFreqsRoot, {
 			{getFreqs, {}}
+		}},
+		{getTemperaturesRoot, {
+			{getCoretempTemperatures, {}},
 		}}
 	}
 };
