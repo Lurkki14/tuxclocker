@@ -8,126 +8,129 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-05 18:07+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-10-08 19:24+0000\n"
+"Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
+"Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/"
+"tuxclocker/tuxclocker/nb_NO/>\n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.1-dev\n"
 
 #: src/plugins/Nvidia.cpp:149 src/plugins/Nvidia.cpp:197
 #: src/plugins/Nvidia.cpp:216 src/plugins/Nvidia.cpp:237
 msgid "MHz"
-msgstr ""
+msgstr "MHz"
 
 #: src/plugins/Nvidia.cpp:153
 msgid "Memory Clock Offset"
-msgstr ""
+msgstr "Minneklokkeforskyvning"
 
 #: src/plugins/Nvidia.cpp:200
 msgid "Core Clock Offset"
-msgstr ""
+msgstr "Kjerneklokkeforskyvning"
 
 #: src/plugins/Nvidia.cpp:220
 msgid "Core Clock"
-msgstr ""
+msgstr "Kjerneklokke"
 
 #: src/plugins/Nvidia.cpp:241
 msgid "Memory Clock"
-msgstr ""
+msgstr "Minneklokke"
 
 #: src/plugins/Nvidia.cpp:255
 msgid "Clocks"
-msgstr ""
+msgstr "Klokker"
 
 #: src/plugins/Nvidia.cpp:275 src/plugins/Nvidia.cpp:310
 #: src/plugins/Nvidia.cpp:372 src/plugins/Nvidia.cpp:392
 #: src/plugins/Nvidia.cpp:428
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: src/plugins/Nvidia.cpp:280 src/plugins/Nvidia.cpp:315
 msgid "Fan Speed"
-msgstr ""
+msgstr "Viftehastighet"
 
 #: src/plugins/Nvidia.cpp:351
 msgid "Automatic"
-msgstr ""
+msgstr "Automatisk"
 
 #: src/plugins/Nvidia.cpp:351
 msgid "Manual"
-msgstr ""
+msgstr "Manuell"
 
 #: src/plugins/Nvidia.cpp:357
 msgid "Fan Mode"
-msgstr ""
+msgstr "Viftemodus"
 
 #: src/plugins/Nvidia.cpp:376
 msgid "Core Utilization"
-msgstr ""
+msgstr "Kjerneutnyttelse"
 
 #: src/plugins/Nvidia.cpp:396
 msgid "Memory Utilization"
-msgstr ""
+msgstr "Minneutnyttelse"
 
 #: src/plugins/Nvidia.cpp:432
 msgid "PCIe Bandwidth Utilization"
-msgstr ""
+msgstr "PCIe-båndbreddebruk"
 
 #: src/plugins/Nvidia.cpp:448 src/plugins/Nvidia.cpp:489
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: src/plugins/Nvidia.cpp:452
 msgid "Power Usage"
-msgstr ""
+msgstr "Strømforbruk"
 
 #: src/plugins/Nvidia.cpp:492
 msgid "Power Limit"
-msgstr ""
+msgstr "Effektgrense"
 
 #: src/plugins/Nvidia.cpp:507 src/plugins/Nvidia.cpp:524
 #: src/plugins/Nvidia.cpp:539
 msgid "°C"
-msgstr ""
+msgstr "°C"
 
 #: src/plugins/Nvidia.cpp:511
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatur"
 
 #: src/plugins/Nvidia.cpp:527
 msgid "Slowdown Temperature"
-msgstr ""
+msgstr "Nedsakkingstemperatur"
 
 #: src/plugins/Nvidia.cpp:542
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "Avstengningstemperatur"
 
 #: src/plugins/Nvidia.cpp:557 src/plugins/Nvidia.cpp:601
 msgid "mV"
-msgstr ""
+msgstr "mV"
 
 #: src/plugins/Nvidia.cpp:561
 msgid "Core Voltage"
-msgstr ""
+msgstr "Kjernespenning"
 
 #: src/plugins/Nvidia.cpp:605
 msgid "Core Voltage Offset"
-msgstr ""
+msgstr "Kjernespenningsforskyvning"
 
 #: src/plugins/Nvidia.cpp:622
 msgid "Fan"
-msgstr ""
+msgstr "Vifte"
 
 #: src/plugins/Nvidia.cpp:652
 msgid "Temperatures"
-msgstr ""
+msgstr "Temperaturer"
 
 #: src/plugins/Nvidia.cpp:660
 msgid "Fans"
-msgstr ""
+msgstr "Vifter"
 
 #: src/plugins/Nvidia.cpp:668
 msgid "Utilizations"
-msgstr ""
+msgstr "Bruk"
