@@ -1,9 +1,12 @@
 #include <Crypto.hpp>
 #include <fplus/fplus.hpp>
 #include <fstream>
+#include <libintl.h>
 #include <Plugin.hpp>
 #include <regex>
 #include <TreeConstructor.hpp>
+
+#define _(String) gettext(String)
 
 using namespace fplus;
 
@@ -132,9 +135,64 @@ std::vector<CPUInfoData> parseCPUInfo() {
 	return retval;
 }
 
+std::optional<DynamicReadable> frequencyReadable(uint coreIndex) {
+	char path[64];
+	snprintf(path, 64, "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_cur_freq", coreIndex);
+
+	std::ifstream file{path};
+	if (!file.good())
+		return std::nullopt;
+
+	auto func = [=]() -> ReadResult {
+		std::ifstream file{path};
+		if (!file.good())
+			return ReadError::UnknownError;
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+
+		auto value = static_cast<uint>(std::stoi(buffer.str()));
+		// kHz -> MHz
+		return value / 1000;
+	};
+
+	return DynamicReadable{func, _("MHz")};
+}
+
+std::vector<TreeNode<DeviceNode>> getFreqs(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+	// Try to get DynamicReadable for all cores
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		auto dr = frequencyReadable(i);
+		if (dr.has_value()) {
+			char idStr[64];
+			snprintf(idStr, 64, "%sCore%uFrequency", data.identifier.c_str(), i);
+
+			auto coreStr = _("Core");
+			char name[32];
+			snprintf(name, 32, "%s %u", coreStr, i);
+			DeviceNode node{
+			    .name = name,
+			    .interface = dr.value(),
+			    .hash = md5(idStr),
+			};
+			retval.push_back(node);
+		}
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getFreqsRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Frequencies"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Frequencies"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getCPUName(CPUData data) {
 	return {DeviceNode{
 	    .name = data.name,
+	    .interface = std::nullopt,
 	    .hash = md5(data.identifier),
 	}};
 }
@@ -145,7 +203,11 @@ std::vector<TreeNode<DeviceNode>> getCPUName(CPUData data) {
 
 // clang-format off
 auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
-	getCPUName, {}
+	getCPUName, {
+		{getFreqsRoot, {
+			{getFreqs, {}}
+		}}
+	}
 };
 // clang-format on
 
