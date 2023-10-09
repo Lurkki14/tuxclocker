@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-09 15:16+0300\n"
-"PO-Revision-Date: 2023-10-06 14:12+0000\n"
+"PO-Revision-Date: 2023-10-09 13:11+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -35,17 +35,16 @@ msgid "Slowdown Temperature"
 msgstr "Hidastumislämpötila"
 
 #: src/plugins/CPU.cpp:236
-#, fuzzy
 msgid "Overall Temperature"
-msgstr "Lämpötila"
+msgstr "Kokonaislämpötila"
 
 #: src/plugins/CPU.cpp:252 src/plugins/CPU.cpp:275
 msgid "Core"
-msgstr ""
+msgstr "Ydin"
 
 #: src/plugins/CPU.cpp:291
 msgid "Frequencies"
-msgstr ""
+msgstr "Taajuudet"
 
 #: src/plugins/CPU.cpp:299 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
@@ -135,7 +134,7 @@ msgstr "Ytimen jännite"
 
 #: src/plugins/Nvidia.cpp:604
 msgid "Core Voltage Offset"
-msgstr "Ytimen jännittepoikkeama"
+msgstr "Ytimen jännitepoikkeama"
 
 #: src/plugins/Nvidia.cpp:621
 msgid "Fan"
@@ -151,87 +150,89 @@ msgstr "Käyttöasteet"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
-msgstr ""
+msgstr "Näytetään:"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
 msgid "Apply changes"
-msgstr ""
+msgstr "Toteuta muutokset"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr ""
+msgstr "Säädettävät solmut"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
-msgstr ""
+msgstr "Dynaamiset arvot"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:43
 msgid "Static Values"
-msgstr ""
+msgstr "Staattiset arvot"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:69
 msgid "Apply"
-msgstr ""
+msgstr "Tallenna"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
 #: src/tuxclocker-qt/widgets/Settings.cpp:69
 msgid "Cancel"
-msgstr ""
+msgstr "Peru"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:143
 msgid "Connecting %1 with:"
-msgstr ""
+msgstr "Yhdistetään %1 solmuun:"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:170
 msgid "A node to connect with needs to be selected"
-msgstr ""
+msgstr "On valittava yhdistettävä solmu"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:174
 msgid "At least two points need to be placed"
-msgstr ""
+msgstr "On sijoitettava ainakin kaksi pistettä"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:28
 msgid "Settings"
-msgstr ""
+msgstr "Asetukset"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:30
 msgid "Apply profile settings automatically"
-msgstr ""
+msgstr "Toteuta profiilin asetukset automaattisesti"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:32
 msgid "Use profile"
-msgstr ""
+msgstr "Käytä profiilia"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:39
 msgid "Add profile"
-msgstr ""
+msgstr "Lisää profiili"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:42
 msgid "Remove selected"
-msgstr ""
+msgstr "Poista valittu"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:45
 msgid "Unnamed"
-msgstr ""
+msgstr "Nimetön"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:65
 msgid "Use tray icon"
-msgstr ""
+msgstr "Käytä ikonia tehtäväpalkissa"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:66
 msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
 msgstr ""
+"Tämän ottaminen käyttöön piilottaa TuxClockerin tehtäväpalkkiin sulkemisen "
+"sijaan ikkunan suljettaessa."
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:73
 msgid "Save"
-msgstr ""
+msgstr "Tallenna"
 
 #: src/tuxclocker-qt/MainWindow.cpp:116
 msgid "&Maximize TuxClocker"
-msgstr ""
+msgstr "&Maksimoi TuxClocker"
 
 #: src/tuxclocker-qt/MainWindow.cpp:120
 msgid "&Quit"
-msgstr ""
+msgstr "&Lopeta"
