@@ -6,6 +6,7 @@
 #include <Plugin.hpp>
 #include <regex>
 #include <TreeConstructor.hpp>
+#include <Utils.hpp>
 
 #define _(String) gettext(String)
 
@@ -193,8 +194,7 @@ std::optional<DynamicReadable> coretempReadable(const char *hwmonPath, uint inde
 		return value / 1000;
 	};
 
-	// TODO: use the function from nvidia code here
-	if (std::holds_alternative<ReadableValue>(func()))
+	if (hasReadableValue(func()))
 		return DynamicReadable{func, _("°C")};
 	return std::nullopt;
 }

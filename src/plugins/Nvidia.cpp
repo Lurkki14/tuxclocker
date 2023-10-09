@@ -3,6 +3,7 @@
 #include <libintl.h>
 #include <NVCtrl/NVCtrl.h>
 #include <Plugin.hpp>
+#include <Utils.hpp>
 
 #include <fplus/fplus.hpp>
 #include <iostream>
@@ -70,8 +71,6 @@ uint nvmlFanCount(nvmlDevice_t dev) {
 		return 0;
 	return fanCount;
 }
-
-bool hasReadableValue(ReadResult res) { return std::holds_alternative<ReadableValue>(res); }
 
 std::optional<NvidiaGPUData> fromIndex(Display *dpy, uint i) {
 	nvmlDevice_t dev;

@@ -30,7 +30,7 @@ foreach lib : nvidia_linux_libs
 endforeach
 
 if all_nvidia_linux_libs
-	shared_library('nvidia', 'Nvidia.cpp',
+	shared_library('nvidia', 'Nvidia.cpp', 'Utils.cpp',
 		override_options : ['cpp_std=c++17'],
 		include_directories : [incdir, patterns_inc, fplus_inc],
 		dependencies : [nvidia_linux_libs, boost_dep],
@@ -39,7 +39,7 @@ if all_nvidia_linux_libs
 		link_with : libtuxclocker)
 endif
 
-shared_library('cpu', 'CPU.cpp',
+shared_library('cpu', 'CPU.cpp', 'Utils.cpp',
         include_directories : [incdir, fplus_inc],
         install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
         install : true,
