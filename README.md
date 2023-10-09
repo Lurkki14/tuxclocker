@@ -41,6 +41,12 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 #### 600 to 900 -series
 - Voltage setting
 
+### CPUs
+- Frequency monitoring
+
+### Intel CPUs
+- Temperature monitoring (coretemp)
+
 ## Possible future improvements
 - Support for more devices
 - Support for more platforms than Linux
