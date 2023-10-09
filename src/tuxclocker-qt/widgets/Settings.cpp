@@ -2,6 +2,7 @@
 
 #include <DynamicReadableConnectionData.hpp>
 #include <Globals.hpp>
+#include <libintl.h>
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QLabel>
@@ -9,6 +10,8 @@
 #include <QPushButton>
 #include <QSettings>
 #include <Utils.hpp>
+
+#define _(String) gettext(String)
 
 Settings::Settings(QWidget *parent) : QWidget(parent) {
 	qRegisterMetaTypeStreamOperators<QVector<QString>>("QVector<QString>>");
@@ -22,24 +25,24 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 	biggerPoint.setPointSize(biggerPoint.pointSize() + 4);
 	label->setTextFormat(Qt::RichText);
 	label->setFont(biggerPoint);
-	label->setText("Settings");
+	label->setText(_("Settings"));
 
-	m_autoLoad = new QCheckBox{"Apply profile settings automatically", this};
+	m_autoLoad = new QCheckBox{_("Apply profile settings automatically"), this};
 
-	m_useProfile = new QCheckBox{"Use profile", this};
+	m_useProfile = new QCheckBox{_("Use profile"), this};
 
 	// TODO: add delegate to make deleting a little nicer
 	m_profileView = new QListWidget{this};
 	m_profileView->setEnabled(false);
 	m_profileView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	auto addButton = new QPushButton{"Add profile"};
+	auto addButton = new QPushButton{_("Add profile")};
 	addButton->setEnabled(false);
 
-	auto removeButton = new QPushButton{"Remove selected"};
+	auto removeButton = new QPushButton{_("Remove selected")};
 
 	connect(addButton, &QPushButton::released, [=] {
-		auto item = new QListWidgetItem{"Unnamed"};
+		auto item = new QListWidgetItem{_("Unnamed")};
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		m_profileView->addItem(item);
 		m_profileView->editItem(item);
@@ -59,15 +62,16 @@ Settings::Settings(QWidget *parent) : QWidget(parent) {
 		m_profileView->setEnabled(enable);
 	});
 
-	m_useTrayIcon = new QCheckBox{"Use tray icon", this};
-	m_useTrayIcon->setToolTip("Enabling this hides TuxClocker into the tray instead of exiting "
-				  "when closing the window.");
+	m_useTrayIcon = new QCheckBox{_("Use tray icon"), this};
+	m_useTrayIcon->setToolTip(
+	    _("Enabling this hides TuxClocker into the tray instead of exiting "
+	      "when closing the window."));
 
-	auto cancelButton = new QPushButton{"Cancel", this};
+	auto cancelButton = new QPushButton{_("Cancel"), this};
 
 	connect(cancelButton, &QPushButton::released, this, &Settings::cancelled);
 
-	auto saveButton = new QPushButton{"Save", this};
+	auto saveButton = new QPushButton{_("Save"), this};
 
 	connect(saveButton, &QPushButton::released, this, [=] {
 		auto settingsData = fromUIState();

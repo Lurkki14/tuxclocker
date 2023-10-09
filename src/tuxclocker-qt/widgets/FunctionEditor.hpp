@@ -15,6 +15,7 @@
 #include <DeviceProxyModel.hpp>
 #include <DragChartView.hpp>
 #include <DynamicReadableConnection.hpp>
+#include <libintl.h>
 #include <NodeSelector.hpp>
 #include <patterns.hpp>
 #include <QAbstractItemView>
@@ -28,6 +29,8 @@
 #include <QTimer>
 #include <QTreeView>
 #include <QWidget>
+
+#define _(String) gettext(String)
 
 // Delet this
 namespace p = mpark::patterns;
@@ -63,10 +66,10 @@ public:
 
 		// m_dragView->setRange(0, 100, 0, 100);
 		m_layout->addWidget(m_dragView, 2, 0, 1, 2);
-		m_applyButton = new QPushButton("Apply");
+		m_applyButton = new QPushButton(_("Apply"));
 		// No connection to apply at first
 		m_applyButton->setEnabled(false);
-		m_cancelButton = new QPushButton("Cancel");
+		m_cancelButton = new QPushButton(_("Cancel"));
 		m_layout->addWidget(m_cancelButton, 3, 0, 1, 1);
 		m_layout->addWidget(m_applyButton, 3, 1, 1, 1);
 
@@ -137,7 +140,7 @@ public:
 		m_rangeInfo = rangeInfo;
 	}
 	void setAssignableName(QString name) {
-		m_dependableLabel->setText(QString{"Connecting %1 with:"}.arg(name));
+		m_dependableLabel->setText(QString{_("Connecting %1 with:")}.arg(name));
 		m_dragView->yAxis().setTitleText(name);
 	}
 
@@ -164,11 +167,11 @@ private:
 		QString reason;
 
 		if (!m_latestNodeIndex.has_value())
-			reason.append("A node to connect with needs to be selected");
+			reason.append(_("A node to connect with needs to be selected"));
 		if (m_dragView->vector().length() < 2) {
 			if (!reason.isEmpty())
 				reason.append('\n');
-			reason.append("At least two points need to be placed");
+			reason.append(_("At least two points need to be placed"));
 		}
 		return reason;
 	}

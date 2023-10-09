@@ -9,10 +9,6 @@ patterns_inc = include_directories('../include/deps/patterns/include/mpark')
 moc_files = qt5.preprocess(moc_headers : ['Adaptors.hpp'],
 	dependencies : qt5_dep)
 
-# Compile time definition for locale path
-locale_path_def_template = '-DTUXCLOCKER_LOCALE_PATH="@0@/@1@/locale"'
-locale_path_def = locale_path_def_template.format(get_option('prefix'), get_option('datadir'))
-
 sources = ['main.cpp']
 	
 executable('tuxclockerd',

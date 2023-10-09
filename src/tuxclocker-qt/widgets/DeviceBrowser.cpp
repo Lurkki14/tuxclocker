@@ -3,6 +3,7 @@
 #include "qnamespace.h"
 
 #include <Globals.hpp>
+#include <libintl.h>
 #include <MainWindow.hpp>
 #include <patterns.hpp>
 #include <QStackedWidget>
@@ -10,6 +11,8 @@
 #include <QVariant>
 #include <Settings.hpp>
 #include <Utils.hpp>
+
+#define _(String) gettext(String)
 
 using namespace mpark::patterns;
 using namespace TuxClocker::Device;
@@ -28,16 +31,16 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 	// TODO: remember collapsed nodes
 	m_treeView->expandAll();
 
-	m_flagLabel = new QLabel("Showing:");
-	m_apply = new QPushButton("Apply changes");
+	m_flagLabel = new QLabel(_("Showing:"));
+	m_apply = new QPushButton(_("Apply changes"));
 	m_apply->setEnabled(true);
 
 	m_flagEditor = new FlagEditor(
-	    QVector({std::tuple(QString("Assignables"), DeviceModel::assignableIcon(),
+	    QVector({std::tuple(QString(_("Assignables")), DeviceModel::assignableIcon(),
 			 DeviceModel::Assignable),
-		std::tuple(QString("Dynamic Values"), DeviceModel::dynamicReadableIcon(),
+		std::tuple(QString(_("Dynamic Values")), DeviceModel::dynamicReadableIcon(),
 		    DeviceModel::DynamicReadable),
-		std::tuple(QString("Static Values"), DeviceModel::staticReadableIcon(),
+		std::tuple(QString(_("Static Values")), DeviceModel::staticReadableIcon(),
 		    DeviceModel::StaticReadable)}),
 	    this);
 

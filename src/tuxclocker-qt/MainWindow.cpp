@@ -4,6 +4,7 @@
 #include <DeviceBrowser.hpp>
 #include <DeviceModel.hpp>
 #include <DeviceModelDelegate.hpp>
+#include <libintl.h>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusMetaType>
@@ -21,6 +22,8 @@
 #include <Globals.hpp>
 #include <Tree.hpp>
 #include <Utils.hpp>
+
+#define _(String) gettext(String)
 
 namespace TCDBus = TuxClocker::DBus;
 
@@ -110,11 +113,11 @@ void MainWindow::setTrayIconEnabled(bool enable) {
 QMenu *MainWindow::createTrayMenu() {
 	auto menu = new QMenu{this};
 
-	auto show = new QAction{"&Maximize TuxClocker", this};
+	auto show = new QAction{_("&Maximize TuxClocker"), this};
 	connect(show, &QAction::triggered, this, &MainWindow::show);
 	menu->addAction(show);
 
-	auto quit = new QAction{"&Quit", this};
+	auto quit = new QAction{_("&Quit"), this};
 	connect(quit, &QAction::triggered, this, &QApplication::quit);
 	menu->addAction(quit);
 

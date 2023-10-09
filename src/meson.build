@@ -11,6 +11,10 @@ boost_dep = dependency('boost',
 plugin_path_def_template = '-DTC_PLUGIN_PATH="@0@/@1@/tuxclocker/plugins"'
 plugin_path_def = plugin_path_def_template.format(get_option('prefix'), get_option('libdir'))
 
+# Compile time definition for locale path
+locale_path_def_template = '-DTUXCLOCKER_LOCALE_PATH="@0@/@1@/locale"'
+locale_path_def = locale_path_def_template.format(get_option('prefix'), get_option('datadir'))
+
 libtuxclocker = shared_library('tuxclocker',
 	['lib/Crypto.cpp',
 	 'lib/Plugin.cpp'],
