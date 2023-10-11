@@ -4,6 +4,7 @@
 #include "DynamicReadableProxy.hpp"
 #include <fplus/fplus.hpp>
 #include <Globals.hpp>
+#include <libintl.h>
 #include <Utils.hpp>
 #include <QApplication>
 #include <QDBusReply>
@@ -11,6 +12,8 @@
 #include <QtGlobal>
 #include <QStyle>
 #include <QVariantAnimation>
+
+#define _(String) gettext(String)
 
 // 'match' is a method in QAbstractItemModel :(
 namespace p = mpark::patterns;
@@ -237,7 +240,7 @@ QStandardItem *DeviceModel::createAssignable(
 
 QString DeviceModel::displayText(AssignableProxy *proxy, AssignableItemData data) {
 	auto currentValue = proxy->currentValue();
-	auto defVal = "No value set";
+	auto defVal = _("No value set");
 	if (!currentValue.has_value())
 		return defVal;
 

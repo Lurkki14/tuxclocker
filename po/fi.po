@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-09 15:16+0300\n"
+"POT-Creation-Date: 2023-10-11 14:16+0300\n"
 "PO-Revision-Date: 2023-10-09 13:11+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
@@ -148,6 +148,22 @@ msgstr "Tuulettimet"
 msgid "Utilizations"
 msgstr "Käyttöasteet"
 
+#: src/tuxclocker-qt/data/AssignableItem.cpp:75
+msgid "(Parametrized)"
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModel.cpp:243
+msgid "No value set"
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
+msgid "Parametrize..."
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
+msgid "Reset to default"
+msgstr ""
+
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
 msgstr "Näytetään:"
@@ -173,7 +189,7 @@ msgid "Apply"
 msgstr "Tallenna"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
-#: src/tuxclocker-qt/widgets/Settings.cpp:69
+#: src/tuxclocker-qt/widgets/Settings.cpp:70
 msgid "Cancel"
 msgstr "Peru"
 
@@ -217,7 +233,7 @@ msgstr "Nimetön"
 msgid "Use tray icon"
 msgstr "Käytä ikonia tehtäväpalkissa"
 
-#: src/tuxclocker-qt/widgets/Settings.cpp:66
+#: src/tuxclocker-qt/widgets/Settings.cpp:67
 msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
@@ -225,7 +241,7 @@ msgstr ""
 "Tämän ottaminen käyttöön piilottaa TuxClockerin tehtäväpalkkiin sulkemisen "
 "sijaan ikkunan suljettaessa."
 
-#: src/tuxclocker-qt/widgets/Settings.cpp:73
+#: src/tuxclocker-qt/widgets/Settings.cpp:74
 msgid "Save"
 msgstr "Tallenna"
 

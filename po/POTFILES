@@ -1,5 +1,8 @@
 src/plugins/CPU.cpp
 src/plugins/Nvidia.cpp
+src/tuxclocker-qt/data/AssignableItem.cpp
+src/tuxclocker-qt/data/DeviceModel.cpp
+src/tuxclocker-qt/data/DeviceModelDelegate.cpp
 src/tuxclocker-qt/widgets/DeviceBrowser.cpp
 src/tuxclocker-qt/widgets/FunctionEditor.hpp
 src/tuxclocker-qt/widgets/Settings.cpp

@@ -6,6 +6,7 @@
 #include <FunctionEditor.hpp>
 #include <Globals.hpp>
 #include <IntRangeEditor.hpp>
+#include <libintl.h>
 #include <patterns.hpp>
 #include <QDebug>
 #include <QEvent>
@@ -16,14 +17,16 @@
 #include <QSettings>
 #include <Utils.hpp>
 
+#define _(String) gettext(String)
+
 using namespace TuxClocker::Device;
 using namespace mpark::patterns;
 
 Q_DECLARE_METATYPE(AssignableItemData)
 
 DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {
-	m_parametrize = new QAction{"Parametrize...", this};
-	m_resetAssignable = new QAction{"Reset to default", this};
+	m_parametrize = new QAction{_("Parametrize..."), this};
+	m_resetAssignable = new QAction{_("Reset to default"), this};
 
 	m_functionEditor = nullptr;
 }

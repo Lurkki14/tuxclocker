@@ -1,6 +1,9 @@
 #include "AssignableItem.hpp"
 
 #include <DynamicReadableConnection.hpp>
+#include <libintl.h>
+
+#define _(String) gettext(String)
 
 Q_DECLARE_METATYPE(AssignableItemData)
 
@@ -69,7 +72,7 @@ void AssignableItem::updateText(AssignableItemData data) {
 	QString targetText;
 	if (data.value().canConvert<DynamicReadableConnectionData>()) {
 		// Include possible unit
-		auto target = "(Parametrized)";
+		auto target = _("(Parametrized)");
 		m_currentTargetData.parametrizationText = target;
 		targetText = target;
 		goto ret;
