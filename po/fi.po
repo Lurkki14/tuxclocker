@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-11 14:16+0300\n"
-"PO-Revision-Date: 2023-10-09 13:11+0000\n"
+"PO-Revision-Date: 2023-10-11 11:23+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -150,19 +150,19 @@ msgstr "Käyttöasteet"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"
-msgstr ""
+msgstr "(Parametrisoitu)"
 
 #: src/tuxclocker-qt/data/DeviceModel.cpp:243
 msgid "No value set"
-msgstr ""
+msgstr "Ei asetettua arvoa"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
 msgid "Parametrize..."
-msgstr ""
+msgstr "Parametrisoi..."
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
 msgid "Reset to default"
-msgstr ""
+msgstr "Nollaa oletusarvoon"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
