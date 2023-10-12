@@ -31,7 +31,6 @@ msgid "°C"
 msgstr "°C"
 
 #: src/plugins/CPU.cpp:225 src/plugins/Nvidia.cpp:526
-#, fuzzy
 msgid "Slowdown Temperature"
 msgstr "Teplota spomaľovania"
 
@@ -79,7 +78,7 @@ msgstr "%"
 
 #: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
 msgid "Fan Speed"
-msgstr ""
+msgstr "Rýchlosť ventilátora"
 
 #: src/plugins/Nvidia.cpp:350
 msgid "Automatic"
@@ -91,7 +90,7 @@ msgstr "Ručné"
 
 #: src/plugins/Nvidia.cpp:356
 msgid "Fan Mode"
-msgstr ""
+msgstr "Režim ventilátora"
 
 #: src/plugins/Nvidia.cpp:375
 msgid "Core Utilization"
@@ -175,7 +174,7 @@ msgstr "Použiť zmeny"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr ""
+msgstr "Priradenie"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
