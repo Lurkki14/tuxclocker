@@ -37,7 +37,46 @@ struct CPUData {
 	uint firstCoreIndex;
 	uint coreCount;
 	std::string name;
+	uint cpuIndex;
 };
+
+// CPU utilization sample
+struct CPUTimeStat {
+	uint64_t totalTime;
+	uint64_t idleTime;
+};
+
+uint utilizationPercentage(CPUTimeStat stat) {
+	auto idle = static_cast<double>(stat.idleTime) / static_cast<double>(stat.totalTime);
+	auto active = 1 - idle;
+	return std::round(active * 100);
+}
+
+std::optional<CPUTimeStat> fromStatLine(const std::string &line) {
+	auto words = fplus::split(' ', true, line);
+	// Remove cpuX from the start
+	words.erase(words.begin());
+
+	if (words.size() < 4)
+		return std::nullopt;
+
+	uint64_t total = 0;
+	for (auto &word : words) {
+		total += std::stoull(word);
+	}
+	return CPUTimeStat{
+	    .totalTime = total,
+	    .idleTime = std::stoull(words[3]),
+	};
+}
+
+std::ifstream &jumptoLine(std::ifstream &file, unsigned int num) {
+	file.seekg(std::ios::beg);
+	for (int i = 0; i < num - 1; ++i) {
+		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+	return file;
+}
 
 std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 	auto samePhysId = [](CPUInfoData a, CPUInfoData b) { return a.physicalId == b.physicalId; };
@@ -56,6 +95,7 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 		    .firstCoreIndex = firstCore,
 		    .coreCount = first.cores,
 		    .name = first.name,
+		    .cpuIndex = first.physicalId,
 		};
 		retval.push_back(data);
 	}
@@ -199,6 +239,77 @@ std::optional<DynamicReadable> coretempReadable(const char *hwmonPath, uint inde
 	return std::nullopt;
 }
 
+std::vector<CPUTimeStat> readCPUStatsFromRange(uint minId, uint maxId) {
+	std::ifstream stat{"/proc/stat"};
+	if (!stat.good())
+		return {};
+
+	std::vector<CPUTimeStat> retval;
+	// cpu0 is on the second line
+	jumptoLine(stat, minId + 2);
+	// TODO: How did I end up with this :D at least debugger shows it works as intended
+	for (uint i = minId + 1; i < maxId + 2; i++) {
+		std::string line;
+		// Seeks to next line
+		std::getline(stat, line);
+
+		auto timeStat = fromStatLine(line);
+		if (timeStat.has_value())
+			retval.push_back(timeStat.value());
+		else
+			return {};
+	}
+	return retval;
+}
+
+CPUTimeStat timeStatDelta(CPUTimeStat prev, CPUTimeStat cur) {
+	return CPUTimeStat{
+	    .totalTime = cur.totalTime - prev.totalTime,
+	    .idleTime = cur.idleTime - prev.idleTime,
+	};
+}
+
+// Returns a list of readings from minId to maxId
+// This is done in groups like this so we can avoid traversing the file again for every core
+std::vector<uint> utilizationsFromRange(uint minId, uint maxId) {
+	// Saves the sample so we can compare to it on the next call
+	static std::unordered_map<uint, CPUTimeStat> timeStatMap;
+
+	auto newTimeStats = readCPUStatsFromRange(minId, maxId);
+	if (newTimeStats.empty())
+		return {};
+
+	std::vector<uint> retval;
+	// Try to get previous reading from map
+	auto first = timeStatMap.find(minId);
+	if (first != timeStatMap.end()) {
+		// Found previous reading
+		for (uint i = 0; i < newTimeStats.size(); i++) {
+			try {
+				auto coreId = i + minId;
+				auto curStat = newTimeStats[i];
+				auto prevStat = timeStatMap.at(coreId);
+
+				auto deltaStat = timeStatDelta(prevStat, curStat);
+				retval.push_back(utilizationPercentage(deltaStat));
+				// Save new value into hashmap
+				timeStatMap[coreId] = curStat;
+			} catch (std::out_of_range) {
+				return {};
+			}
+		}
+	} else {
+		// Use overall utilization
+		for (uint i = 0; i < newTimeStats.size(); i++) {
+			auto coreId = i + minId;
+			// Save current stats so we can calculate delta next call
+			timeStatMap[coreId] = newTimeStats[i];
+			retval.push_back(utilizationPercentage(newTimeStats[i]));
+		}
+	}
+	return retval;
+}
+
 std::vector<TreeNode<DeviceNode>> getCoretempTemperatures(CPUData data) {
 	// Temperature nodes for Intel CPUs
 
@@ -286,11 +397,69 @@ std::vector<TreeNode<DeviceNode>> getFreqs(CPUData data) {
 	return retval;
 }
 
+ReadResult utilizationBuffered(CPUData data, uint coreId) {
+	// NOTE: relies on the looping order in getUtilizations going from low to high
+	// Use cached results until we fetch for the first core id again
+	static std::unordered_map<uint, std::vector<uint>> cachedUtils;
+
+	auto vectorIndex = coreId - data.firstCoreIndex;
+	auto lastId = data.firstCoreIndex + data.coreCount - 1;
+	if (cachedUtils.find(data.cpuIndex) != cachedUtils.end()) {
+		// Cache has value
+		auto utils = cachedUtils[data.cpuIndex];
+		// Position relative to CPU
+		if (coreId == lastId) {
+			// Remove from map so we retrieve new value next time
+			cachedUtils.erase(data.cpuIndex);
+		}
+		return utils[vectorIndex];
+	}
+
+	auto utils = utilizationsFromRange(data.firstCoreIndex, lastId);
+	if (utils.empty())
+		return ReadError::UnknownError;
+
+	cachedUtils.insert({data.cpuIndex, utils});
+	return utils[vectorIndex];
+}
+
+std::vector<TreeNode<DeviceNode>> getUtilizations(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		auto func = [=]() -> ReadResult { return utilizationBuffered(data, i); };
+
+		if (hasReadableValue(func())) {
+			char idStr[64];
+			char name[32];
+			snprintf(idStr, 64, "%sCore%uUtilization", data.identifier.c_str(), i);
+			snprintf(name, 32, "%s %u", _("Core"), i);
+
+			DynamicReadable dr{func, _("%")};
+
+			DeviceNode node{
+			    .name = name,
+			    .interface = dr,
+			    .hash = md5(idStr),
+			};
+			retval.push_back(node);
+		}
+	};
+	return retval;
+}
+
 std::vector<TreeNode<DeviceNode>> getFreqsRoot(CPUData data) {
 	return {DeviceNode{
 	    .name = _("Frequencies"),
 	    .interface = std::nullopt,
 	    .hash = md5(data.identifier + "Frequencies"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Utilizations"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Utilizations"),
 	}};
 }
 
@@ -323,6 +492,9 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 		}},
 		{getTemperaturesRoot, {
 			{getCoretempTemperatures, {}},
+		}},
+		{getUtilizationsRoot, {
+			{getUtilizations, {}}
 		}}
 	}
 };
