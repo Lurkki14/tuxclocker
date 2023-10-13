@@ -55,8 +55,14 @@ bool DeviceProxyModel::lessThan(const QModelIndex &left, const QModelIndex &righ
 	auto leftChildren = sourceModel()->rowCount(left);
 	auto rightChildren = sourceModel()->rowCount(right);
 
-	if (leftChildren == 0 && rightChildren != 0)
-		// Left hand side is 'smaller' if right has children
+	// Always group leaf nodes separately from nodes with children
+	if (leftChildren == 0 && rightChildren > 0) {
+		// Left hand side is 'greater' if right has children
+		return false;
+	}
+
+	if (leftChildren > 0 && rightChildren == 0) {
 		return true;
+	}
 	return QSortFilterProxyModel::lessThan(left, right);
 }
