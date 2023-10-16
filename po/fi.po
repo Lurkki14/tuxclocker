@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-16 16:03+0300\n"
-"PO-Revision-Date: 2023-10-11 11:23+0000\n"
+"PO-Revision-Date: 2023-10-18 04:09+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.1-dev\n"
+"X-Generator: Weblate 5.1\n"
 
 #: src/plugins/CPU.cpp:218 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
@@ -51,7 +51,7 @@ msgstr "%"
 
 #: src/plugins/CPU.cpp:506
 msgid "Power Saving Tendencies"
-msgstr ""
+msgstr "Virransäästöherkkyydet"
 
 #: src/plugins/CPU.cpp:514
 msgid "Frequencies"
