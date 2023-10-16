@@ -310,6 +310,60 @@ std::vector<uint> utilizationsFromRange(uint minId, uint maxId) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getIntelEPBNodes(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+	Range<int> range{0, 15};
+
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		char path[96];
+		snprintf(path, 96, "/sys/devices/system/cpu/cpu%u/power/energy_perf_bias", i);
+		std::ifstream file{path};
+		if (!file.good())
+			continue;
+
+		auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+			std::ifstream file{path};
+			if (!file.good())
+				return std::nullopt;
+
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			return std::stoi(buffer.str());
+		};
+
+		auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+			std::ofstream file{path};
+			if (!file.good())
+				return AssignmentError::UnknownError;
+
+			if (!std::holds_alternative<int>(a))
+				return AssignmentError::InvalidType;
+
+			auto arg = std::get<int>(a);
+			if (arg < 0 || arg > 15)
+				return AssignmentError::OutOfRange;
+
+			file << arg;
+			return std::nullopt;
+		};
+
+		Assignable a{setFunc, range, getFunc, std::nullopt};
+
+		char idStr[64];
+		snprintf(idStr, 64, "%sCore%uEPB", data.identifier.c_str(), i);
+		char nameStr[32];
+		snprintf(nameStr, 32, "%s %u", _("Core"), i);
+
+		DeviceNode node{
+		    .name = nameStr,
+		    .interface = a,
+		    .hash = md5(idStr),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
 std::vector<TreeNode<DeviceNode>> getCoretempTemperatures(CPUData data) {
 	// Temperature nodes for Intel CPUs
 
@@ -447,6 +501,14 @@ std::vector<TreeNode<DeviceNode>> getUtilizations(CPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getIntelEPBRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Power Saving Tendencies"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "EPB"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getFreqsRoot(CPUData data) {
 	return {DeviceNode{
 	    .name = _("Frequencies"),
@@ -495,6 +557,9 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 		}},
 		{getUtilizationsRoot, {
 			{getUtilizations, {}}
+		}},
+		{getIntelEPBRoot, {
+			{getIntelEPBNodes, {}}
 		}}
 	}
 };
