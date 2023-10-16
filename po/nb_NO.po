@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-11 14:16+0300\n"
+"POT-Creation-Date: 2023-10-16 16:03+0300\n"
 "PO-Revision-Date: 2023-10-08 19:24+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/"
@@ -19,35 +19,50 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.1-dev\n"
 
-#: src/plugins/CPU.cpp:178 src/plugins/Nvidia.cpp:148
+#: src/plugins/CPU.cpp:218 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
 #: src/plugins/Nvidia.cpp:236
 msgid "MHz"
 msgstr "MHz"
 
-#: src/plugins/CPU.cpp:198 src/plugins/Nvidia.cpp:506
+#: src/plugins/CPU.cpp:238 src/plugins/Nvidia.cpp:506
 #: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
 msgid "°C"
 msgstr "°C"
 
-#: src/plugins/CPU.cpp:225 src/plugins/Nvidia.cpp:526
+#: src/plugins/CPU.cpp:355 src/plugins/CPU.cpp:417 src/plugins/CPU.cpp:440
+#: src/plugins/CPU.cpp:489
+msgid "Core"
+msgstr ""
+
+#: src/plugins/CPU.cpp:390 src/plugins/Nvidia.cpp:526
 msgid "Slowdown Temperature"
 msgstr "Nedsakkingstemperatur"
 
-#: src/plugins/CPU.cpp:236
+#: src/plugins/CPU.cpp:401
 #, fuzzy
 msgid "Overall Temperature"
 msgstr "Temperatur"
 
-#: src/plugins/CPU.cpp:252 src/plugins/CPU.cpp:275
-msgid "Core"
+#: src/plugins/CPU.cpp:491 src/plugins/Nvidia.cpp:274
+#: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
+#: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
+msgid "%"
+msgstr "%"
+
+#: src/plugins/CPU.cpp:506
+msgid "Power Saving Tendencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:291
+#: src/plugins/CPU.cpp:514
 msgid "Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:299 src/plugins/Nvidia.cpp:651
+#: src/plugins/CPU.cpp:522 src/plugins/Nvidia.cpp:667
+msgid "Utilizations"
+msgstr "Bruk"
+
+#: src/plugins/CPU.cpp:530 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
 msgstr "Temperaturer"
 
@@ -70,12 +85,6 @@ msgstr "Minneklokke"
 #: src/plugins/Nvidia.cpp:254
 msgid "Clocks"
 msgstr "Klokker"
-
-#: src/plugins/Nvidia.cpp:274 src/plugins/Nvidia.cpp:309
-#: src/plugins/Nvidia.cpp:371 src/plugins/Nvidia.cpp:391
-#: src/plugins/Nvidia.cpp:427
-msgid "%"
-msgstr "%"
 
 #: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
 msgid "Fan Speed"
@@ -144,10 +153,6 @@ msgstr "Vifte"
 #: src/plugins/Nvidia.cpp:659
 msgid "Fans"
 msgstr "Vifter"
-
-#: src/plugins/Nvidia.cpp:667
-msgid "Utilizations"
-msgstr "Bruk"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-12 13:21+0300\n"
+"POT-Creation-Date: 2023-10-16 16:03+0300\n"
 "PO-Revision-Date: 2023-10-11 11:20+0000\n"
 "Last-Translator: achjaj <bucko.jakub@protonmail.com>\n"
 "Language-Team: Slovak <https://hosted.weblate.org/projects/tuxclocker/"
@@ -19,34 +19,49 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Weblate 5.1-dev\n"
 
-#: src/plugins/CPU.cpp:178 src/plugins/Nvidia.cpp:148
+#: src/plugins/CPU.cpp:218 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
 #: src/plugins/Nvidia.cpp:236
 msgid "MHz"
 msgstr "Mhz"
 
-#: src/plugins/CPU.cpp:198 src/plugins/Nvidia.cpp:506
+#: src/plugins/CPU.cpp:238 src/plugins/Nvidia.cpp:506
 #: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
 msgid "°C"
 msgstr "°C"
 
-#: src/plugins/CPU.cpp:225 src/plugins/Nvidia.cpp:526
-msgid "Slowdown Temperature"
-msgstr "Teplota spomaľovania"
-
-#: src/plugins/CPU.cpp:236
-msgid "Overall Temperature"
-msgstr "Celková teplota"
-
-#: src/plugins/CPU.cpp:252 src/plugins/CPU.cpp:275
+#: src/plugins/CPU.cpp:355 src/plugins/CPU.cpp:417 src/plugins/CPU.cpp:440
+#: src/plugins/CPU.cpp:489
 msgid "Core"
 msgstr "Jadro"
 
-#: src/plugins/CPU.cpp:291
+#: src/plugins/CPU.cpp:390 src/plugins/Nvidia.cpp:526
+msgid "Slowdown Temperature"
+msgstr "Teplota spomaľovania"
+
+#: src/plugins/CPU.cpp:401
+msgid "Overall Temperature"
+msgstr "Celková teplota"
+
+#: src/plugins/CPU.cpp:491 src/plugins/Nvidia.cpp:274
+#: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
+#: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
+msgid "%"
+msgstr "%"
+
+#: src/plugins/CPU.cpp:506
+msgid "Power Saving Tendencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:514
 msgid "Frequencies"
 msgstr "Frekvencie"
 
-#: src/plugins/CPU.cpp:299 src/plugins/Nvidia.cpp:651
+#: src/plugins/CPU.cpp:522 src/plugins/Nvidia.cpp:667
+msgid "Utilizations"
+msgstr "Využitie"
+
+#: src/plugins/CPU.cpp:530 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
 msgstr "Teploty"
 
@@ -69,12 +84,6 @@ msgstr "Takt pamäte"
 #: src/plugins/Nvidia.cpp:254
 msgid "Clocks"
 msgstr "Takty"
-
-#: src/plugins/Nvidia.cpp:274 src/plugins/Nvidia.cpp:309
-#: src/plugins/Nvidia.cpp:371 src/plugins/Nvidia.cpp:391
-#: src/plugins/Nvidia.cpp:427
-msgid "%"
-msgstr "%"
 
 #: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
 msgid "Fan Speed"
@@ -143,10 +152,6 @@ msgstr "Vetrák"
 #: src/plugins/Nvidia.cpp:659
 msgid "Fans"
 msgstr "Vetráky"
-
-#: src/plugins/Nvidia.cpp:667
-msgid "Utilizations"
-msgstr "Využitie"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-11 14:16+0300\n"
+"POT-Creation-Date: 2023-10-16 16:03+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,34 +17,49 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/plugins/CPU.cpp:178 src/plugins/Nvidia.cpp:148
+#: src/plugins/CPU.cpp:218 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
 #: src/plugins/Nvidia.cpp:236
 msgid "MHz"
 msgstr ""
 
-#: src/plugins/CPU.cpp:198 src/plugins/Nvidia.cpp:506
+#: src/plugins/CPU.cpp:238 src/plugins/Nvidia.cpp:506
 #: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
 msgid "°C"
 msgstr ""
 
-#: src/plugins/CPU.cpp:225 src/plugins/Nvidia.cpp:526
-msgid "Slowdown Temperature"
-msgstr ""
-
-#: src/plugins/CPU.cpp:236
-msgid "Overall Temperature"
-msgstr ""
-
-#: src/plugins/CPU.cpp:252 src/plugins/CPU.cpp:275
+#: src/plugins/CPU.cpp:355 src/plugins/CPU.cpp:417 src/plugins/CPU.cpp:440
+#: src/plugins/CPU.cpp:489
 msgid "Core"
 msgstr ""
 
-#: src/plugins/CPU.cpp:291
+#: src/plugins/CPU.cpp:390 src/plugins/Nvidia.cpp:526
+msgid "Slowdown Temperature"
+msgstr ""
+
+#: src/plugins/CPU.cpp:401
+msgid "Overall Temperature"
+msgstr ""
+
+#: src/plugins/CPU.cpp:491 src/plugins/Nvidia.cpp:274
+#: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
+#: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
+msgid "%"
+msgstr ""
+
+#: src/plugins/CPU.cpp:506
+msgid "Power Saving Tendencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:514
 msgid "Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:299 src/plugins/Nvidia.cpp:651
+#: src/plugins/CPU.cpp:522 src/plugins/Nvidia.cpp:667
+msgid "Utilizations"
+msgstr ""
+
+#: src/plugins/CPU.cpp:530 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
 msgstr ""
 
@@ -66,12 +81,6 @@ msgstr ""
 
 #: src/plugins/Nvidia.cpp:254
 msgid "Clocks"
-msgstr ""
-
-#: src/plugins/Nvidia.cpp:274 src/plugins/Nvidia.cpp:309
-#: src/plugins/Nvidia.cpp:371 src/plugins/Nvidia.cpp:391
-#: src/plugins/Nvidia.cpp:427
-msgid "%"
 msgstr ""
 
 #: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
@@ -140,10 +149,6 @@ msgstr ""
 
 #: src/plugins/Nvidia.cpp:659
 msgid "Fans"
-msgstr ""
-
-#: src/plugins/Nvidia.cpp:667
-msgid "Utilizations"
 msgstr ""
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
