@@ -33,6 +33,10 @@ protected:
 	// TODO: allow to start editing with the keyboard
 	EditTriggers editTriggers() { return QAbstractItemView::AllEditTriggers; }
 private:
+	// Suspend/resume readable updates
+	void suspendChildren(const QModelIndex &);
+	void resumeChildren(const QModelIndex &);
+
 	// DeviceModel &m_deviceModel;
 	DeviceModelDelegate *m_delegate;
 };

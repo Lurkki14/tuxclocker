@@ -36,7 +36,7 @@ DynamicReadableProxy::DynamicReadableProxy(QString path, QDBusConnection conn, Q
 	qDBusRegisterMetaType<TCD::Result<QDBusVariant>>();
 	qDBusRegisterMetaType<TCD::Result<QString>>();
 
-	m_timer.start(1000);
+	m_timer.start(m_updateInterval);
 
 	connect(&m_timer, &QTimer::timeout, [=] {
 		QDBusReply<TCD::Result<QDBusVariant>> reply = m_iface.call("value");
