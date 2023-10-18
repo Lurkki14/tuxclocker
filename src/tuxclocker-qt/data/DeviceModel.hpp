@@ -6,6 +6,7 @@
 
 #include <DBusTypes.hpp>
 #include <Device.hpp>
+#include <DynamicReadableConnectionData.hpp>
 #include <patterns.hpp>
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -58,11 +59,13 @@ public:
 	// QVariant data(QModelIndex&);
 	static QIcon dynamicReadableIcon() { return QIcon(":/ruler.svg"); }
 	static QIcon staticReadableIcon() { return QIcon::fromTheme("help-about"); }
+	QVector<DynamicReadableConnectionData> activeConnections() { return m_activeConnections; }
 signals:
 	void changesApplied();
 private:
 	Q_OBJECT
 
+	QVector<DynamicReadableConnectionData> m_activeConnections;
 	QHash<QStandardItem *, AssignableProxy *> m_assignableProxyHash;
 
 	// Separate handling interfaces since otherwise we run out of columns

@@ -47,3 +47,9 @@ QDataStream &operator>>(QDataStream &in, DynamicReadableConnectionData &data) {
 	in >> data.dynamicReadablePath >> data.points >> data.rangeInfo;
 	return in;
 }
+
+// Comparing just the path should be enough for our purposes
+bool operator==(
+    const DynamicReadableConnectionData &lhs, const DynamicReadableConnectionData &rhs) {
+	return lhs.dynamicReadablePath == rhs.dynamicReadablePath;
+}

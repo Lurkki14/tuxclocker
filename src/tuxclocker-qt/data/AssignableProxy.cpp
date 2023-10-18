@@ -69,6 +69,7 @@ void AssignableProxy::apply() {
 
 	// Stop existing parametrization
 	if (m_connection) {
+		emit connectionStopped(m_value);
 		disconnect(m_connection, nullptr, nullptr, nullptr);
 		m_connection->stop();
 		delete m_connection;

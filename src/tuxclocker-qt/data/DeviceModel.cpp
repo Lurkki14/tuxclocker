@@ -150,8 +150,13 @@ QStandardItem *DeviceModel::createAssignable(
 		    pattern(_) = [] {});
 	});
 
+	connect(proxy, &AssignableProxy::connectionStopped, [=](auto value) {
+		m_activeConnections.removeOne(qvariant_cast<DynamicReadableConnectionData>(value));
+	});
+
 	connect(proxy, &AssignableProxy::connectionSucceeded, [=](auto value) {
-		// Write successful connection value to settings
+		m_activeConnections.append(qvariant_cast<DynamicReadableConnectionData>(value));
+		//  Write successful connection value to settings
 		auto assSetting = AssignableSetting{
 		    .assignablePath = proxy->dbusPath(),
 		    .value = value,

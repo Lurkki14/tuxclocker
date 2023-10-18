@@ -31,7 +31,7 @@ signals:
 	    std::variant<QVariant, TC::Device::AssignmentError>, QString text);
 	void connectionSucceeded(QVariant);
 	void connectionStarted();
-	void connectionStopped();
+	void connectionStopped(QVariant);
 private:
 	Q_OBJECT
 

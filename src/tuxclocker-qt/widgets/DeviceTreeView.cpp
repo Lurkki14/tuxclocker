@@ -2,6 +2,7 @@
 #include "qcheckbox.h"
 
 #include <DragChartView.hpp>
+#include <Globals.hpp>
 #include <patterns.hpp>
 #include <QCheckBox>
 #include <QDebug>
@@ -36,12 +37,21 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 }
 
 void DeviceTreeView::suspendChildren(const QModelIndex &index) {
+	// TODO: readables aren't suspended when hidden and a connection using it stops
+	QVector<QString> connectedReadablePaths;
+	for (auto &conn : Globals::g_deviceModel->activeConnections())
+		connectedReadablePaths.append(conn.dynamicReadablePath);
+
 	auto cb = [=](QAbstractItemModel *model, const QModelIndex &index, int row) {
 		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
 		auto dynProxyV = ifaceIndex.data(DeviceModel::DynamicReadableProxyRole);
 
-		if (dynProxyV.isValid())
-			qvariant_cast<DynamicReadableProxy *>(dynProxyV)->suspend();
+		if (dynProxyV.isValid()) {
+			auto proxy = qvariant_cast<DynamicReadableProxy *>(dynProxyV);
+			// Don't suspend readables that are used in connections
+			if (!connectedReadablePaths.contains(proxy->dbusPath()))
+				proxy->suspend();
+		}
 
 		return model->index(row, DeviceModel::NameColumn, index);
 	};

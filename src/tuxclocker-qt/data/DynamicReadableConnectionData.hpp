@@ -14,6 +14,8 @@ struct DynamicReadableConnectionData {
 	QString dynamicReadablePath;
 	TuxClocker::Device::RangeInfo rangeInfo;
 
+	friend bool operator==(
+	    const DynamicReadableConnectionData &, const DynamicReadableConnectionData &);
 	friend QDataStream &operator<<(QDataStream &, const DynamicReadableConnectionData &);
 	friend QDataStream &operator>>(QDataStream &, DynamicReadableConnectionData &);
 };
