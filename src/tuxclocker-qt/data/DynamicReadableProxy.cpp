@@ -39,13 +39,18 @@ DynamicReadableProxy::DynamicReadableProxy(QString path, QDBusConnection conn, Q
 	m_timer.start(m_updateInterval);
 
 	connect(&m_timer, &QTimer::timeout, [=] {
-		QDBusReply<TCD::Result<QDBusVariant>> reply = m_iface.call("value");
+		auto asyncCall = m_iface.asyncCall("value");
+		auto watcher = new QDBusPendingCallWatcher{asyncCall};
 
-		if (!reply.isValid())
-			emit valueChanged(ReadError::UnknownError);
-		else
-			// qDebug() << QVariant::fromStdVariant(toTCResult(reply.value()));
-			emit valueChanged(toTCResult(reply.value()));
+		connect(watcher, &QDBusPendingCallWatcher::finished,
+		    [=](QDBusPendingCallWatcher *call) {
+			    QDBusPendingReply<TCD::Result<QDBusVariant>> reply = *call;
+			    if (!reply.isValid())
+				    emit valueChanged(ReadError::UnknownError);
+			    else
+				    emit valueChanged(toTCResult(reply.value()));
+			    delete call;
+		    });
 	});
 }
 
