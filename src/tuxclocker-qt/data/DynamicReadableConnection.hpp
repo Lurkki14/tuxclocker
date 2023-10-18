@@ -41,20 +41,24 @@ public:
 	}
 	virtual QVariant connectionData() override { return QVariant(); }
 	virtual void start() override {
-		connect(&m_proxy, &DynamicReadableProxy::valueChanged, [this](auto val) {
-			match(val)(pattern(as<ReadableValue>(arg)) = [this](auto rv) {
-				match(rv)(
-				    pattern(as<uint>(arg)) = [this](auto u) { emitTargetValue(u); },
-				    pattern(as<int>(arg)) = [this](int i) { emitTargetValue(i); },
-				    pattern(as<double>(arg)) = [this](
-								   auto d) { emitTargetValue(d); });
-			});
-		});
+		m_connection =
+		    connect(&m_proxy, &DynamicReadableProxy::valueChanged, [this](auto val) {
+			    match(val)(pattern(as<ReadableValue>(arg)) = [this](auto rv) {
+				    match(rv)(
+					pattern(
+					    as<uint>(arg)) = [this](auto u) { emitTargetValue(u); },
+					pattern(as<int>(arg)) = [this](
+								    int i) { emitTargetValue(i); },
+					pattern(as<double>(arg)) =
+					    [this](auto d) { emitTargetValue(d); });
+			    });
+		    });
 	}
-	virtual void stop() override { disconnect(&m_proxy, nullptr, nullptr, nullptr); }
+	virtual void stop() override { disconnect(m_connection); }
 private:
 	TargetType m_targetType;
 	DynamicReadableProxy &m_proxy;
+	QMetaObject::Connection m_connection;
 	QTimer m_timer;
 	QVector<QPointF> m_points;
 
