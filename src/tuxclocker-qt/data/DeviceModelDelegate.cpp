@@ -132,8 +132,9 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 			}
 			m_functionEditor->setRangeInfo(
 			    std::get<RangeInfo>(assInfo.assignableInfo()));
-			m_functionEditor->setAssignableName(
-			    index.data(DeviceModel::NodeNameRole).toString());
+			auto name = index.data(DeviceModel::NodeNameRole).toString();
+			auto unit = assInfo.unit();
+			m_functionEditor->setAssignableText(name, unit);
 
 			m_menu.addAction(m_parametrize);
 

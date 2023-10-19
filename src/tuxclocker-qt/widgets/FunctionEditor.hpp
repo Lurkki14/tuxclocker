@@ -109,10 +109,25 @@ public:
 			this->close();
 		});
 
-		m_dependableReadableComboBox->indexChanged.connect([this](auto &index) {
+		m_dependableReadableComboBox->indexChanged.connect([this](QModelIndex &index) {
 			m_latestNodeIndex = index;
 			auto nodeName = index.data(Qt::DisplayRole).toString();
 			m_dragView->xAxis().setTitleText(nodeName);
+
+			// DynamicReadableProxy from adjacent column
+			auto dynProxyV =
+			    index.model()
+				->index(index.row(), DeviceModel::InterfaceColumn, index.parent())
+				.data(DeviceModel::DynamicReadableProxyRole);
+			if (dynProxyV.isValid()) {
+				auto unit = dynProxyV.value<DynamicReadableProxy *>()->unit();
+				if (unit.has_value()) {
+					auto text = QString{"%1 (%2)"}.arg(nodeName, *unit);
+					m_dragView->xAxis().setTitleText(text);
+				} else
+					m_dragView->xAxis().setTitleText(nodeName);
+			} else
+				m_dragView->xAxis().setTitleText(nodeName);
 
 			if (m_dragView->vector().length() > 1)
 				emit canApplyChanged(true);
@@ -139,9 +154,16 @@ public:
 		m_applyButton->setToolTip(disabledReason());
 		m_rangeInfo = rangeInfo;
 	}
-	void setAssignableName(QString name) {
+	void setAssignableText(QString name, std::optional<QString> unit) {
 		m_dependableLabel->setText(QString{_("Connecting %1 with:")}.arg(name));
 		m_dragView->yAxis().setTitleText(name);
+
+		if (!unit.has_value())
+			m_dragView->yAxis().setTitleText(name);
+		else {
+			auto text = QString{"%1 (%2)"}.arg(name, *unit);
+			m_dragView->yAxis().setTitleText(text);
+		}
 	}
 
 	boost::signals2::signal<void(std::shared_ptr<AssignableConnection>)>
