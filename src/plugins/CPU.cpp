@@ -160,13 +160,12 @@ std::optional<CPUInfoData> parseCPUInfoSection(std::string section) {
 }
 
 std::vector<CPUInfoData> parseCPUInfo() {
-	std::ifstream file{"/proc/cpuinfo"};
-	std::stringstream buffer;
-	buffer << file.rdbuf();
+	auto contents = fileContents("/proc/cpuinfo");
+	if (!contents.has_value())
+		return {};
 
-	auto contents = buffer.str();
 	// Split into paragraphs/sections
-	auto sections = splitAt("\n\n", contents);
+	auto sections = splitAt("\n\n", *contents);
 	std::vector<CPUInfoData> retval;
 
 	for (auto &section : sections) {
@@ -183,14 +182,9 @@ std::optional<std::string> coretempHwmonPath() {
 	for (auto &dir : hwmonDirs) {
 		// See if 'name' file contains 'coretemp'
 		auto namePath = dir.path().string() + "/name";
-		std::ifstream file{namePath};
-		if (file.good()) {
-			std::stringstream buf;
-			buf << file.rdbuf();
-
-			if (buf.str().find("coretemp") != std::string::npos)
-				return dir.path().string();
-		}
+		auto contents = fileContents(namePath);
+		if (contents.has_value() && contents->find("coretemp") != std::string::npos)
+			return dir.path().string();
 	}
 	return std::nullopt;
 }
@@ -204,13 +198,11 @@ std::optional<DynamicReadable> frequencyReadable(uint coreIndex) {
 		return std::nullopt;
 
 	auto func = [=]() -> ReadResult {
-		std::ifstream file{path};
-		if (!file.good())
+		auto contents = fileContents(path);
+		if (!contents.has_value())
 			return ReadError::UnknownError;
-		std::stringstream buffer;
-		buffer << file.rdbuf();
 
-		auto value = static_cast<uint>(std::stoi(buffer.str()));
+		auto value = static_cast<uint>(std::stoi(*contents));
 		// kHz -> MHz
 		return value / 1000;
 	};
@@ -223,13 +215,11 @@ std::optional<DynamicReadable> coretempReadable(const char *hwmonPath, uint inde
 	snprintf(path, 64, "%s/temp%u_input", hwmonPath, index);
 
 	auto func = [=]() -> ReadResult {
-		std::ifstream file{path};
-		if (!file.good())
+		auto contents = fileContents(path);
+		if (!contents.has_value())
 			return ReadError::UnknownError;
-		std::stringstream buffer;
-		buffer << file.rdbuf();
 
-		auto value = static_cast<uint>(std::stoi(buffer.str()));
+		auto value = static_cast<uint>(std::stoi(*contents));
 		// millicelcius -> celcius
 		return value / 1000;
 	};
@@ -322,13 +312,10 @@ std::vector<TreeNode<DeviceNode>> getIntelEPBNodes(CPUData data) {
 			continue;
 
 		auto getFunc = [=]() -> std::optional<AssignmentArgument> {
-			std::ifstream file{path};
-			if (!file.good())
+			auto contents = fileContents(path);
+			if (!contents.has_value())
 				return std::nullopt;
-
-			std::stringstream buffer;
-			buffer << file.rdbuf();
-			return std::stoi(buffer.str());
+			return std::stoi(*contents);
 		};
 
 		auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
@@ -379,12 +366,9 @@ std::vector<TreeNode<DeviceNode>> getCoretempTemperatures(CPUData data) {
 	char maxTempPath[64];
 	snprintf(maxTempPath, 64, "%s/temp%u_crit", hwmonPath, data.firstCoreIndex + 1);
 
-	std::ifstream file{maxTempPath};
-	if (file.good()) {
-		std::stringstream buf;
-		buf << file.rdbuf();
-
-		StaticReadable sr{static_cast<uint>(std::stoi(buf.str())) / 1000, "°C"};
+	auto contents = fileContents(maxTempPath);
+	if (contents.has_value()) {
+		StaticReadable sr{static_cast<uint>(std::stoi(*contents)) / 1000, "°C"};
 
 		DeviceNode node{
 		    .name = _("Slowdown Temperature"),
