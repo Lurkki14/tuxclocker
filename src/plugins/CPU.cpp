@@ -567,6 +567,129 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 	return retval;
 }
 
+std::optional<Range<int>> cpuFreqRange(CPUData data) {
+	// The proper limits seem to be at least in the last core index, the first two cores
+	// report lower max speed, even though they can boost to the same frequency. WTF?
+	// TODO: check all indices if this is wrong on some other system
+	uint lastIndex = data.firstCoreIndex + data.coreCount - 1;
+	char path[96];
+	snprintf(path, 96, "/sys/devices/system/cpu/cpu%u/cpufreq/cpuinfo_min_freq", lastIndex);
+	auto cpuInfoMinStr = fileContents(path);
+
+	if (!cpuInfoMinStr.has_value())
+		return std::nullopt;
+
+	auto cpuInfoMin = std::stoi(*cpuInfoMinStr);
+
+	snprintf(path, 96, "/sys/devices/system/cpu/cpu%u/cpufreq/cpuinfo_max_freq", lastIndex);
+	auto cpuInfoMaxStr = fileContents(path);
+
+	if (!cpuInfoMinStr.has_value())
+		return std::nullopt;
+
+	auto cpuInfoMax = std::stoi(*cpuInfoMaxStr);
+	// kHz -> MHz
+	return Range{cpuInfoMin / 1000, cpuInfoMax / 1000};
+}
+
+// Take the path format as argument since that's the only difference between min/max
+std::vector<Assignable> freqLimitAssignableFromFormat(CPUData data, const char *format) {
+	std::vector<Assignable> retval;
+	auto range = cpuFreqRange(data);
+	if (!range.has_value())
+		return {};
+
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		char path[96];
+		snprintf(path, 96, format, i);
+
+		auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+			auto contents = fileContents(path);
+			if (!contents.has_value())
+				return std::nullopt;
+			return std::stoi(*contents) / 1000;
+		};
+
+		auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+			if (!std::holds_alternative<int>(a))
+				return AssignmentError::InvalidType;
+
+			auto arg = std::get<int>(a);
+			if (arg < range->min || arg > range->max)
+				return AssignmentError::OutOfRange;
+
+			std::ofstream file{path};
+			// MHz -> kHz
+			if (file << (arg * 1000))
+				return std::nullopt;
+			return AssignmentError::UnknownError;
+		};
+		Assignable a{setFunc, *range, getFunc, _("MHz")};
+		retval.push_back(a);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getGovernorMinimums(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+	auto format = "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_min_freq";
+	auto assignables = freqLimitAssignableFromFormat(data, format);
+
+	for (uint i = 0; i < assignables.size(); i++) {
+		char idStr[64];
+		snprintf(idStr, 64, "%sCore%uGovernorMin", data.identifier.c_str(), i);
+		char nameStr[32];
+		snprintf(nameStr, 32, "%s %u", _("Core"), i);
+
+		DeviceNode node{
+		    .name = nameStr,
+		    .interface = assignables[i],
+		    .hash = md5(idStr),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getGovernorMaximums(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+	auto format = "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_max_freq";
+	auto assignables = freqLimitAssignableFromFormat(data, format);
+
+	for (uint i = 0; i < assignables.size(); i++) {
+		char idStr[64];
+		snprintf(idStr, 64, "%sCore%uGovernorMax", data.identifier.c_str(), i);
+		char nameStr[32];
+		snprintf(nameStr, 32, "%s %u", _("Core"), i);
+
+		DeviceNode node{
+		    .name = nameStr,
+		    .interface = assignables[i],
+		    .hash = md5(idStr),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getGovernorMaximumsRoot(CPUData data) {
+	// Scaling governor root, eg. powersave, performance
+	return {DeviceNode{
+	    .name = _("Maximum Frequencies"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Governor Maximums Root"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getGovernorMinimumsRoot(CPUData data) {
+	// Scaling governor root, eg. powersave, performance
+	return {DeviceNode{
+	    .name = _("Minimum Frequencies"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Governor Minimums Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getCPUGovernorRoot(CPUData data) {
 	// Scaling governor root, eg. powersave, performance
 	return {DeviceNode{
@@ -647,6 +770,12 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 		{getGovernorRoot, {
 			{getCPUGovernorRoot, {
 				{getGovernors, {}},
+			}},
+			{getGovernorMinimumsRoot, {
+				{getGovernorMinimums, {}},
+			}},
+			{getGovernorMaximumsRoot, {
+				{getGovernorMaximums, {}}
 			}}
 		}}
 	}
