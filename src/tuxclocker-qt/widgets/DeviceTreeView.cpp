@@ -130,12 +130,16 @@ bool indexApplicableForIndex(QModelIndex &orig, QModelIndex &other) {
 	return assignableInfoEquals(origAssData.assignableInfo(), otherAssData.assignableInfo());
 }
 
-void DeviceTreeView::commitData(QWidget *w) {
-	for (auto &index : m_editSelection) {
-		// See if node is applicable to being set the same value
-		// as the node the editor was opened for
-		if (indexApplicableForIndex(m_editedIndex, index))
-			m_delegate->setModelData(w, model(), index);
+void DeviceTreeView::dataChanged(
+    const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
+	auto assData = topLeft.data(DeviceModel::AssignableRole);
+	if (assData.isValid() && roles.contains(DeviceModel::AssignableRole)) {
+		for (auto &index : m_editSelection) {
+			// See if node is applicable to being set the same value
+			// as the node the editor was opened for
+			if (indexApplicableForIndex(m_editedIndex, index))
+				model()->setData(index, assData, DeviceModel::AssignableRole);
+		}
 	}
-	QTreeView::commitData(w);
+	QTreeView::dataChanged(topLeft, bottomRight, roles);
 }

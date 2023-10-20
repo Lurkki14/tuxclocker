@@ -37,7 +37,7 @@ protected:
 	}
 	// TODO: allow to start editing with the keyboard
 	EditTriggers editTriggers() { return QAbstractItemView::AllEditTriggers; }
-	void commitData(QWidget *) override;
+	void dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int> &) override;
 private:
 	// Suspend/resume readable updates
 	void suspendChildren(const QModelIndex &);
