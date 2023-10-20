@@ -2,6 +2,13 @@
 #include <sstream>
 #include <Utils.hpp>
 
+bool hasEnum(uint enum_, const TuxClocker::Device::EnumerationVec &enumVec) {
+	for (auto &e : enumVec)
+		if (e.key == enum_)
+			return true;
+	return false;
+}
+
 bool hasReadableValue(TuxClocker::Device::ReadResult res) {
 	return std::holds_alternative<TuxClocker::Device::ReadableValue>(res);
 }

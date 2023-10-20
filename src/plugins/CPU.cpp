@@ -485,6 +485,105 @@ std::vector<TreeNode<DeviceNode>> getUtilizations(CPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+
+	// Convert to our own names so we can localize them
+	auto fromSysFsName = [](const std::string &sysFsName) -> std::string {
+		if (sysFsName.find("powersave") != std::string::npos)
+			return _("Power Saving");
+		if (sysFsName.find("performance") != std::string::npos)
+			return _("Performance");
+		// Unknown name
+		return sysFsName;
+	};
+
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		char path[96];
+		snprintf(path, 96,
+		    "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_available_governors", i);
+
+		auto contents = fileContents(path);
+		if (!contents.has_value())
+			continue;
+
+		EnumerationVec enumVec;
+		std::vector<std::string> sysFsNames;
+		int enumId = 0;
+		for (auto &word : split_words(false, *contents)) {
+			auto e = Enumeration{fromSysFsName(word), enumId};
+			enumId++;
+			enumVec.push_back(e);
+			sysFsNames.push_back(word);
+		}
+		char curPath[96];
+		snprintf(curPath, 96, "/sys/devices/system/cpu/cpu%u/cpufreq/scaling_governor", i);
+
+		auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+			auto string = fileContents(curPath);
+			if (!string.has_value())
+				return std::nullopt;
+
+			for (int i = 0; i < enumVec.size(); i++) {
+				if (string->find(sysFsNames[i]) != std::string::npos)
+					return enumVec[i].key;
+			}
+			return std::nullopt;
+		};
+
+		auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+			std::ofstream file{curPath};
+			if (!file.good())
+				return AssignmentError::UnknownError;
+
+			if (!std::holds_alternative<uint>(a))
+				return AssignmentError::InvalidType;
+
+			auto arg = std::get<uint>(a);
+			if (!hasEnum(arg, enumVec))
+				return AssignmentError::OutOfRange;
+
+			if (file << sysFsNames[arg])
+				return std::nullopt;
+			return AssignmentError::UnknownError;
+		};
+
+		Assignable a{setFunc, enumVec, getFunc, std::nullopt};
+
+		char idStr[64];
+		snprintf(idStr, 64, "%sCore%uGovernor", data.identifier.c_str(), i);
+		char name[32];
+		snprintf(name, 32, "%s %u", _("Core"), i);
+
+		if (getFunc().has_value()) {
+			DeviceNode node{
+			    .name = name,
+			    .interface = a,
+			    .hash = md5(idStr),
+			};
+			retval.push_back(node);
+		}
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getCPUGovernorRoot(CPUData data) {
+	// Scaling governor root, eg. powersave, performance
+	return {DeviceNode{
+	    .name = _("Governor"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Scaling Governor Root"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getGovernorRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Governor"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Governor Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getIntelEPBRoot(CPUData data) {
 	return {DeviceNode{
 	    .name = _("Power Saving Tendencies"),
@@ -544,6 +643,11 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 		}},
 		{getIntelEPBRoot, {
 			{getIntelEPBNodes, {}}
+		}},
+		{getGovernorRoot, {
+			{getCPUGovernorRoot, {
+				{getGovernors, {}},
+			}}
 		}}
 	}
 };
