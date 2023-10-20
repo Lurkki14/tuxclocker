@@ -21,9 +21,14 @@ public:
 	// TODO: this can be handled in the delegate with QAbstractItemDelegate::editorEvent
 	boost::signals2::signal<void(QModelIndex &)> functionEditorRequested;
 protected:
-	/* Workaround for the retarded behavior of waiting for a double click,
-	   you can't even disable it! */
-	bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger, QEvent *event) {
+	bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger,
+	    QEvent *event) override {
+		// The editor value is applied to all applicable indices from these
+		m_editSelection = selectedIndexes();
+		// Used as the baseline
+		m_editedIndex = index;
+
+		// Don't wait for double click
 		return QTreeView::edit(index,
 		    trigger == QAbstractItemView::SelectedClicked
 			? QAbstractItemView::AllEditTriggers
@@ -32,11 +37,14 @@ protected:
 	}
 	// TODO: allow to start editing with the keyboard
 	EditTriggers editTriggers() { return QAbstractItemView::AllEditTriggers; }
+	void commitData(QWidget *) override;
 private:
 	// Suspend/resume readable updates
 	void suspendChildren(const QModelIndex &);
 	void resumeChildren(const QModelIndex &);
 
 	// DeviceModel &m_deviceModel;
+	QModelIndexList m_editSelection;
+	QModelIndex m_editedIndex;
 	DeviceModelDelegate *m_delegate;
 };
