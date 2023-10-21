@@ -51,27 +51,24 @@ msgid "%"
 msgstr "%"
 
 #: src/plugins/CPU.cpp:494
-#, fuzzy
 msgid "Power Saving"
-msgstr "Toimintateho"
+msgstr "Virransäästö"
 
 #: src/plugins/CPU.cpp:496
 msgid "Performance"
-msgstr ""
+msgstr "Suorituskyky"
 
 #: src/plugins/CPU.cpp:678
-#, fuzzy
 msgid "Maximum Frequencies"
-msgstr "Taajuudet"
+msgstr "Enimmäistaajuudet"
 
 #: src/plugins/CPU.cpp:687
-#, fuzzy
 msgid "Minimum Frequencies"
-msgstr "Taajuudet"
+msgstr "Vähimmäistaajuudet"
 
 #: src/plugins/CPU.cpp:696 src/plugins/CPU.cpp:704
 msgid "Governor"
-msgstr ""
+msgstr "Säädin"
 
 #: src/plugins/CPU.cpp:712
 msgid "Power Saving Tendencies"
