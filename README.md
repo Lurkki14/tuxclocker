@@ -12,6 +12,7 @@ TuxClocker uses GNU gettext for translations. You can use [Weblate](https://host
 ## Features
 - Supports any number of devices at once
 - Read and write device properties (Click on a selected node to edit)
+- Edit multiple similar nodes at once by selecting them and starting editing
 - Connect any writable property to any readable property, for more possibilities than just fan curves. Currently only possible with range-based writable properties (Right click on a node)
 - Reset writable properties to default (Right click on a node)
 - Profiles
@@ -43,9 +44,13 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 
 ### CPUs
 - Frequency monitoring
+- Utilization monitoring
+- CPU Governor setting
+- CPU Governor minimum/maximum frequency setting
 
 ### Intel CPUs
 - Temperature monitoring (coretemp)
+- Energy-Performance Bias setting (called Power Saving Tendency in the program)
 
 ## Possible future improvements
 - Support for more devices
