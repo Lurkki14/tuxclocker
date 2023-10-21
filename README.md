@@ -70,6 +70,16 @@ You can use the `tuxclocker.tar` from the release page if you don't want to comp
 - Extract the contents eg. (`tar xf tuxlocker.tar`)
 - Run `sudo echo && ./run.sh` in the same folder (sudo is needed for the daemon)
 
+## Using distribution packages
+This list may contain unofficial distribution packages, maintained by other people not directly related with this project.
+
+#### For openSUSE Tumbleweed
+Install the [tuxclocker](https://software.opensuse.org//download.html?project=home%3Atujhen%3Atuxclocker&package=tuxclocker) package from OBS. Or via terminal
+```
+sudo zypper in opi
+opi tuxclocker
+```
+
 ## Dependencies
 
 `qt (charts, base, dbus), boost-system, boost-filesystem, libnvml, libxnvctrl, xlib, libdrm, meson`
@@ -96,6 +106,24 @@ sudo apt install --yes --quiet --quiet \
     nvidia-settings \
     libxnvctrl-dev
 ```
+
+#### For openSUSE Tumbleweed
+```
+sudo zypper in -y \
+    meson \
+    gettext-runtime \
+    gcc-c++ \
+    libboost_system-devel \
+    libboost_filesystem-devel \
+    libdrm-devel \
+    libXNVCtrl-devel \
+    libX11-devel \
+    libQt5DBus-devel \
+    libQt5Charts5-devel \
+    libqt5-qtbase-devel \
+    libopenssl-1_0_0-devel
+```
+
 
 ## Compiling
 
