@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 16:03+0300\n"
+"POT-Creation-Date: 2023-10-21 12:10+0300\n"
 "PO-Revision-Date: 2023-10-08 19:24+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/"
@@ -19,50 +19,72 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.1-dev\n"
 
-#: src/plugins/CPU.cpp:218 src/plugins/Nvidia.cpp:148
+#: src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:627 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
 #: src/plugins/Nvidia.cpp:236
 msgid "MHz"
 msgstr "MHz"
 
-#: src/plugins/CPU.cpp:238 src/plugins/Nvidia.cpp:506
+#: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:506
 #: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
 msgid "°C"
 msgstr "°C"
 
-#: src/plugins/CPU.cpp:355 src/plugins/CPU.cpp:417 src/plugins/CPU.cpp:440
-#: src/plugins/CPU.cpp:489
+#: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
+#: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:556 src/plugins/CPU.cpp:642
+#: src/plugins/CPU.cpp:663
 msgid "Core"
 msgstr ""
 
-#: src/plugins/CPU.cpp:390 src/plugins/Nvidia.cpp:526
+#: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:526
 msgid "Slowdown Temperature"
 msgstr "Nedsakkingstemperatur"
 
-#: src/plugins/CPU.cpp:401
+#: src/plugins/CPU.cpp:385
 #, fuzzy
 msgid "Overall Temperature"
 msgstr "Temperatur"
 
-#: src/plugins/CPU.cpp:491 src/plugins/Nvidia.cpp:274
+#: src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:274
 #: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
 #: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
 msgid "%"
 msgstr "%"
 
-#: src/plugins/CPU.cpp:506
+#: src/plugins/CPU.cpp:494
+#, fuzzy
+msgid "Power Saving"
+msgstr "Strømforbruk"
+
+#: src/plugins/CPU.cpp:496
+msgid "Performance"
+msgstr ""
+
+#: src/plugins/CPU.cpp:678
+msgid "Maximum Frequencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:687
+msgid "Minimum Frequencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:696 src/plugins/CPU.cpp:704
+msgid "Governor"
+msgstr ""
+
+#: src/plugins/CPU.cpp:712
 msgid "Power Saving Tendencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:514
+#: src/plugins/CPU.cpp:720
 msgid "Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:522 src/plugins/Nvidia.cpp:667
+#: src/plugins/CPU.cpp:728 src/plugins/Nvidia.cpp:667
 msgid "Utilizations"
 msgstr "Bruk"
 
-#: src/plugins/CPU.cpp:530 src/plugins/Nvidia.cpp:651
+#: src/plugins/CPU.cpp:736 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
 msgstr "Temperaturer"
 
@@ -158,7 +180,7 @@ msgstr "Vifter"
 msgid "(Parametrized)"
 msgstr ""
 
-#: src/tuxclocker-qt/data/DeviceModel.cpp:243
+#: src/tuxclocker-qt/data/DeviceModel.cpp:248
 msgid "No value set"
 msgstr ""
 
@@ -199,15 +221,15 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:143
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:158
 msgid "Connecting %1 with:"
 msgstr ""
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:170
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
 msgid "A node to connect with needs to be selected"
 msgstr ""
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:174
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
 msgid "At least two points need to be placed"
 msgstr ""
 
