@@ -8,64 +8,68 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-21 12:10+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-10-23 11:30+0000\n"
+"Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/tuxclocker/"
+"tuxclocker/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.1.1-dev\n"
 
 #: src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:627 src/plugins/Nvidia.cpp:148
 #: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
 #: src/plugins/Nvidia.cpp:236
 msgid "MHz"
-msgstr ""
+msgstr "MHz"
 
 #: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:506
 #: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
 msgid "°C"
-msgstr ""
+msgstr "°C"
 
 #: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
 #: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:556 src/plugins/CPU.cpp:642
 #: src/plugins/CPU.cpp:663
 msgid "Core"
-msgstr ""
+msgstr "Kern"
 
 #: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:526
+#, fuzzy
 msgid "Slowdown Temperature"
-msgstr ""
+msgstr "Wird gedrosselt ab"
 
 #: src/plugins/CPU.cpp:385
 msgid "Overall Temperature"
-msgstr ""
+msgstr "Gesamttemperatur"
 
 #: src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:274
 #: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
 #: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: src/plugins/CPU.cpp:494
 msgid "Power Saving"
-msgstr ""
+msgstr "Energie sparen"
 
 #: src/plugins/CPU.cpp:496
 msgid "Performance"
-msgstr ""
+msgstr "Leistung"
 
 #: src/plugins/CPU.cpp:678
 msgid "Maximum Frequencies"
-msgstr ""
+msgstr "Maximale Frequenz"
 
 #: src/plugins/CPU.cpp:687
 msgid "Minimum Frequencies"
-msgstr ""
+msgstr "Minimale Frequenz"
 
 #: src/plugins/CPU.cpp:696 src/plugins/CPU.cpp:704
 msgid "Governor"
-msgstr ""
+msgstr "Regler"
 
 #: src/plugins/CPU.cpp:712
 msgid "Power Saving Tendencies"
@@ -73,203 +77,210 @@ msgstr ""
 
 #: src/plugins/CPU.cpp:720
 msgid "Frequencies"
-msgstr ""
+msgstr "Frequenzen"
 
 #: src/plugins/CPU.cpp:728 src/plugins/Nvidia.cpp:667
 msgid "Utilizations"
-msgstr ""
+msgstr "Auslastung"
 
 #: src/plugins/CPU.cpp:736 src/plugins/Nvidia.cpp:651
 msgid "Temperatures"
-msgstr ""
+msgstr "Temperaturen"
 
 #: src/plugins/Nvidia.cpp:152
 msgid "Memory Clock Offset"
-msgstr ""
+msgstr "Speichertakt Offset"
 
 #: src/plugins/Nvidia.cpp:199
+#, fuzzy
 msgid "Core Clock Offset"
-msgstr ""
+msgstr "Kerntakt Offset"
 
 #: src/plugins/Nvidia.cpp:219
 msgid "Core Clock"
-msgstr ""
+msgstr "Kerntakt"
 
 #: src/plugins/Nvidia.cpp:240
 msgid "Memory Clock"
-msgstr ""
+msgstr "Speichertakt"
 
 #: src/plugins/Nvidia.cpp:254
 msgid "Clocks"
-msgstr ""
+msgstr "Takt"
 
 #: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
 msgid "Fan Speed"
-msgstr ""
+msgstr "Lüfterdrehzahl"
 
 #: src/plugins/Nvidia.cpp:350
 msgid "Automatic"
-msgstr ""
+msgstr "Automatisch"
 
 #: src/plugins/Nvidia.cpp:350
 msgid "Manual"
-msgstr ""
+msgstr "Manuell"
 
 #: src/plugins/Nvidia.cpp:356
 msgid "Fan Mode"
-msgstr ""
+msgstr "Lüftermodus"
 
 #: src/plugins/Nvidia.cpp:375
+#, fuzzy
 msgid "Core Utilization"
-msgstr ""
+msgstr "Auslastung Kerne"
 
 #: src/plugins/Nvidia.cpp:395
 msgid "Memory Utilization"
-msgstr ""
+msgstr "Speicherauslastung"
 
 #: src/plugins/Nvidia.cpp:431
 msgid "PCIe Bandwidth Utilization"
-msgstr ""
+msgstr "Auslastung PCIe Bandbreite"
 
 #: src/plugins/Nvidia.cpp:447 src/plugins/Nvidia.cpp:488
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: src/plugins/Nvidia.cpp:451
 msgid "Power Usage"
-msgstr ""
+msgstr "Leistungsaufnahme"
 
 #: src/plugins/Nvidia.cpp:491
+#, fuzzy
 msgid "Power Limit"
-msgstr ""
+msgstr "Leistungsgrenze"
 
 #: src/plugins/Nvidia.cpp:510
 msgid "Temperature"
-msgstr ""
+msgstr "Temperatur"
 
 #: src/plugins/Nvidia.cpp:541
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "Abschalttemperatur"
 
 #: src/plugins/Nvidia.cpp:556 src/plugins/Nvidia.cpp:600
 msgid "mV"
-msgstr ""
+msgstr "mV"
 
 #: src/plugins/Nvidia.cpp:560
 msgid "Core Voltage"
-msgstr ""
+msgstr "Kernspannung"
 
 #: src/plugins/Nvidia.cpp:604
+#, fuzzy
 msgid "Core Voltage Offset"
-msgstr ""
+msgstr "Kernspannung Offset"
 
 #: src/plugins/Nvidia.cpp:621
 msgid "Fan"
-msgstr ""
+msgstr "Lüfter"
 
 #: src/plugins/Nvidia.cpp:659
 msgid "Fans"
-msgstr ""
+msgstr "Lüfter"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"
-msgstr ""
+msgstr "(Parametrisiert)"
 
 #: src/tuxclocker-qt/data/DeviceModel.cpp:248
 msgid "No value set"
-msgstr ""
+msgstr "Kein Wert gesetzt"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
 msgid "Parametrize..."
-msgstr ""
+msgstr "Parametrisiere..."
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
 msgid "Reset to default"
-msgstr ""
+msgstr "Standardwerte wiederherstellen"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
-msgstr ""
+msgstr "Darstellen:"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
 msgid "Apply changes"
-msgstr ""
+msgstr "Änderungen speichern"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr ""
+msgstr "Änderbare"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
-msgstr ""
+msgstr "Dynamische Werte"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:43
 msgid "Static Values"
-msgstr ""
+msgstr "Statische Werte"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:69
 msgid "Apply"
-msgstr ""
+msgstr "Anwenden"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
 #: src/tuxclocker-qt/widgets/Settings.cpp:70
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:158
 msgid "Connecting %1 with:"
-msgstr ""
+msgstr "Verbinde %1 mit:"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
+#, fuzzy
 msgid "A node to connect with needs to be selected"
-msgstr ""
+msgstr "Es muss ein Knoten zum Verbinden angegeben werden"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
 msgid "At least two points need to be placed"
-msgstr ""
+msgstr "Mindestens zwei Punkte müssen gesetzt werden"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:28
 msgid "Settings"
-msgstr ""
+msgstr "Einstellungen"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:30
 msgid "Apply profile settings automatically"
-msgstr ""
+msgstr "Profileinstellungen automatisch anwenden"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:32
 msgid "Use profile"
-msgstr ""
+msgstr "Nutze Profil"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:39
 msgid "Add profile"
-msgstr ""
+msgstr "Profil hinzufügen"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:42
 msgid "Remove selected"
-msgstr ""
+msgstr "Entferne gewähltes"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:45
 msgid "Unnamed"
-msgstr ""
+msgstr "Unbenannt"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:65
 msgid "Use tray icon"
-msgstr ""
+msgstr "Nutze Tray Icon"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:67
 msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
 msgstr ""
+"Aktivieren um TuxClocker in der Taskleiste zu verstecken, anstatt beim "
+"Schließen des Fensters zu beenden."
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:74
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: src/tuxclocker-qt/MainWindow.cpp:116
 msgid "&Maximize TuxClocker"
-msgstr ""
+msgstr "&Maximiere TuxClocker"
 
 #: src/tuxclocker-qt/MainWindow.cpp:120
 msgid "&Quit"
-msgstr ""
+msgstr "&Beenden"
