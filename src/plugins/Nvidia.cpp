@@ -50,7 +50,10 @@ std::optional<AssignmentError> fromNVMLRet(nvmlReturn_t ret) {
 	return AssignmentError::UnknownError;
 }
 
-uint nvctrlPerfModes(Display *dpy, uint index) {
+std::optional<uint> nvctrlPerfModes(Display *dpy, uint index) {
+	if (!dpy)
+		return std::nullopt;
+
 	// TODO: NVML has a function to get these but is borked
 	// Thanks to Artifth for original code
 	char *result;
@@ -545,6 +548,9 @@ std::vector<TreeNode<DeviceNode>> getShutdownTemperature(NvidiaGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltage(NvidiaGPUData data) {
+	if (!data.dpy)
+		return {};
+
 	auto func = [data]() -> ReadResult {
 		int value;
 		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index, 0,
@@ -565,6 +571,9 @@ std::vector<TreeNode<DeviceNode>> getVoltage(NvidiaGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
+	if (!data.dpy)
+		return {};
+
 	NVCTRLAttributeValidValuesRec values;
 	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
 		0, NV_CTRL_GPU_OVER_VOLTAGE_OFFSET, &values))
@@ -724,7 +733,8 @@ NvidiaPlugin::~NvidiaPlugin() {
 		XCloseDisplay(m_dpy);
 }
 
-NvidiaPlugin::NvidiaPlugin() : m_dpy() {
+NvidiaPlugin::NvidiaPlugin() {
+	m_dpy = nullptr;
 	// NOTE: we don't seem to need to do any locale stuff here,
 	// since the daemon does and loads us
 	if (nvmlInit_v2() != NVML_SUCCESS)
