@@ -80,6 +80,9 @@ sudo zypper in opi
 opi tuxclocker
 ```
 
+#### For Arch Linux
+Available on [AUR](https://aur.archlinux.org/packages/tuxclocker)
+
 ## Dependencies
 
 `qt (charts, base, dbus), boost-system, boost-filesystem, libnvml, libxnvctrl, xlib, libdrm, meson`
