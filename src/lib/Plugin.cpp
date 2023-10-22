@@ -27,6 +27,7 @@ std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> DevicePlugin::loadPl
 			auto plugin = boost::dll::import_symbol<DevicePlugin>(
 			    entry.path().string(), TUXCLOCKER_PLUGIN_SYMBOL_NAME);
 			retval.push_back(plugin);
+			std::cout << "found plugin at " << entry.path().string() << "\n";
 		} catch (boost::system::system_error &e) {
 		}
 	}

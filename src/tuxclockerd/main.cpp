@@ -73,9 +73,7 @@ int main(int argc, char **argv) {
 
 	TreeNode<DeviceNode> lvl1nodes;
 	if (plugins.has_value()) {
-		qDebug() << "found " << plugins.value().size() << " plugins";
 		for (auto &plugin : plugins.value()) {
-			// rootNodes.append(plugin->deviceRootNode());
 			//  Root node should always be empty
 			for (const auto &node : plugin->deviceRootNode().children()) {
 				lvl1nodes.appendChild(node);
