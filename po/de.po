@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-21 12:10+0300\n"
-"PO-Revision-Date: 2023-10-23 11:30+0000\n"
+"PO-Revision-Date: 2023-10-25 13:13+0000\n"
 "Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/de/>\n"
@@ -37,9 +37,8 @@ msgid "Core"
 msgstr "Kern"
 
 #: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:526
-#, fuzzy
 msgid "Slowdown Temperature"
-msgstr "Wird gedrosselt ab"
+msgstr "Gedrosselt ab"
 
 #: src/plugins/CPU.cpp:385
 msgid "Overall Temperature"
@@ -73,7 +72,7 @@ msgstr "Regler"
 
 #: src/plugins/CPU.cpp:712
 msgid "Power Saving Tendencies"
-msgstr ""
+msgstr "Energiespartendenz"
 
 #: src/plugins/CPU.cpp:720
 msgid "Frequencies"
@@ -92,9 +91,8 @@ msgid "Memory Clock Offset"
 msgstr "Speichertakt Offset"
 
 #: src/plugins/Nvidia.cpp:199
-#, fuzzy
 msgid "Core Clock Offset"
-msgstr "Kerntakt Offset"
+msgstr "GPU Takt Offset"
 
 #: src/plugins/Nvidia.cpp:219
 msgid "Core Clock"
@@ -125,9 +123,8 @@ msgid "Fan Mode"
 msgstr "Lüftermodus"
 
 #: src/plugins/Nvidia.cpp:375
-#, fuzzy
 msgid "Core Utilization"
-msgstr "Auslastung Kerne"
+msgstr "GPU Auslastung"
 
 #: src/plugins/Nvidia.cpp:395
 msgid "Memory Utilization"
@@ -146,9 +143,8 @@ msgid "Power Usage"
 msgstr "Leistungsaufnahme"
 
 #: src/plugins/Nvidia.cpp:491
-#, fuzzy
 msgid "Power Limit"
-msgstr "Leistungsgrenze"
+msgstr "Power Limit"
 
 #: src/plugins/Nvidia.cpp:510
 msgid "Temperature"
@@ -167,9 +163,8 @@ msgid "Core Voltage"
 msgstr "Kernspannung"
 
 #: src/plugins/Nvidia.cpp:604
-#, fuzzy
 msgid "Core Voltage Offset"
-msgstr "Kernspannung Offset"
+msgstr "GPU Spannung Offset"
 
 #: src/plugins/Nvidia.cpp:621
 msgid "Fan"
@@ -205,7 +200,7 @@ msgstr "Änderungen speichern"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr "Änderbare"
+msgstr "Einstellbare Werte"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
@@ -229,9 +224,8 @@ msgid "Connecting %1 with:"
 msgstr "Verbinde %1 mit:"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
-#, fuzzy
 msgid "A node to connect with needs to be selected"
-msgstr "Es muss ein Knoten zum Verbinden angegeben werden"
+msgstr "Es muss ein Ziel zum Verbinden angegeben werden"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
 msgid "At least two points need to be placed"
