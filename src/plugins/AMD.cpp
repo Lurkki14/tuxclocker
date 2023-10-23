@@ -96,9 +96,12 @@ std::vector<AMDGPUData> fromFilesystem() {
 	std::vector<AMDGPUData> retval;
 	// Iterate through files in GPU device folder and find which ones have amdgpu loaded
 	for (const auto &entry : fs::directory_iterator(DRM_DIR_NAME)) {
-		auto data = fromRenderDFile(entry);
-		if (data.has_value())
-			retval.push_back(data.value());
+		// Check if path contains 'renderD' so we don't create root nodes for 'cardX' too
+		if (entry.path().string().find(DRM_RENDER_MINOR_NAME) != std::string::npos) {
+			auto data = fromRenderDFile(entry);
+			if (data.has_value())
+				retval.push_back(data.value());
+		}
 	}
 	return retval;
 }
