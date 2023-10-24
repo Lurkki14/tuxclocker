@@ -217,21 +217,14 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(AMDGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanSpeedRead(AMDGPUData data) {
-	// Get delta of min and max fan RPMs
 	char path[96];
-	snprintf(path, 96, "%s/fan1_min", data.hwmonPath.c_str());
+
+	snprintf(path, 96, "%s/fan1_max", data.hwmonPath.c_str());
 	auto contents = fileContents(path);
 	if (!contents.has_value())
 		return {};
 
-	int minRPM = std::stoi(*contents);
-	snprintf(path, 96, "%s/fan1_max", data.hwmonPath.c_str());
-	contents = fileContents(path);
-	if (!contents.has_value())
-		return {};
-
 	int maxRPM = std::stoi(*contents);
-	auto delta = maxRPM - minRPM;
 
 	snprintf(path, 96, "%s/fan1_input", data.hwmonPath.c_str());
 
@@ -240,9 +233,9 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedRead(AMDGPUData data) {
 		if (!string.has_value())
 			return ReadError::UnknownError;
 
-		int curDelta = maxRPM - std::stoi(*string);
-		double ratio = static_cast<double>(curDelta) / static_cast<double>(delta);
-		return std::floor(ratio * 100);
+		int value = std::stoi(*string);
+		double ratio = static_cast<double>(value) / static_cast<double>(maxRPM);
+		return std::round(ratio * 100);
 	};
 
 	DynamicReadable dr{func, _("%")};
