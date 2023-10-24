@@ -63,6 +63,8 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 ## Prerequisites
 NVIDIA GPUs require [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_and_tricks#Enabling_overclocking) set to enable editing of most writable properties (31 for all functionality)
 
+AMD GPUs require the [amdgpu.ppfeaturemask](https://wiki.archlinux.org/title/AMDGPU#Boot_parameter) boot parameter to edit writable properties (`amdgpu.ppfeaturemask=0xffffffff` for all functionality)
+
 ## Using prebuilt binaries
 NOTE: the prebuilt binaries may not work for NVIDIA GPUs due to NVML requiring a specific version of the NVIDIA driver. See [this issue.](https://github.com/Lurkki14/tuxclocker/issues/63)
 
