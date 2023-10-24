@@ -494,6 +494,8 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 			return _("Power Saving");
 		if (sysFsName.find("performance") != std::string::npos)
 			return _("Performance");
+		if (sysFsName.find("schedutil") != std::string::npos)
+			return _("Scheduler Controlled");
 		// Unknown name
 		return sysFsName;
 	};
