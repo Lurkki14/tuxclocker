@@ -256,11 +256,96 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedRead(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getPowerLimit(AMDGPUData data) {
+	// Get delta of min and max fan RPMs
+	char path[96];
+	snprintf(path, 96, "%s/power1_cap_min", data.hwmonPath.c_str());
+	auto contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	// uW -> W
+	double minLimit = static_cast<double>(std::stoi(*contents)) / 1000000;
+
+	snprintf(path, 96, "%s/power1_cap_max", data.hwmonPath.c_str());
+	contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	double maxLimit = static_cast<double>(std::stoi(*contents)) / 1000000;
+	Range<double> range{minLimit, maxLimit};
+
+	snprintf(path, 96, "%s/power1_cap", data.hwmonPath.c_str());
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto string = fileContents(path);
+		if (!string.has_value())
+			return std::nullopt;
+
+		int cur_uW = std::stoi(*string);
+		return static_cast<double>(cur_uW) / 1000000;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<double>(a))
+			return AssignmentError::InvalidType;
+
+		auto value = std::get<double>(a);
+		if (value < range.min || value > range.max)
+			return AssignmentError::OutOfRange;
+
+		// W -> uW
+		auto target = std::round(value * 1000000);
+		if (std::ofstream{path} << target)
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, range, getFunc, _("W")};
+
+	return {DeviceNode{
+	    .name = _("Power Limit"),
+	    .interface = a,
+	    .hash = md5(data.pciId + "Power Limit"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getPowerUsage(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		uint power;
+		// TODO: is this microwatts too?
+		if (amdgpu_query_sensor_info(data.devHandle, AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
+			sizeof(power), &power) == 0)
+			return static_cast<double>(power) / 1000000;
+		return ReadError::UnknownError;
+	};
+
+	DynamicReadable dr{func, _("W")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Power Usage"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Power Usage"),
+		}};
+	}
+	return {};
+}
+
 std::vector<TreeNode<DeviceNode>> getFanRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Fans"),
 	    .interface = std::nullopt,
 	    .hash = md5(data.pciId + "Fans"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getPowerRoot(AMDGPUData data) {
+	// Root for power usage and power limit
+	return {DeviceNode{
+	    .name = _("Power"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Power"),
 	}};
 }
 
@@ -284,6 +369,10 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 			{getFanMode, {}},
 			{getFanSpeedWrite, {}},
 			{getFanSpeedRead, {}}
+		}},
+		{getPowerRoot, {
+			{getPowerLimit, {}},
+			{getPowerUsage, {}}
 		}}
 	}
 };
