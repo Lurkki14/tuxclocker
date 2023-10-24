@@ -103,7 +103,7 @@ Note that these packages are likely called something different on each distribut
 
 `nix-shell release.nix`
 
-#### For Ubuntu (possibly outdated)
+#### For Ubuntu
 
 ```
 sudo apt install --yes --quiet --quiet \
@@ -115,7 +115,12 @@ sudo apt install --yes --quiet --quiet \
     libdrm-dev \
     nvidia-utils-440-server \
     nvidia-settings \
-    libxnvctrl-dev
+    libxnvctrl-dev \
+    libssl-dev \
+    libboost-filesystem-dev \
+    qttools5-dev-tools \
+    libqt5charts5-dev \
+    libboost-dev
 ```
 
 #### For openSUSE Tumbleweed
