@@ -4,10 +4,12 @@
 #include <TreeConstructor.hpp>
 #include <Utils.hpp>
 
+#include <cmath>
 #include <errno.h>
 #include <fcntl.h>
 #include <filesystem>
 #include <functional>
+#include <fstream>
 #include <iostream>
 #include <libdrm/amdgpu.h>
 #include <libdrm/amdgpu_drm.h>
@@ -128,6 +130,140 @@ std::vector<TreeNode<DeviceNode>> getTemperature(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
+	char path[96];
+	snprintf(path, 96, "%s/pwm1_enable", data.hwmonPath.c_str());
+	if (!std::ifstream{path}.good())
+		return {};
+
+	// TODO: does everything correctly handle enumerations that don't start at zero?
+	EnumerationVec enumVec{{_("Manual"), 1}, {_("Automatic"), 2}};
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto string = fileContents(path);
+		if (!string.has_value())
+			return std::nullopt;
+
+		// We don't handle 0 (no fan control at all)
+		auto value = static_cast<uint>(std::stoi(*string));
+		if (value == 0)
+			return std::nullopt;
+		return value;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<uint>(a))
+			return AssignmentError::InvalidType;
+
+		auto value = std::get<uint>(a);
+		if (!hasEnum(value, enumVec))
+			return AssignmentError::OutOfRange;
+
+		if (std::ofstream{path} << value)
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, enumVec, getFunc, std::nullopt};
+
+	return {DeviceNode{
+	    .name = _("Fan Mode"),
+	    .interface = a,
+	    .hash = md5(data.pciId + "Fan Mode"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(AMDGPUData data) {
+	char path[96];
+	snprintf(path, 96, "%s/pwm1", data.hwmonPath.c_str());
+	if (!std::ifstream{path}.good())
+		return {};
+
+	Range<int> range{0, 100};
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto string = fileContents(path);
+		if (!string.has_value())
+			return std::nullopt;
+
+		double ratio = static_cast<double>(std::stoi(*string)) / 255;
+		// ratio -> %
+		return std::round((ratio * 100));
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto value = std::get<int>(a);
+		if (value < range.min || value > range.max)
+			return AssignmentError::OutOfRange;
+
+		// % -> PWM value (0-255)
+		auto ratio = static_cast<double>(value) / 100;
+		uint target = std::floor(ratio * 255);
+		if (std::ofstream{path} << target)
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, range, getFunc, _("%")};
+
+	return {DeviceNode{
+	    .name = _("Fan Speed"),
+	    .interface = a,
+	    .hash = md5(data.pciId + "Fan Speed Write"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getFanSpeedRead(AMDGPUData data) {
+	// Get delta of min and max fan RPMs
+	char path[96];
+	snprintf(path, 96, "%s/fan1_min", data.hwmonPath.c_str());
+	auto contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	int minRPM = std::stoi(*contents);
+	snprintf(path, 96, "%s/fan1_max", data.hwmonPath.c_str());
+	contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	int maxRPM = std::stoi(*contents);
+	auto delta = maxRPM - minRPM;
+
+	snprintf(path, 96, "%s/fan1_input", data.hwmonPath.c_str());
+
+	auto func = [=]() -> ReadResult {
+		auto string = fileContents(path);
+		if (!string.has_value())
+			return ReadError::UnknownError;
+
+		int curDelta = maxRPM - std::stoi(*string);
+		double ratio = static_cast<double>(curDelta) / static_cast<double>(delta);
+		return std::floor(ratio * 100);
+	};
+
+	DynamicReadable dr{func, _("%")};
+
+	if (hasReadableValue(func()))
+		return {DeviceNode{
+		    .name = _("Fan Speed"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Fan Speed Read"),
+		}};
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getFanRoot(AMDGPUData data) {
+	return {DeviceNode{
+	    .name = _("Fans"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Fans"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 	auto name = amdgpu_get_marketing_name(data.devHandle);
 	if (name) {
@@ -143,7 +279,12 @@ std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 // clang-format off
 auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 	getGPUName, {
-		{getTemperature, {}}
+		{getTemperature, {}},
+		{getFanRoot, {
+			{getFanMode, {}},
+			{getFanSpeedWrite, {}},
+			{getFanSpeedRead, {}}
+		}}
 	}
 };
 // clang-format on
