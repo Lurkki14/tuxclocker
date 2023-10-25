@@ -7,7 +7,7 @@ fplus_inc = include_directories('../include/deps/FunctionalPlus/include')
 if libdrm_dep.found() and libdrm_amdgpu.found()
 	shared_library('amd', 'AMD.cpp', 'Utils.cpp',
 		override_options : ['cpp_std=c++17'],
-		include_directories : [incdir, patterns_inc],
+		include_directories : [incdir, patterns_inc, fplus_inc],
 		dependencies : [ libdrm_amdgpu, libdrm_dep, boost_dep ],
 		install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
 		install : true,

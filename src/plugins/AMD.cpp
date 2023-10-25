@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <filesystem>
+#include <fplus/fplus.hpp>
 #include <functional>
 #include <fstream>
 #include <iostream>
@@ -38,13 +39,101 @@ using namespace TuxClocker;
 
 namespace fs = std::filesystem;
 
+enum PPTableType {
+	Vega10,
+	Navi
+};
+
 struct AMDGPUData {
 	// Full path, eg. /sys/class/drm/renderD128/device/hwmon
 	std::string hwmonPath;
 	amdgpu_device_handle devHandle;
 	// Used as identifier
 	std::string pciId;
+	std::optional<PPTableType> ppTableType;
 };
+
+std::vector<std::string> pstateSectionLines(
+    const std::string &header, const std::string &contents) {
+	std::vector<std::string> retval;
+
+	auto isNewline = [](char c) { return c == '\n'; };
+	auto lines = fplus::split_by(isNewline, false, contents);
+
+	int startIndex = -1;
+	for (int i = 0; i < lines.size(); i++) {
+		// Find section start
+		if (lines[i].find(header) != std::string::npos) {
+			startIndex = i + 1;
+			break;
+		}
+	}
+	if (startIndex == -1)
+		return {};
+
+	for (int i = startIndex; i < lines.size(); i++) {
+		if (isdigit(lines[i].at(0))) {
+			// We're still in the section
+			retval.push_back(lines[i]);
+		} else
+			// Line doesn't start with digit, another section has started
+			break;
+	}
+	return retval;
+}
+
+std::optional<Range<int>> parsePstateRangeLine(std::string title, const std::string &contents) {
+	// For example:
+	// MCLK:     625Mhz        930Mhz
+	auto isNewline = [](char c) { return c == '\n'; };
+	auto lines = fplus::split_by(isNewline, false, contents);
+
+	for (auto &line : lines) {
+		if (line.rfind(title, 0) == 0) {
+			// Line starts with title
+			// Only split on whitespace
+			auto words = fplus::split_one_of(std::string{" "}, false, line);
+			if (words.size() >= 3)
+				return Range<int>{std::stoi(words[1]), std::stoi(words[2])};
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<std::pair<int, int>> parseLineValuePair(const std::string &line) {
+	auto words = fplus::split_one_of(std::string{" "}, false, line);
+
+	if (words.size() >= 3)
+		return std::pair{std::stoi(words[1]), std::stoi(words[2])};
+	return std::nullopt;
+}
+
+std::optional<int> parseLineValue(const std::string &line) {
+	auto words = fplus::split_one_of(std::string{" "}, false, line);
+
+	if (words.size() >= 2)
+		return std::stoi(words[1]);
+	return std::nullopt;
+}
+
+std::optional<PPTableType> fromPPTableContents(const std::string &contents) {
+	auto clockSection = pstateSectionLines("OD_SCLK", contents);
+	if (!clockSection.empty()) {
+		// Vega 10 has the voltage-frequency curve labeled OD_SCLK
+		if (parseLineValuePair(clockSection.front()).has_value())
+			return Vega10;
+		// On Vega 20 it's a section of single values
+		if (parseLineValue(clockSection.front()).has_value()) {
+			auto first = parsePstateRangeLine("VDDC_CURVE_VOLT[0]", contents);
+			auto fourth = parsePstateRangeLine("VDDC_CURVE_VOLT[3]", contents);
+
+			// Navi (NV1X?) has three frequency-voltage points
+			if (first.has_value() && !fourth.has_value())
+				return Navi;
+		}
+	}
+	return std::nullopt;
+}
 
 std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 	auto fd = open(entry.path().c_str(), O_RDONLY);
@@ -81,11 +170,18 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 		if (amdgpu_query_info(dev, AMDGPU_INFO_DEV_INFO, sizeof(info), &info) != 0)
 			goto fail;
 
+		// Try to get powerplay table type
+		std::optional<PPTableType> tableType = std::nullopt;
+		auto contents = fileContents(*hwmonPath + "/pp_od_clk_voltage");
+		if (contents.has_value())
+			tableType = fromPPTableContents(*contents);
+
 		drmFreeVersion(v_ptr);
 		return AMDGPUData{
 		    .hwmonPath = hwmonPath.value(),
 		    .devHandle = dev,
 		    .pciId = std::to_string(info.device_id),
+		    .ppTableType = tableType,
 		};
 	}
 fail:
