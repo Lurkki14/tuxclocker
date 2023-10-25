@@ -421,6 +421,65 @@ std::vector<TreeNode<DeviceNode>> getPowerUsage(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getCoreClockRead(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		uint clock;
+		if (amdgpu_query_sensor_info(
+			data.devHandle, AMDGPU_INFO_SENSOR_GFX_SCLK, sizeof(clock), &clock) == 0)
+			return clock;
+		return ReadError::UnknownError;
+	};
+
+	DynamicReadable dr{func, _("MHz")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Core Clock"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Core Clock"),
+		}};
+	}
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getMemoryClockRead(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		uint clock;
+		// TODO: is this actually the clock speed or memory controller clock?
+		if (amdgpu_query_sensor_info(
+			data.devHandle, AMDGPU_INFO_SENSOR_GFX_MCLK, sizeof(clock), &clock) == 0)
+			return clock;
+		return ReadError::UnknownError;
+	};
+
+	DynamicReadable dr{func, _("MHz")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Memory Clock"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Memory Clock"),
+		}};
+	}
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getClocksRoot(AMDGPUData data) {
+	return {DeviceNode{
+	    .name = _("Clocks"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Clocks"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getPerformanceRoot(AMDGPUData data) {
+	return {DeviceNode{
+	    .name = _("Performance"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Performance"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getFanRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Fans"),
@@ -462,6 +521,12 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		{getPowerRoot, {
 			{getPowerLimit, {}},
 			{getPowerUsage, {}}
+		}},
+		{getPerformanceRoot, {
+			{getClocksRoot, {
+				{getMemoryClockRead, {}},
+				{getCoreClockRead, {}}
+			}}
 		}}
 	}
 };
