@@ -51,6 +51,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	auto conn = QDBusConnection::systemBus();
 	QDBusInterface tuxclockerd("org.tuxclocker", "/", "org.tuxclocker", conn);
 
+	if (tuxclockerd.lastError().isValid())
+		qDebug() << "Couldn't connect to TuxClocker daemon:"
+			 << tuxclockerd.lastError().message();
+
 	QDBusReply<QVector<TCDBus::FlatTreeNode<TCDBus::DeviceNode>>> reply =
 	    tuxclockerd.call("flatDeviceTree");
 
