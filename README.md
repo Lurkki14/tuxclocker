@@ -208,9 +208,9 @@ a trailing comma should be used after the last member (`clang-format` weirdness)
 
 There are a few scripts in `dev/` for development convenience, mainly to deal with DBus. A separate DBus instance and custom config file is used, so the TuxClocker daemon is able to be registered without installing service files into the system.
 
-Note: the following scripts assume TuxClocker is installed to `inst/`, so `meson` should be called as follows:
+Note: the following scripts assume TuxClocker is installed to `inst/` and libraries to `inst/lib` so `meson` should be called as follows:
 
-`meson build --prefix=$(pwd)/inst`
+`meson build --prefix=$(pwd)/inst -Dlibdir=lib`
 
 
 The scripts should be used in this order (they all have to be running simultaneously, so probably best to run in separate terminals):
