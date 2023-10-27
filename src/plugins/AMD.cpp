@@ -44,6 +44,11 @@ enum PPTableType {
 	Navi
 };
 
+struct VFPoint {
+	int voltage;
+	int clock;
+};
+
 struct AMDGPUData {
 	// Full path, eg. /sys/class/drm/renderD128/device/hwmon
 	std::string hwmonPath;
@@ -100,6 +105,14 @@ std::optional<Range<int>> parsePstateRangeLine(std::string title, const std::str
 	return std::nullopt;
 }
 
+std::optional<Range<int>> parsePstateRangeLineWithRead(std::string title, AMDGPUData data) {
+	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	if (!contents.has_value())
+		return std::nullopt;
+
+	return parsePstateRangeLine(title, *contents);
+}
+
 std::optional<std::pair<int, int>> parseLineValuePair(const std::string &line) {
 	auto words = fplus::split_one_of(std::string{" "}, false, line);
 
@@ -114,6 +127,29 @@ std::optional<int> parseLineValue(const std::string &line) {
 	if (words.size() >= 2)
 		return std::stoi(words[1]);
 	return std::nullopt;
+}
+
+std::optional<VFPoint> vfPoint(const std::string &section, int index, const std::string &table) {
+	auto lines = pstateSectionLines(section, table);
+	if (lines.empty() && lines.size() < index + 1)
+		return std::nullopt;
+
+	auto line = lines[index];
+	auto valuePair = parseLineValuePair(line);
+	if (valuePair.has_value())
+		return VFPoint{
+		    .voltage = valuePair->second,
+		    .clock = valuePair->first,
+		};
+	return std::nullopt;
+}
+
+// Same as above, but read the file
+std::optional<VFPoint> vfPointWithRead(const std::string &section, int index, AMDGPUData data) {
+	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	if (!contents.has_value())
+		return std::nullopt;
+	return vfPoint(section, index, *contents);
 }
 
 std::optional<PPTableType> fromPPTableContents(const std::string &contents) {
@@ -463,6 +499,164 @@ std::vector<TreeNode<DeviceNode>> getMemoryClockRead(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getVoltFreqFreq(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	// TODO: assuming range is the same for all points
+	auto range = parsePstateRangeLineWithRead("VDDC_CURVE_SCLK[0]", data);
+	if (!range.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
+		if (!curvePoint.has_value())
+			return std::nullopt;
+
+		return curvePoint->clock;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range->min || target > range->max)
+			return AssignmentError::OutOfRange;
+
+		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
+		if (!curvePoint.has_value())
+			return AssignmentError::UnknownError;
+
+		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		char cmdString[32];
+		snprintf(cmdString, 32, "vc %i %i %i", id, target, curvePoint->voltage);
+
+		if (file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, *range, getFunc, _("MHz")};
+	pointId++;
+
+	if (getFunc().has_value())
+		return {DeviceNode{
+		    .name = _("Core Clock"),
+		    .interface = a,
+		    .hash = md5(data.pciId + "VFClock" + std::to_string(id)),
+		}};
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	// TODO: assuming range is the same for all points
+	auto range = parsePstateRangeLineWithRead("VDDC_CURVE_VOLT[0]", data);
+	if (!range.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
+		if (!curvePoint.has_value())
+			return std::nullopt;
+
+		return curvePoint->voltage;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range->min || target > range->max)
+			return AssignmentError::OutOfRange;
+
+		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
+		if (!curvePoint.has_value())
+			return AssignmentError::UnknownError;
+
+		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		char cmdString[32];
+		snprintf(cmdString, 32, "vc %i %i %i", id, curvePoint->clock, target);
+
+		if (file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, *range, getFunc, _("mV")};
+	pointId++;
+
+	if (getFunc().has_value())
+		return {DeviceNode{
+		    .name = _("Core Voltage"),
+		    .interface = a,
+		    .hash = md5(data.pciId + "VFVoltage" + std::to_string(id)),
+		}};
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
+	// Root item for voltage and frequency of a point
+	std::vector<TreeNode<DeviceNode>> retval;
+	if (!data.ppTableType.has_value() || *data.ppTableType != Navi)
+		return {};
+
+	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto tableContents = fileContents(path);
+	if (!tableContents.has_value())
+		return {};
+
+	auto lines = pstateSectionLines("OD_VDDC_CURVE", *tableContents);
+	char name[32];
+	for (int i = 0; i < lines.size(); i++) {
+		snprintf(name, 32, "%s %i", _("Point"), i);
+
+		DeviceNode node{
+		    .name = name,
+		    .interface = std::nullopt,
+		    .hash = md5(data.pciId + "VFPoint" + std::to_string(i)),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
+	if (data.ppTableType.has_value() && *data.ppTableType == Navi)
+		return {DeviceNode{
+		    .name = _("Voltage-Frequency Curve"),
+		    .interface = std::nullopt,
+		    .hash = md5(data.pciId + "Voltage-Frequency Curve"),
+		}};
+	return {};
+}
+
 std::vector<TreeNode<DeviceNode>> getClocksRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Clocks"),
@@ -525,6 +719,12 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 			{getClocksRoot, {
 				{getMemoryClockRead, {}},
 				{getCoreClockRead, {}}
+			}},
+			{getVoltFreqRoot, {
+				{getVoltFreqNodes, {
+					{getVoltFreqFreq, {}},
+					{getVoltFreqVolt, {}}
+				}}
 			}}
 		}}
 	}
