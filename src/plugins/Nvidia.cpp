@@ -178,7 +178,7 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
 		int value;
 		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-			maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
+			maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, &value))
 			return std::nullopt;
 		return value;
 	};
