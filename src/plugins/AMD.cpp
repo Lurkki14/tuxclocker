@@ -402,10 +402,9 @@ std::vector<TreeNode<DeviceNode>> getPowerLimit(AMDGPUData data) {
 std::vector<TreeNode<DeviceNode>> getPowerUsage(AMDGPUData data) {
 	auto func = [=]() -> ReadResult {
 		uint power;
-		// TODO: is this microwatts too?
 		if (amdgpu_query_sensor_info(data.devHandle, AMDGPU_INFO_SENSOR_GPU_AVG_POWER,
 			sizeof(power), &power) == 0)
-			return static_cast<double>(power) / 1000000;
+			return power;
 		return ReadError::UnknownError;
 	};
 
