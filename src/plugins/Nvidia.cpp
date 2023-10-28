@@ -261,7 +261,15 @@ std::vector<TreeNode<DeviceNode>> getClocksRoot(NvidiaGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanSpeedRead(NvidiaGPUData data) {
+	static nvmlDevice_t latestDev = nullptr;
 	static uint fanId = 0;
+
+	if (data.devHandle != latestDev)
+		// Start from zero for newly seen device
+		fanId = 0;
+
+	latestDev = data.devHandle;
+
 	if (data.fanCount == 0 || fanId + 1 > data.fanCount)
 		return {};
 
@@ -287,7 +295,15 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedRead(NvidiaGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(NvidiaGPUData data) {
+	static nvmlDevice_t latestDev = nullptr;
 	static uint fanId = 0;
+
+	if (data.devHandle != latestDev)
+		// Start from zero for newly seen device
+		fanId = 0;
+
+	latestDev = data.devHandle;
+
 	if (data.fanCount == 0 || fanId + 1 > data.fanCount)
 		return {};
 
@@ -322,7 +338,15 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(NvidiaGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanMode(NvidiaGPUData data) {
+	static nvmlDevice_t latestDev = nullptr;
 	static uint fanId = 0;
+
+	if (data.devHandle != latestDev)
+		// Start from zero for newly seen device
+		fanId = 0;
+
+	latestDev = data.devHandle;
+
 	if (data.fanCount == 0 || fanId + 1 > data.fanCount)
 		return {};
 
