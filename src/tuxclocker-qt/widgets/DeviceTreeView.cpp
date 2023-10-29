@@ -4,6 +4,7 @@
 #include <DragChartView.hpp>
 #include <Globals.hpp>
 #include <patterns.hpp>
+#include <QApplication>
 #include <QCheckBox>
 #include <QDebug>
 #include <QHeaderView>
@@ -33,6 +34,15 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 		resumeChildren(index);
 	});
 
+	// Semi-hack: don't try to copy assignable settings from indices when loading profile
+	auto app = static_cast<QApplication *>(QApplication::instance());
+	connect(app, &QApplication::focusChanged, [=](QWidget *, QWidget *now) {
+		if (now && !this->geometry().contains(now->geometry())) {
+			m_editSelection = {};
+			m_editedIndex = QModelIndex{};
+			clearSelection();
+		}
+	});
 	m_delegate = new DeviceModelDelegate(this);
 
 	setItemDelegate(m_delegate);
