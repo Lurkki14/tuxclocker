@@ -674,6 +674,58 @@ std::vector<TreeNode<DeviceNode>> getVoltageRead(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
+	// Performance parameter control
+	std::array<std::string, 8> sysFsNames = {"auto", "low", "high", "manual",
+	    "profile_standard", "profile_min_sclk", "profile_min_mclk", "profile_peak"};
+
+	EnumerationVec enumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
+	    {_("Manual"), 3}, {_("Base Levels"), 4}, {_("Lowest Core Clock"), 5},
+	    {_("Lowest Memory Clock"), 6}, {_("Highest Clocks"), 7}};
+
+	auto path = data.hwmonPath + "/power_dpm_force_performance_level";
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto string = fileContents(path);
+		if (!string.has_value())
+			return std::nullopt;
+
+		for (int i = 0; i < enumVec.size(); i++) {
+			if (string->find(sysFsNames[i]) != std::string::npos)
+				return enumVec[i].key;
+		}
+		return std::nullopt;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		std::ofstream file{path};
+		if (!file.good())
+			return AssignmentError::UnknownError;
+
+		if (!std::holds_alternative<uint>(a))
+			return AssignmentError::InvalidType;
+
+		auto arg = std::get<uint>(a);
+		if (!hasEnum(arg, enumVec))
+			return AssignmentError::OutOfRange;
+
+		if (file << sysFsNames[arg])
+			return std::nullopt;
+
+		return AssignmentError::UnknownError;
+	};
+
+	Assignable a{setFunc, enumVec, getFunc, std::nullopt};
+
+	if (getFunc().has_value())
+		return {DeviceNode{
+		    .name = _("Performance Parameter Control"),
+		    .interface = std::nullopt,
+		    .hash = md5(data.pciId + "Performance Parameter Control"),
+		}};
+	return {};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() && *data.ppTableType == Navi)
 		return {DeviceNode{
@@ -748,6 +800,7 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getCoreClockRead, {}}
 			}},
 			{getVoltageRead, {}},
+			{getForcePerfLevel, {}},
 			{getVoltFreqRoot, {
 				{getVoltFreqNodes, {
 					{getVoltFreqFreq, {}},
