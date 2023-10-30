@@ -647,6 +647,33 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getVoltageRead(AMDGPUData data) {
+	auto func = [=](int sensorType) -> ReadResult {
+		uint volt;
+		if (amdgpu_query_sensor_info(data.devHandle, sensorType, sizeof(volt), &volt) == 0)
+			return volt;
+		return ReadError::UnknownError;
+	};
+	// Try to get northbridge voltage if graphics voltage can't be fetched
+	std::optional<int> sensorType;
+	if (hasReadableValue(func(AMDGPU_INFO_SENSOR_VDDGFX)))
+		sensorType = AMDGPU_INFO_SENSOR_VDDGFX;
+	if (hasReadableValue(func(AMDGPU_INFO_SENSOR_VDDNB)))
+		sensorType = AMDGPU_INFO_SENSOR_VDDNB;
+
+	if (!sensorType.has_value())
+		return {};
+
+	auto funcWithSensorType = [=]() -> ReadResult { return func(*sensorType); };
+	DynamicReadable dr{funcWithSensorType, _("mV")};
+
+	return {DeviceNode{
+	    .name = _("Core Voltage"),
+	    .interface = dr,
+	    .hash = md5(data.pciId + "Core Voltage"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() && *data.ppTableType == Navi)
 		return {DeviceNode{
@@ -720,6 +747,7 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getMemoryClockRead, {}},
 				{getCoreClockRead, {}}
 			}},
+			{getVoltageRead, {}},
 			{getVoltFreqRoot, {
 				{getVoltFreqNodes, {
 					{getVoltFreqFreq, {}},
