@@ -117,26 +117,37 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 	if (!data.maxPerfState.has_value())
 		return {};
 
-	auto maxPerfState = data.maxPerfState.value();
 	// TODO: getting current offset and available range doesn't work properly through NVML
 	// but setting does
-	NVCTRLAttributeValidValuesRec values;
-	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-		maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &values))
-		return {};
-
-	// Transfer rate -> clock speed
-	Range<int> range{values.u.range.min / 2, values.u.range.max / 2};
-
-	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+	auto maxPerfState = data.maxPerfState.value();
+	auto getFunc = [=](int attribute) -> std::optional<AssignmentArgument> {
 		int value;
 		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-			maxPerfState, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, &value))
+			maxPerfState, attribute, &value))
 			return std::nullopt;
 		return value / 2;
 	};
 
-	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+	// Check which attribute works (same as nvidia-settings code)
+	std::optional<int> attribute;
+	if (getFunc(NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET).has_value())
+		attribute = NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET;
+	if (getFunc(NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET_ALL_PERFORMANCE_LEVELS).has_value())
+		attribute = NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET_ALL_PERFORMANCE_LEVELS;
+
+	if (!attribute.has_value())
+		return {};
+
+	NVCTRLAttributeValidValuesRec values;
+	if (!XNVCTRLQueryValidTargetAttributeValues(
+		data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index, maxPerfState, *attribute, &values)) {
+		return {};
+	}
+	// Transfer rate -> clock speed
+	Range<int> range{values.u.range.min / 2, values.u.range.max / 2};
+
+	// Seems the ..ALL_PERFORMANCE_LEVELS attribute doesn't work with the NVML function
+	auto setFuncNVML = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
 		if (!std::holds_alternative<int>(a))
 			return AssignmentError::InvalidType;
 		auto target = std::get<int>(a);
@@ -148,15 +159,34 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 		return fromNVMLRet(ret);
 	};
 
-	Assignable a{setFunc, range, getFunc, _("MHz")};
+	auto setFuncXNVCTRL = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
 
-	if (getFunc().has_value())
-		return {DeviceNode{
-		    .name = _("Memory Clock Offset"),
-		    .interface = a,
-		    .hash = md5(data.uuid + "Memory Clock Offset"),
-		}};
-	return {};
+		// Clock speed -> transfer rate
+		auto value = target * 2;
+		if (!XNVCTRLSetTargetAttributeAndGetStatus(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
+			data.index, maxPerfState, *attribute, value))
+			return AssignmentError::UnknownError;
+		return std::nullopt;
+	};
+
+	auto getFuncWithAttribute = [=]() -> std::optional<AssignmentArgument> {
+		return getFunc(*attribute);
+	};
+
+	auto a = (*attribute == NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET)
+		     ? Assignable{setFuncNVML, range, getFuncWithAttribute, _("MHz")}
+		     : Assignable{setFuncXNVCTRL, range, getFuncWithAttribute, _("MHz")};
+
+	return {DeviceNode{
+	    .name = _("Memory Clock Offset"),
+	    .interface = a,
+	    .hash = md5(data.uuid + "Memory Clock Offset"),
+	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
@@ -164,24 +194,32 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 		return {};
 
 	auto maxPerfState = data.maxPerfState.value();
-	// TODO: NVML has functions for core clock as well but they're borked as of writing
-	NVCTRLAttributeValidValuesRec values;
-	if (!XNVCTRLQueryValidTargetAttributeValues(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-		maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, &values)) {
-		std::cout << "b" << maxPerfState << "\n";
-		return {};
-	}
-
-	// Transfer rate -> clock speed
-	Range<int> range{values.u.range.min, values.u.range.max};
-
-	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+	auto getFunc = [=](int attribute) -> std::optional<AssignmentArgument> {
 		int value;
 		if (!XNVCTRLQueryTargetAttribute(data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index,
-			maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, &value))
+			maxPerfState, attribute, &value))
 			return std::nullopt;
 		return value;
 	};
+
+	// Check which attribute works (same as nvidia-settings code)
+	std::optional<int> attribute;
+	if (getFunc(NV_CTRL_GPU_NVCLOCK_OFFSET).has_value())
+		attribute = NV_CTRL_GPU_NVCLOCK_OFFSET;
+	if (getFunc(NV_CTRL_GPU_NVCLOCK_OFFSET_ALL_PERFORMANCE_LEVELS).has_value())
+		attribute = NV_CTRL_GPU_NVCLOCK_OFFSET_ALL_PERFORMANCE_LEVELS;
+
+	if (!attribute.has_value())
+		return {};
+
+	// TODO: NVML has functions for core clock as well but they're borked as of writing
+	NVCTRLAttributeValidValuesRec values;
+	if (!XNVCTRLQueryValidTargetAttributeValues(
+		data.dpy, NV_CTRL_TARGET_TYPE_GPU, data.index, maxPerfState, *attribute, &values)) {
+		return {};
+	}
+
+	Range<int> range{values.u.range.min, values.u.range.max};
 
 	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
 		if (!std::holds_alternative<int>(a))
@@ -191,12 +229,16 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 			return AssignmentError::OutOfRange;
 
 		if (!XNVCTRLSetTargetAttributeAndGetStatus(data.dpy, NV_CTRL_TARGET_TYPE_GPU,
-			data.index, maxPerfState, NV_CTRL_GPU_NVCLOCK_OFFSET, target))
+			data.index, maxPerfState, *attribute, target))
 			return AssignmentError::UnknownError;
 		return std::nullopt;
 	};
 
-	Assignable a{setFunc, range, getFunc, _("MHz")};
+	auto getFuncWithAttribute = [=]() -> std::optional<AssignmentArgument> {
+		return getFunc(*attribute);
+	};
+
+	Assignable a{setFunc, range, getFuncWithAttribute, _("MHz")};
 
 	return {DeviceNode{
 	    .name = _("Core Clock Offset"),
