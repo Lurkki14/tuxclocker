@@ -27,6 +27,8 @@ Q_DECLARE_METATYPE(AssignableItemData)
 DeviceModelDelegate::DeviceModelDelegate(QObject *parent) : QStyledItemDelegate(parent) {
 	m_parametrize = new QAction{_("Parametrize..."), this};
 	m_resetAssignable = new QAction{_("Reset to default"), this};
+	// TODO: singular/multiple plural forms
+	m_removeSetting = new QAction{_("Remove settings from profile"), this};
 
 	m_functionEditor = nullptr;
 }
@@ -102,6 +104,7 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 			    nullptr, nullptr);
 		disconnect(m_parametrize, nullptr, nullptr, nullptr);
 		disconnect(m_resetAssignable, nullptr, nullptr, nullptr);
+		disconnect(m_removeSetting, nullptr, nullptr, nullptr);
 		m_menu.clear();
 
 		auto mouse = dynamic_cast<QMouseEvent *>(event);
@@ -115,6 +118,15 @@ bool DeviceModelDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 			    [=]() { setAssignableDefaults(model, defaults); });
 
 			m_menu.addAction(m_resetAssignable);
+		}
+
+		// =||= profile settings
+		auto settingPaths = subtreeSettingPaths(model, index);
+		if (mouse->button() == Qt::RightButton && !settingPaths.empty()) {
+			connect(m_removeSetting, &QAction::triggered,
+			    [=]() { removeSettingPaths(settingPaths); });
+
+			m_menu.addAction(m_removeSetting);
 		}
 
 		auto data = index.data(DeviceModel::AssignableRole);
@@ -254,6 +266,55 @@ QVector<AssignableDefaultData> DeviceModelDelegate::subtreeAssignableDefaults(
 	Utils::traverseModel(cb, model, nameIndex);
 
 	return retval;
+}
+
+QVector<QString> DeviceModelDelegate::subtreeSettingPaths(
+    QAbstractItemModel *model, const QModelIndex &index) {
+	if (!Globals::g_settingsData.currentProfile.has_value())
+		return {};
+
+	QVector<QString> retval;
+	QSettings settings{"tuxclocker"};
+	settings.beginGroup("profiles");
+	settings.beginGroup(*Globals::g_settingsData.currentProfile);
+
+	// All paths profile has a setting for
+	auto paths = settings.childKeys();
+
+	auto cb = [&](auto model, auto index, int row) {
+		auto ifaceIndex = model->index(row, DeviceModel::InterfaceColumn, index);
+		auto assProxyV = ifaceIndex.data(DeviceModel::AssignableProxyRole);
+
+		if (assProxyV.isValid()) {
+			auto proxy = qvariant_cast<AssignableProxy *>(assProxyV);
+			// Check if there is a setting for this node
+			// TODO: might need to make this faster by providing
+			// a hash table in DeviceModel for example
+			for (auto &path : paths) {
+				auto nodePath = Utils::fromSettingsPath(path);
+				if (proxy->dbusPath() == Utils::fromSettingsPath(path)) {
+					retval.push_back(path);
+				}
+			}
+		}
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	auto nameIndex = model->index(index.row(), DeviceModel::NameColumn, index.parent());
+	Utils::traverseModel(cb, model, nameIndex);
+
+	return retval;
+}
+
+void DeviceModelDelegate::removeSettingPaths(QVector<QString> settingPaths) {
+	if (!Globals::g_settingsData.currentProfile.has_value())
+		return;
+
+	QSettings settings{"tuxclocker"};
+	settings.beginGroup("profiles");
+	settings.beginGroup(*Globals::g_settingsData.currentProfile);
+
+	for (auto &path : settingPaths)
+		settings.remove(path);
 }
 
 QColor alphaBlend(QColor top, QColor background) {

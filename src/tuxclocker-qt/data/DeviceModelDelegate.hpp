@@ -41,9 +41,14 @@ private:
 	bool subtreeHasAssignableDefaults(QAbstractItemModel *, const QModelIndex &);
 	QVector<AssignableDefaultData> subtreeAssignableDefaults(
 	    QAbstractItemModel *, const QModelIndex &);
+	// Which paths the profile has settings for
+	// Note: returns the path as stored in settings eg. -a445-bxy6
+	QVector<QString> subtreeSettingPaths(QAbstractItemModel *, const QModelIndex &);
+	void removeSettingPaths(QVector<QString> settingPaths);
 
 	FunctionEditor *m_functionEditor;
 	QAction *m_parametrize;
 	QAction *m_resetAssignable;
+	QAction *m_removeSetting;
 	QMenu m_menu;
 };
