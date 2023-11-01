@@ -276,13 +276,16 @@ std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
 		if (!string.has_value())
 			return std::nullopt;
 
-		// We don't handle 0 (no fan control at all)
+		// We only handle automatic, see below
 		auto value = static_cast<uint>(std::stoi(*string));
-		if (value == 0)
+		if (value != 2)
 			return std::nullopt;
-		return value;
+		return 2;
 	};
 
+	// TODO: this may be wrong
+	// Seems that fan speed is writable even with automatic mode, but writing '2'
+	// without writing fan speed afterwards seems to reset to automatic
 	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
 		if (!std::holds_alternative<uint>(a))
 			return AssignmentError::InvalidType;
@@ -291,7 +294,7 @@ std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
 		if (!hasEnum(value, enumVec))
 			return AssignmentError::OutOfRange;
 
-		if (std::ofstream{path} << value)
+		if (std::ofstream{path} << "2")
 			return std::nullopt;
 		return AssignmentError::UnknownError;
 	};
