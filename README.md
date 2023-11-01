@@ -33,13 +33,13 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Support for multiple fans on one GPU
 - Fan mode
 - Fan speed
-- Core and memory clocks
+- Core and memory clocks (Xorg only)
 - Power limit
 - Temperatures
 - Utilizations
 
 #### 600 to 900 -series
-- Voltage setting and reading
+- Voltage setting and reading (Xorg only)
 
 ### CPUs
 - Frequency monitoring
