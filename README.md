@@ -37,10 +37,9 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Power limit
 - Temperatures
 - Utilizations
-- Voltage reading
 
 #### 600 to 900 -series
-- Voltage setting
+- Voltage setting and reading
 
 ### CPUs
 - Frequency monitoring
