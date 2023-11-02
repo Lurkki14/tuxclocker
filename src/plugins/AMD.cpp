@@ -22,6 +22,50 @@ using namespace TuxClocker::Crypto;
 using namespace TuxClocker::Device;
 using namespace TuxClocker;
 
+using AssignmentFunction = std::function<std::optional<AssignmentError>(AssignmentArgument)>;
+
+EnumerationVec performanceLevelEnumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
+    {_("Manual"), 3}, {_("Base Levels"), 4}, {_("Lowest Core Clock"), 5},
+    {_("Lowest Memory Clock"), 6}, {_("Highest Clocks"), 7}};
+
+std::array<std::string, 8> performanceLevelSysFsNames = {"auto", "low", "high", "manual",
+    "profile_standard", "profile_min_sclk", "profile_min_mclk", "profile_peak"};
+
+// Separate function so we can set this to manual when writing to pp_od_clk_voltage
+std::optional<AssignmentError> setPerformanceLevel(AssignmentArgument a, AMDGPUData data) {
+	std::array<std::string, 8> sysFsNames = {"auto", "low", "high", "manual",
+	    "profile_standard", "profile_min_sclk", "profile_min_mclk", "profile_peak"};
+
+	auto path = data.hwmonPath + "/power_dpm_force_performance_level";
+	std::ofstream file{path};
+	if (!file.good())
+		return AssignmentError::UnknownError;
+
+	if (!std::holds_alternative<uint>(a))
+		return AssignmentError::InvalidType;
+
+	auto arg = std::get<uint>(a);
+	if (!hasEnum(arg, performanceLevelEnumVec))
+		return AssignmentError::OutOfRange;
+
+	if (file << sysFsNames[arg])
+		return std::nullopt;
+
+	return AssignmentError::UnknownError;
+};
+
+// Implicitly set performance level to manual when writing to pp_od_clk_voltage
+std::optional<AssignmentError> withManualPerformanceLevel(
+    const AssignmentFunction &func, AssignmentArgument a, AMDGPUData data) {
+	// Manual
+	auto retval = setPerformanceLevel(3u, data);
+	if (retval.has_value())
+		// Error occurred
+		return retval;
+
+	return func(a);
+}
+
 std::vector<TreeNode<DeviceNode>> getTemperature(AMDGPUData data) {
 	auto func = [=]() -> ReadResult {
 		uint temp;
@@ -333,7 +377,11 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqFreq(AMDGPUData data) {
 		return AssignmentError::UnknownError;
 	};
 
-	Assignable a{setFunc, *range, getFunc, _("MHz")};
+	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	Assignable a{setWithPerfLevel, *range, getFunc, _("MHz")};
 	pointId++;
 
 	if (getFunc().has_value())
@@ -394,7 +442,11 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 		return AssignmentError::UnknownError;
 	};
 
-	Assignable a{setFunc, *range, getFunc, _("mV")};
+	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	Assignable a{setWithPerfLevel, *range, getFunc, _("mV")};
 	pointId++;
 
 	if (getFunc().has_value())
@@ -461,13 +513,6 @@ std::vector<TreeNode<DeviceNode>> getVoltageRead(AMDGPUData data) {
 
 std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 	// Performance parameter control
-	std::array<std::string, 8> sysFsNames = {"auto", "low", "high", "manual",
-	    "profile_standard", "profile_min_sclk", "profile_min_mclk", "profile_peak"};
-
-	EnumerationVec enumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
-	    {_("Manual"), 3}, {_("Base Levels"), 4}, {_("Lowest Core Clock"), 5},
-	    {_("Lowest Memory Clock"), 6}, {_("Highest Clocks"), 7}};
-
 	auto path = data.hwmonPath + "/power_dpm_force_performance_level";
 
 	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
@@ -475,32 +520,18 @@ std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 		if (!string.has_value())
 			return std::nullopt;
 
-		for (int i = 0; i < enumVec.size(); i++) {
-			if (string->find(sysFsNames[i]) != std::string::npos)
-				return enumVec[i].key;
+		for (int i = 0; i < performanceLevelEnumVec.size(); i++) {
+			if (string->find(performanceLevelSysFsNames[i]) != std::string::npos)
+				return performanceLevelEnumVec[i].key;
 		}
 		return std::nullopt;
 	};
 
 	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
-		std::ofstream file{path};
-		if (!file.good())
-			return AssignmentError::UnknownError;
-
-		if (!std::holds_alternative<uint>(a))
-			return AssignmentError::InvalidType;
-
-		auto arg = std::get<uint>(a);
-		if (!hasEnum(arg, enumVec))
-			return AssignmentError::OutOfRange;
-
-		if (file << sysFsNames[arg])
-			return std::nullopt;
-
-		return AssignmentError::UnknownError;
+		return setPerformanceLevel(a, data);
 	};
 
-	Assignable a{setFunc, enumVec, getFunc, std::nullopt};
+	Assignable a{setFunc, performanceLevelEnumVec, getFunc, std::nullopt};
 
 	if (getFunc().has_value())
 		return {DeviceNode{
