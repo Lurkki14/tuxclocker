@@ -118,6 +118,10 @@ std::optional<PPTableType> fromPPTableContents(const std::string &contents) {
 			// Navi (NV1X?) has three frequency-voltage points
 			if (first.has_value() && !fourth.has_value())
 				return Navi;
+
+			// RDNA 3 (SMU13) has six points using offsets
+			if (first.has_value() && fourth.has_value())
+				return SMU13;
 		}
 	}
 	return std::nullopt;

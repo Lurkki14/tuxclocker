@@ -384,9 +384,12 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqFreq(AMDGPUData data) {
 	Assignable a{setWithPerfLevel, *range, getFunc, _("MHz")};
 	pointId++;
 
+	// The rest of this code should work the same on Navi and RDNA 3
+	auto name = (*data.ppTableType == Navi) ? _("Core Clock") : _("Core Clock Offset");
+
 	if (getFunc().has_value())
 		return {DeviceNode{
-		    .name = _("Core Clock"),
+		    .name = name,
 		    .interface = a,
 		    .hash = md5(data.pciId + "VFClock" + std::to_string(id)),
 		}};
@@ -449,9 +452,12 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 	Assignable a{setWithPerfLevel, *range, getFunc, _("mV")};
 	pointId++;
 
+	// The rest of this code should work the same on Navi and RDNA 3
+	auto name = (*data.ppTableType == Navi) ? _("Core Voltage") : _("Core Voltage Offset");
+
 	if (getFunc().has_value())
 		return {DeviceNode{
-		    .name = _("Core Voltage"),
+		    .name = name,
 		    .interface = a,
 		    .hash = md5(data.pciId + "VFVoltage" + std::to_string(id)),
 		}};
@@ -461,7 +467,8 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	// Root item for voltage and frequency of a point
 	std::vector<TreeNode<DeviceNode>> retval;
-	if (!data.ppTableType.has_value() || *data.ppTableType != Navi)
+	if (!data.ppTableType.has_value() || *data.ppTableType != Navi ||
+	    *data.ppTableType != SMU13)
 		return {};
 
 	auto path = data.hwmonPath + "/pp_od_clk_voltage";
@@ -543,7 +550,8 @@ std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
-	if (data.ppTableType.has_value() && *data.ppTableType == Navi)
+	if (data.ppTableType.has_value() &&
+	    (*data.ppTableType == Navi || *data.ppTableType == SMU13))
 		return {DeviceNode{
 		    .name = _("Voltage-Frequency Curve"),
 		    .interface = std::nullopt,

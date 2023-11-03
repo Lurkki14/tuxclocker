@@ -12,7 +12,8 @@ namespace fs = std::filesystem;
 
 enum PPTableType {
 	Vega10,
-	Navi
+	Navi,
+	SMU13 // RDNA 3
 };
 
 struct VFPoint {
