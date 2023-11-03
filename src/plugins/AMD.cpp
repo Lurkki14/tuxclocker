@@ -467,8 +467,8 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	// Root item for voltage and frequency of a point
 	std::vector<TreeNode<DeviceNode>> retval;
-	if (!data.ppTableType.has_value() || *data.ppTableType != Navi ||
-	    *data.ppTableType != SMU13)
+	if (!data.ppTableType.has_value() &&
+	    (*data.ppTableType != Navi && *data.ppTableType != SMU13))
 		return {};
 
 	auto path = data.hwmonPath + "/pp_od_clk_voltage";
