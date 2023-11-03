@@ -24,6 +24,11 @@ using namespace TuxClocker;
 
 using AssignmentFunction = std::function<std::optional<AssignmentError>(AssignmentArgument)>;
 
+enum VoltFreqType {
+	MemoryPState,
+	CorePState
+};
+
 EnumerationVec performanceLevelEnumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
     {_("Manual"), 3}, {_("Base Levels"), 4}, {_("Lowest Core Clock"), 5},
     {_("Lowest Memory Clock"), 6}, {_("Highest Clocks"), 7}};
@@ -64,6 +69,125 @@ std::optional<AssignmentError> withManualPerformanceLevel(
 		return retval;
 
 	return func(a);
+}
+
+// Shared function to get memory and core clock pstate assignables
+std::optional<Assignable> vfPointClockAssignable(
+    VoltFreqType vfType, uint pointIndex, Range<int> range, AMDGPUData data) {
+	// Eg. the 's' in s 0 400 500
+	const char *typeString;
+	const char *sectionHeader;
+
+	switch (vfType) {
+	case MemoryPState: {
+		typeString = "m";
+		sectionHeader = "OD_MCLK";
+		break;
+	}
+	case CorePState: {
+		typeString = "s";
+		sectionHeader = "OD_SCLK";
+		break;
+	}
+	}
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto vfPoint = vfPointWithRead(sectionHeader, pointIndex, data);
+		if (!vfPoint.has_value())
+			return std::nullopt;
+
+		return vfPoint->clock;
+	};
+
+	if (!getFunc().has_value())
+		return std::nullopt;
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		auto vfPoint = vfPointWithRead(sectionHeader, pointIndex, data);
+		if (!vfPoint.has_value())
+			return AssignmentError::UnknownError;
+
+		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		char cmdString[32];
+		snprintf(
+		    cmdString, 32, "%s %u %i %i", typeString, pointIndex, target, vfPoint->voltage);
+
+		if (file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	return Assignable{setWithPerfLevel, range, getFunc, _("MHz")};
+}
+
+std::optional<Assignable> vfPointVoltageAssignable(
+    VoltFreqType vfType, uint pointIndex, Range<int> range, AMDGPUData data) {
+	// Eg. the 's' in s 0 400 500
+	const char *typeString;
+	const char *sectionHeader;
+
+	switch (vfType) {
+	case MemoryPState: {
+		typeString = "m";
+		sectionHeader = "OD_MCLK";
+		break;
+	}
+	case CorePState: {
+		typeString = "s";
+		sectionHeader = "OD_SCLK";
+		break;
+	}
+	}
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto vfPoint = vfPointWithRead(sectionHeader, pointIndex, data);
+		if (!vfPoint.has_value())
+			return std::nullopt;
+
+		return vfPoint->voltage;
+	};
+
+	if (!getFunc().has_value())
+		return std::nullopt;
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		auto vfPoint = vfPointWithRead(sectionHeader, pointIndex, data);
+		if (!vfPoint.has_value())
+			return AssignmentError::UnknownError;
+
+		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		char cmdString[32];
+		snprintf(
+		    cmdString, 32, "%s %u %i %i", typeString, pointIndex, vfPoint->clock, target);
+
+		if (file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	return Assignable{setWithPerfLevel, range, getFunc, _("mV")};
 }
 
 std::vector<TreeNode<DeviceNode>> getTemperature(AMDGPUData data) {
@@ -464,6 +588,71 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getCorePStateFreq(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	auto range = parsePstateRangeLineWithRead("SCLK", data);
+	if (!range.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	auto assignable = vfPointClockAssignable(CorePState, id, *range, data);
+
+	pointId++;
+
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Core Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "CorePStateFreq" + std::to_string(id)),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getCorePStateVolt(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	auto range = parsePstateRangeLineWithRead("VDDC", data);
+	if (!range.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	auto assignable = vfPointVoltageAssignable(CorePState, id, *range, data);
+
+	pointId++;
+
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Core Voltage"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "CorePStateVolt" + std::to_string(id)),
+	}};
+}
 std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	// Root item for voltage and frequency of a point
 	std::vector<TreeNode<DeviceNode>> retval;
@@ -485,6 +674,32 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 		    .name = name,
 		    .interface = std::nullopt,
 		    .hash = md5(data.pciId + "VFPoint" + std::to_string(i)),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getCorePStateNodes(AMDGPUData data) {
+	// Root item for voltage and frequency of a pstate
+	std::vector<TreeNode<DeviceNode>> retval;
+	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
+		return {};
+
+	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto tableContents = fileContents(path);
+	if (!tableContents.has_value())
+		return {};
+
+	auto lines = pstateSectionLines("OD_SCLK", *tableContents);
+	char name[32];
+	for (int i = 0; i < lines.size(); i++) {
+		snprintf(name, 32, "%s %i", _("State"), i);
+
+		DeviceNode node{
+		    .name = name,
+		    .interface = std::nullopt,
+		    .hash = md5(data.pciId + "PState" + std::to_string(i)),
 		};
 		retval.push_back(node);
 	}
@@ -593,6 +808,17 @@ std::vector<TreeNode<DeviceNode>> getPowerRoot(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getCorePStateRoot(AMDGPUData data) {
+	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Core Performance States"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Core Performance States"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 	auto name = amdgpu_get_marketing_name(data.devHandle);
 	if (name) {
@@ -629,6 +855,12 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getVoltFreqNodes, {
 					{getVoltFreqFreq, {}},
 					{getVoltFreqVolt, {}}
+				}}
+			}},
+			{getCorePStateRoot, {
+				{getCorePStateNodes, {
+					{getCorePStateFreq, {}},
+					{getCorePStateVolt, {}}
 				}}
 			}}
 		}}
