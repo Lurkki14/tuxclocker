@@ -195,3 +195,26 @@ std::vector<AMDGPUData> fromFilesystem() {
 	}
 	return retval;
 }
+
+int toMemoryClock(int controllerClock, AMDGPUData data) {
+	drm_amdgpu_info_device info;
+	if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_DEV_INFO, sizeof(info), &info) != 0)
+		return controllerClock;
+
+	// For GDDR 6 (?) memory clock is 2x controller clock, for rest it's the same
+	if (info.vram_type == AMDGPU_VRAM_TYPE_GDDR6)
+		return controllerClock * 2;
+
+	return controllerClock;
+}
+
+int toControllerClock(int memoryClock, AMDGPUData data) {
+	drm_amdgpu_info_device info;
+	if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_DEV_INFO, sizeof(info), &info) != 0)
+		return memoryClock;
+
+	if (info.vram_type == AMDGPU_VRAM_TYPE_GDDR6)
+		return memoryClock / 2;
+
+	return memoryClock;
+}

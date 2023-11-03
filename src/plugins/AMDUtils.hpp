@@ -51,3 +51,7 @@ std::optional<PPTableType> fromPPTableContents(const std::string &contents);
 std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry);
 
 std::vector<AMDGPUData> fromFilesystem();
+
+// https://docs.kernel.org/gpu/amdgpu/thermal.html#pp-od-clk-voltage
+int toMemoryClock(int controllerClock, AMDGPUData data);
+int toControllerClock(int memoryClock, AMDGPUData data);

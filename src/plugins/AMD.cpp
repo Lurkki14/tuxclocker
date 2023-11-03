@@ -96,6 +96,10 @@ std::optional<Assignable> vfPointClockAssignable(
 		if (!vfPoint.has_value())
 			return std::nullopt;
 
+		// Memory clock -> controller clock for memory clocks
+		if (vfType == MemoryPState)
+			return toMemoryClock(vfPoint->clock, data);
+
 		return vfPoint->clock;
 	};
 
@@ -113,6 +117,10 @@ std::optional<Assignable> vfPointClockAssignable(
 		auto vfPoint = vfPointWithRead(sectionHeader, pointIndex, data);
 		if (!vfPoint.has_value())
 			return AssignmentError::UnknownError;
+
+		// Memory clock -> controller clock for memory clocks
+		if (vfType == MemoryPState)
+			target = toControllerClock(target, data);
 
 		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
 		char cmdString[32];
@@ -653,6 +661,78 @@ std::vector<TreeNode<DeviceNode>> getCorePStateVolt(AMDGPUData data) {
 	    .hash = md5(data.pciId + "CorePStateVolt" + std::to_string(id)),
 	}};
 }
+
+std::vector<TreeNode<DeviceNode>> getMemoryPStateFreq(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	auto rangeController = parsePstateRangeLineWithRead("MCLK", data);
+	if (!rangeController.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Controller clock -> effective clock
+	Range<int> range{
+	    toMemoryClock(rangeController->min, data), toMemoryClock(rangeController->max, data)};
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	// Conversion back to controller clock is handled there
+	auto assignable = vfPointClockAssignable(MemoryPState, id, range, data);
+
+	pointId++;
+
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Memory Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "MemoryPStateFreq" + std::to_string(id)),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getMemoryPStateVolt(AMDGPUData data) {
+	static amdgpu_device_handle latestDev = nullptr;
+	static int pointId = 0;
+	std::vector<TreeNode<DeviceNode>> retval = {};
+
+	if (data.devHandle != latestDev)
+		// Start from zero for new device
+		pointId = 0;
+
+	latestDev = data.devHandle;
+
+	auto range = parsePstateRangeLineWithRead("VDDC", data);
+	if (!range.has_value()) {
+		pointId++;
+		return {};
+	}
+
+	// Make a copy so the lambda keeps using the right id
+	auto id = pointId;
+	auto assignable = vfPointVoltageAssignable(MemoryPState, id, *range, data);
+
+	pointId++;
+
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Memory Voltage"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "MemoryPStateVolt" + std::to_string(id)),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	// Root item for voltage and frequency of a point
 	std::vector<TreeNode<DeviceNode>> retval;
@@ -700,6 +780,32 @@ std::vector<TreeNode<DeviceNode>> getCorePStateNodes(AMDGPUData data) {
 		    .name = name,
 		    .interface = std::nullopt,
 		    .hash = md5(data.pciId + "PState" + std::to_string(i)),
+		};
+		retval.push_back(node);
+	}
+	return retval;
+}
+
+std::vector<TreeNode<DeviceNode>> getMemoryPStateNodes(AMDGPUData data) {
+	// Root item for voltage and frequency of a pstate
+	std::vector<TreeNode<DeviceNode>> retval;
+	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
+		return {};
+
+	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto tableContents = fileContents(path);
+	if (!tableContents.has_value())
+		return {};
+
+	auto lines = pstateSectionLines("OD_MCLK", *tableContents);
+	char name[32];
+	for (int i = 0; i < lines.size(); i++) {
+		snprintf(name, 32, "%s %i", _("State"), i);
+
+		DeviceNode node{
+		    .name = name,
+		    .interface = std::nullopt,
+		    .hash = md5(data.pciId + "MemoryPState" + std::to_string(i)),
 		};
 		retval.push_back(node);
 	}
@@ -819,6 +925,17 @@ std::vector<TreeNode<DeviceNode>> getCorePStateRoot(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getMemoryPStateRoot(AMDGPUData data) {
+	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Memory Performance States"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Memory Performance States"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 	auto name = amdgpu_get_marketing_name(data.devHandle);
 	if (name) {
@@ -861,6 +978,12 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getCorePStateNodes, {
 					{getCorePStateFreq, {}},
 					{getCorePStateVolt, {}}
+				}}
+			}},
+			{getMemoryPStateRoot, {
+				{getMemoryPStateNodes, {
+					{getMemoryPStateFreq, {}},
+					{getMemoryPStateVolt, {}}
 				}}
 			}}
 		}}
