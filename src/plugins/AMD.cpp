@@ -1008,6 +1008,62 @@ std::vector<TreeNode<DeviceNode>> getMinMemoryClock(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getMaxCoreClock(AMDGPUData data) {
+	if (!data.ppTableType.has_value())
+		return {};
+
+	auto t = *data.ppTableType;
+	if (t != Navi && t != SMU13 && t != Vega20Other)
+		return {};
+
+	auto lines = pstateSectionLinesWithRead("OD_SCLK", data);
+	if (lines.size() != 2)
+		return {};
+
+	auto range = parsePstateRangeLineWithRead("SCLK", data);
+	if (!range.has_value())
+		return {};
+
+	// Second index is max
+	auto assignable = singleValueAssignable(CoreClock, 1, *range, _("MHz"), data);
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Maximum Core Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "Maximum Core Clock"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getMinCoreClock(AMDGPUData data) {
+	if (!data.ppTableType.has_value())
+		return {};
+
+	auto t = *data.ppTableType;
+	if (t != Navi && t != SMU13 && t != Vega20Other)
+		return {};
+
+	auto lines = pstateSectionLinesWithRead("OD_SCLK", data);
+	if (lines.size() != 2)
+		return {};
+
+	auto range = parsePstateRangeLineWithRead("SCLK", data);
+	if (!range.has_value())
+		return {};
+
+	// First index is min
+	auto assignable = singleValueAssignable(CoreClock, 0, *range, _("MHz"), data);
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Minimum Core Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "Minimum Core Clock"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() &&
 	    (*data.ppTableType == Navi || *data.ppTableType == SMU13))
@@ -1117,7 +1173,9 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getMemoryClockRead, {}},
 				{getCoreClockRead, {}},
 				{getMinMemoryClock, {}},
-				{getMaxMemoryClock, {}}
+				{getMaxMemoryClock, {}},
+				{getMinCoreClock, {}},
+				{getMaxCoreClock, {}}
 			}},
 			{getVoltageRead, {}},
 			{getForcePerfLevel, {}},
