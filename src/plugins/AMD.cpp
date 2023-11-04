@@ -817,6 +817,47 @@ std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getCoreUtilization(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		uint util;
+		if (amdgpu_query_sensor_info(
+			data.devHandle, AMDGPU_INFO_SENSOR_GPU_LOAD, sizeof(util), &util) == 0)
+			return util;
+		return ReadError::UnknownError;
+	};
+
+	DynamicReadable dr{func, _("%")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Core Utilization"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Core Utilization"),
+		}};
+	}
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getMemoryUtilization(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		auto string = fileContents(data.hwmonPath + "/mem_busy_percent");
+		if (!string.has_value())
+			return ReadError::UnknownError;
+		return static_cast<uint>(std::stoi(*string));
+	};
+
+	DynamicReadable dr{func, _("%")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Memory Utilization"),
+		    .interface = dr,
+		    .hash = md5(data.pciId + "Memory Utilization"),
+		}};
+	}
+	return {};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() &&
 	    (*data.ppTableType == Navi || *data.ppTableType == SMU13))
@@ -883,6 +924,15 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateRoot(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(AMDGPUData data) {
+	// TODO: PCIe bandwidth utilization missing
+	return {DeviceNode{
+	    .name = _("Utilizations"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Utilizations"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 	auto name = amdgpu_get_marketing_name(data.devHandle);
 	if (name) {
@@ -907,6 +957,10 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		{getPowerRoot, {
 			{getPowerLimit, {}},
 			{getPowerUsage, {}}
+		}},
+		{getUtilizationsRoot, {
+			{getMemoryUtilization, {}},
+			{getCoreUtilization, {}}
 		}},
 		{getPerformanceRoot, {
 			{getClocksRoot, {
