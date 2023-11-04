@@ -26,7 +26,8 @@ using AssignmentFunction = std::function<std::optional<AssignmentError>(Assignme
 
 enum VoltFreqType {
 	MemoryPState,
-	CorePState
+	CorePState,
+	CoreVFCurve
 };
 
 EnumerationVec performanceLevelEnumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
@@ -87,6 +88,11 @@ std::optional<Assignable> vfPointClockAssignable(
 	case CorePState: {
 		typeString = "s";
 		sectionHeader = "OD_SCLK";
+		break;
+	}
+	case CoreVFCurve: {
+		typeString = "vc";
+		sectionHeader = "OD_VDDC_CURVE";
 		break;
 	}
 	}
@@ -154,6 +160,11 @@ std::optional<Assignable> vfPointVoltageAssignable(
 	case CorePState: {
 		typeString = "s";
 		sectionHeader = "OD_SCLK";
+		break;
+	}
+	case CoreVFCurve: {
+		typeString = "vc";
+		sectionHeader = "OD_VDDC_CURVE";
 		break;
 	}
 	}
@@ -480,52 +491,20 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqFreq(AMDGPUData data) {
 
 	// Make a copy so the lambda keeps using the right id
 	auto id = pointId;
-	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
-		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
-		if (!curvePoint.has_value())
-			return std::nullopt;
-
-		return curvePoint->clock;
-	};
-
-	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
-		if (!std::holds_alternative<int>(a))
-			return AssignmentError::InvalidType;
-
-		auto target = std::get<int>(a);
-		if (target < range->min || target > range->max)
-			return AssignmentError::OutOfRange;
-
-		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
-		if (!curvePoint.has_value())
-			return AssignmentError::UnknownError;
-
-		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
-		char cmdString[32];
-		snprintf(cmdString, 32, "vc %i %i %i", id, target, curvePoint->voltage);
-
-		if (file << cmdString && file << "c")
-			return std::nullopt;
-		return AssignmentError::UnknownError;
-	};
-
-	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
-		return withManualPerformanceLevel(setFunc, a, data);
-	};
-
-	Assignable a{setWithPerfLevel, *range, getFunc, _("MHz")};
 	pointId++;
+
+	auto assignable = vfPointClockAssignable(CoreVFCurve, id, *range, data);
+	if (!assignable.has_value())
+		return {};
 
 	// The rest of this code should work the same on Navi and RDNA 3
 	auto name = (*data.ppTableType == Navi) ? _("Core Clock") : _("Core Clock Offset");
 
-	if (getFunc().has_value())
-		return {DeviceNode{
-		    .name = name,
-		    .interface = a,
-		    .hash = md5(data.pciId + "VFClock" + std::to_string(id)),
-		}};
-	return {};
+	return {DeviceNode{
+	    .name = name,
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "VFClock" + std::to_string(id)),
+	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
@@ -548,52 +527,20 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 
 	// Make a copy so the lambda keeps using the right id
 	auto id = pointId;
-	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
-		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
-		if (!curvePoint.has_value())
-			return std::nullopt;
-
-		return curvePoint->voltage;
-	};
-
-	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
-		if (!std::holds_alternative<int>(a))
-			return AssignmentError::InvalidType;
-
-		auto target = std::get<int>(a);
-		if (target < range->min || target > range->max)
-			return AssignmentError::OutOfRange;
-
-		auto curvePoint = vfPointWithRead("OD_VDDC_CURVE", id, data);
-		if (!curvePoint.has_value())
-			return AssignmentError::UnknownError;
-
-		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
-		char cmdString[32];
-		snprintf(cmdString, 32, "vc %i %i %i", id, curvePoint->clock, target);
-
-		if (file << cmdString && file << "c")
-			return std::nullopt;
-		return AssignmentError::UnknownError;
-	};
-
-	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
-		return withManualPerformanceLevel(setFunc, a, data);
-	};
-
-	Assignable a{setWithPerfLevel, *range, getFunc, _("mV")};
 	pointId++;
+
+	auto assignable = vfPointVoltageAssignable(CoreVFCurve, id, *range, data);
+	if (!assignable.has_value())
+		return {};
 
 	// The rest of this code should work the same on Navi and RDNA 3
 	auto name = (*data.ppTableType == Navi) ? _("Core Voltage") : _("Core Voltage Offset");
 
-	if (getFunc().has_value())
-		return {DeviceNode{
-		    .name = name,
-		    .interface = a,
-		    .hash = md5(data.pciId + "VFVoltage" + std::to_string(id)),
-		}};
-	return {};
+	return {DeviceNode{
+	    .name = name,
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "VFVoltage" + std::to_string(id)),
+	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getCorePStateFreq(AMDGPUData data) {
