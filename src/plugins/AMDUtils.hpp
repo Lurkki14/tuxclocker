@@ -13,7 +13,8 @@ namespace fs = std::filesystem;
 enum PPTableType {
 	Vega10,
 	Navi,
-	SMU13 // RDNA 3
+	SMU13,	    // RDNA 3
+	Vega20Other // Has at least clock limits
 };
 
 struct VFPoint {
@@ -31,6 +32,7 @@ struct AMDGPUData {
 };
 
 std::vector<std::string> pstateSectionLines(const std::string &header, const std::string &contents);
+std::vector<std::string> pstateSectionLinesWithRead(const std::string &header, AMDGPUData data);
 
 std::optional<TuxClocker::Device::Range<int>> parsePstateRangeLine(
     std::string title, const std::string &contents);

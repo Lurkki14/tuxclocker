@@ -30,6 +30,12 @@ enum VoltFreqType {
 	CoreVFCurve
 };
 
+// Minimum (where available) and max clocks
+enum SingleAssignableType {
+	CoreClock,
+	MemoryClock,
+};
+
 EnumerationVec performanceLevelEnumVec = {{_("Automatic"), 0}, {_("Lowest"), 1}, {_("Highest"), 2},
     {_("Manual"), 3}, {_("Base Levels"), 4}, {_("Lowest Core Clock"), 5},
     {_("Lowest Memory Clock"), 6}, {_("Highest Clocks"), 7}};
@@ -143,6 +149,86 @@ std::optional<Assignable> vfPointClockAssignable(
 	};
 
 	return Assignable{setWithPerfLevel, range, getFunc, _("MHz")};
+}
+
+// Same as above, but for editing single values like min/max clocks
+std::optional<Assignable> singleValueAssignable(SingleAssignableType type, uint pointIndex,
+    Range<int> range, std::string unit, AMDGPUData data) {
+	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	const char *typeString;
+	const char *sectionHeader;
+
+	switch (type) {
+	case MemoryClock: {
+		typeString = "m";
+		sectionHeader = "OD_MCLK";
+		break;
+	}
+	case CoreClock: {
+		typeString = "s";
+		sectionHeader = "OD_SCLK";
+		break;
+	}
+	}
+
+	auto lines = pstateSectionLines(sectionHeader, *contents);
+	if (lines.size() < pointIndex + 1)
+		return std::nullopt;
+
+	// The index in sysfs can be '1' even if there's only one point
+	auto words = fplus::split_words(false, lines[pointIndex]);
+	int sysFsIndex = std::stoi(words.front());
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto contents = fileContents(path);
+		if (!contents.has_value())
+			return std::nullopt;
+
+		auto lines = pstateSectionLines(sectionHeader, *contents);
+		if (lines.size() < pointIndex + 1)
+			return std::nullopt;
+
+		auto value = parseLineValue(lines[pointIndex]);
+		if (!value.has_value())
+			return std::nullopt;
+
+		// Memory clock -> controller clock for memory clocks
+		if (type == MemoryClock)
+			return toMemoryClock(*value, data);
+
+		return *value;
+	};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		// Memory clock -> controller clock for memory clocks
+		if (type == MemoryClock)
+			target = toControllerClock(target, data);
+
+		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		char cmdString[32];
+		snprintf(cmdString, 32, "%s %i %i", typeString, sysFsIndex, target);
+
+		if (file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	auto setWithPerfLevel = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	return Assignable{setWithPerfLevel, range, getFunc, unit};
 }
 
 std::optional<Assignable> vfPointVoltageAssignable(
@@ -858,6 +944,70 @@ std::vector<TreeNode<DeviceNode>> getMemoryUtilization(AMDGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getMaxMemoryClock(AMDGPUData data) {
+	if (!data.ppTableType.has_value())
+		return {};
+
+	auto t = *data.ppTableType;
+	if (t != Navi && t != SMU13 && t != Vega20Other)
+		return {};
+
+	// Per kernel documentation, if there's only one index for memory clock, it means maximum
+	auto lines = pstateSectionLinesWithRead("OD_MCLK", data);
+	if (lines.size() != 1 || lines.size() != 2)
+		return {};
+
+	auto index = (lines.size() == 1) ? 0 : 1;
+
+	auto controllerRange = parsePstateRangeLineWithRead("MCLK", data);
+	if (!controllerRange.has_value())
+		return {};
+
+	Range<int> range{
+	    toMemoryClock(controllerRange->min, data), toMemoryClock(controllerRange->max, data)};
+
+	auto assignable = singleValueAssignable(MemoryClock, index, range, _("MHz"), data);
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Maximum Memory Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "Maximum Memory Clock"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getMinMemoryClock(AMDGPUData data) {
+	if (!data.ppTableType.has_value())
+		return {};
+
+	auto t = *data.ppTableType;
+	if (t != Navi && t != SMU13 && t != Vega20Other)
+		return {};
+
+	// Per kernel documentation, two indices means there's a minimum clock
+	auto lines = pstateSectionLinesWithRead("OD_MCLK", data);
+	if (lines.size() != 2)
+		return {};
+
+	auto controllerRange = parsePstateRangeLineWithRead("MCLK", data);
+	if (!controllerRange.has_value())
+		return {};
+
+	Range<int> range{
+	    toMemoryClock(controllerRange->min, data), toMemoryClock(controllerRange->max, data)};
+
+	auto assignable = singleValueAssignable(MemoryClock, 0, range, _("MHz"), data);
+	if (!assignable.has_value())
+		return {};
+
+	return {DeviceNode{
+	    .name = _("Minimum Memory Clock"),
+	    .interface = *assignable,
+	    .hash = md5(data.pciId + "Minimum Memory Clock"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() &&
 	    (*data.ppTableType == Navi || *data.ppTableType == SMU13))
@@ -965,7 +1115,9 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		{getPerformanceRoot, {
 			{getClocksRoot, {
 				{getMemoryClockRead, {}},
-				{getCoreClockRead, {}}
+				{getCoreClockRead, {}},
+				{getMinMemoryClock, {}},
+				{getMaxMemoryClock, {}}
 			}},
 			{getVoltageRead, {}},
 			{getForcePerfLevel, {}},

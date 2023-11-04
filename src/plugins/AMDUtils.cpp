@@ -39,6 +39,14 @@ std::vector<std::string> pstateSectionLines(
 	return retval;
 }
 
+std::vector<std::string> pstateSectionLinesWithRead(const std::string &header, AMDGPUData data) {
+	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	if (!contents.has_value())
+		return {};
+
+	return pstateSectionLines(header, *contents);
+}
+
 std::optional<Range<int>> parsePstateRangeLine(std::string title, const std::string &contents) {
 	// For example:
 	// MCLK:     625Mhz        930Mhz
@@ -122,6 +130,9 @@ std::optional<PPTableType> fromPPTableContents(const std::string &contents) {
 			// RDNA 3 (SMU13) has six points using offsets
 			if (first.has_value() && fourth.has_value())
 				return SMU13;
+
+			// Other tables of this type have min/max clock setting available
+			return Vega20Other;
 		}
 	}
 	return std::nullopt;
