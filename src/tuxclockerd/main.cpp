@@ -1,6 +1,7 @@
 #include <DBusTypes.hpp>
 #include <iostream>
 #include <libintl.h>
+#include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include <QDBusError>
@@ -21,6 +22,11 @@ namespace TCDBus = TuxClocker::DBus;
 
 int main(int argc, char **argv) {
 	QCoreApplication a(argc, argv);
+	a.setApplicationVersion(TUXCLOCKER_VERSION_STRING);
+
+	QCommandLineParser parser;
+	parser.addVersionOption();
+	parser.process(a);
 
 	// TODO: should numbers here be localized or not?
 	setlocale(LC_MESSAGES, "");

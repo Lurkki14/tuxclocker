@@ -46,5 +46,5 @@ executable('tuxclocker-qt',
 	override_options : ['cpp_std=c++17'],
 	dependencies: qt5_dep,
 	include_directories: [incdir, local_incdir],
-        cpp_args : locale_path_def,
+        cpp_args : [locale_path_def, version_string_def],
 	install: true)

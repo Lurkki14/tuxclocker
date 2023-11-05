@@ -1,4 +1,9 @@
-# Define libtuxclocker target here since others depend on it
+# Version information
+tuxclocker_version = '1.3.0-rc.1'
+git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
+version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
+# Used in preprocessor
+version_string_def = '-DTUXCLOCKER_VERSION_STRING="@0@"'.format(version_string)
 
 # OpenSSL is used for hash functions
 openssl_dep = dependency('openssl')
@@ -15,6 +20,7 @@ plugin_path_def = plugin_path_def_template.format(get_option('prefix'), get_opti
 locale_path_def_template = '-DTUXCLOCKER_LOCALE_PATH="@0@/@1@/locale"'
 locale_path_def = locale_path_def_template.format(get_option('prefix'), get_option('datadir'))
 
+# Define libtuxclocker target here since others depend on it
 libtuxclocker = shared_library('tuxclocker',
 	['lib/Crypto.cpp',
 	 'lib/Plugin.cpp'],

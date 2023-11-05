@@ -18,7 +18,7 @@ executable('tuxclockerd',
 	include_directories : [incdir, patterns_inc],
 	dependencies : [qt5_dep, boost_dep],
 	link_with : libtuxclocker,
-        cpp_args : locale_path_def,
+        cpp_args : [locale_path_def,  version_string_def],
 	install : true)
 	
 # DBus data directories
