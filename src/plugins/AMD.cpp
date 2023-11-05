@@ -1064,6 +1064,44 @@ std::vector<TreeNode<DeviceNode>> getMinCoreClock(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getSlowdownTemperature(AMDGPUData data) {
+	auto string = fileContents(data.hwmonPath + "/temp1_crit");
+	if (!string.has_value())
+		return {};
+
+	// millicelsius -> celsius
+	StaticReadable sr{static_cast<uint>(std::stoi(*string)) / 1000, _("°C")};
+
+	return {DeviceNode{
+	    .name = _("Slowdown Temperature"),
+	    .interface = sr,
+	    .hash = md5(data.pciId + "Slowdown Temperature"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getShutdownTemperature(AMDGPUData data) {
+	auto string = fileContents(data.hwmonPath + "/temp1_emergency");
+	if (!string.has_value())
+		return {};
+
+	// millicelsius -> celsius
+	StaticReadable sr{static_cast<uint>(std::stoi(*string)) / 1000, _("°C")};
+
+	return {DeviceNode{
+	    .name = _("Shutdown Temperature"),
+	    .interface = sr,
+	    .hash = md5(data.pciId + "Shutdown Temperature"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getTemperatureRoot(AMDGPUData data) {
+	return {DeviceNode{
+	    .name = _("Temperatures"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.pciId + "Temperatures"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 	if (data.ppTableType.has_value() &&
 	    (*data.ppTableType == Navi || *data.ppTableType == SMU13))
@@ -1154,7 +1192,11 @@ std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 // clang-format off
 auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 	getGPUName, {
-		{getTemperature, {}},
+		{getTemperatureRoot, {
+			{getTemperature, {}},
+			{getSlowdownTemperature, {}},
+			{getShutdownTemperature, {}}
+		}},
 		{getFanRoot, {
 			{getFanMode, {}},
 			{getFanSpeedWrite, {}},
