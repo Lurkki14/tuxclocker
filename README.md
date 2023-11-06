@@ -41,6 +41,9 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Voltage setting and reading (Xorg only)
 
 ### AMD GPUs
+NOTE ABOUT AMD GPUS:
+
+When writing to `pp_od_clk_voltage` (writable properties in the 'Performance' subtree), `power_dpm_force_performance_level` is implicitly set to 'Manual'. Normally this shouldn't matter, but if you set 'Performance Parameter Control' to anything other than 'Automatic' or 'Manual' you may get unexpected results due to the value being overridden by other settings. You can work around this by removing the setting values from your profile by right clicking on the properties.
 #### Radeon HD 7000 -series and above (with amdgpu driver)
 - Temperatures
 - Fan mode
