@@ -26,8 +26,8 @@ mkDerivation rec {
     fetchSubmodules = true;
     owner = "Lurkki14";
     repo = "tuxclocker";
-    rev = "d26b4ca6dfe376eb00751230b5c9586b922cb53d";
-    hash = "sha256-MDf2TOQpIIzfEf1R+axLEdh8t19FujWQqzo9MJ6pzXs=";
+    rev = "60cae61869cb1551db3456e27bdb37773fd27fe8";
+    hash = "sha256-aVCAuHuxPD4ony9wwxV1nC3Yj0C++aNBad79J5X0558=";
   };
 
   # meson 0.57 should fix having to have these
@@ -40,6 +40,7 @@ mkDerivation rec {
   '';
 
   nativeBuildInputs = [
+    git
     pkg-config
   ];
 
