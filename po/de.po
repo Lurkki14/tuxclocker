@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-21 12:10+0300\n"
+"POT-Creation-Date: 2023-11-06 14:09+0200\n"
 "PO-Revision-Date: 2023-10-25 13:13+0000\n"
 "Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/tuxclocker/"
@@ -19,24 +19,24 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.1.1-dev\n"
 
-#: src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:627 src/plugins/Nvidia.cpp:148
-#: src/plugins/Nvidia.cpp:196 src/plugins/Nvidia.cpp:215
-#: src/plugins/Nvidia.cpp:236
+#: src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:629 src/plugins/Nvidia.cpp:182
+#: src/plugins/Nvidia.cpp:183 src/plugins/Nvidia.cpp:241
+#: src/plugins/Nvidia.cpp:260 src/plugins/Nvidia.cpp:281
 msgid "MHz"
 msgstr "MHz"
 
-#: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:506
-#: src/plugins/Nvidia.cpp:523 src/plugins/Nvidia.cpp:538
+#: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:575
+#: src/plugins/Nvidia.cpp:592 src/plugins/Nvidia.cpp:607
 msgid "°C"
 msgstr "°C"
 
 #: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
-#: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:556 src/plugins/CPU.cpp:642
-#: src/plugins/CPU.cpp:663
+#: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:558 src/plugins/CPU.cpp:644
+#: src/plugins/CPU.cpp:665
 msgid "Core"
 msgstr "Kern"
 
-#: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:526
+#: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
 msgid "Slowdown Temperature"
 msgstr "Gedrosselt ab"
 
@@ -44,9 +44,9 @@ msgstr "Gedrosselt ab"
 msgid "Overall Temperature"
 msgstr "Gesamttemperatur"
 
-#: src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:274
-#: src/plugins/Nvidia.cpp:309 src/plugins/Nvidia.cpp:371
-#: src/plugins/Nvidia.cpp:391 src/plugins/Nvidia.cpp:427
+#: src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
+#: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
+#: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
 msgid "%"
 msgstr "%"
 
@@ -58,119 +58,123 @@ msgstr "Energie sparen"
 msgid "Performance"
 msgstr "Leistung"
 
-#: src/plugins/CPU.cpp:678
+#: src/plugins/CPU.cpp:498
+msgid "Scheduler Controlled"
+msgstr ""
+
+#: src/plugins/CPU.cpp:680
 msgid "Maximum Frequencies"
 msgstr "Maximale Frequenz"
 
-#: src/plugins/CPU.cpp:687
+#: src/plugins/CPU.cpp:689
 msgid "Minimum Frequencies"
 msgstr "Minimale Frequenz"
 
-#: src/plugins/CPU.cpp:696 src/plugins/CPU.cpp:704
+#: src/plugins/CPU.cpp:698 src/plugins/CPU.cpp:706
 msgid "Governor"
 msgstr "Regler"
 
-#: src/plugins/CPU.cpp:712
+#: src/plugins/CPU.cpp:714
 msgid "Power Saving Tendencies"
 msgstr "Energiespartendenz"
 
-#: src/plugins/CPU.cpp:720
+#: src/plugins/CPU.cpp:722
 msgid "Frequencies"
 msgstr "Frequenzen"
 
-#: src/plugins/CPU.cpp:728 src/plugins/Nvidia.cpp:667
+#: src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
 msgid "Utilizations"
 msgstr "Auslastung"
 
-#: src/plugins/CPU.cpp:736 src/plugins/Nvidia.cpp:651
+#: src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
 msgid "Temperatures"
 msgstr "Temperaturen"
 
-#: src/plugins/Nvidia.cpp:152
+#: src/plugins/Nvidia.cpp:186
 msgid "Memory Clock Offset"
 msgstr "Speichertakt Offset"
 
-#: src/plugins/Nvidia.cpp:199
+#: src/plugins/Nvidia.cpp:244
 msgid "Core Clock Offset"
 msgstr "GPU Takt Offset"
 
-#: src/plugins/Nvidia.cpp:219
+#: src/plugins/Nvidia.cpp:264
 msgid "Core Clock"
 msgstr "Kerntakt"
 
-#: src/plugins/Nvidia.cpp:240
+#: src/plugins/Nvidia.cpp:285
 msgid "Memory Clock"
 msgstr "Speichertakt"
 
-#: src/plugins/Nvidia.cpp:254
+#: src/plugins/Nvidia.cpp:299
 msgid "Clocks"
 msgstr "Takt"
 
-#: src/plugins/Nvidia.cpp:279 src/plugins/Nvidia.cpp:314
+#: src/plugins/Nvidia.cpp:332 src/plugins/Nvidia.cpp:375
 msgid "Fan Speed"
 msgstr "Lüfterdrehzahl"
 
-#: src/plugins/Nvidia.cpp:350
+#: src/plugins/Nvidia.cpp:419
 msgid "Automatic"
 msgstr "Automatisch"
 
-#: src/plugins/Nvidia.cpp:350
+#: src/plugins/Nvidia.cpp:419
 msgid "Manual"
 msgstr "Manuell"
 
-#: src/plugins/Nvidia.cpp:356
+#: src/plugins/Nvidia.cpp:425
 msgid "Fan Mode"
 msgstr "Lüftermodus"
 
-#: src/plugins/Nvidia.cpp:375
+#: src/plugins/Nvidia.cpp:444
 msgid "Core Utilization"
 msgstr "GPU Auslastung"
 
-#: src/plugins/Nvidia.cpp:395
+#: src/plugins/Nvidia.cpp:464
 msgid "Memory Utilization"
 msgstr "Speicherauslastung"
 
-#: src/plugins/Nvidia.cpp:431
+#: src/plugins/Nvidia.cpp:500
 msgid "PCIe Bandwidth Utilization"
 msgstr "Auslastung PCIe Bandbreite"
 
-#: src/plugins/Nvidia.cpp:447 src/plugins/Nvidia.cpp:488
+#: src/plugins/Nvidia.cpp:516 src/plugins/Nvidia.cpp:557
 msgid "W"
 msgstr "W"
 
-#: src/plugins/Nvidia.cpp:451
+#: src/plugins/Nvidia.cpp:520
 msgid "Power Usage"
 msgstr "Leistungsaufnahme"
 
-#: src/plugins/Nvidia.cpp:491
+#: src/plugins/Nvidia.cpp:560
 msgid "Power Limit"
 msgstr "Power Limit"
 
-#: src/plugins/Nvidia.cpp:510
+#: src/plugins/Nvidia.cpp:579
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: src/plugins/Nvidia.cpp:541
+#: src/plugins/Nvidia.cpp:610
 msgid "Shutdown Temperature"
 msgstr "Abschalttemperatur"
 
-#: src/plugins/Nvidia.cpp:556 src/plugins/Nvidia.cpp:600
+#: src/plugins/Nvidia.cpp:628 src/plugins/Nvidia.cpp:675
 msgid "mV"
 msgstr "mV"
 
-#: src/plugins/Nvidia.cpp:560
+#: src/plugins/Nvidia.cpp:632
 msgid "Core Voltage"
 msgstr "Kernspannung"
 
-#: src/plugins/Nvidia.cpp:604
+#: src/plugins/Nvidia.cpp:679
 msgid "Core Voltage Offset"
 msgstr "GPU Spannung Offset"
 
-#: src/plugins/Nvidia.cpp:621
+#: src/plugins/Nvidia.cpp:696
 msgid "Fan"
 msgstr "Lüfter"
 
-#: src/plugins/Nvidia.cpp:659
+#: src/plugins/Nvidia.cpp:734
 msgid "Fans"
 msgstr "Lüfter"
 
@@ -189,6 +193,10 @@ msgstr "Parametrisiere..."
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
 msgid "Reset to default"
 msgstr "Standardwerte wiederherstellen"
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
+msgid "Remove settings from profile"
+msgstr ""
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
@@ -271,10 +279,10 @@ msgstr ""
 msgid "Save"
 msgstr "Speichern"
 
-#: src/tuxclocker-qt/MainWindow.cpp:116
+#: src/tuxclocker-qt/MainWindow.cpp:120
 msgid "&Maximize TuxClocker"
 msgstr "&Maximiere TuxClocker"
 
-#: src/tuxclocker-qt/MainWindow.cpp:120
+#: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Quit"
 msgstr "&Beenden"
