@@ -19,10 +19,9 @@ TuxClocker uses GNU gettext for translations. You can use [Weblate](https://host
 - Option to apply profile settings on startup/profile change
 
 ### Currently missing from earlier releases
-These are missing from the 1.0.0 release, but present in the 0.1.1 release.
+These are missing from the 1.3.0 release, but present in the 0.1.1 release.
 Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/76369ef24283364b4111c5970797062432044cbc) if you wish to use these.
 
-- AMD GPU support
 - Graphs for properties
 
 ## Currently supported devices and features
@@ -40,6 +39,28 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 
 #### 600 to 900 -series
 - Voltage setting and reading (Xorg only)
+
+### AMD GPUs
+#### Radeon HD 7000 -series and above (with amdgpu driver)
+- Temperatures
+- Fan mode
+- Fan speed
+- Core and memory clock reading
+- Performance parameter control (power_dpm_force_performance_level)
+
+#### Vega-series and above
+- Voltage monitoring
+- Utilizations
+
+#### Vega-series
+- Memory and core performance state editing (discrete clock-voltage points)
+
+#### Navi-series and above
+- Minimum and maximum core clock editing
+- Minimum and maximum memory clock editing
+
+#### Navi-series
+- Voltage-frequency curve editing for core clocks
 
 ### CPUs
 - Frequency monitoring
