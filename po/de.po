@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-06 14:09+0200\n"
+"POT-Creation-Date: 2023-11-06 14:11+0200\n"
 "PO-Revision-Date: 2023-10-25 13:13+0000\n"
 "Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/tuxclocker/"
@@ -19,16 +19,207 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.1.1-dev\n"
 
-#: src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:629 src/plugins/Nvidia.cpp:182
-#: src/plugins/Nvidia.cpp:183 src/plugins/Nvidia.cpp:241
-#: src/plugins/Nvidia.cpp:260 src/plugins/Nvidia.cpp:281
+#: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+msgid "Automatic"
+msgstr "Automatisch"
+
+#: src/plugins/AMD.cpp:39
+msgid "Lowest"
+msgstr ""
+
+#: src/plugins/AMD.cpp:39
+msgid "Highest"
+msgstr ""
+
+#: src/plugins/AMD.cpp:40 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+msgid "Manual"
+msgstr "Manuell"
+
+#: src/plugins/AMD.cpp:40
+msgid "Base Levels"
+msgstr ""
+
+#: src/plugins/AMD.cpp:40
+#, fuzzy
+msgid "Lowest Core Clock"
+msgstr "Kerntakt"
+
+#: src/plugins/AMD.cpp:41
+#, fuzzy
+msgid "Lowest Memory Clock"
+msgstr "Speichertakt"
+
+#: src/plugins/AMD.cpp:41
+#, fuzzy
+msgid "Highest Clocks"
+msgstr "Takt"
+
+#: src/plugins/AMD.cpp:151 src/plugins/AMD.cpp:526 src/plugins/AMD.cpp:548
+#: src/plugins/AMD.cpp:969 src/plugins/AMD.cpp:1000 src/plugins/AMD.cpp:1028
+#: src/plugins/AMD.cpp:1056 src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:629
+#: src/plugins/Nvidia.cpp:182 src/plugins/Nvidia.cpp:183
+#: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
+#: src/plugins/Nvidia.cpp:281
 msgid "MHz"
 msgstr "MHz"
 
+#: src/plugins/AMD.cpp:295 src/plugins/AMD.cpp:866 src/plugins/Nvidia.cpp:628
+#: src/plugins/Nvidia.cpp:675
+msgid "mV"
+msgstr "mV"
+
+#: src/plugins/AMD.cpp:308 src/plugins/AMD.cpp:1073 src/plugins/AMD.cpp:1088
 #: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:575
 #: src/plugins/Nvidia.cpp:592 src/plugins/Nvidia.cpp:607
 msgid "°C"
 msgstr "°C"
+
+#: src/plugins/AMD.cpp:312 src/plugins/Nvidia.cpp:579
+msgid "Temperature"
+msgstr "Temperatur"
+
+#: src/plugins/AMD.cpp:360 src/plugins/Nvidia.cpp:425
+msgid "Fan Mode"
+msgstr "Lüftermodus"
+
+#: src/plugins/AMD.cpp:400 src/plugins/AMD.cpp:431 src/plugins/AMD.cpp:915
+#: src/plugins/AMD.cpp:935 src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
+#: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
+#: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
+msgid "%"
+msgstr "%"
+
+#: src/plugins/AMD.cpp:403 src/plugins/AMD.cpp:435 src/plugins/Nvidia.cpp:332
+#: src/plugins/Nvidia.cpp:375
+msgid "Fan Speed"
+msgstr "Lüfterdrehzahl"
+
+#: src/plugins/AMD.cpp:487 src/plugins/AMD.cpp:505 src/plugins/Nvidia.cpp:516
+#: src/plugins/Nvidia.cpp:557
+msgid "W"
+msgstr "W"
+
+#: src/plugins/AMD.cpp:490 src/plugins/Nvidia.cpp:560
+msgid "Power Limit"
+msgstr "Power Limit"
+
+#: src/plugins/AMD.cpp:509 src/plugins/Nvidia.cpp:520
+msgid "Power Usage"
+msgstr "Leistungsaufnahme"
+
+#: src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:587 src/plugins/AMD.cpp:659
+#: src/plugins/Nvidia.cpp:264
+msgid "Core Clock"
+msgstr "Kerntakt"
+
+#: src/plugins/AMD.cpp:552 src/plugins/AMD.cpp:730 src/plugins/Nvidia.cpp:285
+msgid "Memory Clock"
+msgstr "Speichertakt"
+
+#: src/plugins/AMD.cpp:587 src/plugins/Nvidia.cpp:244
+msgid "Core Clock Offset"
+msgstr "GPU Takt Offset"
+
+#: src/plugins/AMD.cpp:623 src/plugins/AMD.cpp:692 src/plugins/AMD.cpp:869
+#: src/plugins/Nvidia.cpp:632
+msgid "Core Voltage"
+msgstr "Kernspannung"
+
+#: src/plugins/AMD.cpp:623 src/plugins/Nvidia.cpp:679
+msgid "Core Voltage Offset"
+msgstr "GPU Spannung Offset"
+
+#: src/plugins/AMD.cpp:763
+#, fuzzy
+msgid "Memory Voltage"
+msgstr "Kernspannung"
+
+#: src/plugins/AMD.cpp:784
+msgid "Point"
+msgstr ""
+
+#: src/plugins/AMD.cpp:810 src/plugins/AMD.cpp:836
+msgid "State"
+msgstr ""
+
+#: src/plugins/AMD.cpp:899
+msgid "Performance Parameter Control"
+msgstr ""
+
+#: src/plugins/AMD.cpp:919 src/plugins/Nvidia.cpp:444
+msgid "Core Utilization"
+msgstr "GPU Auslastung"
+
+#: src/plugins/AMD.cpp:939 src/plugins/Nvidia.cpp:464
+msgid "Memory Utilization"
+msgstr "Speicherauslastung"
+
+#: src/plugins/AMD.cpp:974
+#, fuzzy
+msgid "Maximum Memory Clock"
+msgstr "Speichertakt"
+
+#: src/plugins/AMD.cpp:1005
+#, fuzzy
+msgid "Minimum Memory Clock"
+msgstr "Speichertakt"
+
+#: src/plugins/AMD.cpp:1033
+#, fuzzy
+msgid "Maximum Core Clock"
+msgstr "Kerntakt"
+
+#: src/plugins/AMD.cpp:1061
+#, fuzzy
+msgid "Minimum Core Clock"
+msgstr "Kerntakt"
+
+#: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
+msgid "Slowdown Temperature"
+msgstr "Gedrosselt ab"
+
+#: src/plugins/AMD.cpp:1091 src/plugins/Nvidia.cpp:610
+msgid "Shutdown Temperature"
+msgstr "Abschalttemperatur"
+
+#: src/plugins/AMD.cpp:1099 src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
+msgid "Temperatures"
+msgstr "Temperaturen"
+
+#: src/plugins/AMD.cpp:1109
+msgid "Voltage-Frequency Curve"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1118 src/plugins/Nvidia.cpp:299
+msgid "Clocks"
+msgstr "Takt"
+
+#: src/plugins/AMD.cpp:1126 src/plugins/CPU.cpp:496
+msgid "Performance"
+msgstr "Leistung"
+
+#: src/plugins/AMD.cpp:1134 src/plugins/Nvidia.cpp:734
+msgid "Fans"
+msgstr "Lüfter"
+
+#: src/plugins/AMD.cpp:1143
+#, fuzzy
+msgid "Power"
+msgstr "Leistungsaufnahme"
+
+#: src/plugins/AMD.cpp:1154
+#, fuzzy
+msgid "Core Performance States"
+msgstr "Leistung"
+
+#: src/plugins/AMD.cpp:1165
+#, fuzzy
+msgid "Memory Performance States"
+msgstr "Leistung"
+
+#: src/plugins/AMD.cpp:1174 src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
+msgid "Utilizations"
+msgstr "Auslastung"
 
 #: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
 #: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:558 src/plugins/CPU.cpp:644
@@ -36,27 +227,13 @@ msgstr "°C"
 msgid "Core"
 msgstr "Kern"
 
-#: src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
-msgid "Slowdown Temperature"
-msgstr "Gedrosselt ab"
-
 #: src/plugins/CPU.cpp:385
 msgid "Overall Temperature"
 msgstr "Gesamttemperatur"
 
-#: src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
-#: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
-#: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
-msgid "%"
-msgstr "%"
-
 #: src/plugins/CPU.cpp:494
 msgid "Power Saving"
 msgstr "Energie sparen"
-
-#: src/plugins/CPU.cpp:496
-msgid "Performance"
-msgstr "Leistung"
 
 #: src/plugins/CPU.cpp:498
 msgid "Scheduler Controlled"
@@ -82,100 +259,16 @@ msgstr "Energiespartendenz"
 msgid "Frequencies"
 msgstr "Frequenzen"
 
-#: src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
-msgid "Utilizations"
-msgstr "Auslastung"
-
-#: src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
-msgid "Temperatures"
-msgstr "Temperaturen"
-
 #: src/plugins/Nvidia.cpp:186
 msgid "Memory Clock Offset"
 msgstr "Speichertakt Offset"
-
-#: src/plugins/Nvidia.cpp:244
-msgid "Core Clock Offset"
-msgstr "GPU Takt Offset"
-
-#: src/plugins/Nvidia.cpp:264
-msgid "Core Clock"
-msgstr "Kerntakt"
-
-#: src/plugins/Nvidia.cpp:285
-msgid "Memory Clock"
-msgstr "Speichertakt"
-
-#: src/plugins/Nvidia.cpp:299
-msgid "Clocks"
-msgstr "Takt"
-
-#: src/plugins/Nvidia.cpp:332 src/plugins/Nvidia.cpp:375
-msgid "Fan Speed"
-msgstr "Lüfterdrehzahl"
-
-#: src/plugins/Nvidia.cpp:419
-msgid "Automatic"
-msgstr "Automatisch"
-
-#: src/plugins/Nvidia.cpp:419
-msgid "Manual"
-msgstr "Manuell"
-
-#: src/plugins/Nvidia.cpp:425
-msgid "Fan Mode"
-msgstr "Lüftermodus"
-
-#: src/plugins/Nvidia.cpp:444
-msgid "Core Utilization"
-msgstr "GPU Auslastung"
-
-#: src/plugins/Nvidia.cpp:464
-msgid "Memory Utilization"
-msgstr "Speicherauslastung"
 
 #: src/plugins/Nvidia.cpp:500
 msgid "PCIe Bandwidth Utilization"
 msgstr "Auslastung PCIe Bandbreite"
 
-#: src/plugins/Nvidia.cpp:516 src/plugins/Nvidia.cpp:557
-msgid "W"
-msgstr "W"
-
-#: src/plugins/Nvidia.cpp:520
-msgid "Power Usage"
-msgstr "Leistungsaufnahme"
-
-#: src/plugins/Nvidia.cpp:560
-msgid "Power Limit"
-msgstr "Power Limit"
-
-#: src/plugins/Nvidia.cpp:579
-msgid "Temperature"
-msgstr "Temperatur"
-
-#: src/plugins/Nvidia.cpp:610
-msgid "Shutdown Temperature"
-msgstr "Abschalttemperatur"
-
-#: src/plugins/Nvidia.cpp:628 src/plugins/Nvidia.cpp:675
-msgid "mV"
-msgstr "mV"
-
-#: src/plugins/Nvidia.cpp:632
-msgid "Core Voltage"
-msgstr "Kernspannung"
-
-#: src/plugins/Nvidia.cpp:679
-msgid "Core Voltage Offset"
-msgstr "GPU Spannung Offset"
-
 #: src/plugins/Nvidia.cpp:696
 msgid "Fan"
-msgstr "Lüfter"
-
-#: src/plugins/Nvidia.cpp:734
-msgid "Fans"
 msgstr "Lüfter"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75

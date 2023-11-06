@@ -1,3 +1,4 @@
+src/plugins/AMD.cpp
 src/plugins/CPU.cpp
 src/plugins/Nvidia.cpp
 src/tuxclocker-qt/data/AssignableItem.cpp
