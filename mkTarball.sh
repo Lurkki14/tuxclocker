@@ -6,8 +6,8 @@ libPaths=( "${storePaths[@]/%/\/lib\/}" )
 libPaths=( "${libPaths[@]/#/.}" )
 libPathsColonSep=$(echo ${libPaths[@]} | sed 's/ /:/g')
 glibPath=$(nix-build '<nixpkgs>' -A glibc --no-out-link)
-# TODO: don't hardcode version!
-qtPluginPath=.$(nix-build '<nixpkgs>' -A libsForQt5.qt5.qtbase --no-out-link)/lib/qt-5.15.9/plugins/
+qtVersion=$(nix-instantiate --eval --expr "(import <nixpkgs> {}).libsForQt5.qtbase.version" | sed s/\"//g)
+qtPluginPath=.$(nix-build '<nixpkgs>' -A libsForQt5.qt5.qtbase --no-out-link)/lib/qt-$qtVersion/plugins/
 tuxclockerPluginPath=.$(nix-build release.nix)/lib/tuxclocker/plugins/
 chmod 777 ./.tuxclockerd-wrapped ./.tuxclocker-qt-wrapped
 patchelf --set-rpath \.$glibPath/lib ./.tuxclockerd-wrapped ./.tuxclocker-qt-wrapped
