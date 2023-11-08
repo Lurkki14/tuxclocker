@@ -25,6 +25,9 @@ struct VFPoint {
 struct AMDGPUData {
 	// Full path, eg. /sys/class/drm/renderD128/device/hwmon
 	std::string hwmonPath;
+	// Device path, eg. /sys/class/drm/renderD128/device
+	// Contains pp_od_clk_voltage and some others
+	std::string devPath;
 	amdgpu_device_handle devHandle;
 	// Used as identifier
 	std::string pciId;

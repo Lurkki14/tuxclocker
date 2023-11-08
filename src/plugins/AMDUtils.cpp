@@ -40,7 +40,7 @@ std::vector<std::string> pstateSectionLines(
 }
 
 std::vector<std::string> pstateSectionLinesWithRead(const std::string &header, AMDGPUData data) {
-	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	auto contents = fileContents(data.devPath + "/pp_od_clk_voltage");
 	if (!contents.has_value())
 		return {};
 
@@ -66,7 +66,7 @@ std::optional<Range<int>> parsePstateRangeLine(std::string title, const std::str
 }
 
 std::optional<Range<int>> parsePstateRangeLineWithRead(std::string title, AMDGPUData data) {
-	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	auto contents = fileContents(data.devPath + "/pp_od_clk_voltage");
 	if (!contents.has_value())
 		return std::nullopt;
 
@@ -106,7 +106,7 @@ std::optional<VFPoint> vfPoint(const std::string &section, int index, const std:
 
 // Same as above, but read the file
 std::optional<VFPoint> vfPointWithRead(const std::string &section, int index, AMDGPUData data) {
-	auto contents = fileContents(data.hwmonPath + "/pp_od_clk_voltage");
+	auto contents = fileContents(data.devPath + "/pp_od_clk_voltage");
 	if (!contents.has_value())
 		return std::nullopt;
 	return vfPoint(section, index, *contents);
@@ -153,6 +153,7 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 		auto filename = entry.path().filename().string();
 		stream << "/sys/class/drm/" << filename << "/device/hwmon";
 
+		auto devPath = "/sys/class/drm/" + filename + "/device";
 		std::optional<std::string> hwmonPath = std::nullopt;
 		try {
 			for (const auto &entry : fs::directory_iterator(stream.str())) {
@@ -175,13 +176,14 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 
 		// Try to get powerplay table type
 		std::optional<PPTableType> tableType = std::nullopt;
-		auto contents = fileContents(*hwmonPath + "/pp_od_clk_voltage");
+		auto contents = fileContents(devPath + "/pp_od_clk_voltage");
 		if (contents.has_value())
 			tableType = fromPPTableContents(*contents);
 
 		drmFreeVersion(v_ptr);
 		return AMDGPUData{
 		    .hwmonPath = hwmonPath.value(),
+		    .devPath = devPath,
 		    .devHandle = dev,
 		    .pciId = std::to_string(info.device_id),
 		    .ppTableType = tableType,

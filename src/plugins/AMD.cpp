@@ -48,7 +48,7 @@ std::optional<AssignmentError> setPerformanceLevel(AssignmentArgument a, AMDGPUD
 	std::array<std::string, 8> sysFsNames = {"auto", "low", "high", "manual",
 	    "profile_standard", "profile_min_sclk", "profile_min_mclk", "profile_peak"};
 
-	auto path = data.hwmonPath + "/power_dpm_force_performance_level";
+	auto path = data.devPath + "/power_dpm_force_performance_level";
 	std::ofstream file{path};
 	if (!file.good())
 		return AssignmentError::UnknownError;
@@ -134,7 +134,7 @@ std::optional<Assignable> vfPointClockAssignable(
 		if (vfType == MemoryPState)
 			target = toControllerClock(target, data);
 
-		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		std::ofstream file{data.devPath + "/pp_od_clk_voltage"};
 		char cmdString[32];
 		snprintf(
 		    cmdString, 32, "%s %u %i %i", typeString, pointIndex, target, vfPoint->voltage);
@@ -154,7 +154,7 @@ std::optional<Assignable> vfPointClockAssignable(
 // Same as above, but for editing single values like min/max clocks
 std::optional<Assignable> singleValueAssignable(SingleAssignableType type, uint pointIndex,
     Range<int> range, std::string unit, AMDGPUData data) {
-	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto path = data.devPath + "/pp_od_clk_voltage";
 	auto contents = fileContents(path);
 	if (!contents.has_value())
 		return {};
@@ -215,7 +215,7 @@ std::optional<Assignable> singleValueAssignable(SingleAssignableType type, uint 
 		if (type == MemoryClock)
 			target = toControllerClock(target, data);
 
-		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		std::ofstream file{data.devPath + "/pp_od_clk_voltage"};
 		char cmdString[32];
 		snprintf(cmdString, 32, "%s %i %i", typeString, sysFsIndex, target);
 
@@ -278,7 +278,7 @@ std::optional<Assignable> vfPointVoltageAssignable(
 		if (!vfPoint.has_value())
 			return AssignmentError::UnknownError;
 
-		std::ofstream file{data.hwmonPath + "/pp_od_clk_voltage"};
+		std::ofstream file{data.devPath + "/pp_od_clk_voltage"};
 		char cmdString[32];
 		snprintf(
 		    cmdString, 32, "%s %u %i %i", typeString, pointIndex, vfPoint->clock, target);
@@ -773,7 +773,7 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 	    (*data.ppTableType != Navi && *data.ppTableType != SMU13))
 		return {};
 
-	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto path = data.devPath + "/pp_od_clk_voltage";
 	auto tableContents = fileContents(path);
 	if (!tableContents.has_value())
 		return {};
@@ -799,7 +799,7 @@ std::vector<TreeNode<DeviceNode>> getCorePStateNodes(AMDGPUData data) {
 	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
 		return {};
 
-	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto path = data.devPath + "/pp_od_clk_voltage";
 	auto tableContents = fileContents(path);
 	if (!tableContents.has_value())
 		return {};
@@ -825,7 +825,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateNodes(AMDGPUData data) {
 	if (!data.ppTableType.has_value() || *data.ppTableType != Vega10)
 		return {};
 
-	auto path = data.hwmonPath + "/pp_od_clk_voltage";
+	auto path = data.devPath + "/pp_od_clk_voltage";
 	auto tableContents = fileContents(path);
 	if (!tableContents.has_value())
 		return {};
@@ -874,7 +874,7 @@ std::vector<TreeNode<DeviceNode>> getVoltageRead(AMDGPUData data) {
 
 std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 	// Performance parameter control
-	auto path = data.hwmonPath + "/power_dpm_force_performance_level";
+	auto path = data.devPath + "/power_dpm_force_performance_level";
 
 	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
 		auto string = fileContents(path);
