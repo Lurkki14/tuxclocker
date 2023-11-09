@@ -65,6 +65,9 @@ When writing to `pp_od_clk_voltage` (writable properties in the 'Performance' su
 #### Navi-series
 - Voltage-frequency curve editing for core clocks
 
+#### RX 6000 -series + ?
+- Voltage offset setting
+
 ### CPUs
 - Frequency monitoring
 - Utilization monitoring

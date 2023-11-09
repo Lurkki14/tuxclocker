@@ -1094,6 +1094,70 @@ std::vector<TreeNode<DeviceNode>> getShutdownTemperature(AMDGPUData data) {
 	}};
 }
 
+// Mysterious undocumented thing that's in at least RX 6000s, see doc/amd-pptables/rx6000
+std::vector<TreeNode<DeviceNode>> getCoreVoltageOffset(AMDGPUData data) {
+	if (!data.ppTableType.has_value())
+		return {};
+
+	auto t = *data.ppTableType;
+	if (t != Navi && t != SMU13 && t != Vega20Other)
+		return {};
+
+	// TODO: doesn't seem to have a range anywhere
+	Range<int> range{-200, 200};
+	auto path = data.devPath + "/pp_od_clk_voltage";
+
+	auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+		auto contents = fileContents(path);
+		if (!contents.has_value())
+			return std::nullopt;
+
+		auto isNewline = [](char c) { return c == '\n'; };
+		auto lines = fplus::split_by(isNewline, false, *contents);
+
+		for (int i = 0; i < lines.size(); i++) {
+			if (lines[i].find("OD_VDDGFX_OFFSET") != std::string::npos &&
+			    i + 1 < lines.size()) {
+				// Next line is the value
+				auto valueLine = lines[i + 1];
+				return std::stoi(valueLine);
+			}
+		}
+		return std::nullopt;
+	};
+
+	if (!getFunc().has_value())
+		return {};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		std::ofstream file{path};
+		char cmdString[32];
+		snprintf(cmdString, 32, "vo %i", target);
+		if (file.good() && file << cmdString && file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	auto setWithPerfLevel = [=](AssignmentArgument a) {
+		return withManualPerformanceLevel(setFunc, a, data);
+	};
+
+	Assignable a{setWithPerfLevel, range, getFunc, _("mV")};
+
+	return {DeviceNode{
+	    .name = _("Core Voltage Offset"),
+	    .interface = a,
+	    .hash = md5(data.pciId + "Core Voltage Offset"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getTemperatureRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Temperatures"),
@@ -1220,6 +1284,7 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 				{getMaxCoreClock, {}}
 			}},
 			{getVoltageRead, {}},
+			{getCoreVoltageOffset, {}},
 			{getForcePerfLevel, {}},
 			{getVoltFreqRoot, {
 				{getVoltFreqNodes, {
