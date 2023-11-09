@@ -144,6 +144,9 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 	amdgpu_device_handle dev;
 	uint32_t m, n;
 	int devInitRetval = amdgpu_device_initialize(fd, &m, &n, &dev);
+	// We can have multiple devices with the same PCI id, hopefully
+	// this order is somewhat consistent
+	static int gpuIndex = 0;
 	if (fd > 0 && v_ptr && devInitRetval == 0 &&
 	    std::string(v_ptr->name).find(_AMDGPU_NAME) != std::string::npos) {
 		// Device uses amdgpu
@@ -180,12 +183,16 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 		if (contents.has_value())
 			tableType = fromPPTableContents(*contents);
 
+		auto index = gpuIndex;
+		auto identifier = std::to_string(info.device_id) + std::to_string(index);
+		gpuIndex++;
 		drmFreeVersion(v_ptr);
 		return AMDGPUData{
 		    .hwmonPath = hwmonPath.value(),
 		    .devPath = devPath,
 		    .devHandle = dev,
 		    .pciId = std::to_string(info.device_id),
+		    .identifier = identifier,
 		    .ppTableType = tableType,
 		};
 	}

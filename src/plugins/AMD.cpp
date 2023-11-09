@@ -311,7 +311,7 @@ std::vector<TreeNode<DeviceNode>> getTemperature(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Temperature"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Temperature"),
+		    .hash = md5(data.identifier + "Temperature"),
 		}};
 	}
 	return {};
@@ -359,7 +359,7 @@ std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Fan Mode"),
 	    .interface = a,
-	    .hash = md5(data.pciId + "Fan Mode"),
+	    .hash = md5(data.identifier + "Fan Mode"),
 	}};
 }
 
@@ -402,7 +402,7 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Fan Speed"),
 	    .interface = a,
-	    .hash = md5(data.pciId + "Fan Speed Write"),
+	    .hash = md5(data.identifier + "Fan Speed Write"),
 	}};
 }
 
@@ -434,7 +434,7 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedRead(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Fan Speed"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Fan Speed Read"),
+		    .hash = md5(data.identifier + "Fan Speed Read"),
 		}};
 	return {};
 }
@@ -489,7 +489,7 @@ std::vector<TreeNode<DeviceNode>> getPowerLimit(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Power Limit"),
 	    .interface = a,
-	    .hash = md5(data.pciId + "Power Limit"),
+	    .hash = md5(data.identifier + "Power Limit"),
 	}};
 }
 
@@ -508,7 +508,7 @@ std::vector<TreeNode<DeviceNode>> getPowerUsage(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Power Usage"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Power Usage"),
+		    .hash = md5(data.identifier + "Power Usage"),
 		}};
 	}
 	return {};
@@ -529,7 +529,7 @@ std::vector<TreeNode<DeviceNode>> getCoreClockRead(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Core Clock"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Core Clock"),
+		    .hash = md5(data.identifier + "Core Clock"),
 		}};
 	}
 	return {};
@@ -551,7 +551,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryClockRead(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Memory Clock"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Memory Clock"),
+		    .hash = md5(data.identifier + "Memory Clock"),
 		}};
 	}
 	return {};
@@ -589,7 +589,7 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqFreq(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = name,
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "VFClock" + std::to_string(id)),
+	    .hash = md5(data.identifier + "VFClock" + std::to_string(id)),
 	}};
 }
 
@@ -625,7 +625,7 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqVolt(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = name,
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "VFVoltage" + std::to_string(id)),
+	    .hash = md5(data.identifier + "VFVoltage" + std::to_string(id)),
 	}};
 }
 
@@ -658,7 +658,7 @@ std::vector<TreeNode<DeviceNode>> getCorePStateFreq(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Core Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "CorePStateFreq" + std::to_string(id)),
+	    .hash = md5(data.identifier + "CorePStateFreq" + std::to_string(id)),
 	}};
 }
 
@@ -691,7 +691,7 @@ std::vector<TreeNode<DeviceNode>> getCorePStateVolt(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Core Voltage"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "CorePStateVolt" + std::to_string(id)),
+	    .hash = md5(data.identifier + "CorePStateVolt" + std::to_string(id)),
 	}};
 }
 
@@ -729,7 +729,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateFreq(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Memory Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "MemoryPStateFreq" + std::to_string(id)),
+	    .hash = md5(data.identifier + "MemoryPStateFreq" + std::to_string(id)),
 	}};
 }
 
@@ -762,7 +762,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateVolt(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Memory Voltage"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "MemoryPStateVolt" + std::to_string(id)),
+	    .hash = md5(data.identifier + "MemoryPStateVolt" + std::to_string(id)),
 	}};
 }
 
@@ -786,7 +786,7 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqNodes(AMDGPUData data) {
 		DeviceNode node{
 		    .name = name,
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId + "VFPoint" + std::to_string(i)),
+		    .hash = md5(data.identifier + "VFPoint" + std::to_string(i)),
 		};
 		retval.push_back(node);
 	}
@@ -812,7 +812,7 @@ std::vector<TreeNode<DeviceNode>> getCorePStateNodes(AMDGPUData data) {
 		DeviceNode node{
 		    .name = name,
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId + "PState" + std::to_string(i)),
+		    .hash = md5(data.identifier + "PState" + std::to_string(i)),
 		};
 		retval.push_back(node);
 	}
@@ -838,7 +838,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateNodes(AMDGPUData data) {
 		DeviceNode node{
 		    .name = name,
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId + "MemoryPState" + std::to_string(i)),
+		    .hash = md5(data.identifier + "MemoryPState" + std::to_string(i)),
 		};
 		retval.push_back(node);
 	}
@@ -868,7 +868,7 @@ std::vector<TreeNode<DeviceNode>> getVoltageRead(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Core Voltage"),
 	    .interface = dr,
-	    .hash = md5(data.pciId + "Core Voltage"),
+	    .hash = md5(data.identifier + "Core Voltage"),
 	}};
 }
 
@@ -898,7 +898,7 @@ std::vector<TreeNode<DeviceNode>> getForcePerfLevel(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Performance Parameter Control"),
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId + "Performance Parameter Control"),
+		    .hash = md5(data.identifier + "Performance Parameter Control"),
 		}};
 	return {};
 }
@@ -918,7 +918,7 @@ std::vector<TreeNode<DeviceNode>> getCoreUtilization(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Core Utilization"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Core Utilization"),
+		    .hash = md5(data.identifier + "Core Utilization"),
 		}};
 	}
 	return {};
@@ -938,7 +938,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryUtilization(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Memory Utilization"),
 		    .interface = dr,
-		    .hash = md5(data.pciId + "Memory Utilization"),
+		    .hash = md5(data.identifier + "Memory Utilization"),
 		}};
 	}
 	return {};
@@ -973,7 +973,7 @@ std::vector<TreeNode<DeviceNode>> getMaxMemoryClock(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Maximum Memory Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "Maximum Memory Clock"),
+	    .hash = md5(data.identifier + "Maximum Memory Clock"),
 	}};
 }
 
@@ -1004,7 +1004,7 @@ std::vector<TreeNode<DeviceNode>> getMinMemoryClock(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Minimum Memory Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "Minimum Memory Clock"),
+	    .hash = md5(data.identifier + "Minimum Memory Clock"),
 	}};
 }
 
@@ -1032,7 +1032,7 @@ std::vector<TreeNode<DeviceNode>> getMaxCoreClock(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Maximum Core Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "Maximum Core Clock"),
+	    .hash = md5(data.identifier + "Maximum Core Clock"),
 	}};
 }
 
@@ -1060,7 +1060,7 @@ std::vector<TreeNode<DeviceNode>> getMinCoreClock(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Minimum Core Clock"),
 	    .interface = *assignable,
-	    .hash = md5(data.pciId + "Minimum Core Clock"),
+	    .hash = md5(data.identifier + "Minimum Core Clock"),
 	}};
 }
 
@@ -1075,7 +1075,7 @@ std::vector<TreeNode<DeviceNode>> getSlowdownTemperature(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Slowdown Temperature"),
 	    .interface = sr,
-	    .hash = md5(data.pciId + "Slowdown Temperature"),
+	    .hash = md5(data.identifier + "Slowdown Temperature"),
 	}};
 }
 
@@ -1090,7 +1090,7 @@ std::vector<TreeNode<DeviceNode>> getShutdownTemperature(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Shutdown Temperature"),
 	    .interface = sr,
-	    .hash = md5(data.pciId + "Shutdown Temperature"),
+	    .hash = md5(data.identifier + "Shutdown Temperature"),
 	}};
 }
 
@@ -1154,7 +1154,7 @@ std::vector<TreeNode<DeviceNode>> getCoreVoltageOffset(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Core Voltage Offset"),
 	    .interface = a,
-	    .hash = md5(data.pciId + "Core Voltage Offset"),
+	    .hash = md5(data.identifier + "Core Voltage Offset"),
 	}};
 }
 
@@ -1162,7 +1162,7 @@ std::vector<TreeNode<DeviceNode>> getTemperatureRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Temperatures"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Temperatures"),
+	    .hash = md5(data.identifier + "Temperatures"),
 	}};
 }
 
@@ -1172,7 +1172,7 @@ std::vector<TreeNode<DeviceNode>> getVoltFreqRoot(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = _("Voltage-Frequency Curve"),
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId + "Voltage-Frequency Curve"),
+		    .hash = md5(data.identifier + "Voltage-Frequency Curve"),
 		}};
 	return {};
 }
@@ -1181,7 +1181,7 @@ std::vector<TreeNode<DeviceNode>> getClocksRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Clocks"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Clocks"),
+	    .hash = md5(data.identifier + "Clocks"),
 	}};
 }
 
@@ -1189,7 +1189,7 @@ std::vector<TreeNode<DeviceNode>> getPerformanceRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Performance"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Performance"),
+	    .hash = md5(data.identifier + "Performance"),
 	}};
 }
 
@@ -1197,7 +1197,7 @@ std::vector<TreeNode<DeviceNode>> getFanRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Fans"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Fans"),
+	    .hash = md5(data.identifier + "Fans"),
 	}};
 }
 
@@ -1206,7 +1206,7 @@ std::vector<TreeNode<DeviceNode>> getPowerRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Power"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Power"),
+	    .hash = md5(data.identifier + "Power"),
 	}};
 }
 
@@ -1217,7 +1217,7 @@ std::vector<TreeNode<DeviceNode>> getCorePStateRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Core Performance States"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Core Performance States"),
+	    .hash = md5(data.identifier + "Core Performance States"),
 	}};
 }
 
@@ -1228,7 +1228,7 @@ std::vector<TreeNode<DeviceNode>> getMemoryPStateRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Memory Performance States"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Memory Performance States"),
+	    .hash = md5(data.identifier + "Memory Performance States"),
 	}};
 }
 
@@ -1237,7 +1237,7 @@ std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Utilizations"),
 	    .interface = std::nullopt,
-	    .hash = md5(data.pciId + "Utilizations"),
+	    .hash = md5(data.identifier + "Utilizations"),
 	}};
 }
 
@@ -1247,7 +1247,7 @@ std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
 		return {DeviceNode{
 		    .name = name,
 		    .interface = std::nullopt,
-		    .hash = md5(data.pciId),
+		    .hash = md5(data.identifier),
 		}};
 	}
 	return {};

@@ -29,8 +29,10 @@ struct AMDGPUData {
 	// Contains pp_od_clk_voltage and some others
 	std::string devPath;
 	amdgpu_device_handle devHandle;
-	// Used as identifier
+	// PCIe device ID
 	std::string pciId;
+	// Device ID + GPU index
+	std::string identifier;
 	std::optional<PPTableType> ppTableType;
 };
 
