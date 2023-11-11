@@ -2,6 +2,5 @@
 
 option('daemon', type: 'boolean', value: 'true', description: 'Build daemon')
 option('plugins', type: 'boolean', value: 'true', description: 'Build plugins')
-option('interfaces', type: 'boolean', value: 'true', description: 'Build interfaces')
 option('library', type: 'boolean', value: 'true', description: 'Build library')
 option('gui', type: 'boolean', value: 'true', description: 'Build Qt GUI')
