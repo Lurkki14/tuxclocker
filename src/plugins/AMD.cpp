@@ -13,6 +13,10 @@
 #include <libdrm/amdgpu_drm.h>
 #include <libintl.h>
 
+#ifdef WITH_HWDATA
+	#include <HWData.hpp>
+#endif
+
 #define _(String) gettext(String)
 
 extern int errno;
@@ -1242,6 +1246,20 @@ std::vector<TreeNode<DeviceNode>> getUtilizationsRoot(AMDGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getGPUName(AMDGPUData data) {
+#ifdef WITH_HWDATA
+	// Get GPU name from hwdata
+	static auto pciObj = getPciObject();
+	auto pciData = fromUeventFile(data.deviceFilename);
+	if (pciObj.has_value() && pciData.has_value()) {
+		auto name = hwdataName(*pciObj, *pciData);
+		if (name.has_value())
+			return {DeviceNode{
+			    .name = *name,
+			    .interface = std::nullopt,
+			    .hash = md5(data.identifier),
+			}};
+	}
+#endif
 	auto name = amdgpu_get_marketing_name(data.devHandle);
 	if (name) {
 		return {DeviceNode{
@@ -1319,6 +1337,10 @@ private:
 };
 
 TreeNode<DeviceNode> AMDPlugin::deviceRootNode() {
+#ifdef WITH_HWDATA
+	PythonInstance p;
+#endif
+
 	TreeNode<DeviceNode> root;
 
 	auto dataVec = fromFilesystem();

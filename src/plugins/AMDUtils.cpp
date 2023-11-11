@@ -192,6 +192,7 @@ std::optional<AMDGPUData> fromRenderDFile(const fs::directory_entry &entry) {
 		    .devPath = devPath,
 		    .devHandle = dev,
 		    .pciId = std::to_string(info.device_id),
+		    .deviceFilename = filename,
 		    .identifier = identifier,
 		    .ppTableType = tableType,
 		};

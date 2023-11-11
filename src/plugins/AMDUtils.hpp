@@ -31,6 +31,8 @@ struct AMDGPUData {
 	amdgpu_device_handle devHandle;
 	// PCIe device ID
 	std::string pciId;
+	// Eg. renderD128
+	std::string deviceFilename;
 	// Device ID + GPU index
 	std::string identifier;
 	std::optional<PPTableType> ppTableType;

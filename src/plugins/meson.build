@@ -1,17 +1,38 @@
-libdrm_amdgpu = cc.find_library('drm_amdgpu', required : false)
-libdrm_dep = dependency('libdrm', required : false)
-
 patterns_inc = include_directories('../include/deps/patterns/include/mpark')
 fplus_inc = include_directories('../include/deps/FunctionalPlus/include')
 
+libdrm_amdgpu = cc.find_library('drm_amdgpu', required : false)
+libdrm_dep = dependency('libdrm', required : false)
+
+python = import('python')
+python_with_hwdata = python.find_installation('python3',
+	modules : ['hwdata'],
+	required : get_option('require-python-hwdata'))
+hwdata_version = run_command('python3', '-c',
+	'from importlib.metadata import version; print(version(\'hwdata\'))').stdout().strip()
+
 if libdrm_dep.found() and libdrm_amdgpu.found()
-	shared_library('amd', 'AMD.cpp', 'AMDUtils.cpp', 'Utils.cpp',
+	sources = ['AMD.cpp', 'AMDUtils.cpp', 'Utils.cpp']
+	cpp_args = []
+	deps = [ libdrm_amdgpu, libdrm_dep, boost_dep ]
+	if (python_with_hwdata.found())
+		if (hwdata_version.version_compare('<2.4.1'))
+			warning('python-hwdata 2.4.1 is recommended for PCI.get_subsystem')
+		endif
+		# Makes us link to libpython
+		deps += python_with_hwdata.dependency(embed : true)
+		cpp_args += '-DWITH_HWDATA'
+		sources += 'HWData.cpp'
+	endif
+	shared_library('amd',
+		sources,
 		override_options : ['cpp_std=c++17'],
 		include_directories : [incdir, patterns_inc, fplus_inc],
-		dependencies : [ libdrm_amdgpu, libdrm_dep, boost_dep ],
+		dependencies : deps,
 		install_dir : get_option('libdir') / 'tuxclocker' / 'plugins',
 		install : true,
-                link_with : libtuxclocker)
+		cpp_args : cpp_args,
+		link_with : libtuxclocker)
 endif
 
 libnvml = cc.find_library('nvidia-ml', required : false)
