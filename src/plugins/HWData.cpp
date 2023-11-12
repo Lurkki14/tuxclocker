@@ -53,11 +53,11 @@ std::optional<std::string> hwdataName(PyObject *pciObj, PciData data) {
 	auto subsysStr = PyObject_CallMethod(
 	    pciObj, "get_subsystem", "sss", "1002", data.device.c_str(), data.subsystem.c_str());
 	if (subsysStr && PyUnicode_Check(subsysStr))
-		return PyUnicode_AsUTF8(subsysStr);
+		return "AMD " + std::string{PyUnicode_AsUTF8(subsysStr)};
 
 	// Try to get device name
 	auto devStr = PyObject_CallMethod(pciObj, "get_device", "ss", "1002", data.device.c_str());
 	if (devStr && PyUnicode_Check(devStr))
-		return PyUnicode_AsUTF8(devStr);
+		return "AMD " + std::string{PyUnicode_AsUTF8(devStr)};
 	return std::nullopt;
 }
