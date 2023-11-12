@@ -177,6 +177,10 @@ sudo zypper in -y \
 --prefix=<path> (install location prefix, usually '/usr')
 -Dplugins=<true/false>
 -Ddaemon=<true/false> (builds and installs 'tuxclockerd' binary/daemon)
+# The following options allow you to abort the build if some components can't be built
+-Drequire-nvidia=<true/false>
+-Drequire-amd=<true/false>
+-Drequire-python-hwdata=<true/false>
 ```
 
 #### Clone, build and install
