@@ -1,8 +1,9 @@
 patterns_inc = include_directories('../include/deps/patterns/include/mpark')
 fplus_inc = include_directories('../include/deps/FunctionalPlus/include')
 
-libdrm_amdgpu = cc.find_library('drm_amdgpu', required : false)
-libdrm_dep = dependency('libdrm', required : false)
+req_amd = get_option('require-amd')
+libdrm_amdgpu = cc.find_library('drm_amdgpu', required : req_amd)
+libdrm_dep = dependency('libdrm', required : req_amd)
 
 python = import('python')
 python_with_hwdata = python.find_installation('python3',
@@ -35,10 +36,11 @@ if libdrm_dep.found() and libdrm_amdgpu.found()
 		link_with : libtuxclocker)
 endif
 
-libnvml = cc.find_library('nvidia-ml', required : false)
-libxext = cc.find_library('Xext', required : false)
-libx = cc.find_library('X11', required : false)
-libxnvctrl = cc.find_library('XNVCtrl', required : false)
+req_nv = get_option('require-nvidia')
+libnvml = cc.find_library('nvidia-ml', required : req_nv)
+libxext = cc.find_library('Xext', required : req_nv)
+libx = cc.find_library('X11', required : req_nv)
+libxnvctrl = cc.find_library('XNVCtrl', required : req_nv)
 
 nvidia_linux_libs = [libnvml, libx, libxext, libxnvctrl]
 

@@ -6,3 +6,7 @@ option('library', type: 'boolean', value: 'true', description: 'Build library')
 option('gui', type: 'boolean', value: 'true', description: 'Build Qt GUI')
 option('require-python-hwdata', type: 'boolean', value: 'false',
 	description: 'Require python-hwdata for prettier AMD GPU names')
+option('require-amd', type: 'boolean', value: 'false',
+	description: 'Require AMD plugin')
+option('require-nvidia', type: 'boolean', value: 'false',
+	description: 'Require NVIDIA plugin')
