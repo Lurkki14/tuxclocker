@@ -121,7 +121,13 @@ Available on [AUR](https://aur.archlinux.org/packages/tuxclocker)
 
 ## Dependencies
 
-`qt (charts, base, dbus), boost-system, boost-filesystem, libnvml, libxnvctrl, xlib, libdrm, meson`
+Required: `qt (charts, base, dbus), boost-system, boost-filesystem, meson`
+
+Optional:
+
+- `libnvml, libxnvctrl, xlib` - NVIDIA support
+- `libdrm` - AMD support
+- `python-hwdata` - Prettier AMD GPU names
 
 NOTE: some distros like NixOS only contain `libnvml` as part of a fully featured CUDA package.
 
