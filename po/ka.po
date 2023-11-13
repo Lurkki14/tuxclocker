@@ -1,0 +1,365 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tuxclocker package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tuxclocker\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-06 14:11+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+msgid "Automatic"
+msgstr ""
+
+#: src/plugins/AMD.cpp:39
+msgid "Lowest"
+msgstr ""
+
+#: src/plugins/AMD.cpp:39
+msgid "Highest"
+msgstr ""
+
+#: src/plugins/AMD.cpp:40 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+msgid "Manual"
+msgstr ""
+
+#: src/plugins/AMD.cpp:40
+msgid "Base Levels"
+msgstr ""
+
+#: src/plugins/AMD.cpp:40
+msgid "Lowest Core Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:41
+msgid "Lowest Memory Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:41
+msgid "Highest Clocks"
+msgstr ""
+
+#: src/plugins/AMD.cpp:151 src/plugins/AMD.cpp:526 src/plugins/AMD.cpp:548
+#: src/plugins/AMD.cpp:969 src/plugins/AMD.cpp:1000 src/plugins/AMD.cpp:1028
+#: src/plugins/AMD.cpp:1056 src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:629
+#: src/plugins/Nvidia.cpp:182 src/plugins/Nvidia.cpp:183
+#: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
+#: src/plugins/Nvidia.cpp:281
+msgid "MHz"
+msgstr ""
+
+#: src/plugins/AMD.cpp:295 src/plugins/AMD.cpp:866 src/plugins/Nvidia.cpp:628
+#: src/plugins/Nvidia.cpp:675
+msgid "mV"
+msgstr ""
+
+#: src/plugins/AMD.cpp:308 src/plugins/AMD.cpp:1073 src/plugins/AMD.cpp:1088
+#: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:575
+#: src/plugins/Nvidia.cpp:592 src/plugins/Nvidia.cpp:607
+msgid "°C"
+msgstr ""
+
+#: src/plugins/AMD.cpp:312 src/plugins/Nvidia.cpp:579
+msgid "Temperature"
+msgstr ""
+
+#: src/plugins/AMD.cpp:360 src/plugins/Nvidia.cpp:425
+msgid "Fan Mode"
+msgstr ""
+
+#: src/plugins/AMD.cpp:400 src/plugins/AMD.cpp:431 src/plugins/AMD.cpp:915
+#: src/plugins/AMD.cpp:935 src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
+#: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
+#: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
+msgid "%"
+msgstr ""
+
+#: src/plugins/AMD.cpp:403 src/plugins/AMD.cpp:435 src/plugins/Nvidia.cpp:332
+#: src/plugins/Nvidia.cpp:375
+msgid "Fan Speed"
+msgstr ""
+
+#: src/plugins/AMD.cpp:487 src/plugins/AMD.cpp:505 src/plugins/Nvidia.cpp:516
+#: src/plugins/Nvidia.cpp:557
+msgid "W"
+msgstr ""
+
+#: src/plugins/AMD.cpp:490 src/plugins/Nvidia.cpp:560
+msgid "Power Limit"
+msgstr ""
+
+#: src/plugins/AMD.cpp:509 src/plugins/Nvidia.cpp:520
+msgid "Power Usage"
+msgstr ""
+
+#: src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:587 src/plugins/AMD.cpp:659
+#: src/plugins/Nvidia.cpp:264
+msgid "Core Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:552 src/plugins/AMD.cpp:730 src/plugins/Nvidia.cpp:285
+msgid "Memory Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:587 src/plugins/Nvidia.cpp:244
+msgid "Core Clock Offset"
+msgstr ""
+
+#: src/plugins/AMD.cpp:623 src/plugins/AMD.cpp:692 src/plugins/AMD.cpp:869
+#: src/plugins/Nvidia.cpp:632
+msgid "Core Voltage"
+msgstr ""
+
+#: src/plugins/AMD.cpp:623 src/plugins/Nvidia.cpp:679
+msgid "Core Voltage Offset"
+msgstr ""
+
+#: src/plugins/AMD.cpp:763
+msgid "Memory Voltage"
+msgstr ""
+
+#: src/plugins/AMD.cpp:784
+msgid "Point"
+msgstr ""
+
+#: src/plugins/AMD.cpp:810 src/plugins/AMD.cpp:836
+msgid "State"
+msgstr ""
+
+#: src/plugins/AMD.cpp:899
+msgid "Performance Parameter Control"
+msgstr ""
+
+#: src/plugins/AMD.cpp:919 src/plugins/Nvidia.cpp:444
+msgid "Core Utilization"
+msgstr ""
+
+#: src/plugins/AMD.cpp:939 src/plugins/Nvidia.cpp:464
+msgid "Memory Utilization"
+msgstr ""
+
+#: src/plugins/AMD.cpp:974
+msgid "Maximum Memory Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1005
+msgid "Minimum Memory Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1033
+msgid "Maximum Core Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1061
+msgid "Minimum Core Clock"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
+msgid "Slowdown Temperature"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1091 src/plugins/Nvidia.cpp:610
+msgid "Shutdown Temperature"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1099 src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
+msgid "Temperatures"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1109
+msgid "Voltage-Frequency Curve"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1118 src/plugins/Nvidia.cpp:299
+msgid "Clocks"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1126 src/plugins/CPU.cpp:496
+msgid "Performance"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1134 src/plugins/Nvidia.cpp:734
+msgid "Fans"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1143
+msgid "Power"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1154
+msgid "Core Performance States"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1165
+msgid "Memory Performance States"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1174 src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
+msgid "Utilizations"
+msgstr ""
+
+#: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
+#: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:558 src/plugins/CPU.cpp:644
+#: src/plugins/CPU.cpp:665
+msgid "Core"
+msgstr ""
+
+#: src/plugins/CPU.cpp:385
+msgid "Overall Temperature"
+msgstr ""
+
+#: src/plugins/CPU.cpp:494
+msgid "Power Saving"
+msgstr ""
+
+#: src/plugins/CPU.cpp:498
+msgid "Scheduler Controlled"
+msgstr ""
+
+#: src/plugins/CPU.cpp:680
+msgid "Maximum Frequencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:689
+msgid "Minimum Frequencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:698 src/plugins/CPU.cpp:706
+msgid "Governor"
+msgstr ""
+
+#: src/plugins/CPU.cpp:714
+msgid "Power Saving Tendencies"
+msgstr ""
+
+#: src/plugins/CPU.cpp:722
+msgid "Frequencies"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:186
+msgid "Memory Clock Offset"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:500
+msgid "PCIe Bandwidth Utilization"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:696
+msgid "Fan"
+msgstr ""
+
+#: src/tuxclocker-qt/data/AssignableItem.cpp:75
+msgid "(Parametrized)"
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModel.cpp:248
+msgid "No value set"
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
+msgid "Parametrize..."
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
+msgid "Reset to default"
+msgstr ""
+
+#: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
+msgid "Remove settings from profile"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
+msgid "Showing:"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
+msgid "Apply changes"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
+msgid "Assignables"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
+msgid "Dynamic Values"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:43
+msgid "Static Values"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:69
+msgid "Apply"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
+#: src/tuxclocker-qt/widgets/Settings.cpp:70
+msgid "Cancel"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:158
+msgid "Connecting %1 with:"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
+msgid "A node to connect with needs to be selected"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
+msgid "At least two points need to be placed"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:28
+msgid "Settings"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:30
+msgid "Apply profile settings automatically"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:32
+msgid "Use profile"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:39
+msgid "Add profile"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:42
+msgid "Remove selected"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:45
+msgid "Unnamed"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:65
+msgid "Use tray icon"
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:67
+msgid ""
+"Enabling this hides TuxClocker into the tray instead of exiting when closing "
+"the window."
+msgstr ""
+
+#: src/tuxclocker-qt/widgets/Settings.cpp:74
+msgid "Save"
+msgstr ""
+
+#: src/tuxclocker-qt/MainWindow.cpp:120
+msgid "&Maximize TuxClocker"
+msgstr ""
+
+#: src/tuxclocker-qt/MainWindow.cpp:124
+msgid "&Quit"
+msgstr ""
