@@ -9,14 +9,15 @@ python = import('python')
 python_with_hwdata = python.find_installation('python3',
 	modules : ['hwdata'],
 	required : get_option('require-python-hwdata'))
-hwdata_version = run_command('python3', '-c',
-	'from importlib.metadata import version; print(version(\'hwdata\'))').stdout().strip()
 
 if libdrm_dep.found() and libdrm_amdgpu.found()
 	sources = ['AMD.cpp', 'AMDUtils.cpp', 'Utils.cpp']
 	cpp_args = []
 	deps = [ libdrm_amdgpu, libdrm_dep, boost_dep ]
 	if (python_with_hwdata.found())
+		hwdata_version = run_command('python3', '-c',
+			'from importlib.metadata import version; print(version(\'hwdata\'))')
+			.stdout().strip()
 		if (hwdata_version.version_compare('<2.4.1'))
 			warning('python-hwdata 2.4.1 is recommended for PCI.get_subsystem')
 		endif
