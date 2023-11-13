@@ -26,8 +26,8 @@ mkDerivation rec {
     fetchSubmodules = true;
     owner = "Lurkki14";
     repo = "tuxclocker";
-    rev = "60cae61869cb1551db3456e27bdb37773fd27fe8";
-    hash = "sha256-aVCAuHuxPD4ony9wwxV1nC3Yj0C++aNBad79J5X0558=";
+    rev = "b838a1f5b117dc2ec33acbeef2b906ed95f10b1f";
+    hash = "sha256-1DpKKlFdN0hZ7hL9KwnsJMRoAWxz5BS5iNtHKqnjINk=";
   };
 
   # meson 0.57 should fix having to have these
