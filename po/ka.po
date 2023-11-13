@@ -8,45 +8,48 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-06 14:11+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2023-11-13 12:22+0000\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <https://hosted.weblate.org/projects/tuxclocker/"
+"tuxclocker/ka/>\n"
 "Language: ka\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.2-dev\n"
 
 #: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
 msgid "Automatic"
-msgstr ""
+msgstr "ავტომატური"
 
 #: src/plugins/AMD.cpp:39
 msgid "Lowest"
-msgstr ""
+msgstr "უმდაბლესი"
 
 #: src/plugins/AMD.cpp:39
 msgid "Highest"
-msgstr ""
+msgstr "უმაღლესი"
 
 #: src/plugins/AMD.cpp:40 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
 msgid "Manual"
-msgstr ""
+msgstr "ხელით"
 
 #: src/plugins/AMD.cpp:40
 msgid "Base Levels"
-msgstr ""
+msgstr "ძირითადი დონეები"
 
 #: src/plugins/AMD.cpp:40
 msgid "Lowest Core Clock"
-msgstr ""
+msgstr "უმდაბლესი ბირთვის სიხშირე"
 
 #: src/plugins/AMD.cpp:41
 msgid "Lowest Memory Clock"
-msgstr ""
+msgstr "უმდაბლესი მეხსიერების სიხშირე"
 
 #: src/plugins/AMD.cpp:41
 msgid "Highest Clocks"
-msgstr ""
+msgstr "უმაღლესი სიხშირეები"
 
 #: src/plugins/AMD.cpp:151 src/plugins/AMD.cpp:526 src/plugins/AMD.cpp:548
 #: src/plugins/AMD.cpp:969 src/plugins/AMD.cpp:1000 src/plugins/AMD.cpp:1028
@@ -55,311 +58,313 @@ msgstr ""
 #: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
 #: src/plugins/Nvidia.cpp:281
 msgid "MHz"
-msgstr ""
+msgstr "მჰც"
 
 #: src/plugins/AMD.cpp:295 src/plugins/AMD.cpp:866 src/plugins/Nvidia.cpp:628
 #: src/plugins/Nvidia.cpp:675
 msgid "mV"
-msgstr ""
+msgstr "მვ"
 
 #: src/plugins/AMD.cpp:308 src/plugins/AMD.cpp:1073 src/plugins/AMD.cpp:1088
 #: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:575
 #: src/plugins/Nvidia.cpp:592 src/plugins/Nvidia.cpp:607
 msgid "°C"
-msgstr ""
+msgstr "°C"
 
 #: src/plugins/AMD.cpp:312 src/plugins/Nvidia.cpp:579
 msgid "Temperature"
-msgstr ""
+msgstr "ტემპერატურა"
 
 #: src/plugins/AMD.cpp:360 src/plugins/Nvidia.cpp:425
 msgid "Fan Mode"
-msgstr ""
+msgstr "ვენტილატორის რეჟიმი"
 
 #: src/plugins/AMD.cpp:400 src/plugins/AMD.cpp:431 src/plugins/AMD.cpp:915
 #: src/plugins/AMD.cpp:935 src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
 #: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
 #: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: src/plugins/AMD.cpp:403 src/plugins/AMD.cpp:435 src/plugins/Nvidia.cpp:332
 #: src/plugins/Nvidia.cpp:375
 msgid "Fan Speed"
-msgstr ""
+msgstr "ვენტილატორის სიჩქარე"
 
 #: src/plugins/AMD.cpp:487 src/plugins/AMD.cpp:505 src/plugins/Nvidia.cpp:516
 #: src/plugins/Nvidia.cpp:557
 msgid "W"
-msgstr ""
+msgstr "ო"
 
 #: src/plugins/AMD.cpp:490 src/plugins/Nvidia.cpp:560
 msgid "Power Limit"
-msgstr ""
+msgstr "კვების ზღვარი"
 
 #: src/plugins/AMD.cpp:509 src/plugins/Nvidia.cpp:520
 msgid "Power Usage"
-msgstr ""
+msgstr "კვების ხარჯვა"
 
 #: src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:587 src/plugins/AMD.cpp:659
 #: src/plugins/Nvidia.cpp:264
 msgid "Core Clock"
-msgstr ""
+msgstr "ბირთვის სიხშირე"
 
 #: src/plugins/AMD.cpp:552 src/plugins/AMD.cpp:730 src/plugins/Nvidia.cpp:285
 msgid "Memory Clock"
-msgstr ""
+msgstr "მეხსიერების სიხშირე"
 
 #: src/plugins/AMD.cpp:587 src/plugins/Nvidia.cpp:244
 msgid "Core Clock Offset"
-msgstr ""
+msgstr "ბირთვის სიხშირის წანაცვლება"
 
 #: src/plugins/AMD.cpp:623 src/plugins/AMD.cpp:692 src/plugins/AMD.cpp:869
 #: src/plugins/Nvidia.cpp:632
 msgid "Core Voltage"
-msgstr ""
+msgstr "ბირთვის ძაბვა"
 
 #: src/plugins/AMD.cpp:623 src/plugins/Nvidia.cpp:679
 msgid "Core Voltage Offset"
-msgstr ""
+msgstr "ბირთვის ძაბვის წანაცვლება"
 
 #: src/plugins/AMD.cpp:763
 msgid "Memory Voltage"
-msgstr ""
+msgstr "მეხსიერების ვოლტაჟი"
 
 #: src/plugins/AMD.cpp:784
 msgid "Point"
-msgstr ""
+msgstr "წერტილი"
 
 #: src/plugins/AMD.cpp:810 src/plugins/AMD.cpp:836
 msgid "State"
-msgstr ""
+msgstr "მდგომარეობა"
 
 #: src/plugins/AMD.cpp:899
 msgid "Performance Parameter Control"
-msgstr ""
+msgstr "წარმადობის პარამეტრის კონტროლი"
 
 #: src/plugins/AMD.cpp:919 src/plugins/Nvidia.cpp:444
 msgid "Core Utilization"
-msgstr ""
+msgstr "ბირთვის გამოყენება"
 
 #: src/plugins/AMD.cpp:939 src/plugins/Nvidia.cpp:464
 msgid "Memory Utilization"
-msgstr ""
+msgstr "მეხსიერების გამოყენება"
 
 #: src/plugins/AMD.cpp:974
 msgid "Maximum Memory Clock"
-msgstr ""
+msgstr "მაქსიმალური მეხსიერების სიხშირე"
 
 #: src/plugins/AMD.cpp:1005
 msgid "Minimum Memory Clock"
-msgstr ""
+msgstr "მინიმალური მეხსიერების სიხშირე"
 
 #: src/plugins/AMD.cpp:1033
 msgid "Maximum Core Clock"
-msgstr ""
+msgstr "მაქსიმალური ბირთვის სიხშირე"
 
 #: src/plugins/AMD.cpp:1061
 msgid "Minimum Core Clock"
-msgstr ""
+msgstr "მინიმალური ბირთვის სიხშირე"
 
 #: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
 msgid "Slowdown Temperature"
-msgstr ""
+msgstr "შენელების ტემპერატურა"
 
 #: src/plugins/AMD.cpp:1091 src/plugins/Nvidia.cpp:610
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "გამორთვის ტემპერატურა"
 
 #: src/plugins/AMD.cpp:1099 src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
 msgid "Temperatures"
-msgstr ""
+msgstr "ტემპერატურა"
 
 #: src/plugins/AMD.cpp:1109
 msgid "Voltage-Frequency Curve"
-msgstr ""
+msgstr "ვოლტაჟი-სიხშირის მრუდი"
 
 #: src/plugins/AMD.cpp:1118 src/plugins/Nvidia.cpp:299
 msgid "Clocks"
-msgstr ""
+msgstr "საათები"
 
 #: src/plugins/AMD.cpp:1126 src/plugins/CPU.cpp:496
 msgid "Performance"
-msgstr ""
+msgstr "წარმადობა"
 
 #: src/plugins/AMD.cpp:1134 src/plugins/Nvidia.cpp:734
 msgid "Fans"
-msgstr ""
+msgstr "ვენტილატორები"
 
 #: src/plugins/AMD.cpp:1143
 msgid "Power"
-msgstr ""
+msgstr "კვება"
 
 #: src/plugins/AMD.cpp:1154
 msgid "Core Performance States"
-msgstr ""
+msgstr "ბირთვის წარმადობის მდგომარეობები"
 
 #: src/plugins/AMD.cpp:1165
 msgid "Memory Performance States"
-msgstr ""
+msgstr "მეხსიერების წარმადობის მდგომარეობები"
 
 #: src/plugins/AMD.cpp:1174 src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
 msgid "Utilizations"
-msgstr ""
+msgstr "გამოყენება"
 
 #: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
 #: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:558 src/plugins/CPU.cpp:644
 #: src/plugins/CPU.cpp:665
 msgid "Core"
-msgstr ""
+msgstr "ძირითადი ბირთვული მოდულები"
 
 #: src/plugins/CPU.cpp:385
 msgid "Overall Temperature"
-msgstr ""
+msgstr "ზოგადი ტემპერატურა"
 
 #: src/plugins/CPU.cpp:494
 msgid "Power Saving"
-msgstr ""
+msgstr "ენერგიის დაზოგვა"
 
 #: src/plugins/CPU.cpp:498
 msgid "Scheduler Controlled"
-msgstr ""
+msgstr "მგეგმავით მართულია"
 
 #: src/plugins/CPU.cpp:680
 msgid "Maximum Frequencies"
-msgstr ""
+msgstr "მაქსიმალური სიხშირეები"
 
 #: src/plugins/CPU.cpp:689
 msgid "Minimum Frequencies"
-msgstr ""
+msgstr "მინიმალური სისხშირეები"
 
 #: src/plugins/CPU.cpp:698 src/plugins/CPU.cpp:706
 msgid "Governor"
-msgstr ""
+msgstr "მმართველი"
 
 #: src/plugins/CPU.cpp:714
 msgid "Power Saving Tendencies"
-msgstr ""
+msgstr "ენერგიის დაზოგვის მორგება"
 
 #: src/plugins/CPU.cpp:722
 msgid "Frequencies"
-msgstr ""
+msgstr "სიხშირეები"
 
 #: src/plugins/Nvidia.cpp:186
 msgid "Memory Clock Offset"
-msgstr ""
+msgstr "მეხსიერების სიხშირის წანაცვლება"
 
 #: src/plugins/Nvidia.cpp:500
 msgid "PCIe Bandwidth Utilization"
-msgstr ""
+msgstr "PCIe გამტარობის გამოყენება"
 
 #: src/plugins/Nvidia.cpp:696
 msgid "Fan"
-msgstr ""
+msgstr "ვენტილატორი"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"
-msgstr ""
+msgstr "(პარამეტრიზებული)"
 
 #: src/tuxclocker-qt/data/DeviceModel.cpp:248
 msgid "No value set"
-msgstr ""
+msgstr "მნიშვნელობა დაყენებული არაა"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
 msgid "Parametrize..."
-msgstr ""
+msgstr "პარამეტრიზება..."
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
 msgid "Reset to default"
-msgstr ""
+msgstr "ნაგულისხმევ მნიშვნელობაზე დაბრუნება"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
 msgid "Remove settings from profile"
-msgstr ""
+msgstr "პროფილიდან პარამეტრების წაშლა"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
-msgstr ""
+msgstr "ვაჩვენებ:"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
 msgid "Apply changes"
-msgstr ""
+msgstr "ცვლილებების გადატარება"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr ""
+msgstr "მინიჭებადები"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
-msgstr ""
+msgstr "დინამიკური მნიშვნელობები"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:43
 msgid "Static Values"
-msgstr ""
+msgstr "სტატიკური მნიშვნელობები"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:69
 msgid "Apply"
-msgstr ""
+msgstr "გადატარება"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
 #: src/tuxclocker-qt/widgets/Settings.cpp:70
 msgid "Cancel"
-msgstr ""
+msgstr "გაუქმება"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:158
 msgid "Connecting %1 with:"
-msgstr ""
+msgstr "%1-ის მიერთება:"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
 msgid "A node to connect with needs to be selected"
-msgstr ""
+msgstr "საჭიროა აირჩიოთ მისაერთებელი კვანძი"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
 msgid "At least two points need to be placed"
-msgstr ""
+msgstr "საჭიროა, სულ ცოტა, ორი წერტილის დასმა"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:28
 msgid "Settings"
-msgstr ""
+msgstr "მორგება"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:30
 msgid "Apply profile settings automatically"
-msgstr ""
+msgstr "პროფილის პარამეტრების ავტომატური გადატარება"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:32
 msgid "Use profile"
-msgstr ""
+msgstr "პროფილის გამოყენება"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:39
 msgid "Add profile"
-msgstr ""
+msgstr "პროფილის დამატება"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:42
 msgid "Remove selected"
-msgstr ""
+msgstr "მონიშნულის წაშლა"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:45
 msgid "Unnamed"
-msgstr ""
+msgstr "უსახელო"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:65
 msgid "Use tray icon"
-msgstr ""
+msgstr "სისტემის კუთხეში ხატულის ჩვენება"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:67
 msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
 msgstr ""
+"აჩვენებს ან დამალავს TuxClocker-ს სისტემის საათთან, პროგრამიდან გასვლის "
+"მაგიერ."
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:74
 msgid "Save"
-msgstr ""
+msgstr "შენახვა"
 
 #: src/tuxclocker-qt/MainWindow.cpp:120
 msgid "&Maximize TuxClocker"
-msgstr ""
+msgstr "&TuxClocker-ის გაშლა"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Quit"
-msgstr ""
+msgstr "&გასვლა"
