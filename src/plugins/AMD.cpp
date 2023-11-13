@@ -958,9 +958,10 @@ std::vector<TreeNode<DeviceNode>> getMaxMemoryClock(AMDGPUData data) {
 
 	// Per kernel documentation, if there's only one index for memory clock, it means maximum
 	auto lines = pstateSectionLinesWithRead("OD_MCLK", data);
-	if (lines.size() != 1 || lines.size() != 2)
+	if (lines.size() != 1 && lines.size() != 2)
 		return {};
 
+	// Index refers to nth line after 'OD_MCLK'
 	auto index = (lines.size() == 1) ? 0 : 1;
 
 	auto controllerRange = parsePstateRangeLineWithRead("MCLK", data);
