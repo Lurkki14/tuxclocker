@@ -127,7 +127,7 @@ Optional:
 
 - `libnvml, libxnvctrl, xlib` - NVIDIA support
 - `libdrm` - AMD support
-- `python-hwdata` - Prettier AMD GPU names
+- `python-hwdata, libpython3, python3` - Prettier AMD GPU names
 
 NOTE: some distros like NixOS only contain `libnvml` as part of a fully featured CUDA package.
 
