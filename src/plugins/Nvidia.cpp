@@ -289,6 +289,70 @@ std::vector<TreeNode<DeviceNode>> getMemClockRead(NvidiaGPUData data) {
 	return {};
 }
 
+std::vector<TreeNode<DeviceNode>> getTotalVram(NvidiaGPUData data) {
+	nvmlMemory_t mem;
+	if (nvmlDeviceGetMemoryInfo(data.devHandle, &mem) != NVML_SUCCESS)
+		return {};
+	// B -> MB
+	auto total = static_cast<uint>(mem.total / 1000000ull);
+
+	StaticReadable sr{total, _("MB")};
+
+	return {DeviceNode{
+	    .name = _("Total Memory"),
+	    .interface = sr,
+	    .hash = md5(data.uuid + "Total VRAM"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getReservedVram(NvidiaGPUData data) {
+	auto func = [=]() -> ReadResult {
+		nvmlMemory_v2_t mem;
+		if (nvmlDeviceGetMemoryInfo_v2(data.devHandle, &mem) != NVML_SUCCESS)
+			return ReadError::UnknownError;
+		// B -> MB
+		return static_cast<uint>(mem.reserved / 1000000ull);
+	};
+
+	DynamicReadable dr{func, _("MB")};
+
+	if (hasReadableValue(func()))
+		return {DeviceNode{
+		    .name = _("Reserved Memory"),
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Reserved VRAM"),
+		}};
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getUsedVram(NvidiaGPUData data) {
+	auto func = [=]() -> ReadResult {
+		nvmlMemory_t mem;
+		if (nvmlDeviceGetMemoryInfo(data.devHandle, &mem) != NVML_SUCCESS)
+			return ReadError::UnknownError;
+		// B -> MB
+		return static_cast<uint>(mem.used / 1000000ull);
+	};
+
+	DynamicReadable dr{func, _("MB")};
+
+	if (hasReadableValue(func()))
+		return {DeviceNode{
+		    .name = _("Used Memory"),
+		    .interface = dr,
+		    .hash = md5(data.uuid + "Used VRAM"),
+		}};
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getVramRoot(NvidiaGPUData data) {
+	return {DeviceNode{
+	    .name = _("Video Memory"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.uuid + "VRAM Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getClocksRoot(NvidiaGPUData data) {
 	// TODO: this gets added unconditionally
 	// If leaf nodes without an interface become a problem, we can remove them
@@ -774,6 +838,11 @@ auto gpuTree = TreeConstructor<NvidiaGPUData, DeviceNode>{
 			{getSingleFanSpeedRead, {}},
 			{getSingleFanSpeedWrite, {}},
 			{getSingleFanMode, {}}
+		}},
+		{getVramRoot, {
+			{getTotalVram, {}},
+			{getUsedVram, {}},
+			{getReservedVram, {}}
 		}},
 		{getPowerUsage, {}},
 		{getPowerLimit, {}},
