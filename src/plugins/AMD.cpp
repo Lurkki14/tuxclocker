@@ -1163,6 +1163,53 @@ std::vector<TreeNode<DeviceNode>> getCoreVoltageOffset(AMDGPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getUsedVram(AMDGPUData data) {
+	auto func = [=]() -> ReadResult {
+		uint usedBytes;
+		if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_VRAM_USAGE,
+				sizeof(usedBytes), &usedBytes) != 0)
+			return ReadError::UnknownError;
+		// B -> MB
+		return usedBytes / 1000000;
+	};
+
+	DynamicReadable dr{func, _("MB")};
+
+	if (hasReadableValue(func())) {
+		return {DeviceNode{
+		    .name = _("Used Memory"),
+		    .interface = dr,
+		    .hash = md5(data.identifier + "Used VRAM"),
+		}};
+	}
+	return {};
+}
+
+std::vector<TreeNode<DeviceNode>> getTotalVram(AMDGPUData data) {
+	drm_amdgpu_info_vram_gtt vramInfo;
+	if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_VRAM_GTT,
+			sizeof(vramInfo), &vramInfo) != 0)
+		return {};
+
+	// B -> MB
+	uint totalMBs = vramInfo.vram_size / 1000000;
+	StaticReadable sr{totalMBs, _("MB")};
+
+	return {DeviceNode{
+		.name = ("Total Memory"),
+		.interface = sr,
+		.hash = md5(data.identifier + "Total VRAM"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getVramRoot(AMDGPUData data) {
+	return {DeviceNode{
+	    .name = _("Video Memory"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "VRAM Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getTemperatureRoot(AMDGPUData data) {
 	return {DeviceNode{
 	    .name = _("Temperatures"),
@@ -1292,6 +1339,10 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		{getUtilizationsRoot, {
 			{getMemoryUtilization, {}},
 			{getCoreUtilization, {}}
+		}},
+		{getVramRoot, {
+			{getUsedVram, {}},
+			{getTotalVram, {}}
 		}},
 		{getPerformanceRoot, {
 			{getClocksRoot, {
