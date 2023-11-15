@@ -171,7 +171,9 @@ sudo zypper in -y \
     libQt5DBus-devel \
     libQt5Charts5-devel \
     libqt5-qtbase-devel \
-    libopenssl-1_0_0-devel
+    libopenssl-1_0_0-devel \
+    python3-devel \
+    python-hwdata
 ```
 
 
