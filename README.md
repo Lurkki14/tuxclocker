@@ -139,6 +139,7 @@ Note that these packages are likely called something different on each distribut
 
 #### For Ubuntu
 
+`python-hwdata` is not packaged for Ubuntu but can be acquired on [OBS](https://build.opensuse.org/package/show/home:alvistack/xsuchy-python-hwdata-2.4.1).
 ```
 sudo apt install --yes --quiet --quiet \
     libqt5x11extras5-dev \
