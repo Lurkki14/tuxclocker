@@ -31,6 +31,7 @@ sources = ['main.cpp',
 	'widgets/DragChartView.cpp',
 	'widgets/EnumEditor.cpp',
 	'widgets/FlagEditor.cpp',
+	'widgets/FunctionEditor.cpp',
         'widgets/Settings.cpp',
 	'MainWindow.cpp',
         'Utils.cpp']
