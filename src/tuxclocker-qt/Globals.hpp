@@ -15,6 +15,8 @@ extern DeviceModel *g_deviceModel;
 extern MainWindow *g_mainWindow;
 extern QStackedWidget *g_mainStack;
 extern QWidget *g_deviceBrowser;
+// Used to determine if DeviceTreeView selection should be cleared
+extern QWidget *g_functionEditor;
 // When applying successfully, we need to know which profile to save changes to
 extern SettingsData g_settingsData;
 

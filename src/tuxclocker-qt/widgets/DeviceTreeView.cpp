@@ -36,8 +36,13 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 
 	// Semi-hack: don't try to copy assignable settings from indices when loading profile
 	auto app = static_cast<QApplication *>(QApplication::instance());
-	connect(app, &QApplication::focusChanged, [=](QWidget *, QWidget *now) {
-		if (now && !this->geometry().contains(now->geometry())) {
+	connect(app, &QApplication::focusChanged, [=](QWidget *old, QWidget *now) {
+		auto functionEditor = Globals::g_functionEditor;
+		// Don't lose selection when function editor is active
+		// TODO: more proper way would be isAncestorOf but it thinks
+		// the NodeSelector combobox isn't a child -_-
+		auto editorActive = functionEditor && functionEditor->isVisible();
+		if (!editorActive && now && !this->isAncestorOf(now)) {
 			m_editSelection = {};
 			m_editedIndex = QModelIndex{};
 			clearSelection();
