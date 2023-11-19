@@ -1166,8 +1166,8 @@ std::vector<TreeNode<DeviceNode>> getCoreVoltageOffset(AMDGPUData data) {
 std::vector<TreeNode<DeviceNode>> getUsedVram(AMDGPUData data) {
 	auto func = [=]() -> ReadResult {
 		uint usedBytes;
-		if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_VRAM_USAGE,
-				sizeof(usedBytes), &usedBytes) != 0)
+		if (amdgpu_query_info(
+			data.devHandle, AMDGPU_INFO_VRAM_USAGE, sizeof(usedBytes), &usedBytes) != 0)
 			return ReadError::UnknownError;
 		// B -> MB
 		return usedBytes / 1000000;
@@ -1187,8 +1187,8 @@ std::vector<TreeNode<DeviceNode>> getUsedVram(AMDGPUData data) {
 
 std::vector<TreeNode<DeviceNode>> getTotalVram(AMDGPUData data) {
 	drm_amdgpu_info_vram_gtt vramInfo;
-	if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_VRAM_GTT,
-			sizeof(vramInfo), &vramInfo) != 0)
+	if (amdgpu_query_info(data.devHandle, AMDGPU_INFO_VRAM_GTT, sizeof(vramInfo), &vramInfo) !=
+	    0)
 		return {};
 
 	// B -> MB
@@ -1196,9 +1196,9 @@ std::vector<TreeNode<DeviceNode>> getTotalVram(AMDGPUData data) {
 	StaticReadable sr{totalMBs, _("MB")};
 
 	return {DeviceNode{
-		.name = ("Total Memory"),
-		.interface = sr,
-		.hash = md5(data.identifier + "Total VRAM"),
+	    .name = ("Total Memory"),
+	    .interface = sr,
+	    .hash = md5(data.identifier + "Total VRAM"),
 	}};
 }
 
