@@ -37,12 +37,18 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	// Semi-hack: don't try to copy assignable settings from indices when loading profile
 	auto app = static_cast<QApplication *>(QApplication::instance());
 	connect(app, &QApplication::focusChanged, [=](QWidget *old, QWidget *now) {
+		if (!now)
+			return;
 		auto functionEditor = Globals::g_functionEditor;
 		// Don't lose selection when function editor is active
 		// TODO: more proper way would be isAncestorOf but it thinks
 		// the NodeSelector combobox isn't a child -_-
 		auto editorActive = functionEditor && functionEditor->isVisible();
-		if (!editorActive && now && !this->isAncestorOf(now)) {
+		// Workaround for same reason as above for EnumEditor delegate
+		auto newTypeStr = now->metaObject()->className();
+		// Seriously, WTF?
+		auto isComboBox = QString{newTypeStr} == QString{"QComboBoxListView"};
+		if (!editorActive && now && !this->isAncestorOf(now) && !isComboBox) {
 			m_editSelection = {};
 			m_editedIndex = QModelIndex{};
 			clearSelection();
