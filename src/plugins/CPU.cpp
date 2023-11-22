@@ -569,6 +569,91 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getEPPNodes(CPUData data) {
+	std::vector<TreeNode<DeviceNode>> retval;
+
+	auto fromSysFsName = [](const std::string &sysFsName) -> std::string {
+		if (sysFsName == "performance")
+			return _("Performance");
+		if (sysFsName == "balance_performance")
+			return _("Balanced Performance");
+		if (sysFsName == "default")
+			return _("Default");
+		if (sysFsName == "balance_power")
+			return _("Balanced Power Saving");
+		if (sysFsName == "power")
+			return _("Power Saving");
+		// Unknown name
+		return sysFsName;
+	};
+
+	for (uint i = data.firstCoreIndex; i < data.firstCoreIndex + data.coreCount; i++) {
+		char path[96];
+		snprintf(path, 96,
+		    "/sys/devices/system/cpu/cpu%u/cpufreq/"
+		    "energy_performance_available_preferences",
+		    i);
+
+		auto sysFsNames = fileWords(path);
+		if (sysFsNames.empty())
+			continue;
+
+		EnumerationVec enumVec;
+		for (int i = 0; i < sysFsNames.size(); i++) {
+			auto e = Enumeration{fromSysFsName(sysFsNames[i]), i};
+			enumVec.push_back(e);
+		}
+
+		// Path of current value
+		snprintf(path, 96,
+		    "/sys/devices/system/cpu/cpu%u/cpufreq/energy_performance_preference", i);
+
+		auto getFunc = [=]() -> std::optional<AssignmentArgument> {
+			auto string = fileContents(path);
+			if (!string.has_value())
+				return std::nullopt;
+
+			for (int i = 0; i < enumVec.size(); i++) {
+				// Comparison fails with newline
+				if (fplus::trim('\n', *string) == sysFsNames[i])
+					return enumVec[i].key;
+			}
+			return std::nullopt;
+		};
+
+		auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+			if (!std::holds_alternative<uint>(a))
+				return AssignmentError::InvalidType;
+
+			auto arg = std::get<uint>(a);
+			if (!hasEnum(arg, enumVec))
+				return AssignmentError::OutOfRange;
+
+			std::ofstream file{path};
+			if (file.good() && file << sysFsNames[arg])
+				return std::nullopt;
+			return AssignmentError::UnknownError;
+		};
+
+		Assignable a{setFunc, enumVec, getFunc, std::nullopt};
+
+		char idStr[64];
+		snprintf(idStr, 64, "%sCore%uEPP", data.identifier.c_str(), i);
+		char name[32];
+		snprintf(name, 32, "%s %u", _("Core"), i);
+
+		if (getFunc().has_value()) {
+			DeviceNode node{
+			    .name = name,
+			    .interface = a,
+			    .hash = md5(idStr),
+			};
+			retval.push_back(node);
+		}
+	}
+	return retval;
+}
+
 std::optional<Range<int>> cpuFreqRange(CPUData data) {
 	// The proper limits seem to be at least in the last core index, the first two cores
 	// report lower max speed, even though they can boost to the same frequency. WTF?
@@ -674,6 +759,15 @@ std::vector<TreeNode<DeviceNode>> getGovernorMaximums(CPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getEPPRoot(CPUData data) {
+	// This seems to do something on Intel too, even when EPB is available
+	return {DeviceNode{
+	    .name = _("Power Usage Mode"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "EPP Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getGovernorMaximumsRoot(CPUData data) {
 	// Scaling governor root, eg. powersave, performance
 	return {DeviceNode{
@@ -768,6 +862,9 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 		}},
 		{getIntelEPBRoot, {
 			{getIntelEPBNodes, {}}
+		}},
+		{getEPPRoot, {
+			{getEPPNodes, {}}
 		}},
 		{getGovernorRoot, {
 			{getCPUGovernorRoot, {

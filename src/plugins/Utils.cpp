@@ -1,3 +1,4 @@
+#include <fplus/fplus.hpp>
 #include <fstream>
 #include <sstream>
 #include <Utils.hpp>
@@ -21,4 +22,12 @@ std::optional<std::string> fileContents(const std::string &path) {
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	return buffer.str();
+}
+
+std::vector<std::string> fileWords(const std::string &path) {
+	auto contents = fileContents(path);
+	if (!contents.has_value())
+		return {};
+
+	return fplus::split_one_of(std::string{"\n "}, false, *contents);
 }
