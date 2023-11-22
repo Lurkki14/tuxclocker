@@ -11,6 +11,9 @@ using ModelTraverseCallback =
     std::function<std::optional<QModelIndex>(QAbstractItemModel *, const QModelIndex &, int)>;
 using NodePath = QString;
 
+// File path to save non-setting persistent data, eg. window geometry
+QString cacheFilePath();
+
 // Conversion for saving in settings
 NodePath fromSettingsPath(QString);
 QString toSettingsPath(NodePath);

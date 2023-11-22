@@ -7,6 +7,7 @@
 #include <functional>
 #include <QDebug>
 #include <QSettings>
+#include <QStandardPaths>
 #include <Settings.hpp>
 
 namespace Utils {
@@ -137,6 +138,11 @@ void writeAssignableSetting(SettingsData data, AssignableSetting setting) {
 	settings.beginGroup("profiles");
 	settings.beginGroup(profile);
 	settings.setValue(toSettingsPath(setting.assignablePath), setting.value);
+}
+
+QString cacheFilePath() {
+	auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+	return QString("%1/tuxclocker.conf").arg(cacheDir);
 }
 
 } // namespace Utils

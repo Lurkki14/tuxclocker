@@ -129,8 +129,7 @@ QMenu *MainWindow::createTrayMenu() {
 }
 
 void MainWindow::restoreGeometryFromCache(QWidget *widget) {
-	auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-	auto cacheFilePath = QString("%1/tuxclocker.conf").arg(cacheDir);
+	auto cacheFilePath = Utils::cacheFilePath();
 
 	QSettings settings{cacheFilePath, QSettings::NativeFormat};
 	widget->restoreGeometry(settings.value("geometry").toByteArray());
@@ -138,8 +137,7 @@ void MainWindow::restoreGeometryFromCache(QWidget *widget) {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
 	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
-	auto cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-	auto cacheFilePath = QString("%1/tuxclocker.conf").arg(cacheDir);
+	auto cacheFilePath = Utils::cacheFilePath();
 
 	QSettings settings{cacheFilePath, QSettings::NativeFormat};
 	settings.setValue("geometry", saveGeometry());
