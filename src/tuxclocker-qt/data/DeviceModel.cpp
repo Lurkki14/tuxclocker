@@ -53,6 +53,7 @@ DeviceModel::DeviceModel(TC::TreeNode<TCDBus::DeviceNode> root, QObject *parent)
 		QList<QStandardItem *> rowItems;
 		auto nameItem = new QStandardItem;
 		nameItem->setText(nodeName);
+		nameItem->setData(node.value().path, NodePathRole);
 		rowItems.append(nameItem);
 
 		p::match(node.value().interface)(

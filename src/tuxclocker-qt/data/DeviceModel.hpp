@@ -38,7 +38,8 @@ public:
 		ConnectionRole, // Data about the connection
 		DynamicReadableProxyRole,
 		InterfaceTypeRole, // InterfaceType
-		NodeNameRole	   //
+		NodeNameRole,
+		NodePathRole // DBus path
 	};
 
 	enum InterfaceFlag {

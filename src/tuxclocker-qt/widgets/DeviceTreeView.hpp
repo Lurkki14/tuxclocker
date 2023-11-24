@@ -14,6 +14,7 @@
 class DeviceTreeView : public QTreeView {
 public:
 	DeviceTreeView(QWidget *parent = nullptr);
+	void setModel(QAbstractItemModel *) override;
 	// Accessor method for connecting everything in the browser
 	// const DeviceModel &deviceModel() {return m_deviceModel;}
 	// TODO: make this more generalized
@@ -39,6 +40,8 @@ protected:
 	EditTriggers editTriggers() { return QAbstractItemView::AllEditTriggers; }
 	void dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int> &) override;
 private:
+	void saveCollapsed(QAbstractItemModel *model);
+	void restoreCollapsed(QAbstractItemModel *model);
 	// Suspend/resume readable updates
 	void suspendChildren(const QModelIndex &);
 	void resumeChildren(const QModelIndex &);

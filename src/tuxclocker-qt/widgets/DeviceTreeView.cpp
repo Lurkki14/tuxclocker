@@ -8,6 +8,7 @@
 #include <QCheckBox>
 #include <QDebug>
 #include <QHeaderView>
+#include <QSettings>
 #include <Utils.hpp>
 
 using namespace mpark::patterns;
@@ -27,11 +28,16 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	connect(this, &QTreeView::collapsed, [=](auto &index) {
 		// Traverse model, recursively suspend everything
 		suspendChildren(index);
+		// TODO: only save on exit
+		// Difficulty has been recognizing 'exit' when a bunch of stuff isn't NULL
+		saveCollapsed(model());
 	});
 
 	connect(this, &QTreeView::expanded, [=](auto &index) {
 		// Traverse model, recursively resuming expanded nodes
 		resumeChildren(index);
+		// TODO: only save on exit
+		saveCollapsed(model());
 	});
 
 	// Semi-hack: don't try to copy assignable settings from indices when loading profile
@@ -60,6 +66,10 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 }
 
 void DeviceTreeView::suspendChildren(const QModelIndex &index) {
+	// Somehow can be true when we collapse nodes from cache
+	if (!Globals::g_deviceModel)
+		return;
+
 	// TODO: readables aren't suspended when hidden and a connection using it stops
 	QVector<QString> connectedReadablePaths;
 	for (auto &conn : Globals::g_deviceModel->activeConnections())
@@ -163,4 +173,42 @@ void DeviceTreeView::dataChanged(
 		}
 	}
 	QTreeView::dataChanged(topLeft, bottomRight, roles);
+}
+
+void DeviceTreeView::saveCollapsed(QAbstractItemModel *model) {
+	QStringList collapsed;
+	auto cb = [&](auto *model, auto &index, int row) -> std::optional<QModelIndex> {
+		if (!isExpanded(index)) {
+			auto pathV = index.data(DeviceModel::NodePathRole);
+			if (pathV.isValid())
+				collapsed.append(pathV.toString());
+		}
+
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	Utils::traverseModel(cb, model, QModelIndex{});
+
+	QSettings cache{Utils::cacheFilePath(), QSettings::NativeFormat};
+	cache.setValue("collapsedNodes", collapsed);
+}
+
+void DeviceTreeView::restoreCollapsed(QAbstractItemModel *model) {
+	QSettings cache{Utils::cacheFilePath(), QSettings::NativeFormat};
+	auto collapsed = qvariant_cast<QStringList>(cache.value("collapsedNodes"));
+
+	expandAll();
+
+	auto cb = [=](auto *model, auto &index, int row) -> std::optional<QModelIndex> {
+		auto pathV = index.data(DeviceModel::NodePathRole);
+		if (pathV.isValid() && collapsed.contains(pathV.toString())) {
+			this->collapse(index);
+		}
+		return model->index(row, DeviceModel::NameColumn, index);
+	};
+	Utils::traverseModel(cb, model, QModelIndex{});
+}
+
+void DeviceTreeView::setModel(QAbstractItemModel *model) {
+	QTreeView::setModel(model);
+	restoreCollapsed(model);
 }
