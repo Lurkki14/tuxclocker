@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-06 14:11+0200\n"
-"PO-Revision-Date: 2023-10-18 04:09+0000\n"
+"PO-Revision-Date: 2023-11-26 15:29+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.1\n"
+"X-Generator: Weblate 5.2.1-rc\n"
 
 #: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
 msgid "Automatic"
@@ -130,17 +130,16 @@ msgid "Core Voltage Offset"
 msgstr "Ytimen jännitepoikkeama"
 
 #: src/plugins/AMD.cpp:763
-#, fuzzy
 msgid "Memory Voltage"
-msgstr "Ytimen jännite"
+msgstr "Muistin jännite"
 
 #: src/plugins/AMD.cpp:784
 msgid "Point"
-msgstr ""
+msgstr "Piste"
 
 #: src/plugins/AMD.cpp:810 src/plugins/AMD.cpp:836
 msgid "State"
-msgstr ""
+msgstr "Tila"
 
 #: src/plugins/AMD.cpp:899
 msgid "Performance Parameter Control"
@@ -155,24 +154,20 @@ msgid "Memory Utilization"
 msgstr "Muistin käyttöaste"
 
 #: src/plugins/AMD.cpp:974
-#, fuzzy
 msgid "Maximum Memory Clock"
-msgstr "Muistin kellotaajuus"
+msgstr "Muistin enimmäiskellotaajuus"
 
 #: src/plugins/AMD.cpp:1005
-#, fuzzy
 msgid "Minimum Memory Clock"
-msgstr "Muistin kellotaajuus"
+msgstr "Muistin vähimmäiskellotaajuus"
 
 #: src/plugins/AMD.cpp:1033
-#, fuzzy
 msgid "Maximum Core Clock"
-msgstr "Ytimen kellotaajuus"
+msgstr "Ytimen enimmäiskellotaajuus"
 
 #: src/plugins/AMD.cpp:1061
-#, fuzzy
 msgid "Minimum Core Clock"
-msgstr "Ytimen kellotaajuus"
+msgstr "Ytimen vähimmäiskellotaajuus"
 
 #: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
 msgid "Slowdown Temperature"
@@ -188,7 +183,7 @@ msgstr "Lämpötilat"
 
 #: src/plugins/AMD.cpp:1109
 msgid "Voltage-Frequency Curve"
-msgstr ""
+msgstr "Jännite-taajuuskäyrä"
 
 #: src/plugins/AMD.cpp:1118 src/plugins/Nvidia.cpp:299
 msgid "Clocks"
@@ -208,14 +203,12 @@ msgid "Power"
 msgstr "Toimintateho"
 
 #: src/plugins/AMD.cpp:1154
-#, fuzzy
 msgid "Core Performance States"
-msgstr "Suorituskyky"
+msgstr "Ytimen suorituskykytilat"
 
 #: src/plugins/AMD.cpp:1165
-#, fuzzy
 msgid "Memory Performance States"
-msgstr "Suorituskyky"
+msgstr "Muistin suorituskykytilat"
 
 #: src/plugins/AMD.cpp:1174 src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
 msgid "Utilizations"
@@ -237,7 +230,7 @@ msgstr "Virransäästö"
 
 #: src/plugins/CPU.cpp:498
 msgid "Scheduler Controlled"
-msgstr ""
+msgstr "Vuorottimen hallitsema"
 
 #: src/plugins/CPU.cpp:680
 msgid "Maximum Frequencies"
@@ -289,7 +282,7 @@ msgstr "Nollaa oletusarvoon"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
 msgid "Remove settings from profile"
-msgstr ""
+msgstr "Poista asetukset profiilista"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
 msgid "Showing:"
