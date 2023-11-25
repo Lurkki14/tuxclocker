@@ -49,3 +49,17 @@ executable('tuxclocker-qt',
 	include_directories: [incdir, local_incdir],
         cpp_args : [locale_path_def, version_string_def],
 	install: true)
+
+desktop_file_conf = configuration_data()
+desktop_file_conf.set('tuxclocker-qt_path',
+	join_paths(get_option('prefix'), get_option('bindir'), 'tuxclocker-qt'))
+desktop_file_dir = join_paths(get_option('prefix'), get_option('datadir'), 'applications')
+
+configure_file(input: 'tuxclocker.desktop.in',
+	output : 'tuxclocker.desktop',
+	configuration : desktop_file_conf,
+	install_dir : desktop_file_dir)
+
+icon_dir = join_paths(get_option('prefix'), get_option('datadir'), 'icons/hicolor/scalable/apps')
+install_data('resources/tuxclocker-logo.svg',
+	install_dir : icon_dir)

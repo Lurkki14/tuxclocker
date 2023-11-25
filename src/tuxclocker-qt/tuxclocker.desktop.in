@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=TuxClocker
+Comment=Hardware control and monitoring
+Exec=@tuxclocker-qt_path@
+Icon=tuxclocker-logo

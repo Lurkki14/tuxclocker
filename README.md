@@ -205,7 +205,7 @@ ninja && sudo ninja install
 ```
 
 #### Running
-Once you have installed everything into a proper location, TuxClocker is available with `tuxclocker-qt` from the terminal. There is currently no desktop entry so TuxClocker won't come up in any launcher.
+Once you have installed everything into a proper location, TuxClocker is available through a launcher or with `tuxclocker-qt` from the terminal.
 
 If TuxClocker shows up with no items, there may be a problem with connecting to the DBus daemon. Refer to your system documentation on where DBus system service entries should be located. Alternatively, you can launch the needed components manually as explained in the Developing/Scripts section of the README.
 
