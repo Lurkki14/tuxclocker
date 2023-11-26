@@ -110,7 +110,9 @@ You can use the `tuxclocker.tar` from the release page if you don't want to comp
 This list may contain unofficial distribution packages, maintained by other people not directly related with this project.
 
 #### For openSUSE Tumbleweed
-Install the [tuxclocker](https://software.opensuse.org//download.html?project=home%3Atujhen%3Atuxclocker&package=tuxclocker) package from OBS. Or via terminal
+NOTE: Due to NVIDIA proprietary driver license problems package builded without NVIDIA modules. See [issue#65](https://github.com/Lurkki14/tuxclocker/issues/65) for more info.
+
+Install the [tuxclocker](https://software.opensuse.org//download.html?project=home%3Atujhen%3Atuxclocker&package=tuxclocker) package from OBS. Or via terminal:
 ```
 sudo zypper in opi
 opi tuxclocker
@@ -159,9 +161,11 @@ sudo apt install --yes --quiet --quiet \
 ```
 
 #### For openSUSE Tumbleweed
+`python-hwdata` is not packaged for openSUSE but can be acquired on [OBS](https://build.opensuse.org/package/show/home:tujhen:tuxclocker/python-hwdata).
 ```
 sudo zypper in -y \
     meson \
+    git \
     gettext-runtime \
     gcc-c++ \
     libboost_system-devel \
@@ -172,9 +176,10 @@ sudo zypper in -y \
     libQt5DBus-devel \
     libQt5Charts5-devel \
     libqt5-qtbase-devel \
-    libopenssl-1_0_0-devel \
-    python3-devel \
-    python-hwdata
+    libopenssl-devel \
+    python311-devel \
+    python311-hwdata \
+    nvidia-compute-G06
 ```
 
 
