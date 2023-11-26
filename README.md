@@ -110,7 +110,7 @@ You can use the `tuxclocker.tar` from the release page if you don't want to comp
 This list may contain unofficial distribution packages, maintained by other people not directly related with this project.
 
 #### For openSUSE Tumbleweed
-NOTE: Due to NVIDIA proprietary driver license problems package builded without NVIDIA modules. See [issue#65](https://github.com/Lurkki14/tuxclocker/issues/65) for more info.
+NOTE: Due to NVIDIA proprietary driver license problems the package is built without NVIDIA modules. See [issue#65](https://github.com/Lurkki14/tuxclocker/issues/65) for more info.
 
 Install the [tuxclocker](https://software.opensuse.org//download.html?project=home%3Atujhen%3Atuxclocker&package=tuxclocker) package from OBS. Or via terminal:
 ```
