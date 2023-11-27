@@ -86,6 +86,7 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 	std::vector<CPUData> retval;
 	for (auto &cpu : cpus) {
 		auto firstCore = minimum_by(smallerCoreId, cpu).processor;
+		auto lastCore = fplus::maximum_by(smallerCoreId, cpu).processor;
 		auto first = cpu.front();
 		// Create identifier
 		char identBuf[20];
@@ -93,7 +94,7 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 		CPUData data{
 		    .identifier = identBuf,
 		    .firstCoreIndex = firstCore,
-		    .coreCount = first.cores,
+		    .coreCount = (lastCore - firstCore) + 1,
 		    .name = first.name,
 		    .cpuIndex = first.physicalId,
 		};
