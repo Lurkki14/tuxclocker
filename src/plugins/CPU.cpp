@@ -85,7 +85,10 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 	auto smallerCoreId = [](CPUInfoData a, CPUInfoData b) { return a.processor < b.processor; };
 	std::vector<CPUData> retval;
 	for (auto &cpu : cpus) {
+		// These are actually threads, and not the 'core count' field,
+		// since one core may have more than one thread, and threads are used in sysfs
 		auto firstCore = minimum_by(smallerCoreId, cpu).processor;
+		auto lastCore = fplus::maximum_by(smallerCoreId, cpu).processor;
 		auto first = cpu.front();
 		// Create identifier
 		char identBuf[20];
@@ -93,7 +96,7 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 		CPUData data{
 		    .identifier = identBuf,
 		    .firstCoreIndex = firstCore,
-		    .coreCount = first.cores,
+		    .coreCount = (lastCore - firstCore) + 1,
 		    .name = first.name,
 		    .cpuIndex = first.physicalId,
 		};

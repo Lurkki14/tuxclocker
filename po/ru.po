@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-06 14:11+0200\n"
-"PO-Revision-Date: 2023-10-23 11:30+0000\n"
-"Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
+"PO-Revision-Date: 2023-11-26 15:29+0000\n"
+"Last-Translator: Egor Kuznetsov <egor.kuznetsov.26@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/ru/>\n"
 "Language: ru\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.1.1-dev\n"
+"X-Generator: Weblate 5.2.1-rc\n"
 
 #: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
 msgid "Automatic"
@@ -26,11 +26,11 @@ msgstr "Автоматический"
 
 #: src/plugins/AMD.cpp:39
 msgid "Lowest"
-msgstr ""
+msgstr "Наименьший"
 
 #: src/plugins/AMD.cpp:39
 msgid "Highest"
-msgstr ""
+msgstr "Наибольший"
 
 #: src/plugins/AMD.cpp:40 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
 msgid "Manual"
@@ -38,22 +38,19 @@ msgstr "Ручной"
 
 #: src/plugins/AMD.cpp:40
 msgid "Base Levels"
-msgstr ""
+msgstr "Базовые уровни"
 
 #: src/plugins/AMD.cpp:40
-#, fuzzy
 msgid "Lowest Core Clock"
-msgstr "Тактовая частота ядра"
+msgstr "Наименьшая актовая частота ядра"
 
 #: src/plugins/AMD.cpp:41
-#, fuzzy
 msgid "Lowest Memory Clock"
-msgstr "Тактовая частота памяти"
+msgstr "Наименьшая тактовая частота памяти"
 
 #: src/plugins/AMD.cpp:41
-#, fuzzy
 msgid "Highest Clocks"
-msgstr "Тактовые частоты"
+msgstr "Наибольшие тактовые частоты"
 
 #: src/plugins/AMD.cpp:151 src/plugins/AMD.cpp:526 src/plugins/AMD.cpp:548
 #: src/plugins/AMD.cpp:969 src/plugins/AMD.cpp:1000 src/plugins/AMD.cpp:1028
@@ -131,9 +128,8 @@ msgid "Core Voltage Offset"
 msgstr ""
 
 #: src/plugins/AMD.cpp:763
-#, fuzzy
 msgid "Memory Voltage"
-msgstr "Напряжение ядра"
+msgstr "Напряжение памяти"
 
 #: src/plugins/AMD.cpp:784
 msgid "Point"
@@ -161,19 +157,16 @@ msgid "Maximum Memory Clock"
 msgstr "Тактовая частота памяти"
 
 #: src/plugins/AMD.cpp:1005
-#, fuzzy
 msgid "Minimum Memory Clock"
-msgstr "Тактовая частота памяти"
+msgstr "Минимальная тактовая частота памяти"
 
 #: src/plugins/AMD.cpp:1033
-#, fuzzy
 msgid "Maximum Core Clock"
-msgstr "Тактовая частота ядра"
+msgstr "Максимальная тактовая частота ядра"
 
 #: src/plugins/AMD.cpp:1061
-#, fuzzy
 msgid "Minimum Core Clock"
-msgstr "Тактовая частота ядра"
+msgstr "Минимальная тактовая частота ядра"
 
 #: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
 msgid "Slowdown Temperature"
@@ -302,7 +295,7 @@ msgstr "Применить изменения"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Assignables"
-msgstr ""
+msgstr "Переменная"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
 msgid "Dynamic Values"
