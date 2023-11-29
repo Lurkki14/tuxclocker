@@ -1,10 +1,12 @@
 #include <Crypto.hpp>
+#include <fcntl.h>
 #include <filesystem>
 #include <fplus/fplus.hpp>
 #include <fstream>
 #include <libintl.h>
 #include <Plugin.hpp>
 #include <regex>
+#include <sys/time.h>
 #include <TreeConstructor.hpp>
 #include <Utils.hpp>
 
@@ -21,6 +23,7 @@ using namespace TuxClocker::Plugin;
 // /proc/cpuinfo
 struct CPUInfoData {
 	uint processor; // meaning core
+	std::string vendorId;
 	uint family;
 	uint model;
 	std::string name;
@@ -38,12 +41,19 @@ struct CPUData {
 	uint coreCount;
 	std::string name;
 	uint cpuIndex;
+	std::string vendorId;
 };
 
 // CPU utilization sample
 struct CPUTimeStat {
 	uint64_t totalTime;
 	uint64_t idleTime;
+};
+
+// Used to calculate power usage
+struct EnergyState {
+	uint64_t counter;
+	uint64_t usecs;
 };
 
 uint utilizationPercentage(CPUTimeStat stat) {
@@ -68,6 +78,23 @@ std::optional<CPUTimeStat> fromStatLine(const std::string &line) {
 	    .totalTime = total,
 	    .idleTime = std::stoull(words[3]),
 	};
+}
+
+std::optional<uint64_t> readMsr(int address, int mask, uint coreIndex) {
+	char path[32];
+	snprintf(path, 32, "/dev/cpu/%u/msr", coreIndex);
+
+	int msr_fd = open(path, O_RDONLY);
+	if (msr_fd < 0)
+		return std::nullopt;
+
+	uint64_t reg_value;
+	auto status = pread(msr_fd, &reg_value, sizeof(reg_value), address);
+	close(msr_fd);
+	if (status < 1)
+		return std::nullopt;
+
+	return reg_value & mask;
 }
 
 std::ifstream &jumptoLine(std::ifstream &file, unsigned int num) {
@@ -99,6 +126,7 @@ std::vector<CPUData> fromCPUInfoData(std::vector<CPUInfoData> dataVec) {
 		    .coreCount = (lastCore - firstCore) + 1,
 		    .name = first.name,
 		    .cpuIndex = first.physicalId,
+		    .vendorId = first.vendorId,
 		};
 		retval.push_back(data);
 	}
@@ -136,8 +164,8 @@ std::vector<std::string> splitAt(std::string delimiter, std::string input) {
 std::optional<CPUInfoData> parseCPUInfoSection(std::string section) {
 	auto lines = splitAt("\n", section);
 
-	std::vector<std::string> titlesOrdered{
-	    "processor", "cpu family", "model", "model name", "physical id", "cpu cores"};
+	std::vector<std::string> titlesOrdered{"processor", "vendor_id", "cpu family", "model",
+	    "model name", "physical id", "cpu cores"};
 	std::vector<std::string> parsed;
 	auto titlesSize = titlesOrdered.size();
 	// Assumes /proc/cpuinfo is ordered the same way everywhere
@@ -154,11 +182,12 @@ std::optional<CPUInfoData> parseCPUInfoSection(std::string section) {
 
 	return CPUInfoData{
 	    .processor = static_cast<uint>(std::stoi(parsed[0])),
-	    .family = static_cast<uint>(std::stoi(parsed[1])),
-	    .model = static_cast<uint>(std::stoi(parsed[2])),
-	    .name = parsed[3],
-	    .physicalId = static_cast<uint>(std::stoi(parsed[4])),
-	    .cores = static_cast<uint>(std::stoi(parsed[5])),
+	    .vendorId = parsed[1],
+	    .family = static_cast<uint>(std::stoi(parsed[2])),
+	    .model = static_cast<uint>(std::stoi(parsed[3])),
+	    .name = parsed[4],
+	    .physicalId = static_cast<uint>(std::stoi(parsed[5])),
+	    .cores = static_cast<uint>(std::stoi(parsed[6])),
 	};
 }
 
@@ -486,6 +515,148 @@ std::vector<TreeNode<DeviceNode>> getUtilizations(CPUData data) {
 		}
 	};
 	return retval;
+}
+
+double toWatts(EnergyState current, EnergyState previous) {
+	auto counterDelta = current.counter - previous.counter;
+	// us -> s
+	double delta_s = (current.usecs - previous.usecs) / 1000000.0;
+	// Counter is 61 uJ increments
+	double delta_j = (counterDelta * 61) / 1000000.0;
+	return delta_j / delta_s;
+}
+
+std::optional<EnergyState> getEnergyState(int address, int mask, uint coreIndex) {
+	auto curCounter = readMsr(address, mask, coreIndex);
+	if (!curCounter.has_value() || *curCounter == 0)
+		return std::nullopt;
+
+	timeval time;
+	if (gettimeofday(&time, NULL) != 0)
+		return std::nullopt;
+
+	uint64_t cur_usecs = (time.tv_sec * 1000000) + time.tv_usec;
+	return EnergyState{.counter = *curCounter, .usecs = cur_usecs};
+}
+
+// TODO: quite a bit of copypasta, mostly due to every function keeping its own state
+std::vector<TreeNode<DeviceNode>> getTotalPowerUsage(CPUData data) {
+	std::optional<int> msrAddress = std::nullopt;
+	if (data.vendorId == "GenuineIntel")
+		// MSR_PKG_ENERGY_STATUS
+		msrAddress = 0x611;
+	if (data.vendorId == "AuthenticAMD")
+		// TODO: we can get per-core power usage for AMD
+		msrAddress = 0xc001029b;
+
+	if (!msrAddress.has_value())
+		return {};
+
+	auto func = [=]() -> ReadResult {
+		// Previous EnergyState for CPU index
+		static std::unordered_map<uint, EnergyState> prevStates;
+
+		// 32 bits
+		auto curState = getEnergyState(*msrAddress, 0xffffffff, data.firstCoreIndex);
+		if (!curState.has_value())
+			return ReadError::UnknownError;
+
+		if (prevStates.find(data.cpuIndex) == prevStates.end()) {
+			// No previous value
+			prevStates[data.cpuIndex] = *curState;
+			// This result shouldn't be seen since this is called at initialization
+			return 0.0f;
+		}
+		auto prevState = prevStates[data.cpuIndex];
+
+		prevStates[data.cpuIndex] = *curState;
+		return toWatts(*curState, prevState);
+	};
+
+	if (!hasReadableValue(func()))
+		return {};
+
+	DynamicReadable dr{func, _("W")};
+
+	return {DeviceNode{
+	    .name = _("Power Usage"),
+	    .interface = dr,
+	    .hash = md5(data.identifier + "Power Usage"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getDramPowerUsage(CPUData data) {
+	if (data.vendorId != "GenuineIntel")
+		return {};
+
+	auto func = [=]() -> ReadResult {
+		// Previous EnergyState for CPU index
+		static std::unordered_map<uint, EnergyState> prevStates;
+
+		// MSR_DRAM_ENERGY_STATUS, 32 bits
+		auto curState = getEnergyState(0x619, 0xffffffff, data.firstCoreIndex);
+		if (!curState.has_value())
+			return ReadError::UnknownError;
+
+		if (prevStates.find(data.cpuIndex) == prevStates.end()) {
+			// No previous value
+			prevStates[data.cpuIndex] = *curState;
+			// This result shouldn't be seen since this is called at initialization
+			return 0.0f;
+		}
+		auto prevState = prevStates[data.cpuIndex];
+
+		prevStates[data.cpuIndex] = *curState;
+		return toWatts(*curState, prevState);
+	};
+
+	if (!hasReadableValue(func()))
+		return {};
+
+	DynamicReadable dr{func, _("W")};
+
+	return {DeviceNode{
+	    .name = _("Memory Power Usage"),
+	    .interface = dr,
+	    .hash = md5(data.identifier + "DRAM Power Usage"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getCorePowerUsage(CPUData data) {
+	if (data.vendorId != "GenuineIntel")
+		return {};
+
+	auto func = [=]() -> ReadResult {
+		// Previous EnergyState for CPU index
+		static std::unordered_map<uint, EnergyState> prevStates;
+
+		// MSR_PP0_ENERGY_STATUS, 32 bits
+		auto curState = getEnergyState(0x639, 0xffffffff, data.firstCoreIndex);
+		if (!curState.has_value())
+			return ReadError::UnknownError;
+
+		if (prevStates.find(data.cpuIndex) == prevStates.end()) {
+			// No previous value
+			prevStates[data.cpuIndex] = *curState;
+			// This result shouldn't be seen since this is called at initialization
+			return 0.0f;
+		}
+		auto prevState = prevStates[data.cpuIndex];
+
+		prevStates[data.cpuIndex] = *curState;
+		return toWatts(*curState, prevState);
+	};
+
+	if (!hasReadableValue(func()))
+		return {};
+
+	DynamicReadable dr{func, _("W")};
+
+	return {DeviceNode{
+	    .name = _("Core Power Usage"),
+	    .interface = dr,
+	    .hash = md5(data.identifier + "Core Power Usage"),
+	}};
 }
 
 std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
@@ -838,6 +1009,14 @@ std::vector<TreeNode<DeviceNode>> getTemperaturesRoot(CPUData data) {
 	}};
 }
 
+std::vector<TreeNode<DeviceNode>> getPowerRoot(CPUData data) {
+	return {DeviceNode{
+	    .name = _("Power"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Power Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getCPUName(CPUData data) {
 	return {DeviceNode{
 	    .name = data.name,
@@ -879,6 +1058,11 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 			{getGovernorMaximumsRoot, {
 				{getGovernorMaximums, {}}
 			}}
+		}},
+		{getPowerRoot, {
+			{getTotalPowerUsage, {}},
+			{getDramPowerUsage, {}},
+			{getCorePowerUsage, {}}
 		}}
 	}
 };
