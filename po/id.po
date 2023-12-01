@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-06 14:11+0200\n"
+"POT-Creation-Date: 2023-12-01 19:17+0200\n"
 "PO-Revision-Date: 2023-11-13 21:17+0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,232 +17,275 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.4.1\n"
 
-#: src/plugins/AMD.cpp:39 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+#: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
 msgstr "Otomatis"
 
-#: src/plugins/AMD.cpp:39
+#: src/plugins/AMD.cpp:43
 msgid "Lowest"
 msgstr "Terendah"
 
-#: src/plugins/AMD.cpp:39
+#: src/plugins/AMD.cpp:43
 msgid "Highest"
 msgstr "Tertinggi"
 
-#: src/plugins/AMD.cpp:40 src/plugins/AMD.cpp:327 src/plugins/Nvidia.cpp:419
+#: src/plugins/AMD.cpp:44 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Manual"
 msgstr "Manual"
 
-#: src/plugins/AMD.cpp:40
+#: src/plugins/AMD.cpp:44
 msgid "Base Levels"
 msgstr "Level Dasar"
 
-#: src/plugins/AMD.cpp:40
+#: src/plugins/AMD.cpp:44
 msgid "Lowest Core Clock"
 msgstr "Kecepatan core terendah"
 
-#: src/plugins/AMD.cpp:41
+#: src/plugins/AMD.cpp:45
 msgid "Lowest Memory Clock"
 msgstr "Kecepatan memori terendah"
 
-#: src/plugins/AMD.cpp:41
+#: src/plugins/AMD.cpp:45
 msgid "Highest Clocks"
 msgstr "Kecepatan Tertinggi"
 
-#: src/plugins/AMD.cpp:151 src/plugins/AMD.cpp:526 src/plugins/AMD.cpp:548
-#: src/plugins/AMD.cpp:969 src/plugins/AMD.cpp:1000 src/plugins/AMD.cpp:1028
-#: src/plugins/AMD.cpp:1056 src/plugins/CPU.cpp:210 src/plugins/CPU.cpp:629
+#: src/plugins/AMD.cpp:155 src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:552
+#: src/plugins/AMD.cpp:974 src/plugins/AMD.cpp:1005 src/plugins/AMD.cpp:1033
+#: src/plugins/AMD.cpp:1061 src/plugins/CPU.cpp:242 src/plugins/CPU.cpp:888
 #: src/plugins/Nvidia.cpp:182 src/plugins/Nvidia.cpp:183
 #: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
 #: src/plugins/Nvidia.cpp:281
 msgid "MHz"
 msgstr "MHz"
 
-#: src/plugins/AMD.cpp:295 src/plugins/AMD.cpp:866 src/plugins/Nvidia.cpp:628
-#: src/plugins/Nvidia.cpp:675
+#: src/plugins/AMD.cpp:299 src/plugins/AMD.cpp:870 src/plugins/AMD.cpp:1157
+#: src/plugins/Nvidia.cpp:692 src/plugins/Nvidia.cpp:739
 msgid "mV"
 msgstr "mV"
 
-#: src/plugins/AMD.cpp:308 src/plugins/AMD.cpp:1073 src/plugins/AMD.cpp:1088
-#: src/plugins/CPU.cpp:228 src/plugins/Nvidia.cpp:575
-#: src/plugins/Nvidia.cpp:592 src/plugins/Nvidia.cpp:607
+#: src/plugins/AMD.cpp:312 src/plugins/AMD.cpp:1078 src/plugins/AMD.cpp:1093
+#: src/plugins/CPU.cpp:260 src/plugins/Nvidia.cpp:639
+#: src/plugins/Nvidia.cpp:656 src/plugins/Nvidia.cpp:671
 msgid "°C"
 msgstr "°C"
 
-#: src/plugins/AMD.cpp:312 src/plugins/Nvidia.cpp:579
+#: src/plugins/AMD.cpp:316 src/plugins/Nvidia.cpp:643
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: src/plugins/AMD.cpp:360 src/plugins/Nvidia.cpp:425
+#: src/plugins/AMD.cpp:364 src/plugins/Nvidia.cpp:489
 msgid "Fan Mode"
 msgstr "Mode kipas"
 
-#: src/plugins/AMD.cpp:400 src/plugins/AMD.cpp:431 src/plugins/AMD.cpp:915
-#: src/plugins/AMD.cpp:935 src/plugins/CPU.cpp:475 src/plugins/Nvidia.cpp:327
-#: src/plugins/Nvidia.cpp:370 src/plugins/Nvidia.cpp:440
-#: src/plugins/Nvidia.cpp:460 src/plugins/Nvidia.cpp:496
+#: src/plugins/AMD.cpp:404 src/plugins/AMD.cpp:435 src/plugins/AMD.cpp:919
+#: src/plugins/AMD.cpp:939 src/plugins/CPU.cpp:507 src/plugins/Nvidia.cpp:391
+#: src/plugins/Nvidia.cpp:434 src/plugins/Nvidia.cpp:504
+#: src/plugins/Nvidia.cpp:524 src/plugins/Nvidia.cpp:560
 msgid "%"
 msgstr "%"
 
-#: src/plugins/AMD.cpp:403 src/plugins/AMD.cpp:435 src/plugins/Nvidia.cpp:332
-#: src/plugins/Nvidia.cpp:375
+#: src/plugins/AMD.cpp:407 src/plugins/AMD.cpp:439 src/plugins/Nvidia.cpp:396
+#: src/plugins/Nvidia.cpp:439
 msgid "Fan Speed"
 msgstr "Kecapatan kipas"
 
-#: src/plugins/AMD.cpp:487 src/plugins/AMD.cpp:505 src/plugins/Nvidia.cpp:516
-#: src/plugins/Nvidia.cpp:557
+#: src/plugins/AMD.cpp:491 src/plugins/AMD.cpp:509 src/plugins/CPU.cpp:579
+#: src/plugins/CPU.cpp:616 src/plugins/CPU.cpp:653 src/plugins/Nvidia.cpp:580
+#: src/plugins/Nvidia.cpp:621
 msgid "W"
 msgstr "W"
 
-#: src/plugins/AMD.cpp:490 src/plugins/Nvidia.cpp:560
+#: src/plugins/AMD.cpp:494 src/plugins/Nvidia.cpp:624
 msgid "Power Limit"
 msgstr "Batas Daya"
 
-#: src/plugins/AMD.cpp:509 src/plugins/Nvidia.cpp:520
+#: src/plugins/AMD.cpp:513 src/plugins/CPU.cpp:582 src/plugins/Nvidia.cpp:584
 msgid "Power Usage"
 msgstr "Penggunaan daya"
 
-#: src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:587 src/plugins/AMD.cpp:659
+#: src/plugins/AMD.cpp:534 src/plugins/AMD.cpp:591 src/plugins/AMD.cpp:663
 #: src/plugins/Nvidia.cpp:264
 msgid "Core Clock"
 msgstr "Kecepatan inti"
 
-#: src/plugins/AMD.cpp:552 src/plugins/AMD.cpp:730 src/plugins/Nvidia.cpp:285
+#: src/plugins/AMD.cpp:556 src/plugins/AMD.cpp:734 src/plugins/Nvidia.cpp:285
 msgid "Memory Clock"
 msgstr "Kecepatan memori"
 
-#: src/plugins/AMD.cpp:587 src/plugins/Nvidia.cpp:244
+#: src/plugins/AMD.cpp:591 src/plugins/Nvidia.cpp:244
 msgid "Core Clock Offset"
 msgstr "Offset kecepatan Inti"
 
-#: src/plugins/AMD.cpp:623 src/plugins/AMD.cpp:692 src/plugins/AMD.cpp:869
-#: src/plugins/Nvidia.cpp:632
+#: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:696 src/plugins/AMD.cpp:873
+#: src/plugins/Nvidia.cpp:696
 msgid "Core Voltage"
 msgstr "Tegangan inti"
 
-#: src/plugins/AMD.cpp:623 src/plugins/Nvidia.cpp:679
+#: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:1160 src/plugins/Nvidia.cpp:743
 msgid "Core Voltage Offset"
 msgstr "Pengimbangan Tegangan Inti"
 
-#: src/plugins/AMD.cpp:763
+#: src/plugins/AMD.cpp:767
 msgid "Memory Voltage"
 msgstr "Tegangan memori"
 
-#: src/plugins/AMD.cpp:784
+#: src/plugins/AMD.cpp:788
 msgid "Point"
 msgstr "Titik"
 
-#: src/plugins/AMD.cpp:810 src/plugins/AMD.cpp:836
+#: src/plugins/AMD.cpp:814 src/plugins/AMD.cpp:840
 msgid "State"
 msgstr "keadaan"
 
-#: src/plugins/AMD.cpp:899
+#: src/plugins/AMD.cpp:903
 msgid "Performance Parameter Control"
 msgstr "Kontrol Parameter Performa"
 
-#: src/plugins/AMD.cpp:919 src/plugins/Nvidia.cpp:444
+#: src/plugins/AMD.cpp:923 src/plugins/Nvidia.cpp:508
 msgid "Core Utilization"
 msgstr "Pemanfaatan Inti"
 
-#: src/plugins/AMD.cpp:939 src/plugins/Nvidia.cpp:464
+#: src/plugins/AMD.cpp:943 src/plugins/Nvidia.cpp:528
 msgid "Memory Utilization"
 msgstr "Penggunaan memori"
 
-#: src/plugins/AMD.cpp:974
+#: src/plugins/AMD.cpp:979
 msgid "Maximum Memory Clock"
 msgstr " kecepatan memori Maksimum"
 
-#: src/plugins/AMD.cpp:1005
+#: src/plugins/AMD.cpp:1010
 msgid "Minimum Memory Clock"
 msgstr "kecepatan memori minimal"
 
-#: src/plugins/AMD.cpp:1033
+#: src/plugins/AMD.cpp:1038
 msgid "Maximum Core Clock"
 msgstr "kecepatan core maksimal"
 
-#: src/plugins/AMD.cpp:1061
+#: src/plugins/AMD.cpp:1066
 msgid "Minimum Core Clock"
 msgstr "kecepatan core minimum"
 
-#: src/plugins/AMD.cpp:1076 src/plugins/CPU.cpp:374 src/plugins/Nvidia.cpp:595
+#: src/plugins/AMD.cpp:1081 src/plugins/CPU.cpp:406 src/plugins/Nvidia.cpp:659
 msgid "Slowdown Temperature"
 msgstr "Temperatur Perlambatan"
 
-#: src/plugins/AMD.cpp:1091 src/plugins/Nvidia.cpp:610
+#: src/plugins/AMD.cpp:1096 src/plugins/Nvidia.cpp:674
 msgid "Shutdown Temperature"
 msgstr "Suhu Mati"
 
-#: src/plugins/AMD.cpp:1099 src/plugins/CPU.cpp:738 src/plugins/Nvidia.cpp:726
+#: src/plugins/AMD.cpp:1176 src/plugins/AMD.cpp:1196 src/plugins/Nvidia.cpp:299
+#: src/plugins/Nvidia.cpp:317 src/plugins/Nvidia.cpp:337
+msgid "MB"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1180 src/plugins/Nvidia.cpp:341
+msgid "Used Memory"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1207 src/plugins/Nvidia.cpp:350
+msgid "Video Memory"
+msgstr ""
+
+#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1006 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
 msgstr "Temperatur"
 
-#: src/plugins/AMD.cpp:1109
+#: src/plugins/AMD.cpp:1225
 msgid "Voltage-Frequency Curve"
 msgstr "Voltage-Frequency Curve"
 
-#: src/plugins/AMD.cpp:1118 src/plugins/Nvidia.cpp:299
+#: src/plugins/AMD.cpp:1234 src/plugins/Nvidia.cpp:363
 msgid "Clocks"
 msgstr "Kecepatan Tertinggi"
 
-#: src/plugins/AMD.cpp:1126 src/plugins/CPU.cpp:496
+#: src/plugins/AMD.cpp:1242 src/plugins/CPU.cpp:670 src/plugins/CPU.cpp:751
 msgid "Performance"
 msgstr "Performa"
 
-#: src/plugins/AMD.cpp:1134 src/plugins/Nvidia.cpp:734
+#: src/plugins/AMD.cpp:1250 src/plugins/Nvidia.cpp:798
 msgid "Fans"
 msgstr "Kipas"
 
-#: src/plugins/AMD.cpp:1143
+#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1014
 msgid "Power"
 msgstr "daya"
 
-#: src/plugins/AMD.cpp:1154
+#: src/plugins/AMD.cpp:1270
 msgid "Core Performance States"
 msgstr "Keadaan performa inti"
 
-#: src/plugins/AMD.cpp:1165
+#: src/plugins/AMD.cpp:1281
 msgid "Memory Performance States"
 msgstr "Keadaan performa memori"
 
-#: src/plugins/AMD.cpp:1174 src/plugins/CPU.cpp:730 src/plugins/Nvidia.cpp:742
+#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:998 src/plugins/Nvidia.cpp:806
 msgid "Utilizations"
 msgstr "Penggunaan"
 
-#: src/plugins/CPU.cpp:342 src/plugins/CPU.cpp:401 src/plugins/CPU.cpp:424
-#: src/plugins/CPU.cpp:473 src/plugins/CPU.cpp:558 src/plugins/CPU.cpp:644
-#: src/plugins/CPU.cpp:665
+#: src/plugins/CPU.cpp:374 src/plugins/CPU.cpp:433 src/plugins/CPU.cpp:456
+#: src/plugins/CPU.cpp:505 src/plugins/CPU.cpp:732 src/plugins/CPU.cpp:817
+#: src/plugins/CPU.cpp:903 src/plugins/CPU.cpp:924
 msgid "Core"
 msgstr "kecepatan "
 
-#: src/plugins/CPU.cpp:385
+#: src/plugins/CPU.cpp:417
 msgid "Overall Temperature"
 msgstr "Suhu Keseluruhan"
 
-#: src/plugins/CPU.cpp:494
+#: src/plugins/CPU.cpp:619
+#, fuzzy
+msgid "Memory Power Usage"
+msgstr "Penggunaan daya"
+
+#: src/plugins/CPU.cpp:656
+#, fuzzy
+msgid "Core Power Usage"
+msgstr "Penggunaan daya"
+
+#: src/plugins/CPU.cpp:668 src/plugins/CPU.cpp:759
 msgid "Power Saving"
 msgstr "Penghematan Daya"
 
-#: src/plugins/CPU.cpp:498
+#: src/plugins/CPU.cpp:672
 msgid "Scheduler Controlled"
 msgstr "Scheduler Controlled"
 
-#: src/plugins/CPU.cpp:680
+#: src/plugins/CPU.cpp:753
+#, fuzzy
+msgid "Balanced Performance"
+msgstr "Performa"
+
+#: src/plugins/CPU.cpp:755
+msgid "Default"
+msgstr ""
+
+#: src/plugins/CPU.cpp:757
+#, fuzzy
+msgid "Balanced Power Saving"
+msgstr "Penghematan Daya"
+
+#: src/plugins/CPU.cpp:939
+#, fuzzy
+msgid "Power Usage Mode"
+msgstr "Penggunaan daya"
+
+#: src/plugins/CPU.cpp:948
 msgid "Maximum Frequencies"
 msgstr "Frekuensi Maksimum"
 
-#: src/plugins/CPU.cpp:689
+#: src/plugins/CPU.cpp:957
 msgid "Minimum Frequencies"
 msgstr "Frekuensi Minimum"
 
-#: src/plugins/CPU.cpp:698 src/plugins/CPU.cpp:706
+#: src/plugins/CPU.cpp:966 src/plugins/CPU.cpp:974
 msgid "Governor"
 msgstr "governor"
 
-#: src/plugins/CPU.cpp:714
+#: src/plugins/CPU.cpp:982
 msgid "Power Saving Tendencies"
 msgstr "Kecenderungan Hemat Daya"
 
-#: src/plugins/CPU.cpp:722
+#: src/plugins/CPU.cpp:990
 msgid "Frequencies"
 msgstr "Frekuensi"
 
@@ -250,11 +293,19 @@ msgstr "Frekuensi"
 msgid "Memory Clock Offset"
 msgstr "Offset kecepatan Memori"
 
-#: src/plugins/Nvidia.cpp:500
+#: src/plugins/Nvidia.cpp:302
+msgid "Total Memory"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:321
+msgid "Reserved Memory"
+msgstr ""
+
+#: src/plugins/Nvidia.cpp:564
 msgid "PCIe Bandwidth Utilization"
 msgstr "Pemanfaatan Bandwidth PCIe"
 
-#: src/plugins/Nvidia.cpp:696
+#: src/plugins/Nvidia.cpp:760
 msgid "Fan"
 msgstr "Kipas"
 
@@ -262,7 +313,7 @@ msgstr "Kipas"
 msgid "(Parametrized)"
 msgstr "(Diparameterkan)"
 
-#: src/tuxclocker-qt/data/DeviceModel.cpp:248
+#: src/tuxclocker-qt/data/DeviceModel.cpp:249
 msgid "No value set"
 msgstr "Tidak ada nilai yang diatur"
 
@@ -278,44 +329,35 @@ msgstr "Reset to default"
 msgid "Remove settings from profile"
 msgstr "Hapus pengaturan dari profil"
 
-#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:34
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:30
 msgid "Showing:"
 msgstr "Tampilkan"
 
-#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:31
 msgid "Apply changes"
 msgstr "Terapkan Perubahan"
 
-#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
 msgid "Assignables"
 msgstr "Ditugaskan"
 
-#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:41
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:37
 msgid "Dynamic Values"
 msgstr "Nilai dinamis"
 
-#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:43
+#: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Static Values"
 msgstr "Nilai statis"
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:69
-msgid "Apply"
-msgstr "Terapkan"
-
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:72
-#: src/tuxclocker-qt/widgets/Settings.cpp:70
-msgid "Cancel"
-msgstr "Batalkan"
-
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:158
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:60
 msgid "Connecting %1 with:"
 msgstr "Menghubungkan %1 dengan:"
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:192
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:96
 msgid "A node to connect with needs to be selected"
 msgstr "Node yang akan disambungkan perlu dipilih"
 
-#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:196
+#: src/tuxclocker-qt/widgets/FunctionEditor.hpp:100
 msgid "At least two points need to be placed"
 msgstr "Setidaknya dua titik harus ditempatkan"
 
@@ -355,6 +397,10 @@ msgstr ""
 "Mengaktifkan ini akan menyembunyikan TuxClocker ke dalam baki dan bukannya "
 "keluar saat menutup jendela."
 
+#: src/tuxclocker-qt/widgets/Settings.cpp:70
+msgid "Cancel"
+msgstr "Batalkan"
+
 #: src/tuxclocker-qt/widgets/Settings.cpp:74
 msgid "Save"
 msgstr "Simpan"
@@ -366,3 +412,6 @@ msgstr "&Memperbesar TuxClocker"
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Quit"
 msgstr "&Keluar"
+
+#~ msgid "Apply"
+#~ msgstr "Terapkan"
