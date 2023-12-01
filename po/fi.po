@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-01 19:17+0200\n"
-"PO-Revision-Date: 2023-11-26 15:29+0000\n"
+"PO-Revision-Date: 2023-12-01 17:57+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.2.1-rc\n"
+"X-Generator: Weblate 5.3-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
@@ -181,15 +181,15 @@ msgstr "Sammumislämpötila"
 #: src/plugins/AMD.cpp:1176 src/plugins/AMD.cpp:1196 src/plugins/Nvidia.cpp:299
 #: src/plugins/Nvidia.cpp:317 src/plugins/Nvidia.cpp:337
 msgid "MB"
-msgstr ""
+msgstr "Mt"
 
 #: src/plugins/AMD.cpp:1180 src/plugins/Nvidia.cpp:341
 msgid "Used Memory"
-msgstr ""
+msgstr "Käytetty muisti"
 
 #: src/plugins/AMD.cpp:1207 src/plugins/Nvidia.cpp:350
 msgid "Video Memory"
-msgstr ""
+msgstr "Videomuisti"
 
 #: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1006 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
@@ -212,9 +212,8 @@ msgid "Fans"
 msgstr "Tuulettimet"
 
 #: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1014
-#, fuzzy
 msgid "Power"
-msgstr "Toimintateho"
+msgstr "Teho"
 
 #: src/plugins/AMD.cpp:1270
 msgid "Core Performance States"
@@ -239,14 +238,12 @@ msgid "Overall Temperature"
 msgstr "Kokonaislämpötila"
 
 #: src/plugins/CPU.cpp:619
-#, fuzzy
 msgid "Memory Power Usage"
-msgstr "Toimintateho"
+msgstr "Muistin toimintateho"
 
 #: src/plugins/CPU.cpp:656
-#, fuzzy
 msgid "Core Power Usage"
-msgstr "Toimintateho"
+msgstr "Ytimen toimintateho"
 
 #: src/plugins/CPU.cpp:668 src/plugins/CPU.cpp:759
 msgid "Power Saving"
@@ -257,23 +254,20 @@ msgid "Scheduler Controlled"
 msgstr "Vuorottimen hallitsema"
 
 #: src/plugins/CPU.cpp:753
-#, fuzzy
 msgid "Balanced Performance"
-msgstr "Suorituskyky"
+msgstr "Tasapainoinen suorituskyky"
 
 #: src/plugins/CPU.cpp:755
 msgid "Default"
-msgstr ""
+msgstr "Oletusarvo"
 
 #: src/plugins/CPU.cpp:757
-#, fuzzy
 msgid "Balanced Power Saving"
-msgstr "Virransäästö"
+msgstr "Tasapainoinen virransäästö"
 
 #: src/plugins/CPU.cpp:939
-#, fuzzy
 msgid "Power Usage Mode"
-msgstr "Toimintateho"
+msgstr "Virrankulutustila"
 
 #: src/plugins/CPU.cpp:948
 msgid "Maximum Frequencies"
@@ -301,11 +295,11 @@ msgstr "Muistin kellotaajuuspoikkeama"
 
 #: src/plugins/Nvidia.cpp:302
 msgid "Total Memory"
-msgstr ""
+msgstr "Kokonaismuisti"
 
 #: src/plugins/Nvidia.cpp:321
 msgid "Reserved Memory"
-msgstr ""
+msgstr "Varattu muisti"
 
 #: src/plugins/Nvidia.cpp:564
 msgid "PCIe Bandwidth Utilization"
