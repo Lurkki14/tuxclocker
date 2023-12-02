@@ -19,6 +19,10 @@ Q_DECLARE_METATYPE(AssignableProxy *)
 
 DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	connect(header(), &QHeaderView::sortIndicatorChanged,
+	    [=](auto index, auto order) { saveSortOrder(index, order); });
+
 	setSortingEnabled(true);
 	setEditTriggers(SelectedClicked | EditKeyPressed);
 	setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -210,5 +214,23 @@ void DeviceTreeView::restoreCollapsed(QAbstractItemModel *model) {
 
 void DeviceTreeView::setModel(QAbstractItemModel *model) {
 	QTreeView::setModel(model);
+
 	restoreCollapsed(model);
+	restoreSortOrder();
+}
+
+void DeviceTreeView::saveSortOrder(int column, Qt::SortOrder order) {
+	if (column != DeviceModel::NameColumn)
+		return;
+
+	QSettings cache{Utils::cacheFilePath(), QSettings::NativeFormat};
+	cache.setValue("sortOrder", order);
+}
+
+void DeviceTreeView::restoreSortOrder() {
+	QSettings cache{Utils::cacheFilePath(), QSettings::NativeFormat};
+	if (cache.contains("sortOrder")) {
+		sortByColumn(DeviceModel::NameColumn,
+		    static_cast<Qt::SortOrder>(cache.value("sortOrder").toInt()));
+	}
 }
