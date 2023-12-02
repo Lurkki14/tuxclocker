@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-01 19:17+0200\n"
+"POT-Creation-Date: 2023-12-02 23:08+0200\n"
 "PO-Revision-Date: 2023-10-08 19:24+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://hosted.weblate.org/projects/"
@@ -64,7 +64,8 @@ msgid "MHz"
 msgstr "MHz"
 
 #: src/plugins/AMD.cpp:299 src/plugins/AMD.cpp:870 src/plugins/AMD.cpp:1157
-#: src/plugins/Nvidia.cpp:692 src/plugins/Nvidia.cpp:739
+#: src/plugins/CPU.cpp:957 src/plugins/Nvidia.cpp:692
+#: src/plugins/Nvidia.cpp:739
 msgid "mV"
 msgstr "mV"
 
@@ -122,7 +123,7 @@ msgid "Core Clock Offset"
 msgstr "Kjerneklokkeforskyvning"
 
 #: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:696 src/plugins/AMD.cpp:873
-#: src/plugins/Nvidia.cpp:696
+#: src/plugins/CPU.cpp:956 src/plugins/Nvidia.cpp:696
 msgid "Core Voltage"
 msgstr "Kjernespenning"
 
@@ -196,7 +197,7 @@ msgstr ""
 msgid "Video Memory"
 msgstr ""
 
-#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1006 src/plugins/Nvidia.cpp:790
+#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1041 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
 msgstr "Temperaturer"
 
@@ -216,7 +217,7 @@ msgstr ""
 msgid "Fans"
 msgstr "Vifter"
 
-#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1014
+#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1049
 #, fuzzy
 msgid "Power"
 msgstr "Strømforbruk"
@@ -229,7 +230,7 @@ msgstr ""
 msgid "Memory Performance States"
 msgstr ""
 
-#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:998 src/plugins/Nvidia.cpp:806
+#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:1033 src/plugins/Nvidia.cpp:806
 msgid "Utilizations"
 msgstr "Bruk"
 
@@ -276,28 +277,33 @@ msgstr ""
 msgid "Balanced Power Saving"
 msgstr "Strømforbruk"
 
-#: src/plugins/CPU.cpp:939
+#: src/plugins/CPU.cpp:965
+#, fuzzy
+msgid "Voltages"
+msgstr "Kjernespenning"
+
+#: src/plugins/CPU.cpp:974
 #, fuzzy
 msgid "Power Usage Mode"
 msgstr "Strømforbruk"
 
-#: src/plugins/CPU.cpp:948
+#: src/plugins/CPU.cpp:983
 msgid "Maximum Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:957
+#: src/plugins/CPU.cpp:992
 msgid "Minimum Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:966 src/plugins/CPU.cpp:974
+#: src/plugins/CPU.cpp:1001 src/plugins/CPU.cpp:1009
 msgid "Governor"
 msgstr ""
 
-#: src/plugins/CPU.cpp:982
+#: src/plugins/CPU.cpp:1017
 msgid "Power Saving Tendencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:990
+#: src/plugins/CPU.cpp:1025
 msgid "Frequencies"
 msgstr ""
 

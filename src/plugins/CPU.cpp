@@ -80,7 +80,7 @@ std::optional<CPUTimeStat> fromStatLine(const std::string &line) {
 	};
 }
 
-std::optional<uint64_t> readMsr(int address, int mask, uint coreIndex) {
+std::optional<uint64_t> readMsr(uint64_t address, uint64_t mask, uint coreIndex) {
 	char path[32];
 	snprintf(path, 32, "/dev/cpu/%u/msr", coreIndex);
 
@@ -933,6 +933,41 @@ std::vector<TreeNode<DeviceNode>> getGovernorMaximums(CPUData data) {
 	return retval;
 }
 
+std::vector<TreeNode<DeviceNode>> getCoreVoltage(CPUData data) {
+	if (data.vendorId != "GenuineIntel")
+		return {};
+
+	auto func = [=]() -> ReadResult {
+		// Increment in volts
+		const double factor = 1 / pow(2, 13);
+		// MSR_PERF_STATUS, bits 31:47
+		auto value = readMsr(0x198, 0xffff00000000, data.firstCoreIndex);
+		if (!value.has_value() || *value == 0)
+			return ReadError::UnknownError;
+
+		auto increment = *value >> 32;
+		// V -> mV
+		return (increment * factor) * 1000;
+	};
+	if (!hasReadableValue(func()))
+		return {};
+	// Normally this is shown in V, but we already have translations for mV
+	return {DeviceNode{
+	    .name = _("Core Voltage"),
+	    .interface = DynamicReadable{func, _("mV")},
+	    .hash = md5(data.identifier + "Core Voltage"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getVoltageRoot(CPUData data) {
+	// This seems to do something on Intel too, even when EPB is available
+	return {DeviceNode{
+	    .name = _("Voltages"),
+	    .interface = std::nullopt,
+	    .hash = md5(data.identifier + "Voltage Root"),
+	}};
+}
+
 std::vector<TreeNode<DeviceNode>> getEPPRoot(CPUData data) {
 	// This seems to do something on Intel too, even when EPB is available
 	return {DeviceNode{
@@ -1063,6 +1098,9 @@ auto cpuTree = TreeConstructor<CPUData, DeviceNode>{
 			{getTotalPowerUsage, {}},
 			{getDramPowerUsage, {}},
 			{getCorePowerUsage, {}}
+		}},
+		{getVoltageRoot, {
+			{getCoreVoltage, {}}
 		}}
 	}
 };

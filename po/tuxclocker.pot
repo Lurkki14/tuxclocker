@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-01 19:17+0200\n"
+"POT-Creation-Date: 2023-12-02 23:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,8 @@ msgid "MHz"
 msgstr ""
 
 #: src/plugins/AMD.cpp:299 src/plugins/AMD.cpp:870 src/plugins/AMD.cpp:1157
-#: src/plugins/Nvidia.cpp:692 src/plugins/Nvidia.cpp:739
+#: src/plugins/CPU.cpp:957 src/plugins/Nvidia.cpp:692
+#: src/plugins/Nvidia.cpp:739
 msgid "mV"
 msgstr ""
 
@@ -117,7 +118,7 @@ msgid "Core Clock Offset"
 msgstr ""
 
 #: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:696 src/plugins/AMD.cpp:873
-#: src/plugins/Nvidia.cpp:696
+#: src/plugins/CPU.cpp:956 src/plugins/Nvidia.cpp:696
 msgid "Core Voltage"
 msgstr ""
 
@@ -186,7 +187,7 @@ msgstr ""
 msgid "Video Memory"
 msgstr ""
 
-#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1006 src/plugins/Nvidia.cpp:790
+#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1041 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
 msgstr ""
 
@@ -206,7 +207,7 @@ msgstr ""
 msgid "Fans"
 msgstr ""
 
-#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1014
+#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1049
 msgid "Power"
 msgstr ""
 
@@ -218,7 +219,7 @@ msgstr ""
 msgid "Memory Performance States"
 msgstr ""
 
-#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:998 src/plugins/Nvidia.cpp:806
+#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:1033 src/plugins/Nvidia.cpp:806
 msgid "Utilizations"
 msgstr ""
 
@@ -260,27 +261,31 @@ msgstr ""
 msgid "Balanced Power Saving"
 msgstr ""
 
-#: src/plugins/CPU.cpp:939
+#: src/plugins/CPU.cpp:965
+msgid "Voltages"
+msgstr ""
+
+#: src/plugins/CPU.cpp:974
 msgid "Power Usage Mode"
 msgstr ""
 
-#: src/plugins/CPU.cpp:948
+#: src/plugins/CPU.cpp:983
 msgid "Maximum Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:957
+#: src/plugins/CPU.cpp:992
 msgid "Minimum Frequencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:966 src/plugins/CPU.cpp:974
+#: src/plugins/CPU.cpp:1001 src/plugins/CPU.cpp:1009
 msgid "Governor"
 msgstr ""
 
-#: src/plugins/CPU.cpp:982
+#: src/plugins/CPU.cpp:1017
 msgid "Power Saving Tendencies"
 msgstr ""
 
-#: src/plugins/CPU.cpp:990
+#: src/plugins/CPU.cpp:1025
 msgid "Frequencies"
 msgstr ""
 
