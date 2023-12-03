@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-02 23:08+0200\n"
-"PO-Revision-Date: 2023-12-01 17:57+0000\n"
+"PO-Revision-Date: 2023-12-03 18:01+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -267,9 +267,8 @@ msgid "Balanced Power Saving"
 msgstr "Tasapainoinen virransäästö"
 
 #: src/plugins/CPU.cpp:965
-#, fuzzy
 msgid "Voltages"
-msgstr "Ytimen jännite"
+msgstr "Jännitteet"
 
 #: src/plugins/CPU.cpp:974
 msgid "Power Usage Mode"
