@@ -36,6 +36,7 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Power limit
 - Temperatures
 - Utilizations
+- VRAM usage monitoring
 
 #### 600 to 900 -series
 - Voltage setting and reading (Xorg only)
@@ -50,6 +51,7 @@ When writing to `pp_od_clk_voltage` (writable properties in the 'Performance' su
 - Fan speed
 - Core and memory clock reading
 - Performance parameter control (power_dpm_force_performance_level)
+- VRAM usage monitoring
 
 #### Vega-series and above
 - Voltage monitoring
@@ -69,14 +71,22 @@ When writing to `pp_od_clk_voltage` (writable properties in the 'Performance' su
 - Voltage offset setting
 
 ### CPUs
+Some CPU features require kernel module `msr` to be loaded.
+
 - Frequency monitoring
 - Utilization monitoring
 - CPU Governor setting
 - CPU Governor minimum/maximum frequency setting
 
+### AMD and Intel CPUs
+- Energy-Power Preference setting (called 'Power Usage Mode' in the program)
+- Power usage monitoring (MSR)
+
 ### Intel CPUs
 - Temperature monitoring (coretemp)
 - Energy-Performance Bias setting (called Power Saving Tendency in the program)
+- Core and memory power usage monitoring (MSR)
+- Voltage monitoring (MSR)
 
 ## Possible future improvements
 - Support for more devices
