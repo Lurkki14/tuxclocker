@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-02 23:08+0200\n"
-"PO-Revision-Date: 2023-12-04 19:40+0000\n"
+"PO-Revision-Date: 2023-12-04 20:39+0000\n"
 "Last-Translator: mrintrepide <quentin@intrepide.io>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fr/>\n"
@@ -49,7 +49,7 @@ msgstr "Fréquence Minimale de la Mémoire"
 
 #: src/plugins/AMD.cpp:45
 msgid "Highest Clocks"
-msgstr "Fréquence la plus Haute"
+msgstr "Fréquence Maximale"
 
 #: src/plugins/AMD.cpp:155 src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:552
 #: src/plugins/AMD.cpp:974 src/plugins/AMD.cpp:1005 src/plugins/AMD.cpp:1033
@@ -104,7 +104,7 @@ msgstr "Limite de Puissance"
 
 #: src/plugins/AMD.cpp:513 src/plugins/CPU.cpp:582 src/plugins/Nvidia.cpp:584
 msgid "Power Usage"
-msgstr "Consommation d'Énergie"
+msgstr "Utilisation de la Puissance"
 
 #: src/plugins/AMD.cpp:534 src/plugins/AMD.cpp:591 src/plugins/AMD.cpp:663
 #: src/plugins/Nvidia.cpp:264
@@ -134,7 +134,7 @@ msgstr "Tension de la Mémoire"
 
 #: src/plugins/AMD.cpp:788
 msgid "Point"
-msgstr ""
+msgstr "Point"
 
 #: src/plugins/AMD.cpp:814 src/plugins/AMD.cpp:840
 msgid "State"
@@ -170,11 +170,11 @@ msgstr "Fréquence Minimale du Cœur"
 
 #: src/plugins/AMD.cpp:1081 src/plugins/CPU.cpp:406 src/plugins/Nvidia.cpp:659
 msgid "Slowdown Temperature"
-msgstr ""
+msgstr "Température de Ralentissement"
 
 #: src/plugins/AMD.cpp:1096 src/plugins/Nvidia.cpp:674
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "Température d'Arrêt"
 
 #: src/plugins/AMD.cpp:1176 src/plugins/AMD.cpp:1196 src/plugins/Nvidia.cpp:299
 #: src/plugins/Nvidia.cpp:317 src/plugins/Nvidia.cpp:337
@@ -236,14 +236,12 @@ msgid "Overall Temperature"
 msgstr "Température Globale"
 
 #: src/plugins/CPU.cpp:619
-#, fuzzy
 msgid "Memory Power Usage"
-msgstr "Utilisation de la mémoire"
+msgstr "Utilisation Puissance de la Mémoire"
 
 #: src/plugins/CPU.cpp:656
-#, fuzzy
 msgid "Core Power Usage"
-msgstr "Utilisation de puissance du cœur"
+msgstr "Utilisation de Puissance du Cœur"
 
 #: src/plugins/CPU.cpp:668 src/plugins/CPU.cpp:759
 msgid "Power Saving"
@@ -263,7 +261,7 @@ msgstr "Défaut"
 
 #: src/plugins/CPU.cpp:757
 msgid "Balanced Power Saving"
-msgstr "Gestion équilibrée de l'énergie"
+msgstr "Gestion Équilibrée de l'Énergie"
 
 #: src/plugins/CPU.cpp:965
 msgid "Voltages"
@@ -271,15 +269,15 @@ msgstr "Tensions"
 
 #: src/plugins/CPU.cpp:974
 msgid "Power Usage Mode"
-msgstr "Mode d'Utilisation de l'Énergie"
+msgstr "Mode d'Utilisation de la Puissance"
 
 #: src/plugins/CPU.cpp:983
 msgid "Maximum Frequencies"
-msgstr "Fréquence maximale"
+msgstr "Fréquence Maximale"
 
 #: src/plugins/CPU.cpp:992
 msgid "Minimum Frequencies"
-msgstr "Fréquence minimale"
+msgstr "Fréquence Minimale"
 
 #: src/plugins/CPU.cpp:1001 src/plugins/CPU.cpp:1009
 msgid "Governor"
@@ -287,7 +285,7 @@ msgstr "Gouverneur"
 
 #: src/plugins/CPU.cpp:1017
 msgid "Power Saving Tendencies"
-msgstr ""
+msgstr "Tendances à l'Économie d'Énergie"
 
 #: src/plugins/CPU.cpp:1025
 msgid "Frequencies"
@@ -326,22 +324,18 @@ msgid "Parametrize..."
 msgstr "Paramétrer..."
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
-#, fuzzy
 msgid "Reset to default"
 msgstr "Réinitialiser par défaut"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
-#, fuzzy
 msgid "Remove settings from profile"
 msgstr "Supprimer les paramètres du profil"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:30
-#, fuzzy
 msgid "Showing:"
 msgstr "Affichage :"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:31
-#, fuzzy
 msgid "Apply changes"
 msgstr "Appliquer les changements"
 
@@ -395,7 +389,7 @@ msgstr "Sans nom"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:65
 msgid "Use tray icon"
-msgstr "Utiliser l'icône de la barre d'état système"
+msgstr "Utiliser l'icône système"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:67
 msgid ""
@@ -415,7 +409,7 @@ msgstr "Enregistrer"
 
 #: src/tuxclocker-qt/MainWindow.cpp:120
 msgid "&Maximize TuxClocker"
-msgstr "&Agrandir TuxClocker"
+msgstr "&Réduire TuxClocker"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Quit"
