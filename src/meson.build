@@ -1,5 +1,5 @@
 # Version information
-tuxclocker_version = '1.3.0'
+tuxclocker_version = '1.4.0'
 git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
 version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
 # Used in preprocessor
