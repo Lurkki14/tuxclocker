@@ -45,6 +45,8 @@ private:
 	// Suspend/resume readable updates
 	void suspendChildren(const QModelIndex &);
 	void resumeChildren(const QModelIndex &);
+	void saveSortOrder(int column, Qt::SortOrder);
+	void restoreSortOrder();
 
 	// DeviceModel &m_deviceModel;
 	QModelIndexList m_editSelection;
