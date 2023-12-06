@@ -1,5 +1,8 @@
 [Desktop Entry]
+Categories=Utility;Qt;
 Name=TuxClocker
+GenericName=Overclocking Tool
 Comment=Hardware control and monitoring
 Exec=@tuxclocker-qt_path@
 Icon=tuxclocker-logo
+Type=Application
