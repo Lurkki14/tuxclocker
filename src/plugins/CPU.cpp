@@ -517,12 +517,27 @@ std::vector<TreeNode<DeviceNode>> getUtilizations(CPUData data) {
 	return retval;
 }
 
-double toWatts(EnergyState current, EnergyState previous) {
+double energyCounterFactor(CPUData data) {
+	static std::unordered_map<uint, double> factors;
+
+	if (factors.find(data.cpuIndex) == factors.end()) {
+		// No value yet
+		// Bits 8:12
+		auto unit = readMsr(0x606, 0x1f00, data.firstCoreIndex);
+		if (!unit.has_value())
+			// Assume 14 ESU; 61 uJ increment
+			factors[data.cpuIndex] = (1 / pow(2, 14));
+		else
+			factors[data.cpuIndex] = (1 / pow(2, (*unit >> 8)));
+	}
+	return factors[data.cpuIndex];
+}
+
+double toWatts(EnergyState current, EnergyState previous, CPUData data) {
 	auto counterDelta = current.counter - previous.counter;
 	// us -> s
 	double delta_s = (current.usecs - previous.usecs) / 1000000.0;
-	// Counter is 61 uJ increments
-	double delta_j = (counterDelta * 61) / 1000000.0;
+	double delta_j = (counterDelta * energyCounterFactor(data));
 	return delta_j / delta_s;
 }
 
@@ -570,7 +585,7 @@ std::vector<TreeNode<DeviceNode>> getTotalPowerUsage(CPUData data) {
 		auto prevState = prevStates[data.cpuIndex];
 
 		prevStates[data.cpuIndex] = *curState;
-		return toWatts(*curState, prevState);
+		return toWatts(*curState, prevState, data);
 	};
 
 	if (!hasReadableValue(func()))
@@ -607,7 +622,7 @@ std::vector<TreeNode<DeviceNode>> getDramPowerUsage(CPUData data) {
 		auto prevState = prevStates[data.cpuIndex];
 
 		prevStates[data.cpuIndex] = *curState;
-		return toWatts(*curState, prevState);
+		return toWatts(*curState, prevState, data);
 	};
 
 	if (!hasReadableValue(func()))
@@ -644,7 +659,7 @@ std::vector<TreeNode<DeviceNode>> getCorePowerUsage(CPUData data) {
 		auto prevState = prevStates[data.cpuIndex];
 
 		prevStates[data.cpuIndex] = *curState;
-		return toWatts(*curState, prevState);
+		return toWatts(*curState, prevState, data);
 	};
 
 	if (!hasReadableValue(func()))
