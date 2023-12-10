@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-02 23:08+0200\n"
+"POT-Creation-Date: 2023-12-10 15:08+0200\n"
 "PO-Revision-Date: 2023-12-03 18:01+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
@@ -56,7 +56,7 @@ msgstr "Kellotaajuudet"
 
 #: src/plugins/AMD.cpp:155 src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:552
 #: src/plugins/AMD.cpp:974 src/plugins/AMD.cpp:1005 src/plugins/AMD.cpp:1033
-#: src/plugins/AMD.cpp:1061 src/plugins/CPU.cpp:242 src/plugins/CPU.cpp:888
+#: src/plugins/AMD.cpp:1061 src/plugins/CPU.cpp:242 src/plugins/CPU.cpp:903
 #: src/plugins/Nvidia.cpp:182 src/plugins/Nvidia.cpp:183
 #: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
 #: src/plugins/Nvidia.cpp:281
@@ -64,7 +64,7 @@ msgid "MHz"
 msgstr "MHz"
 
 #: src/plugins/AMD.cpp:299 src/plugins/AMD.cpp:870 src/plugins/AMD.cpp:1157
-#: src/plugins/CPU.cpp:957 src/plugins/Nvidia.cpp:692
+#: src/plugins/CPU.cpp:972 src/plugins/Nvidia.cpp:692
 #: src/plugins/Nvidia.cpp:739
 msgid "mV"
 msgstr "mV"
@@ -95,8 +95,8 @@ msgstr "%"
 msgid "Fan Speed"
 msgstr "Tuulettimen nopeus"
 
-#: src/plugins/AMD.cpp:491 src/plugins/AMD.cpp:509 src/plugins/CPU.cpp:579
-#: src/plugins/CPU.cpp:616 src/plugins/CPU.cpp:653 src/plugins/Nvidia.cpp:580
+#: src/plugins/AMD.cpp:491 src/plugins/AMD.cpp:509 src/plugins/CPU.cpp:594
+#: src/plugins/CPU.cpp:631 src/plugins/CPU.cpp:668 src/plugins/Nvidia.cpp:580
 #: src/plugins/Nvidia.cpp:621
 msgid "W"
 msgstr "W"
@@ -105,7 +105,7 @@ msgstr "W"
 msgid "Power Limit"
 msgstr "Tehorajoitus"
 
-#: src/plugins/AMD.cpp:513 src/plugins/CPU.cpp:582 src/plugins/Nvidia.cpp:584
+#: src/plugins/AMD.cpp:513 src/plugins/CPU.cpp:597 src/plugins/Nvidia.cpp:584
 msgid "Power Usage"
 msgstr "Toimintateho"
 
@@ -123,7 +123,7 @@ msgid "Core Clock Offset"
 msgstr "Ytimen kellotaajuuspoikkeama"
 
 #: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:696 src/plugins/AMD.cpp:873
-#: src/plugins/CPU.cpp:956 src/plugins/Nvidia.cpp:696
+#: src/plugins/CPU.cpp:971 src/plugins/Nvidia.cpp:696
 msgid "Core Voltage"
 msgstr "Ytimen jännite"
 
@@ -192,7 +192,7 @@ msgstr "Käytetty muisti"
 msgid "Video Memory"
 msgstr "Videomuisti"
 
-#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1041 src/plugins/Nvidia.cpp:790
+#: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1056 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
 msgstr "Lämpötilat"
 
@@ -204,7 +204,7 @@ msgstr "Jännite-taajuuskäyrä"
 msgid "Clocks"
 msgstr "Kellotaajuudet"
 
-#: src/plugins/AMD.cpp:1242 src/plugins/CPU.cpp:670 src/plugins/CPU.cpp:751
+#: src/plugins/AMD.cpp:1242 src/plugins/CPU.cpp:685 src/plugins/CPU.cpp:766
 msgid "Performance"
 msgstr "Suorituskyky"
 
@@ -212,7 +212,7 @@ msgstr "Suorituskyky"
 msgid "Fans"
 msgstr "Tuulettimet"
 
-#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1049
+#: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1064
 msgid "Power"
 msgstr "Teho"
 
@@ -224,13 +224,13 @@ msgstr "Ytimen suorituskykytilat"
 msgid "Memory Performance States"
 msgstr "Muistin suorituskykytilat"
 
-#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:1033 src/plugins/Nvidia.cpp:806
+#: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:1048 src/plugins/Nvidia.cpp:806
 msgid "Utilizations"
 msgstr "Käyttöasteet"
 
 #: src/plugins/CPU.cpp:374 src/plugins/CPU.cpp:433 src/plugins/CPU.cpp:456
-#: src/plugins/CPU.cpp:505 src/plugins/CPU.cpp:732 src/plugins/CPU.cpp:817
-#: src/plugins/CPU.cpp:903 src/plugins/CPU.cpp:924
+#: src/plugins/CPU.cpp:505 src/plugins/CPU.cpp:747 src/plugins/CPU.cpp:832
+#: src/plugins/CPU.cpp:918 src/plugins/CPU.cpp:939
 msgid "Core"
 msgstr "Ydin"
 
@@ -238,59 +238,59 @@ msgstr "Ydin"
 msgid "Overall Temperature"
 msgstr "Kokonaislämpötila"
 
-#: src/plugins/CPU.cpp:619
+#: src/plugins/CPU.cpp:634
 msgid "Memory Power Usage"
 msgstr "Muistin toimintateho"
 
-#: src/plugins/CPU.cpp:656
+#: src/plugins/CPU.cpp:671
 msgid "Core Power Usage"
 msgstr "Ytimen toimintateho"
 
-#: src/plugins/CPU.cpp:668 src/plugins/CPU.cpp:759
+#: src/plugins/CPU.cpp:683 src/plugins/CPU.cpp:774
 msgid "Power Saving"
 msgstr "Virransäästö"
 
-#: src/plugins/CPU.cpp:672
+#: src/plugins/CPU.cpp:687
 msgid "Scheduler Controlled"
 msgstr "Vuorottimen hallitsema"
 
-#: src/plugins/CPU.cpp:753
+#: src/plugins/CPU.cpp:768
 msgid "Balanced Performance"
 msgstr "Tasapainoinen suorituskyky"
 
-#: src/plugins/CPU.cpp:755
+#: src/plugins/CPU.cpp:770
 msgid "Default"
 msgstr "Oletusarvo"
 
-#: src/plugins/CPU.cpp:757
+#: src/plugins/CPU.cpp:772
 msgid "Balanced Power Saving"
 msgstr "Tasapainoinen virransäästö"
 
-#: src/plugins/CPU.cpp:965
+#: src/plugins/CPU.cpp:980
 msgid "Voltages"
 msgstr "Jännitteet"
 
-#: src/plugins/CPU.cpp:974
+#: src/plugins/CPU.cpp:989
 msgid "Power Usage Mode"
 msgstr "Virrankulutustila"
 
-#: src/plugins/CPU.cpp:983
+#: src/plugins/CPU.cpp:998
 msgid "Maximum Frequencies"
 msgstr "Enimmäistaajuudet"
 
-#: src/plugins/CPU.cpp:992
+#: src/plugins/CPU.cpp:1007
 msgid "Minimum Frequencies"
 msgstr "Vähimmäistaajuudet"
 
-#: src/plugins/CPU.cpp:1001 src/plugins/CPU.cpp:1009
+#: src/plugins/CPU.cpp:1016 src/plugins/CPU.cpp:1024
 msgid "Governor"
 msgstr "Säädin"
 
-#: src/plugins/CPU.cpp:1017
+#: src/plugins/CPU.cpp:1032
 msgid "Power Saving Tendencies"
 msgstr "Virransäästöherkkyydet"
 
-#: src/plugins/CPU.cpp:1025
+#: src/plugins/CPU.cpp:1040
 msgid "Frequencies"
 msgstr "Taajuudet"
 
@@ -410,11 +410,15 @@ msgstr "Peru"
 msgid "Save"
 msgstr "Tallenna"
 
-#: src/tuxclocker-qt/MainWindow.cpp:120
+#: src/tuxclocker-qt/MainWindow.cpp:57
+msgid "Couldn't connect to TuxClocker daemon: %1"
+msgstr ""
+
+#: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Maximize TuxClocker"
 msgstr "&Maksimoi TuxClocker"
 
-#: src/tuxclocker-qt/MainWindow.cpp:124
+#: src/tuxclocker-qt/MainWindow.cpp:128
 msgid "&Quit"
 msgstr "&Lopeta"
 
