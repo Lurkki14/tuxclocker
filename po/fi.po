@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: 2023-12-03 18:01+0000\n"
+"PO-Revision-Date: 2023-12-10 13:52+0000\n"
 "Last-Translator: Jussi Kuokkanen <jussi.kuokkanen@protonmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fi/>\n"
@@ -412,7 +412,7 @@ msgstr "Tallenna"
 
 #: src/tuxclocker-qt/MainWindow.cpp:57
 msgid "Couldn't connect to TuxClocker daemon: %1"
-msgstr ""
+msgstr "TuxClockerin taustaprosessiin yhdistäminen epäonnistui: %1"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Maximize TuxClocker"
