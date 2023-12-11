@@ -344,10 +344,16 @@ template <typename T>
 void updateReadItemText(QStandardItem *item, T value, std::optional<QString> unit) {
 	// TODO: this can be made a lot (around 3x) faster by using direct copying
 	// Form a string of the form "1000 MHz" if has unit
-	auto text = (unit.has_value()) ? QString("%1 %2").arg(value).arg(unit.value())
-				       : QString("%1").arg(value);
+	QString valueText;
+	if (std::is_same<T, double>())
+		// Show two decimals
+		valueText = QString{"%1"}.arg(static_cast<double>(value), 0, 'f', 2);
+	else
+		valueText = QString{"%1"}.arg(value);
+
+	auto text = (unit.has_value()) ? QString("%1 %2").arg(valueText).arg(unit.value())
+				       : QString("%1").arg(valueText);
 	item->setText(text);
-	// qDebug() << item->data(DeviceModel::DynamicReadableProxyRole);
 }
 
 std::optional<QStandardItem *> DeviceModel::setupDynReadable(
