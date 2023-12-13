@@ -102,18 +102,11 @@ NVIDIA GPUs require [Coolbits](https://wiki.archlinux.org/index.php/NVIDIA/Tips_
 AMD GPUs require the [amdgpu.ppfeaturemask](https://wiki.archlinux.org/title/AMDGPU#Boot_parameter) boot parameter to edit writable properties (`amdgpu.ppfeaturemask=0xffffffff` for all functionality)
 
 ## Using prebuilt binaries
-NOTE: the prebuilt binaries may not work for NVIDIA GPUs due to NVML requiring a specific version of the NVIDIA driver. See [this issue.](https://github.com/Lurkki14/tuxclocker/issues/63)
-
-Possible remedies:
-
-- Use a distribution package if applicable
-- Compile from source
-- Create a Flatpak package
-
 You can use the `tuxclocker.tar` from the release page if you don't want to compile. The tarball is generated from the `mkTarball.sh` script.
 
 - Download the tarball into some empty directory
 - Extract the contents eg. (`tar xf tuxlocker.tar`)
+- For NVIDIA users, run `./nvidiaInstall.sh` before running to get suitable NVIDIA libraries through Flatpak
 - Run `sudo echo && ./run.sh` in the same folder (sudo is needed for the daemon)
 
 ## Using distribution packages
