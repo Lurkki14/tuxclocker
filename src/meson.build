@@ -1,9 +1,14 @@
-# Version information
-tuxclocker_version = '1.4.0'
-git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
-version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
-# Used in preprocessor
-version_string_def = '-DTUXCLOCKER_VERSION_STRING="@0@"'.format(version_string)
+# Version string not used when building only plugins
+need_version = get_option('gui') or get_option('daemon')
+
+if need_version
+	# Version information
+	tuxclocker_version = '1.4.0'
+	git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
+	version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
+	# Used in preprocessor
+	version_string_def = '-DTUXCLOCKER_VERSION_STRING="@0@"'.format(version_string)
+endif
 
 # OpenSSL is used for hash functions
 openssl_dep = dependency('openssl')
