@@ -10,3 +10,4 @@ option('require-amd', type: 'boolean', value: 'false',
 	description: 'Require AMD plugin')
 option('require-nvidia', type: 'boolean', value: 'false',
 	description: 'Require NVIDIA plugin')
+option('plugins-cpu', type: 'boolean', value: 'true', description: 'Build CPU plugin')
