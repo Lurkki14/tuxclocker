@@ -143,8 +143,10 @@ Note that these packages are likely called something different on each distribut
 `nix-shell release.nix`
 
 #### For Ubuntu
+NOTE: Some Ubuntu releases provide `libboost` which is too old (1.78 or newer is required)
 
 `python-hwdata` is not packaged for Ubuntu but can be acquired on [OBS](https://build.opensuse.org/package/show/home:alvistack/xsuchy-python-hwdata-2.4.1).
+
 ```
 sudo apt install --yes --quiet --quiet \
     libqt5x11extras5-dev \
