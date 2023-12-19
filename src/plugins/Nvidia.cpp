@@ -94,6 +94,15 @@ std::optional<NvidiaGPUData> fromIndex(Display *dpy, uint i) {
 	};
 }
 
+bool isXorg() {
+	auto value = std::getenv("XDG_SESSION_TYPE");
+	if (!value)
+		// Assume X, since that will lead to the least amount of broken
+		return true;
+
+	return std::string{value} == "x11";
+}
+
 std::vector<TreeNode<DeviceNode>> getGPUName(NvidiaGPUData data) {
 	char name[NVML_DEVICE_NAME_BUFFER_SIZE];
 	if (nvmlDeviceGetName(data.devHandle, name, NVML_DEVICE_NAME_BUFFER_SIZE) == NVML_SUCCESS)
@@ -244,6 +253,64 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 	    .name = _("Core Clock Offset"),
 	    .interface = a,
 	    .hash = md5(data.uuid + "Core Clock Offset"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getCoreClockWriteNoX(NvidiaGPUData data) {
+	// Try to use NVML function only on non-X, since seems to be broken on some GPUs
+	if (isXorg())
+		return {};
+
+	// Completely made-up range
+	Range<int> range{-300, 1000};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		auto retval = nvmlDeviceSetGpcClkVfOffset(data.devHandle, target);
+		return fromNVMLRet(retval);
+	};
+
+	// No way to get through NVML by the looks if it
+	auto getFunc = []() { return 0; };
+
+	return {DeviceNode{
+	    .name = _("Core Clock Offset"),
+	    .interface = Assignable{setFunc, range, getFunc, _("MHz")},
+	    .hash = md5(data.uuid + "Core Clock Offset NVML"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getMemoryClockWriteNoX(NvidiaGPUData data) {
+	// Try to use NVML function only on non-X, since seems to be broken on some GPUs
+	if (isXorg())
+		return {};
+
+	// Completely made-up range
+	Range<int> range{-800, 1000};
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+		auto target = std::get<int>(a);
+		if (target < range.min || target > range.max)
+			return AssignmentError::OutOfRange;
+
+		auto retval = nvmlDeviceSetMemClkVfOffset(data.devHandle, target);
+		return fromNVMLRet(retval);
+	};
+
+	// No way to get through NVML by the looks if it
+	auto getFunc = []() { return 0; };
+
+	return {DeviceNode{
+	    .name = _("Memory Clock Offset"),
+	    .interface = Assignable{setFunc, range, getFunc, _("MHz")},
+	    .hash = md5(data.uuid + "Memory Clock Offset NVML"),
 	}};
 }
 
@@ -827,7 +894,9 @@ auto gpuTree = TreeConstructor<NvidiaGPUData, DeviceNode>{
 			{getCoreClockRead, {}},
 			{getCoreClockWrite, {}},
 			{getMemClockRead, {}},
-			{getMemClockWrite, {}}
+			{getMemClockWrite, {}},
+			{getCoreClockWriteNoX, {}},
+			{getMemoryClockWriteNoX, {}}
 		}},
 		{getFanRoot, {
 			{getMultiFanRoots, {

@@ -21,7 +21,7 @@ export TUXCLOCKER_PLUGIN_PATH=\"$tuxclockerPluginPath\"
 nvidiaVersion=\$(cat /sys/module/nvidia/version | sed 's/\./-/g')
 flatpakNvidiaPath=\$(find /var/lib/flatpak/runtime/org.freedesktop.Platform.GL.nvidia-\$nvidiaVersion/x86_64/*/active/files/lib)
 sudo -E dbus-run-session --config-file=dev/dbusconf.conf \
-sudo -E LD_LIBRARY_PATH=\$flatpakNvidiaPath:\"\$LD_LIBRARY_PATH\" ./.tuxclockerd-wrapped & \
+sudo -E LD_LIBRARY_PATH=\$flatpakNvidiaPath:\"\$LD_LIBRARY_PATH\" XDG_SESSION_TYPE=\$XDG_SESSION_TYPE ./.tuxclockerd-wrapped & \
 (unset LD_LIBRARY_PATH; sleep 2) && ./.tuxclocker-qt-wrapped; \
 unset LD_LIBRARY_PATH && \
 sudo kill \$(pidof .tuxclockerd-wrapped)
