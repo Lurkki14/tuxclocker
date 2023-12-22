@@ -1,0 +1,10 @@
+name: tuxclocker
+version: 0.0.1
+cabal-version: 2.0
+build-type: Simple
+
+executable tuxclocker
+  build-depends: base >= 4.16,
+                 dbus >= 1.2,
+                 text >= 2.0
+  main-is: Main.hs
