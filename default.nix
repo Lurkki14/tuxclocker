@@ -3,8 +3,9 @@
 , boost
 , cmake
 , cudatoolkit
-, git
 , fetchFromGitHub
+, git
+, haskellPackages
 , libdrm
 , libX11
 , libXext
@@ -40,6 +41,7 @@ mkDerivation rec {
   '';
 
   nativeBuildInputs = [
+    (haskellPackages.ghcWithPackages (p: with p; [ dbus ]))
     git
     pkg-config
   ];

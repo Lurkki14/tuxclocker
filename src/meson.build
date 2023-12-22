@@ -50,3 +50,7 @@ endif
 if get_option('gui')
 	subdir('tuxclocker-qt')
 endif
+
+if get_option('cli')
+	subdir('tuxclocker-cli')
+endif
