@@ -2,7 +2,6 @@
 , stdenv
 , boost
 , cmake
-, cudatoolkit
 , fetchFromGitHub
 , git
 , haskellPackages
@@ -48,7 +47,6 @@ mkDerivation rec {
 
   buildInputs = [
     boost
-    cudatoolkit
     libdrm
     libXext
     libX11
