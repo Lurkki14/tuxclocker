@@ -4,6 +4,7 @@ import Data.Either
 import Data.Functor
 import Data.Maybe
 import Data.Text (Text)
+import Data.Tree
 import DBus
 import DBus.Client
 import qualified DBus.Introspection as I
@@ -27,16 +28,15 @@ getName client path =
   in
     getProperty client call <&> fromRight (toVariant ("Unnamed" :: Text))
 
-printDBusTree :: Client -> IO ()
-printDBusTree client =
-  go client "/" where
-    go client path = do
-      object <- getObject client path
-      print $ I.objectPath object
-      name <- getName client $ I.objectPath object
-      print name
-      mapM_ (go client) (I.objectPath <$> I.objectChildren object)
+getDBusTree :: Client -> IO (Tree Variant)
+getDBusTree client = unfoldTreeM (buildNode client) "/" where
+  buildNode :: Client -> ObjectPath -> IO (Variant, [ObjectPath])
+  buildNode client path = do
+    object <- getObject client path
+    name <- getName client $ I.objectPath object
+    let childPaths = I.objectPath <$> I.objectChildren object
+    pure (name, childPaths)
 
 main = do
   client <- connectSystem
-  printDBusTree client
+  getDBusTree client >>= print
