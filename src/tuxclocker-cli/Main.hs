@@ -12,6 +12,13 @@ import qualified DBus.Introspection as I
 tuxClockerCall :: MethodCall -> MethodCall
 tuxClockerCall call = call { methodCallDestination = Just "org.tuxclocker" }
 
+printTree :: Show a => Tree a -> IO ()
+printTree tree = printIndent tree 0 where
+  printIndent :: Show a => Tree a -> Int -> IO ()
+  printIndent (Node rootLabel subForest) level = do
+    print $ (replicate level ' ') <> show rootLabel
+    mapM_ (\tree -> printIndent tree (level + 1)) subForest
+
 getObject :: Client -> ObjectPath -> IO I.Object
 getObject client path = do
   reply <- call_ client $
@@ -39,4 +46,4 @@ getDBusTree client = unfoldTreeM (buildNode client) "/" where
 
 main = do
   client <- connectSystem
-  getDBusTree client >>= print
+  getDBusTree client >>= printTree
