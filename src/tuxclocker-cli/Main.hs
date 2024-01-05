@@ -28,22 +28,30 @@ getObject client path = do
     (error ("Invalid introspection XML: " ++ show xml))
     (xml >>= I.parseXML path)
 
-getName :: Client -> ObjectPath -> IO Variant
+getName :: Client -> ObjectPath -> IO String
 getName client path =
   let
     call = tuxClockerCall $ methodCall path "org.tuxclocker.Node" "name"
   in
-    getProperty client call <&> fromRight (toVariant ("Unnamed" :: Text))
+    getProperty client call <&> fromRight (toVariant ("Unnamed" :: String)) <&> variantToString
 
 getDBusTree :: Client -> IO (Tree Variant)
 getDBusTree client = unfoldTreeM (buildNode client) "/" where
-  buildNode :: Client -> ObjectPath -> IO (Variant, [ObjectPath])
+  buildNode :: Client -> ObjectPath -> IO (ObjectPath, [ObjectPath])
   buildNode client path = do
     object <- getObject client path
-    name <- getName client $ I.objectPath object
     let childPaths = I.objectPath <$> I.objectChildren object
-    pure (name, childPaths)
+    pure (I.objectPath object, childPaths)
+
+variantToString :: Variant -> String
+variantToString x = fromMaybe "Invalid" $ fromVariant x
+
+getNameTree :: Client -> Tree ObjectPath -> IO (Tree String)
+getNameTree client = mapM (getName client)
+
 
 main = do
   client <- connectSystem
-  getDBusTree client >>= printTree
+  tree <- getDBusTree client
+  nameTree <- getNameTree client tree
+  putStr $ drawTree nameTree
