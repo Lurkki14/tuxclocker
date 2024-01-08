@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: 2023-12-04 18:54+0000\n"
+"PO-Revision-Date: 2024-01-02 04:07+0000\n"
 "Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
 "Language-Team: Georgian <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/ka/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.3-dev\n"
+"X-Generator: Weblate 5.4-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
@@ -409,7 +409,7 @@ msgstr "შენახვა"
 
 #: src/tuxclocker-qt/MainWindow.cpp:57
 msgid "Couldn't connect to TuxClocker daemon: %1"
-msgstr ""
+msgstr "ვერ მივუერთდი TuxClocker-ის დემონს: %1"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Maximize TuxClocker"
