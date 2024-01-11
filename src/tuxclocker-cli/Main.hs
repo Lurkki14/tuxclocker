@@ -7,6 +7,8 @@ import Data.Text (Text)
 import Data.Tree
 import DBus
 import DBus.Client
+import Text.Printf
+
 import qualified DBus.Internal.Types as I
 import qualified DBus.Introspection as I
 
@@ -17,6 +19,13 @@ data DeviceNode = DeviceNode {
   object :: I.Object,
   interface :: Maybe DeviceInterface
 }
+
+newtype ReadableValue = ReadableValue I.Atom
+
+instance Show ReadableValue where
+  -- Show 2 decimals for Double
+  show (ReadableValue (I.AtomDouble d)) = printf "%.2f" d
+  show (ReadableValue x) = I.showAtom False x
 
 newtype DynamicReadableNode = DynamicReadableNode ObjectPath
 
@@ -65,9 +74,13 @@ getValue :: Client -> DynamicReadableNode -> IO String
 getValue client (DynamicReadableNode path) =
   let
     _call = tuxClockerCall $ methodCall path "org.tuxclocker.DynamicReadable" "value"
+    fromResult (False, I.Variant (I.ValueAtom value)) = Just $ ReadableValue value
+    fromResult _ = Nothing
+    toReadableValue x = fromVariant x >>= fromResult
   in do
     reply <- call_ client _call
-    pure $ show $ head $ methodReturnBody reply
+    let variant = head $ methodReturnBody reply
+    pure $ fromMaybe "Invalid" (show <$> toReadableValue variant)
 
 getDBusTree :: Client -> IO (Tree I.Object)
 getDBusTree client = unfoldTreeM (buildNode client) "/" where
