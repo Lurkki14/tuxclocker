@@ -6,5 +6,6 @@ build-type: Simple
 executable tuxclocker
   build-depends: base >= 4.16,
                  dbus >= 1.2,
-                 text >= 2.0
+                 text >= 2.0,
+                 containers >= 0.6
   main-is: Main.hs

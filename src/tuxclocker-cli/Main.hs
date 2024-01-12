@@ -7,6 +7,8 @@ import Data.Text (Text)
 import Data.Tree
 import DBus
 import DBus.Client
+import Text.Printf
+
 import qualified DBus.Internal.Types as I
 import qualified DBus.Introspection as I
 
@@ -18,7 +20,26 @@ data DeviceNode = DeviceNode {
   interface :: Maybe DeviceInterface
 }
 
+data ReadableData = ReadableData {
+  value :: ReadableValue,
+  unit :: Maybe String
+}
+
 newtype DynamicReadableNode = DynamicReadableNode ObjectPath
+
+newtype ReadableValue = ReadableValue I.Atom
+
+instance Show ReadableData where
+  show x = maybe valStr (\u -> valStr <> " " <> u) $ unit x where
+    valStr = show $ value x
+
+instance Show ReadableValue where
+  -- Show 2 decimals for Double
+  show (ReadableValue (I.AtomDouble d)) = printf "%.2f" d
+  show (ReadableValue x) = I.showAtom False x
+
+maybeRight (Right x) = Just x
+maybeRight _ = Nothing
 
 tuxClockerCall :: MethodCall -> MethodCall
 tuxClockerCall call = call { methodCallDestination = Just "org.tuxclocker" }
@@ -50,9 +71,13 @@ getShowNode client node = do
 
 getShowInterface :: Client -> DeviceNode -> IO String
 getShowInterface client node = go client node where
-  go client node@DeviceNode { interface = Just DynamicReadable } =
-    getValue client $ DynamicReadableNode $ I.objectPath $ object node
+  go :: Client -> DeviceNode -> IO String
+  go client node@DeviceNode { interface = Just DynamicReadable } = do
+    data' <- getReadableData client (DynamicReadableNode $ I.objectPath $ object node)
+    pure $ showMaybe data'
   go _ _ = pure ""
+  showMaybe (Just x) = show x
+  showMaybe _ = "Invalid interface"
 
 getName :: Client -> ObjectPath -> IO String
 getName client path =
@@ -61,13 +86,34 @@ getName client path =
   in
     getProperty client call <&> fromRight (toVariant ("Unnamed" :: String)) <&> variantToString
 
-getValue :: Client -> DynamicReadableNode -> IO String
+getValue :: Client -> DynamicReadableNode -> IO (Maybe ReadableValue)
 getValue client (DynamicReadableNode path) =
   let
     _call = tuxClockerCall $ methodCall path "org.tuxclocker.DynamicReadable" "value"
+    fromResult (False, I.Variant (I.ValueAtom value)) = Just $ ReadableValue value
+    fromResult _ = Nothing
+    toReadableValue x = fromVariant x >>= fromResult
   in do
     reply <- call_ client _call
-    pure $ show $ head $ methodReturnBody reply
+    let variant = head $ methodReturnBody reply
+    pure $ toReadableValue variant
+
+-- TODO: no indication when fetching unit fails
+getUnit :: Client -> DynamicReadableNode -> IO (Maybe String)
+getUnit client (DynamicReadableNode path) =
+  let
+    call = tuxClockerCall $ methodCall path "org.tuxclocker.DynamicReadable" "unit"
+    fromResult (False, unit) = Just unit
+    fromResult _ = Nothing
+  in do
+    result <- getProperty client call
+    pure $ maybeRight result >>= fromVariant >>= fromResult
+
+getReadableData :: Client -> DynamicReadableNode -> IO (Maybe ReadableData)
+getReadableData client node = do
+  value <- getValue client node
+  unit <- getUnit client node
+  pure $ fmap (\value -> ReadableData value unit) value
 
 getDBusTree :: Client -> IO (Tree I.Object)
 getDBusTree client = unfoldTreeM (buildNode client) "/" where
