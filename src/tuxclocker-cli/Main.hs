@@ -20,6 +20,8 @@ data DeviceNode = DeviceNode {
   interface :: Maybe DeviceInterface
 }
 
+data InterfaceValue = ValueReadableData ReadableData
+
 data ReadableData = ReadableData {
   value :: ReadableValue,
   unit :: Maybe String
@@ -28,6 +30,9 @@ data ReadableData = ReadableData {
 newtype DynamicReadableNode = DynamicReadableNode ObjectPath
 
 newtype ReadableValue = ReadableValue I.Atom
+
+instance Show InterfaceValue where
+  show (ValueReadableData x) = show x
 
 instance Show ReadableData where
   show x = maybe valStr (\u -> valStr <> " " <> u) $ unit x where
@@ -66,18 +71,18 @@ deviceInterface object =
 getShowNode :: Client -> DeviceNode -> IO String
 getShowNode client node = do
   name <- getName client $ I.objectPath $ object node
-  ifaceText <- getShowInterface client node
-  pure $ name <> "\n" <> ifaceText
+  ifaceValue <- getInterfaceValue client node
+  pure $ name <> "\n" <> showMaybe ifaceValue where
+    showMaybe (Just x) = show x
+    showMaybe _ = ""
 
-getShowInterface :: Client -> DeviceNode -> IO String
-getShowInterface client node = go client node where
-  go :: Client -> DeviceNode -> IO String
+getInterfaceValue :: Client -> DeviceNode -> IO (Maybe InterfaceValue)
+getInterfaceValue client node = go client node where
+  go :: Client -> DeviceNode -> IO (Maybe InterfaceValue)
   go client node@DeviceNode { interface = Just DynamicReadable } = do
     data' <- getReadableData client (DynamicReadableNode $ I.objectPath $ object node)
-    pure $ showMaybe data'
-  go _ _ = pure ""
-  showMaybe (Just x) = show x
-  showMaybe _ = "Invalid interface"
+    pure $ ValueReadableData <$> data'
+  go _ _ = pure Nothing
 
 getName :: Client -> ObjectPath -> IO String
 getName client path =
