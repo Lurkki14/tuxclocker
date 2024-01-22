@@ -368,6 +368,13 @@ std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(AMDGPUData data) {
+	// Don't try to use pre-6.7 interface on RX 7000
+	// TODO: potential regression, if this exists on older cards, but doesn't function
+	char fanCurvePath[128];
+	snprintf(fanCurvePath, 128, "%s/gpu_od/fan_ctrl/fan_curve", data.devPath.c_str());
+	if (std::ifstream{fanCurvePath}.good())
+		return {};
+
 	char path[96];
 	snprintf(path, 96, "%s/pwm1", data.hwmonPath.c_str());
 	if (!std::ifstream{path}.good())
@@ -407,6 +414,71 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWrite(AMDGPUData data) {
 	    .name = _("Fan Speed"),
 	    .interface = a,
 	    .hash = md5(data.identifier + "Fan Speed Write"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
+	char fanCurvePath[128];
+	snprintf(fanCurvePath, 128, "%s/gpu_od/fan_ctrl/fan_curve", data.devPath.c_str());
+	if (!std::ifstream{fanCurvePath}.good())
+		return {};
+
+	auto contentsRaw = fileContents(fanCurvePath);
+	if (!contentsRaw.has_value())
+		return {};
+
+	// Replace the space in 'fan speed' with underscore, see doc/amd-pptables/rx7000-fancurve
+	// to fit the format parsePstateRangeLine expects
+	// Little cursed, but this allows us to use the same algorithm
+	auto contents =
+	    fplus::replace_tokens(std::string{"fan speed"}, std::string{"fan_speed"}, *contentsRaw);
+
+	// We don't care acout the temps, since we set all points to desired speed
+	auto speedRange = parsePstateRangeLine("FAN_CURVE(fan_speed)", contents);
+	if (!speedRange.has_value())
+		return {};
+
+	// Doesn't make sense with what we do
+	auto getFunc = [] { return std::nullopt; };
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<int>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<int>(a);
+		if (speedRange->min > target || speedRange->max < target)
+			return AssignmentError::OutOfRange;
+
+		// TODO: do we even need to care about setting same temperature?
+		// Might be slow to do this every assignment
+		auto lines = pstateSectionLines("OD_FAN_CURVE", contents);
+		std::ofstream file{fanCurvePath};
+		if (lines.empty() || !file.good())
+			return AssignmentError::UnknownError;
+
+		for (int i = 0; i < lines.size(); i++) {
+			// Write all curve points to same value
+			auto words = fplus::split_one_of(std::string{" "}, false, lines[i]);
+			if (words.size() < 3)
+				return AssignmentError::UnknownError;
+
+			// Essentially cut off the 'C' in '65C'
+			auto temp = std::atoi(words[1].c_str());
+			char cmdString[32];
+			// TODO: docs say PWM but internet says percentage
+			snprintf(cmdString, 32, "%i %i %i", i, temp, target);
+			if (!(file << cmdString))
+				return AssignmentError::UnknownError;
+		}
+		if (file << "c")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	return {DeviceNode{
+	    .name = _("Fan Speed"),
+	    .interface = Assignable{setFunc, *speedRange, getFunc, _("%")},
+	    .hash = md5(data.identifier + "RX7000 Fan Speed"),
 	}};
 }
 
@@ -1330,6 +1402,7 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		{getFanRoot, {
 			{getFanMode, {}},
 			{getFanSpeedWrite, {}},
+			{getFanSpeedWriteRX7000, {}},
 			{getFanSpeedRead, {}}
 		}},
 		{getPowerRoot, {
