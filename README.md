@@ -32,7 +32,7 @@ Refer to the [0.1.1 release readme](https://github.com/Lurkki14/tuxclocker/tree/
 - Support for multiple fans on one GPU
 - Fan mode
 - Fan speed
-- Core and memory clocks (Xorg only)
+- Core and memory clocks (Xorg works, also experimental support elsewhere)
 - Power limit
 - Temperatures
 - Utilizations
