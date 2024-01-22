@@ -112,6 +112,8 @@ You can use the `tuxclocker.tar` from the release page if you don't want to comp
 ## Using distribution packages
 This list may contain unofficial distribution packages, maintained by other people not directly related with this project.
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/tuxclocker.svg)](https://repology.org/project/tuxclocker/versions)
+
 #### For openSUSE Tumbleweed
 NOTE: Due to NVIDIA proprietary driver license problems the package is built without NVIDIA modules. See [issue#65](https://github.com/Lurkki14/tuxclocker/issues/65) for more info.
 
@@ -120,9 +122,6 @@ Install the [tuxclocker](https://software.opensuse.org//download.html?project=ho
 sudo zypper in opi
 opi tuxclocker
 ```
-
-#### For Arch Linux
-Available on [AUR](https://aur.archlinux.org/packages/tuxclocker)
 
 ## Dependencies
 
