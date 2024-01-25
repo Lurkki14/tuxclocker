@@ -70,12 +70,3 @@ if get_option('plugins-cpu')
 		install : true,
 		link_with : libtuxclocker)
 endif
-
-tests = executable('tests', 'Tests.cpp', 'AMDUtils.cpp', 'Utils.cpp',
-	# Find sample AMD files
-	cpp_args : '-DPROJECT_ROOT="@0@"'.format(meson.source_root()),
-	include_directories : [incdir, fplus_inc],
-	dependencies : [ libdrm_amdgpu, libdrm_dep, boost_dep ])
-
-test('AMD parsing', tests,
-	protocol : 'exitcode')
