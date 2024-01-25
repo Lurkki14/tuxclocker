@@ -423,18 +423,12 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 	if (!std::ifstream{fanCurvePath}.good())
 		return {};
 
-	auto contentsRaw = fileContents(fanCurvePath);
-	if (!contentsRaw.has_value())
+	auto contents = fileContents(fanCurvePath);
+	if (!contents.has_value())
 		return {};
 
-	// Replace the space in 'fan speed' with underscore, see doc/amd-pptables/rx7000-fancurve
-	// to fit the format parsePstateRangeLine expects
-	// Little cursed, but this allows us to use the same algorithm
-	auto contents =
-	    fplus::replace_tokens(std::string{"fan speed"}, std::string{"fan_speed"}, *contentsRaw);
-
 	// We don't care acout the temps, since we set all points to desired speed
-	auto speedRange = parsePstateRangeLine("FAN_CURVE(fan_speed)", contents);
+	auto speedRange = fromFanCurveContents(*contents);
 	if (!speedRange.has_value())
 		return {};
 
@@ -451,7 +445,7 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 
 		// TODO: do we even need to care about setting same temperature?
 		// Might be slow to do this every assignment
-		auto lines = pstateSectionLines("OD_FAN_CURVE", contents);
+		auto lines = pstateSectionLines("OD_FAN_CURVE", *contents);
 		std::ofstream file{fanCurvePath};
 		if (lines.empty() || !file.good())
 			return AssignmentError::UnknownError;

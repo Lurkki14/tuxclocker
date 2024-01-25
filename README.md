@@ -238,6 +238,10 @@ If TuxClocker shows up with no items, there may be a problem with connecting to 
 ![Settings](screenshots/settings.png)
 
 # Developing
+### Tests
+NOTE: building tests requires passing `-Dtest=true` to meson.
+
+Tests are located in `src/test`. Run them with `meson test`.
 
 ### Formatting
 

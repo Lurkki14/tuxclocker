@@ -10,6 +10,8 @@ if need_version
 	version_string_def = '-DTUXCLOCKER_VERSION_STRING="@0@"'.format(version_string)
 endif
 
+fplus_inc = include_directories('include/deps/FunctionalPlus/include')
+
 # OpenSSL is used for hash functions
 openssl_dep = dependency('openssl')
 
@@ -54,3 +56,5 @@ endif
 if get_option('cli')
 	subdir('tuxclocker-cli')
 endif
+
+subdir('test')

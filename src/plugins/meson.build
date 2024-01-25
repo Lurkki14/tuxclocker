@@ -1,5 +1,4 @@
 patterns_inc = include_directories('../include/deps/patterns/include/mpark')
-fplus_inc = include_directories('../include/deps/FunctionalPlus/include')
 
 req_amd = get_option('require-amd')
 libdrm_amdgpu = cc.find_library('drm_amdgpu', required : req_amd)
@@ -71,3 +70,12 @@ if get_option('plugins-cpu')
 		install : true,
 		link_with : libtuxclocker)
 endif
+
+tests = executable('tests', 'Tests.cpp', 'AMDUtils.cpp', 'Utils.cpp',
+	# Find sample AMD files
+	cpp_args : '-DPROJECT_ROOT="@0@"'.format(meson.source_root()),
+	include_directories : [incdir, fplus_inc],
+	dependencies : [ libdrm_amdgpu, libdrm_dep, boost_dep ])
+
+test('AMD parsing', tests,
+	protocol : 'exitcode')

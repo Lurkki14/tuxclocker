@@ -73,6 +73,16 @@ std::optional<Range<int>> parsePstateRangeLineWithRead(std::string title, AMDGPU
 	return parsePstateRangeLine(title, *contents);
 }
 
+std::optional<Range<int>> fromFanCurveContents(const std::string &contentsRaw) {
+	// Replace the space in 'fan speed' with underscore, see doc/amd-pptables/rx7000-fancurve
+	// to fit the format parsePstateRangeLine expects
+	// Little cursed, but this allows us to use the same algorithm
+	auto contents =
+	    fplus::replace_tokens(std::string{"fan speed"}, std::string{"fan_speed"}, contentsRaw);
+
+	return parsePstateRangeLine("FAN_CURVE(fan_speed)", contents);
+}
+
 std::optional<std::pair<int, int>> parseLineValuePair(const std::string &line) {
 	auto words = fplus::split_one_of(std::string{" "}, false, line);
 
