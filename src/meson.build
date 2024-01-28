@@ -3,7 +3,7 @@ need_version = get_option('gui') or get_option('daemon')
 
 if need_version
 	# Version information
-	tuxclocker_version = '1.4.0'
+	tuxclocker_version = '1.5.0'
 	git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
 	version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
 	# Used in preprocessor
