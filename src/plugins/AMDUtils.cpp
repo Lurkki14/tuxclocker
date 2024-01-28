@@ -83,6 +83,19 @@ std::optional<Range<int>> fromFanCurveContents(const std::string &contentsRaw) {
 	return parsePstateRangeLine("FAN_CURVE(fan_speed)", contents);
 }
 
+std::vector<int> fanCurveTempsFromContents(const std::string &contents) {
+	auto lines = pstateSectionLines("OD_FAN_CURVE", contents);
+
+	std::vector<int> retval;
+	for (auto &line : lines) {
+		auto value = parseLineValue(line);
+		if (!value.has_value())
+			return {};
+		retval.push_back(*value);
+	}
+	return retval;
+}
+
 std::optional<std::pair<int, int>> parseLineValuePair(const std::string &line) {
 	auto words = fplus::split_one_of(std::string{" "}, false, line);
 

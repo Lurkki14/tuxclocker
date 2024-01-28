@@ -427,9 +427,14 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 	if (!contents.has_value())
 		return {};
 
-	// We don't care acout the temps, since we set all points to desired speed
+	// We don't care acout the temp range, since we set all points to desired speed
 	auto speedRange = fromFanCurveContents(*contents);
 	if (!speedRange.has_value())
+		return {};
+
+	// Only fetch temperatures once
+	auto temps = fanCurveTempsFromContents(*contents);
+	if (temps.empty())
 		return {};
 
 	// Doesn't make sense with what we do
@@ -443,27 +448,16 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 		if (speedRange->min > target || speedRange->max < target)
 			return AssignmentError::OutOfRange;
 
-		// TODO: do we even need to care about setting same temperature?
-		// Might be slow to do this every assignment
-		auto lines = pstateSectionLines("OD_FAN_CURVE", *contents);
+		// Write all curve points to same value
 		std::ofstream file{fanCurvePath};
-		if (lines.empty() || !file.good())
-			return AssignmentError::UnknownError;
-
-		for (int i = 0; i < lines.size(); i++) {
-			// Write all curve points to same value
-			auto words = fplus::split_one_of(std::string{" "}, false, lines[i]);
-			if (words.size() < 3)
-				return AssignmentError::UnknownError;
-
-			// Essentially cut off the 'C' in '65C'
-			auto temp = std::atoi(words[1].c_str());
+		for (int i = 0; i < temps.size(); i++) {
 			char cmdString[32];
 			// TODO: docs say PWM but internet says percentage
-			snprintf(cmdString, 32, "%i %i %i", i, temp, target);
+			snprintf(cmdString, 32, "%i %i %i", i, temps[i], target);
 			if (!(file << cmdString))
 				return AssignmentError::UnknownError;
 		}
+
 		if (file << "c")
 			return std::nullopt;
 		return AssignmentError::UnknownError;

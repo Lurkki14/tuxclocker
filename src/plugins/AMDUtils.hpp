@@ -48,6 +48,7 @@ std::optional<TuxClocker::Device::Range<int>> parsePstateRangeLineWithRead(
     std::string title, AMDGPUData data);
 
 std::optional<TuxClocker::Device::Range<int>> fromFanCurveContents(const std::string &contents);
+std::vector<int> fanCurveTempsFromContents(const std::string &contents);
 
 std::optional<std::pair<int, int>> parseLineValuePair(const std::string &line);
 
