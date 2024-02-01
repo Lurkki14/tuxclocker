@@ -73,7 +73,7 @@ std::optional<Range<int>> parsePstateRangeLineWithRead(std::string title, AMDGPU
 	return parsePstateRangeLine(title, *contents);
 }
 
-std::optional<Range<int>> fromFanCurveContents(const std::string &contentsRaw) {
+std::optional<Range<int>> speedRangeFromContents(const std::string &contentsRaw) {
 	// Replace the space in 'fan speed' with underscore, see doc/amd-pptables/rx7000-fancurve
 	// to fit the format parsePstateRangeLine expects
 	// Little cursed, but this allows us to use the same algorithm
@@ -81,6 +81,13 @@ std::optional<Range<int>> fromFanCurveContents(const std::string &contentsRaw) {
 	    fplus::replace_tokens(std::string{"fan speed"}, std::string{"fan_speed"}, contentsRaw);
 
 	return parsePstateRangeLine("FAN_CURVE(fan_speed)", contents);
+}
+
+std::optional<Range<int>> tempRangeFromContents(const std::string &contentsRaw) {
+	// -||-
+	auto contents = fplus::replace_tokens(
+	    std::string{"hotspot temp"}, std::string{"hotspot_temp"}, contentsRaw);
+	return parsePstateRangeLine("FAN_CURVE(hotspot_temp)", contents);
 }
 
 std::vector<int> fanCurveTempsFromContents(const std::string &contents) {

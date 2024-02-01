@@ -427,14 +427,12 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 	if (!contents.has_value())
 		return {};
 
-	// We don't care acout the temp range, since we set all points to desired speed
-	auto speedRange = fromFanCurveContents(*contents);
-	if (!speedRange.has_value())
-		return {};
-
-	// Only fetch temperatures once
-	auto temps = fanCurveTempsFromContents(*contents);
-	if (temps.empty())
+	// We need the temperature range since the current fan curve can read out invalid values
+	auto tempRange = tempRangeFromContents(*contents);
+	auto speedRange = speedRangeFromContents(*contents);
+	// We only need this for point count
+	auto pointCount = fanCurveTempsFromContents(*contents).size();
+	if (!tempRange.has_value() || !speedRange.has_value() || pointCount == 0)
 		return {};
 
 	// Doesn't make sense with what we do
@@ -450,10 +448,10 @@ std::vector<TreeNode<DeviceNode>> getFanSpeedWriteRX7000(AMDGPUData data) {
 
 		// Write all curve points to same value
 		std::ofstream file{fanCurvePath};
-		for (int i = 0; i < temps.size(); i++) {
+		for (int i = 0; i < pointCount; i++) {
 			char cmdString[32];
 			// TODO: docs say PWM but internet says percentage
-			snprintf(cmdString, 32, "%i %i %i", i, temps[i], target);
+			snprintf(cmdString, 32, "%i %i %i", i, tempRange->min, target);
 			if (!(file << cmdString))
 				return AssignmentError::UnknownError;
 		}

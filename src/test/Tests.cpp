@@ -22,16 +22,28 @@ int failWith(const char *message) {
 	return 1;
 }
 
-int fanCurveParse() {
+int fanCurveSpeedRangeParse() {
 	auto contents = fileContents(fanCurvePath);
 	if (!contents.has_value())
 		return failWith(fileErrorMessage);
 
-	auto range = fromFanCurveContents(*contents);
+	auto range = speedRangeFromContents(*contents);
 	if (!range.has_value())
 		return failWith("Couldn't parse fan speed range");
 
 	return !(range->min == 15 && range->max == 100);
+}
+
+int fanCurveTempRangeParse() {
+	auto contents = fileContents(fanCurvePath);
+	if (!contents.has_value())
+		return failWith(fileErrorMessage);
+
+	auto range = tempRangeFromContents(*contents);
+	if (!range.has_value())
+		return failWith("Couldn't parse temperature range");
+
+	return !(range->min == 25 && range->max == 100);
 }
 
 int fanCurvePointParse() {
@@ -45,5 +57,5 @@ int fanCurvePointParse() {
 }
 
 int main() {
-	return test({fanCurveParse, fanCurvePointParse});
+	return test({fanCurveSpeedRangeParse, fanCurveTempRangeParse, fanCurvePointParse});
 }
