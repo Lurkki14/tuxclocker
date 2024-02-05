@@ -322,6 +322,12 @@ std::vector<TreeNode<DeviceNode>> getTemperature(AMDGPUData data) {
 }
 
 std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
+	// Don't try to use pre-6.7 interface on RX 7000
+	char fanCurvePath[128];
+	snprintf(fanCurvePath, 128, "%s/gpu_od/fan_ctrl/fan_curve", data.devPath.c_str());
+	if (std::ifstream{fanCurvePath}.good())
+		return {};
+
 	char path[96];
 	snprintf(path, 96, "%s/pwm1_enable", data.hwmonPath.c_str());
 	if (!std::ifstream{path}.good())
@@ -364,6 +370,40 @@ std::vector<TreeNode<DeviceNode>> getFanMode(AMDGPUData data) {
 	    .name = _("Fan Mode"),
 	    .interface = a,
 	    .hash = md5(data.identifier + "Fan Mode"),
+	}};
+}
+
+std::vector<TreeNode<DeviceNode>> getFanModeRX7000(AMDGPUData data) {
+	char fanCurvePath[128];
+	snprintf(fanCurvePath, 128, "%s/gpu_od/fan_ctrl/fan_curve", data.devPath.c_str());
+	if (!std::ifstream{fanCurvePath}.good())
+		return {};
+
+	// This isn't really a range of options,
+	// it's provided to reset the fan speed in a sensible manner
+	// (as opposed to having a magic default value, that would reset the underlying fan curve)
+	EnumerationVec enums = {{_("Automatic"), 0u}};
+
+	auto getFunc = []() { return 0u; };
+
+	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
+		if (!std::holds_alternative<uint>(a))
+			return AssignmentError::InvalidType;
+
+		auto target = std::get<uint>(a);
+		if (!hasEnum(target, enums))
+			return AssignmentError::OutOfRange;
+
+		std::ofstream file{fanCurvePath};
+		if (file.good() && file << "r")
+			return std::nullopt;
+		return AssignmentError::UnknownError;
+	};
+
+	return {DeviceNode{
+	    .name = _("Fan Mode"),
+	    .interface = Assignable{setFunc, enums, getFunc, std::nullopt},
+	    .hash = md5("RX 7000 Fan Mode" + data.identifier),
 	}};
 }
 
@@ -1387,6 +1427,7 @@ auto gpuTree = TreeConstructor<AMDGPUData, DeviceNode>{
 		}},
 		{getFanRoot, {
 			{getFanMode, {}},
+			{getFanModeRX7000, {}},
 			{getFanSpeedWrite, {}},
 			{getFanSpeedWriteRX7000, {}},
 			{getFanSpeedRead, {}}
