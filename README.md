@@ -267,9 +267,7 @@ Note: the following scripts assume TuxClocker is installed to `inst/` and librar
 
 The scripts should be used in this order (they all have to be running simultaneously, so probably best to run in separate terminals):
 
-`dev/dbus-start.sh` Starts a separate DBus instance.
-
-`dev/tuxclockerd-start.sh` Launches `tuxclockerd` making it connect to our separate DBus instance and LD_LIBRARY_PATH set to find the built `libtuxclocker`.
+`dev/tuxclockerd-start.sh` Starts a separate DBus instance with `dbus-run-session` and launches `tuxclockerd` using the separate DBus instance and LD_LIBRARY_PATH set to find the built `libtuxclocker`.
 
 `dev/gui-start.sh` Launches the TuxClocker GUI making it connect to our separate DBus instance, so it can find the TuxClocker DBus service.
 
