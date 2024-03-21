@@ -39,6 +39,8 @@ protected:
 	// TODO: allow to start editing with the keyboard
 	EditTriggers editTriggers() { return QAbstractItemView::AllEditTriggers; }
 	void dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int> &) override;
+	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+	void mouseMoveEvent(QMouseEvent *event);
 private:
 	void saveCollapsed(QAbstractItemModel *model);
 	void restoreCollapsed(QAbstractItemModel *model);
@@ -52,4 +54,5 @@ private:
 	QModelIndexList m_editSelection;
 	QModelIndex m_editedIndex;
 	DeviceModelDelegate *m_delegate;
+	QStringList selected_dbus_readables;
 };
