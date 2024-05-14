@@ -1,5 +1,7 @@
 #include "DeviceBrowser.hpp"
 #include "AssignableItemData.hpp"
+#include "./monitor/Monitor.hpp"
+#include "./monitor/Metric.hpp"
 #include "qnamespace.h"
 
 #include <Globals.hpp>
@@ -11,6 +13,8 @@
 #include <QVariant>
 #include <Settings.hpp>
 #include <Utils.hpp>
+#include <QMimeData>
+#include <QStandardItemModel>
 
 #define _(String) gettext(String)
 
@@ -19,6 +23,48 @@ using namespace TuxClocker::Device;
 
 Q_DECLARE_METATYPE(AssignableItemData)
 Q_DECLARE_METATYPE(AssignableProxy *)
+
+class MonitorDropBox : public QLabel{
+public:
+	Monitor monitor;
+	QWidget widget;
+
+	MonitorDropBox(QWidget *parent) : QLabel(parent), monitor(nullptr), widget(nullptr){
+		setAcceptDrops(true);
+		setFrameStyle(QFrame::Box);
+		setLineWidth(1);
+		setText("Monitor");
+		setAlignment(Qt::AlignCenter);
+	}
+
+	void setupMonitor(QStringList dbus_paths){
+		monitor.setParent(&widget);
+		widget.show();
+
+		monitor.metrics.clear();
+
+		for(QString dbus_path : dbus_paths){
+		  monitor.metrics.append(std::make_shared<Metric>(dbus_path));
+		}
+
+		monitor.setupGraphs();
+
+		monitor.start();
+	}
+
+	void dropEvent(QDropEvent *event) override {
+		QStringList dbus_paths = event->mimeData()->text().split(",");
+
+		if(dbus_paths.count()){
+			setupMonitor(dbus_paths);
+		}
+	}
+
+	void dragEnterEvent(QDragEnterEvent *event) override {
+		event->acceptProposedAction();
+	}
+
+};
 
 DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
     : QWidget(parent), m_deviceModel(model) {
@@ -75,9 +121,12 @@ DeviceBrowser::DeviceBrowser(DeviceModel &model, QWidget *parent)
 		Globals::g_mainStack->setCurrentWidget(m_settings);
 	});
 
-	m_layout->addWidget(toolButton, 0, 0);
+	auto monitorDropBox = new MonitorDropBox{this};
 
-	m_layout->addWidget(m_flagLabel, 0, 1, 1, 1, Qt::AlignRight);
+	m_layout->addWidget(toolButton, 0, 0);
+	m_layout->addWidget(monitorDropBox, 0, 1);
+
+	m_layout->addWidget(m_flagLabel, 0, 2, 1, 0, Qt::AlignRight);
 	m_layout->addWidget(m_flagEditor, 0, 2);
 	m_layout->addWidget(m_treeView, 1, 0, 1, 3);
 	m_layout->addWidget(m_apply, 2, 0, 1, 3);
