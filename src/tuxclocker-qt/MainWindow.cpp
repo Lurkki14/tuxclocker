@@ -104,28 +104,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::setTrayIconEnabled(bool enable) {
 	if (enable) {
-		if (!m_trayIcon)
+		if (!m_trayIcon) {
+			m_trayIcon = new QSystemTrayIcon{this};
 			// This seems to make the main window not close during closeEvent
 			m_trayIcon = new QSystemTrayIcon{this};
-		m_trayIcon->setIcon(QIcon{QPixmap{":/tuxclocker-logo.svg"}});
-		m_trayIcon->setToolTip("TuxClocker");
-		m_trayIcon->setContextMenu(createTrayMenu());
-		m_trayIcon->show();
-		connect(m_trayIcon, &QSystemTrayIcon::activated, this,
-		    &MainWindow::show);
-		return;
+			m_trayIcon->setIcon(QIcon{QPixmap{":/tuxclocker-logo.svg"}});
+			m_trayIcon->setToolTip("TuxClocker");
+			m_trayIcon->setContextMenu(createTrayMenu());
+			m_trayIcon->show();
+			connect(m_trayIcon, &QSystemTrayIcon::activated, this,
+		    	&MainWindow::show);
+			return;
+		}
+		else
+			return;
 	}
-	// Remove tray icon
-	if (m_trayIcon)
+
+	if (m_trayIcon) {
 		delete m_trayIcon;
+		m_trayIcon = nullptr;
+	}
 }
 
 QMenu *MainWindow::createTrayMenu() {
 	auto menu = new QMenu{this};
 
-	auto show = new QAction{_("&Maximize TuxClocker"), this};
+	auto show = new QAction{_("&Show TuxClocker"), this};
 	connect(show, &QAction::triggered, this, &MainWindow::show);
 	menu->addAction(show);
+
+	auto hide = new QAction{_("&Hide TuxClocker"), this};
+	connect(hide, &QAction::triggered, this, &MainWindow::hide);
+	menu->addAction(hide);
 
 	auto quit = new QAction{_("&Quit"), this};
 	connect(quit, &QAction::triggered, this, &QApplication::quit);
@@ -146,16 +156,17 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 	if (m_trayIcon && m_trayIcon->isVisible()) {
 		QMessageBox::information(this, tr("TuxClocker"),
-		    tr("TuxClocker will continue to run "
-		       "in the background. To completely "
-		       "exit the application, choose <b><u>Q</u>uit</b> "
-		       "from the system tray icon"));
+				tr("TuxClocker will continue to run "
+				   "in the background. To completely "
+				   "exit the application, choose <b><u>Q</u>uit</b> "
+				   "from the system tray icon"));
 		hide();
 		event->ignore();
 		return;
 	}
 
 	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
+
 	auto cacheFilePath = Utils::cacheFilePath();
 
 	QSettings settings{cacheFilePath, QSettings::NativeFormat};
