@@ -111,11 +111,10 @@ void MainWindow::setTrayIconEnabled(bool enable) {
 			m_trayIcon->setContextMenu(createTrayMenu());
 			m_trayIcon->show();
 			return;
-		}
-		else
+		} else
 			return;
 	}
-	
+
 	if (m_trayIcon) {
 		delete m_trayIcon;
 		m_trayIcon = nullptr;
@@ -124,7 +123,7 @@ void MainWindow::setTrayIconEnabled(bool enable) {
 
 QMenu *MainWindow::createTrayMenu() {
 	auto menu = new QMenu{this};
-	
+
 	auto show = new QAction{_("&Show TuxClocker"), this};
 	connect(show, &QAction::triggered, this, &MainWindow::show);
 	menu->addAction(show);
@@ -149,13 +148,13 @@ void MainWindow::restoreGeometryFromCache(QWidget *widget) {
 
 void MainWindow::closeEvent(QCloseEvent *event) {
 	// if the tray icon is active, hide the application instead of closing it
-	
+
 	if (m_trayIcon && m_trayIcon->isVisible()) {
 		QMessageBox::information(this, tr("TuxClocker"),
-				tr("TuxClocker will continue to run "
-				   "in the background. To completely "
-				   "exit the application, choose <b><u>Q</u>uit</b> "
-				   "from the system tray icon"));
+		    tr("TuxClocker will continue to run "
+		       "in the background. To completely "
+		       "exit the application, choose <b><u>Q</u>uit</b> "
+		       "from the system tray icon"));
 		hide();
 		event->ignore();
 		return;
