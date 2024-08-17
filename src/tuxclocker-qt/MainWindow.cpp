@@ -142,6 +142,19 @@ void MainWindow::restoreGeometryFromCache(QWidget *widget) {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
+	// if the tray icon is active, hide the application instead of closing it
+
+	if (m_trayIcon && m_trayIcon->isVisible()) {
+		QMessageBox::information(this, tr("TuxClocker"),
+		    tr("TuxClocker will continue to run "
+		       "in the background. To completely "
+		       "exit the application, choose <b><u>Q</u>uit</b> "
+		       "from the system tray icon"));
+		hide();
+		event->ignore();
+		return;
+	}
+
 	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
 	auto cacheFilePath = Utils::cacheFilePath();
 
