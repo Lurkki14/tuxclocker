@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: 2023-12-04 20:39+0000\n"
-"Last-Translator: mrintrepide <quentin@intrepide.io>\n"
+"PO-Revision-Date: 2024-09-08 16:09+0000\n"
+"Last-Translator: Gaphilly GD <gaphillygd@gmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/fr/>\n"
 "Language: fr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.3-dev\n"
+"X-Generator: Weblate 5.8-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
@@ -396,8 +396,8 @@ msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
 msgstr ""
-"En activant cela, TuxClocker se cache dans la barre d'état au lieu de se "
-"fermer lorsque la fenêtre est fermée."
+"Cette option masque TuxClocker dans la barre d'état au lieu de le fermer "
+"lorsque la fenêtre est fermée."
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:70
 msgid "Cancel"
@@ -409,7 +409,7 @@ msgstr "Enregistrer"
 
 #: src/tuxclocker-qt/MainWindow.cpp:57
 msgid "Couldn't connect to TuxClocker daemon: %1"
-msgstr ""
+msgstr "Erreur de connexion au daemon TuxClocker : %1"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Maximize TuxClocker"
