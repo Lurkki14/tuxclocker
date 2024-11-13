@@ -1,5 +1,5 @@
 qt5 = import('qt5')
-qt5_dep = dependency('qt5', modules: ['DBus', 'Charts', 'Widgets'])
+qt5_dep = dependency('qt5', modules: ['DBus', 'Charts', 'Widgets', 'PrintSupport'])
 
 # signals2
 boost_dep = dependency('boost')
@@ -9,6 +9,8 @@ moc_files = qt5.preprocess(moc_headers: ['MainWindow.hpp',
 		'data/AssignableItem.hpp',
 		'data/AssignableProxy.hpp',
 		'data/DeviceModel.hpp',
+		'monitor/Monitor.hpp',
+		'monitor/qcustomplot.h',
 		'data/DynamicReadableConnection.hpp',
 		'data/DynamicReadableProxy.hpp',
                 'widgets/AbstractAssignableEditor.hpp',
@@ -28,6 +30,10 @@ sources = ['main.cpp',
 	'data/DynamicReadableProxy.cpp',
 	'widgets/DeviceBrowser.cpp',
 	'widgets/DeviceTreeView.cpp',
+	'monitor/Monitor.cpp',
+	'monitor/Metric.cpp',
+	'monitor/QColorProvider.cpp',
+	'monitor/qcustomplot.cpp',
 	'widgets/DragChartView.cpp',
 	'widgets/EnumEditor.cpp',
 	'widgets/FlagEditor.cpp',

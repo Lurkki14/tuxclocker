@@ -10,6 +10,8 @@
 #include <QHeaderView>
 #include <QSettings>
 #include <Utils.hpp>
+#include <QMimeData>
+#include <QDrag>
 
 using namespace mpark::patterns;
 using namespace TuxClocker::Device;
@@ -26,6 +28,7 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	setSortingEnabled(true);
 	setEditTriggers(SelectedClicked | EditKeyPressed);
 	setContextMenuPolicy(Qt::DefaultContextMenu);
+	setDragEnabled(true);
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -67,6 +70,42 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent) {
 	m_delegate = new DeviceModelDelegate(this);
 
 	setItemDelegate(m_delegate);
+}
+
+void DeviceTreeView::mouseMoveEvent(QMouseEvent *event)
+{
+	if (!(event->buttons() & Qt::LeftButton))
+        return;
+
+	QDrag *drag = new QDrag(this);
+	QMimeData *mimeData = new QMimeData;
+	mimeData->setData("text/plain", selected_dbus_readables.join(",").toUtf8());
+	drag->setMimeData(mimeData);
+
+	Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+}
+
+void DeviceTreeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected){
+	selected_dbus_readables.clear();
+
+	for(auto selection : selected){
+		QModelIndexList selectedIndexes = selection.indexes();
+		auto duplicated = std::unique(selectedIndexes.begin(), selectedIndexes.end(), [](QModelIndex &indexA, QModelIndex &indexB){
+			return indexA.row() == indexB.row();
+		});
+
+		selectedIndexes.erase(duplicated, selectedIndexes.end());
+
+		for(auto model_index : selectedIndexes){
+			auto dynProxyV = model_index.data(DeviceModel::DynamicReadableProxyRole);
+
+			if (dynProxyV.isValid()) {
+				auto proxy = qvariant_cast<DynamicReadableProxy *>(dynProxyV);
+
+				selected_dbus_readables.append(proxy->dbusPath());
+			}
+		}
+	}
 }
 
 void DeviceTreeView::suspendChildren(const QModelIndex &index) {
