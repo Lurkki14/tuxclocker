@@ -8,45 +8,48 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2025-03-16 09:26+0000\n"
+"Last-Translator: தமிழ்நேரம் <anishprabu.t@gmail.com>\n"
+"Language-Team: Tamil <https://hosted.weblate.org/projects/tuxclocker/"
+"tuxclocker/ta/>\n"
 "Language: ta\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.11-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
-msgstr ""
+msgstr "தானியங்கி"
 
 #: src/plugins/AMD.cpp:43
 msgid "Lowest"
-msgstr ""
+msgstr "மிகக் குறைந்த"
 
 #: src/plugins/AMD.cpp:43
 msgid "Highest"
-msgstr ""
+msgstr "அதிகபட்சம்"
 
 #: src/plugins/AMD.cpp:44 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Manual"
-msgstr ""
+msgstr "கையேடு"
 
 #: src/plugins/AMD.cpp:44
 msgid "Base Levels"
-msgstr ""
+msgstr "அடிப்படை நிலைகள்"
 
 #: src/plugins/AMD.cpp:44
 msgid "Lowest Core Clock"
-msgstr ""
+msgstr "மிகக் குறைந்த கோர் கடிகாரம்"
 
 #: src/plugins/AMD.cpp:45
 msgid "Lowest Memory Clock"
-msgstr ""
+msgstr "குறைந்த நினைவக கடிகாரம்"
 
 #: src/plugins/AMD.cpp:45
 msgid "Highest Clocks"
-msgstr ""
+msgstr "மிக உயர்ந்த கடிகாரங்கள்"
 
 #: src/plugins/AMD.cpp:155 src/plugins/AMD.cpp:530 src/plugins/AMD.cpp:552
 #: src/plugins/AMD.cpp:974 src/plugins/AMD.cpp:1005 src/plugins/AMD.cpp:1033
@@ -55,361 +58,363 @@ msgstr ""
 #: src/plugins/Nvidia.cpp:241 src/plugins/Nvidia.cpp:260
 #: src/plugins/Nvidia.cpp:281
 msgid "MHz"
-msgstr ""
+msgstr "MHZ"
 
 #: src/plugins/AMD.cpp:299 src/plugins/AMD.cpp:870 src/plugins/AMD.cpp:1157
 #: src/plugins/CPU.cpp:972 src/plugins/Nvidia.cpp:692
 #: src/plugins/Nvidia.cpp:739
 msgid "mV"
-msgstr ""
+msgstr "எம்.வி."
 
 #: src/plugins/AMD.cpp:312 src/plugins/AMD.cpp:1078 src/plugins/AMD.cpp:1093
 #: src/plugins/CPU.cpp:260 src/plugins/Nvidia.cpp:639
 #: src/plugins/Nvidia.cpp:656 src/plugins/Nvidia.cpp:671
 msgid "°C"
-msgstr ""
+msgstr ". C."
 
 #: src/plugins/AMD.cpp:316 src/plugins/Nvidia.cpp:643
 msgid "Temperature"
-msgstr ""
+msgstr "வெப்பநிலை"
 
 #: src/plugins/AMD.cpp:364 src/plugins/Nvidia.cpp:489
 msgid "Fan Mode"
-msgstr ""
+msgstr "ரசிகர்களின் ஃபேசன்"
 
 #: src/plugins/AMD.cpp:404 src/plugins/AMD.cpp:435 src/plugins/AMD.cpp:919
 #: src/plugins/AMD.cpp:939 src/plugins/CPU.cpp:507 src/plugins/Nvidia.cpp:391
 #: src/plugins/Nvidia.cpp:434 src/plugins/Nvidia.cpp:504
 #: src/plugins/Nvidia.cpp:524 src/plugins/Nvidia.cpp:560
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: src/plugins/AMD.cpp:407 src/plugins/AMD.cpp:439 src/plugins/Nvidia.cpp:396
 #: src/plugins/Nvidia.cpp:439
 msgid "Fan Speed"
-msgstr ""
+msgstr "ரசிகர்களின் விரைவு"
 
 #: src/plugins/AMD.cpp:491 src/plugins/AMD.cpp:509 src/plugins/CPU.cpp:594
 #: src/plugins/CPU.cpp:631 src/plugins/CPU.cpp:668 src/plugins/Nvidia.cpp:580
 #: src/plugins/Nvidia.cpp:621
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: src/plugins/AMD.cpp:494 src/plugins/Nvidia.cpp:624
 msgid "Power Limit"
-msgstr ""
+msgstr "ஆற்றல் வரம்பு"
 
 #: src/plugins/AMD.cpp:513 src/plugins/CPU.cpp:597 src/plugins/Nvidia.cpp:584
 msgid "Power Usage"
-msgstr ""
+msgstr "ஆற்றல் பயன்பாடு"
 
 #: src/plugins/AMD.cpp:534 src/plugins/AMD.cpp:591 src/plugins/AMD.cpp:663
 #: src/plugins/Nvidia.cpp:264
 msgid "Core Clock"
-msgstr ""
+msgstr "கோர் கடிகாரம்"
 
 #: src/plugins/AMD.cpp:556 src/plugins/AMD.cpp:734 src/plugins/Nvidia.cpp:285
 msgid "Memory Clock"
-msgstr ""
+msgstr "நினைவக கடிகாரம்"
 
 #: src/plugins/AMD.cpp:591 src/plugins/Nvidia.cpp:244
 msgid "Core Clock Offset"
-msgstr ""
+msgstr "கோர் கடிகாரம் ஆஃப்செட்"
 
 #: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:696 src/plugins/AMD.cpp:873
 #: src/plugins/CPU.cpp:971 src/plugins/Nvidia.cpp:696
 msgid "Core Voltage"
-msgstr ""
+msgstr "மைய மின்னழுத்தம்"
 
 #: src/plugins/AMD.cpp:627 src/plugins/AMD.cpp:1160 src/plugins/Nvidia.cpp:743
 msgid "Core Voltage Offset"
-msgstr ""
+msgstr "கோர் மின்னழுத்த ஆஃப்செட்"
 
 #: src/plugins/AMD.cpp:767
 msgid "Memory Voltage"
-msgstr ""
+msgstr "நினைவக மின்னழுத்தம்"
 
 #: src/plugins/AMD.cpp:788
 msgid "Point"
-msgstr ""
+msgstr "புள்ளியம்"
 
 #: src/plugins/AMD.cpp:814 src/plugins/AMD.cpp:840
 msgid "State"
-msgstr ""
+msgstr "மாநிலம்"
 
 #: src/plugins/AMD.cpp:903
 msgid "Performance Parameter Control"
-msgstr ""
+msgstr "செயல்திறன் அளவுரு கட்டுப்பாடு"
 
 #: src/plugins/AMD.cpp:923 src/plugins/Nvidia.cpp:508
 msgid "Core Utilization"
-msgstr ""
+msgstr "கோர் பயன்பாடு"
 
 #: src/plugins/AMD.cpp:943 src/plugins/Nvidia.cpp:528
 msgid "Memory Utilization"
-msgstr ""
+msgstr "நினைவக பயன்பாடு"
 
 #: src/plugins/AMD.cpp:979
 msgid "Maximum Memory Clock"
-msgstr ""
+msgstr "அதிகபட்ச நினைவக கடிகாரம்"
 
 #: src/plugins/AMD.cpp:1010
 msgid "Minimum Memory Clock"
-msgstr ""
+msgstr "குறைந்தபட்ச நினைவக கடிகாரம்"
 
 #: src/plugins/AMD.cpp:1038
 msgid "Maximum Core Clock"
-msgstr ""
+msgstr "அதிகபட்ச மைய கடிகாரம்"
 
 #: src/plugins/AMD.cpp:1066
 msgid "Minimum Core Clock"
-msgstr ""
+msgstr "குறைந்தபட்ச மைய கடிகாரம்"
 
 #: src/plugins/AMD.cpp:1081 src/plugins/CPU.cpp:406 src/plugins/Nvidia.cpp:659
 msgid "Slowdown Temperature"
-msgstr ""
+msgstr "மந்தநிலை வெப்பநிலை"
 
 #: src/plugins/AMD.cpp:1096 src/plugins/Nvidia.cpp:674
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "பணிநிறுத்தம் வெப்பநிலை"
 
 #: src/plugins/AMD.cpp:1176 src/plugins/AMD.cpp:1196 src/plugins/Nvidia.cpp:299
 #: src/plugins/Nvidia.cpp:317 src/plugins/Nvidia.cpp:337
 msgid "MB"
-msgstr ""
+msgstr "எம்பி"
 
 #: src/plugins/AMD.cpp:1180 src/plugins/Nvidia.cpp:341
 msgid "Used Memory"
-msgstr ""
+msgstr "பயன்படுத்தப்பட்ட நினைவகம்"
 
 #: src/plugins/AMD.cpp:1207 src/plugins/Nvidia.cpp:350
 msgid "Video Memory"
-msgstr ""
+msgstr "வீடியோ நினைவகம்"
 
 #: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1056 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
-msgstr ""
+msgstr "வெப்பநிலை"
 
 #: src/plugins/AMD.cpp:1225
 msgid "Voltage-Frequency Curve"
-msgstr ""
+msgstr "Voltage-Frequency வளைவு"
 
 #: src/plugins/AMD.cpp:1234 src/plugins/Nvidia.cpp:363
 msgid "Clocks"
-msgstr ""
+msgstr "கடிகாரங்கள்"
 
 #: src/plugins/AMD.cpp:1242 src/plugins/CPU.cpp:685 src/plugins/CPU.cpp:766
 msgid "Performance"
-msgstr ""
+msgstr "செயல்திறன்"
 
 #: src/plugins/AMD.cpp:1250 src/plugins/Nvidia.cpp:798
 msgid "Fans"
-msgstr ""
+msgstr "ரசிகர்கள்"
 
 #: src/plugins/AMD.cpp:1259 src/plugins/CPU.cpp:1064
 msgid "Power"
-msgstr ""
+msgstr "விசை"
 
 #: src/plugins/AMD.cpp:1270
 msgid "Core Performance States"
-msgstr ""
+msgstr "முக்கிய செயல்திறன் நிலைகள்"
 
 #: src/plugins/AMD.cpp:1281
 msgid "Memory Performance States"
-msgstr ""
+msgstr "நினைவக செயல்திறன் நிலைகள்"
 
 #: src/plugins/AMD.cpp:1290 src/plugins/CPU.cpp:1048 src/plugins/Nvidia.cpp:806
 msgid "Utilizations"
-msgstr ""
+msgstr "பயன்பாடு"
 
 #: src/plugins/CPU.cpp:374 src/plugins/CPU.cpp:433 src/plugins/CPU.cpp:456
 #: src/plugins/CPU.cpp:505 src/plugins/CPU.cpp:747 src/plugins/CPU.cpp:832
 #: src/plugins/CPU.cpp:918 src/plugins/CPU.cpp:939
 msgid "Core"
-msgstr ""
+msgstr "வயிரம்"
 
 #: src/plugins/CPU.cpp:417
 msgid "Overall Temperature"
-msgstr ""
+msgstr "ஒட்டுமொத்த வெப்பநிலை"
 
 #: src/plugins/CPU.cpp:634
 msgid "Memory Power Usage"
-msgstr ""
+msgstr "நினைவக ஆற்றல் பயன்பாடு"
 
 #: src/plugins/CPU.cpp:671
 msgid "Core Power Usage"
-msgstr ""
+msgstr "முக்கிய ஆற்றல் பயன்பாடு"
 
 #: src/plugins/CPU.cpp:683 src/plugins/CPU.cpp:774
 msgid "Power Saving"
-msgstr ""
+msgstr "ஆற்றல் சேமிப்பு"
 
 #: src/plugins/CPU.cpp:687
 msgid "Scheduler Controlled"
-msgstr ""
+msgstr "திட்டமிடல் கட்டுப்படுத்தப்பட்டது"
 
 #: src/plugins/CPU.cpp:768
 msgid "Balanced Performance"
-msgstr ""
+msgstr "சீரான செயல்திறன்"
 
 #: src/plugins/CPU.cpp:770
 msgid "Default"
-msgstr ""
+msgstr "இயல்புநிலை"
 
 #: src/plugins/CPU.cpp:772
 msgid "Balanced Power Saving"
-msgstr ""
+msgstr "சீரான ஆற்றல் சேமிப்பு"
 
 #: src/plugins/CPU.cpp:980
 msgid "Voltages"
-msgstr ""
+msgstr "மின்னழுத்தங்கள்"
 
 #: src/plugins/CPU.cpp:989
 msgid "Power Usage Mode"
-msgstr ""
+msgstr "ஆற்றல் பயன்பாட்டு முறை"
 
 #: src/plugins/CPU.cpp:998
 msgid "Maximum Frequencies"
-msgstr ""
+msgstr "அதிகபட்ச அதிர்வெண்கள்"
 
 #: src/plugins/CPU.cpp:1007
 msgid "Minimum Frequencies"
-msgstr ""
+msgstr "குறைந்தபட்ச அதிர்வெண்கள்"
 
 #: src/plugins/CPU.cpp:1016 src/plugins/CPU.cpp:1024
 msgid "Governor"
-msgstr ""
+msgstr "ஆள்கருவி"
 
 #: src/plugins/CPU.cpp:1032
 msgid "Power Saving Tendencies"
-msgstr ""
+msgstr "மின் சேமிப்பு போக்குகள்"
 
 #: src/plugins/CPU.cpp:1040
 msgid "Frequencies"
-msgstr ""
+msgstr "அலைவெண்கள்"
 
 #: src/plugins/Nvidia.cpp:186
 msgid "Memory Clock Offset"
-msgstr ""
+msgstr "நினைவக கடிகாரம் ஆஃப்செட்"
 
 #: src/plugins/Nvidia.cpp:302
 msgid "Total Memory"
-msgstr ""
+msgstr "மொத்த நினைவகம்"
 
 #: src/plugins/Nvidia.cpp:321
 msgid "Reserved Memory"
-msgstr ""
+msgstr "ஒதுக்கப்பட்ட நினைவகம்"
 
 #: src/plugins/Nvidia.cpp:564
 msgid "PCIe Bandwidth Utilization"
-msgstr ""
+msgstr "PCIE அலைவரிசை பயன்பாடு"
 
 #: src/plugins/Nvidia.cpp:760
 msgid "Fan"
-msgstr ""
+msgstr "விசிறி"
 
 #: src/tuxclocker-qt/data/AssignableItem.cpp:75
 msgid "(Parametrized)"
-msgstr ""
+msgstr "(அளவுரு)"
 
 #: src/tuxclocker-qt/data/DeviceModel.cpp:249
 msgid "No value set"
-msgstr ""
+msgstr "மதிப்பு தொகுப்பு இல்லை"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:28
 msgid "Parametrize..."
-msgstr ""
+msgstr "அளவுரு ..."
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:29
 msgid "Reset to default"
-msgstr ""
+msgstr "இயல்புநிலைக்கு மீட்டமைக்கவும்"
 
 #: src/tuxclocker-qt/data/DeviceModelDelegate.cpp:31
 msgid "Remove settings from profile"
-msgstr ""
+msgstr "சுயவிவரத்திலிருந்து அமைப்புகளை அகற்று"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:30
 msgid "Showing:"
-msgstr ""
+msgstr "காட்டுகிறது:"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:31
 msgid "Apply changes"
-msgstr ""
+msgstr "மாற்றங்களைப் பயன்படுத்துங்கள்"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:35
 msgid "Assignables"
-msgstr ""
+msgstr "ஒதுக்கப்பட்டவை"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:37
 msgid "Dynamic Values"
-msgstr ""
+msgstr "மாறும் மதிப்புகள்"
 
 #: src/tuxclocker-qt/widgets/DeviceBrowser.cpp:39
 msgid "Static Values"
-msgstr ""
+msgstr "நிலையான மதிப்புகள்"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:60
 msgid "Connecting %1 with:"
-msgstr ""
+msgstr "உடன் %1 ஐ இணைக்கிறது:"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:96
 msgid "A node to connect with needs to be selected"
-msgstr ""
+msgstr "இணைக்க வேண்டிய தேவை"
 
 #: src/tuxclocker-qt/widgets/FunctionEditor.hpp:100
 msgid "At least two points need to be placed"
-msgstr ""
+msgstr "குறைந்தது இரண்டு புள்ளிகள் வைக்கப்பட வேண்டும்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:28
 msgid "Settings"
-msgstr ""
+msgstr "அமைப்புகள்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:30
 msgid "Apply profile settings automatically"
-msgstr ""
+msgstr "சுயவிவர அமைப்புகளை தானாகவே பயன்படுத்துங்கள்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:32
 msgid "Use profile"
-msgstr ""
+msgstr "சுயவிவரத்தைப் பயன்படுத்தவும்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:39
 msgid "Add profile"
-msgstr ""
+msgstr "சுயவிவரத்தைச் சேர்க்கவும்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:42
 msgid "Remove selected"
-msgstr ""
+msgstr "தேர்ந்தெடுக்கப்பட்டதை அகற்று"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:45
 msgid "Unnamed"
-msgstr ""
+msgstr "பெயரில்லாதது"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:65
 msgid "Use tray icon"
-msgstr ""
+msgstr "தட்டு ஐகானைப் பயன்படுத்தவும்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:67
 msgid ""
 "Enabling this hides TuxClocker into the tray instead of exiting when closing "
 "the window."
 msgstr ""
+"இதை இயக்குவது சாளரத்தை மூடும்போது வெளியேறுவதற்கு பதிலாக டக்ச் கிளாக்கரை தட்டில் "
+"மறைக்கிறது."
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:70
 msgid "Cancel"
-msgstr ""
+msgstr "ரத்துசெய்"
 
 #: src/tuxclocker-qt/widgets/Settings.cpp:74
 msgid "Save"
-msgstr ""
+msgstr "சேமி"
 
 #: src/tuxclocker-qt/MainWindow.cpp:57
 msgid "Couldn't connect to TuxClocker daemon: %1"
-msgstr ""
+msgstr "டக்ச் கிளாக்கர் டீமனுடன் இணைக்க முடியவில்லை: %1"
 
 #: src/tuxclocker-qt/MainWindow.cpp:124
 msgid "&Maximize TuxClocker"
-msgstr ""
+msgstr "& டக்ச் கிளாக்கரை அதிகரிக்கவும்"
 
 #: src/tuxclocker-qt/MainWindow.cpp:128
 msgid "&Quit"
-msgstr ""
+msgstr "&வெளியேறு"
