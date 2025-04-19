@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: 2025-03-16 09:26+0000\n"
+"PO-Revision-Date: 2025-04-20 23:01+0000\n"
 "Last-Translator: தமிழ்நேரம் <anishprabu.t@gmail.com>\n"
 "Language-Team: Tamil <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/ta/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.11-dev\n"
+"X-Generator: Weblate 5.11.1-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
@@ -191,7 +191,7 @@ msgstr "வீடியோ நினைவகம்"
 
 #: src/plugins/AMD.cpp:1215 src/plugins/CPU.cpp:1056 src/plugins/Nvidia.cpp:790
 msgid "Temperatures"
-msgstr "வெப்பநிலை"
+msgstr "வெப்பநிலைகள்"
 
 #: src/plugins/AMD.cpp:1225
 msgid "Voltage-Frequency Curve"
