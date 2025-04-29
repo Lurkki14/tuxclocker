@@ -111,6 +111,8 @@ void MainWindow::setTrayIconEnabled(bool enable) {
 		m_trayIcon->setToolTip("TuxClocker");
 		m_trayIcon->setContextMenu(createTrayMenu());
 		m_trayIcon->show();
+		connect(m_trayIcon, &QSystemTrayIcon::activated, this,
+		    &MainWindow::show);
 		return;
 	}
 	// Remove tray icon
