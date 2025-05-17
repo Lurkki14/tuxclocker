@@ -702,7 +702,7 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 		std::vector<std::string> sysFsNames;
 		int enumId = 0;
 		for (auto &word : split_words(false, *contents)) {
-			auto e = Enumeration{fromSysFsName(word), enumId};
+			auto e = Enumeration{fromSysFsName(word), static_cast<unsigned>(enumId)};
 			enumId++;
 			enumVec.push_back(e);
 			sysFsNames.push_back(word);
@@ -789,7 +789,7 @@ std::vector<TreeNode<DeviceNode>> getEPPNodes(CPUData data) {
 
 		EnumerationVec enumVec;
 		for (int i = 0; i < sysFsNames.size(); i++) {
-			auto e = Enumeration{fromSysFsName(sysFsNames[i]), i};
+			auto e = Enumeration{fromSysFsName(sysFsNames[i]), static_cast<unsigned>(i)};
 			enumVec.push_back(e);
 		}
 

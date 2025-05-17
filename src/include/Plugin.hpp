@@ -41,7 +41,7 @@ public:
 	virtual ~DevicePlugin() {}
 
 	// Helper for loading all DevicePlugin's
-	static std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> loadPlugins();
+	static std::optional<std::vector<std::shared_ptr<DevicePlugin>>> loadPlugins();
 };
 
 }; // namespace Plugin

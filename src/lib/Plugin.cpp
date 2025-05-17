@@ -9,8 +9,8 @@ namespace fs = std::filesystem;
 
 std::string Plugin::pluginPath() { return TC_PLUGIN_PATH; }
 
-std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> DevicePlugin::loadPlugins() {
-	std::vector<boost::shared_ptr<DevicePlugin>> retval;
+std::optional<std::vector<std::shared_ptr<DevicePlugin>>> DevicePlugin::loadPlugins() {
+	std::vector<std::shared_ptr<DevicePlugin>> retval;
 
 	std::string pluginPath;
 	const char *pluginPathEnv = std::getenv("TUXCLOCKER_PLUGIN_PATH");
