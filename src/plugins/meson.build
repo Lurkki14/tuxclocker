@@ -15,7 +15,7 @@ if libdrm_dep.found() and libdrm_amdgpu.found()
 	deps = [ libdrm_amdgpu, libdrm_dep, boost_dep ]
 	if (python_with_hwdata.found())
 		hwdata_version_cmd = run_command('python3', '-c',
-			'from importlib.metadata import version; print(version(\'hwdata\'))')
+			'from importlib.metadata import version; print(version(\'hwdata\'))', check: true)
 		hwdata_version = hwdata_version_cmd.stdout().strip()
 		if (hwdata_version.version_compare('<2.4.1'))
 			warning('python-hwdata 2.4.1 is recommended for PCI.get_subsystem')
