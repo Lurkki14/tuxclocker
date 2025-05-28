@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
 "PO-Revision-Date: 2025-05-29 20:01+0000\n"
-"Last-Translator: gasMan <alcaevb@gmail.com>\n"
+"Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/ru/>\n"
 "Language: ru\n"
@@ -175,7 +175,7 @@ msgstr "Температура замедления"
 
 #: src/plugins/AMD.cpp:1096 src/plugins/Nvidia.cpp:674
 msgid "Shutdown Temperature"
-msgstr ""
+msgstr "Температура выключения"
 
 #: src/plugins/AMD.cpp:1176 src/plugins/AMD.cpp:1196 src/plugins/Nvidia.cpp:299
 #: src/plugins/Nvidia.cpp:317 src/plugins/Nvidia.cpp:337
