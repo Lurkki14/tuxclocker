@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: tuxclocker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-12-10 15:08+0200\n"
-"PO-Revision-Date: 2025-05-29 20:01+0000\n"
-"Last-Translator: Wellen Filet <techwessel@googlemail.com>\n"
+"PO-Revision-Date: 2025-07-30 17:07+0000\n"
+"Last-Translator: EXE1S10R <rabotpcht@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/tuxclocker/"
 "tuxclocker/ru/>\n"
 "Language: ru\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12-dev\n"
+"X-Generator: Weblate 5.13-dev\n"
 
 #: src/plugins/AMD.cpp:43 src/plugins/AMD.cpp:331 src/plugins/Nvidia.cpp:483
 msgid "Automatic"
@@ -135,15 +135,15 @@ msgstr "Напряжение памяти"
 
 #: src/plugins/AMD.cpp:788
 msgid "Point"
-msgstr ""
+msgstr "Точка"
 
 #: src/plugins/AMD.cpp:814 src/plugins/AMD.cpp:840
 msgid "State"
-msgstr ""
+msgstr "Состояние"
 
 #: src/plugins/AMD.cpp:903
 msgid "Performance Parameter Control"
-msgstr ""
+msgstr "Контроль производительности"
 
 #: src/plugins/AMD.cpp:923 src/plugins/Nvidia.cpp:508
 msgid "Core Utilization"
