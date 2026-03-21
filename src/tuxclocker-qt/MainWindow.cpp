@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTimer>
 #include <QStackedWidget>
 #include <QStandardItemModel>
 #include <QStandardPaths>
@@ -100,12 +101,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	// Enable tray icon when enabled in settings
 	m_trayIcon = nullptr;
 	setTrayIconEnabled(Globals::g_settingsData.useTrayIcon);
+
+	if (m_startMinimized) {
+		QTimer::singleShot(0, this, [this]() {
+			if (m_trayIcon)
+				hide();
+			else
+				showMinimized();
+		});
+	}
 }
 
 void MainWindow::setTrayIconEnabled(bool enable) {
 	if (enable) {
 		if (!m_trayIcon) {
-			m_trayIcon = new QSystemTrayIcon{this};
 			// This seems to make the main window not close during closeEvent
 			m_trayIcon = new QSystemTrayIcon{this};
 			m_trayIcon->setIcon(QIcon{QPixmap{":/tuxclocker-logo.svg"}});
@@ -113,13 +122,15 @@ void MainWindow::setTrayIconEnabled(bool enable) {
 			m_trayIcon->setContextMenu(createTrayMenu());
 			m_trayIcon->show();
 			connect(m_trayIcon, &QSystemTrayIcon::activated, this,
-		    	&MainWindow::show);
-			return;
+			    [this](QSystemTrayIcon::ActivationReason reason) {
+				if (reason == QSystemTrayIcon::Trigger ||
+				    reason == QSystemTrayIcon::DoubleClick)
+					restoreWindow();
+			    });
 		}
-		else
-			return;
+		return;
 	}
-
+	// Remove tray icon
 	if (m_trayIcon) {
 		delete m_trayIcon;
 		m_trayIcon = nullptr;
@@ -130,7 +141,7 @@ QMenu *MainWindow::createTrayMenu() {
 	auto menu = new QMenu{this};
 
 	auto show = new QAction{_("&Show TuxClocker"), this};
-	connect(show, &QAction::triggered, this, &MainWindow::show);
+	connect(show, &QAction::triggered, this, &MainWindow::restoreWindow);
 	menu->addAction(show);
 
 	auto hide = new QAction{_("&Hide TuxClocker"), this};
@@ -138,7 +149,10 @@ QMenu *MainWindow::createTrayMenu() {
 	menu->addAction(hide);
 
 	auto quit = new QAction{_("&Quit"), this};
-	connect(quit, &QAction::triggered, this, &QApplication::quit);
+	connect(quit, &QAction::triggered, this, [this]() {
+		saveStateToCache();
+		QApplication::quit();
+	});
 	menu->addAction(quit);
 
 	return menu;
@@ -149,27 +163,41 @@ void MainWindow::restoreGeometryFromCache(QWidget *widget) {
 
 	QSettings settings{cacheFilePath, QSettings::NativeFormat};
 	widget->restoreGeometry(settings.value("geometry").toByteArray());
+	m_startMinimized = settings.value("minimized", false).toBool();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
 	// if the tray icon is active, hide the application instead of closing it
-
 	if (m_trayIcon && m_trayIcon->isVisible()) {
-		QMessageBox::information(this, tr("TuxClocker"),
-				tr("TuxClocker will continue to run "
-				   "in the background. To completely "
-				   "exit the application, choose <b><u>Q</u>uit</b> "
-				   "from the system tray icon"));
+		auto cacheFilePath = Utils::cacheFilePath();
+		QSettings settings{cacheFilePath, QSettings::NativeFormat};
+		if (!settings.value("trayCloseNoticeShown", false).toBool()) {
+			QMessageBox::information(this, tr("TuxClocker"),
+			    tr("TuxClocker will continue to run "
+			       "in the background. To completely "
+			       "exit the application, choose <b><u>Q</u>uit</b> "
+			       "from the system tray icon"));
+			settings.setValue("trayCloseNoticeShown", true);
+		}
 		hide();
 		event->ignore();
 		return;
 	}
 
-	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
+	saveStateToCache();
+	QWidget::closeEvent(event);
+}
 
+void MainWindow::restoreWindow() {
+	setWindowState((windowState() & ~Qt::WindowMinimized));
+	showNormal();
+}
+
+void MainWindow::saveStateToCache() {
+	// Save window geometry to user cache dir (XDG_CACHE_HOME on Linux)
 	auto cacheFilePath = Utils::cacheFilePath();
 
 	QSettings settings{cacheFilePath, QSettings::NativeFormat};
 	settings.setValue("geometry", saveGeometry());
-	QWidget::closeEvent(event);
+	settings.setValue("minimized", isMinimized() || isHidden());
 }
