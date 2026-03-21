@@ -140,7 +140,7 @@ bool assignableInfoEquals(AssignableInfo a, AssignableInfo b) {
 		if (enumsA.size() != enumsB.size())
 			return false;
 
-		for (int i = 0; i < enumsA.size(); i++) {
+		for (size_t i = 0; i < enumsA.size(); i++) {
 			if (enumsA[i].key != enumsB[i].key || enumsA[i].name != enumsB[i].name)
 				return false;
 		}

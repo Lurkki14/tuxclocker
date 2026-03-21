@@ -28,10 +28,10 @@ EnumEditor::EnumEditor(QWidget *parent) : AbstractAssignableEditor(parent) {
 
 EnumEditor::EnumEditor(TuxClocker::Device::EnumerationVec enums, QWidget *parent)
     : EnumEditor(parent) {
-	auto qStrings = QVector<QString>::fromStdVector(
-	    transform([](auto e) { return QString::fromStdString(e.name); }, enums));
+	auto stdStrings = transform([](auto e) { return QString::fromStdString(e.name); }, enums);
+	auto qStrings = QVector<QString>(stdStrings.begin(), stdStrings.end());
 
-	for (uint i = 0; i < qStrings.length(); i++) {
+	for (int i = 0; i < qStrings.length(); i++) {
 		auto item = new QStandardItem;
 		item->setText(qStrings[i]);
 		item->setData(i, KeyRole);

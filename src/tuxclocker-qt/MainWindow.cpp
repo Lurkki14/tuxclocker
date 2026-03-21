@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 		for (auto &f_node : dbusFlatTree) {
 			// qDebug() << f_node.value.interface << f_node.value.path;
 			FlatTreeNode<TCDBus::DeviceNode> node{
-			    f_node.value, f_node.childIndices.toStdVector()};
+				f_node.value, std::vector<int>(f_node.childIndices.begin(), f_node.childIndices.end())};
 			flatTree.nodes.push_back(node);
 		}
 	}
