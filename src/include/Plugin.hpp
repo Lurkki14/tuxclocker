@@ -2,8 +2,18 @@
 
 #include <boost/config.hpp>
 #include <boost/dll/import.hpp>
+#include <boost/version.hpp>
 #include <optional>
 #include <string>
+
+// boost::dll::import_symbol returns std::shared_ptr starting from Boost 1.88
+#if BOOST_VERSION >= 108800
+	#include <memory>
+	#define TC_PLUGIN_PTR std::shared_ptr
+#else
+	#include <boost/shared_ptr.hpp>
+	#define TC_PLUGIN_PTR boost::shared_ptr
+#endif
 
 #include "Device.hpp"
 #include "Tree.hpp"
@@ -41,7 +51,7 @@ public:
 	virtual ~DevicePlugin() {}
 
 	// Helper for loading all DevicePlugin's
-	static std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> loadPlugins();
+	static std::optional<std::vector<TC_PLUGIN_PTR<DevicePlugin>>> loadPlugins();
 };
 
 }; // namespace Plugin
