@@ -153,7 +153,7 @@ std::vector<TreeNode<DeviceNode>> getMemClockWrite(NvidiaGPUData data) {
 		return {};
 	}
 	// Transfer rate -> clock speed
-	Range<int> range{values.u.range.min / 2, values.u.range.max / 2};
+	Range<int> range{static_cast<int>(values.u.range.min / 2), static_cast<int>(values.u.range.max / 2)};
 
 	// Seems the ..ALL_PERFORMANCE_LEVELS attribute doesn't work with the NVML function
 	auto setFuncNVML = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
@@ -228,7 +228,7 @@ std::vector<TreeNode<DeviceNode>> getCoreClockWrite(NvidiaGPUData data) {
 		return {};
 	}
 
-	Range<int> range{values.u.range.min, values.u.range.max};
+	Range<int> range{static_cast<int>(values.u.range.min), static_cast<int>(values.u.range.max)};
 
 	auto setFunc = [=](AssignmentArgument a) -> std::optional<AssignmentError> {
 		if (!std::holds_alternative<int>(a))
@@ -777,7 +777,7 @@ std::vector<TreeNode<DeviceNode>> getVoltageOffset(NvidiaGPUData data) {
 		return {};
 
 	// uV -> mV
-	Range<int> range{values.u.range.min / 1000, values.u.range.max / 1000};
+	Range<int> range{static_cast<int>(values.u.range.min / 1000), static_cast<int>(values.u.range.max / 1000)};
 
 	auto getFunc = [data]() -> std::optional<AssignmentArgument> {
 		int value;

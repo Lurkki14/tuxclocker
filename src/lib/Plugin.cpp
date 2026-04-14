@@ -1,6 +1,7 @@
 #include <Plugin.hpp>
 
 #include <filesystem>
+#include <iostream>
 #include <sstream>
 
 using namespace TuxClocker::Plugin;
@@ -9,8 +10,8 @@ namespace fs = std::filesystem;
 
 std::string Plugin::pluginPath() { return TC_PLUGIN_PATH; }
 
-std::optional<std::vector<boost::shared_ptr<DevicePlugin>>> DevicePlugin::loadPlugins() {
-	std::vector<boost::shared_ptr<DevicePlugin>> retval;
+std::optional<std::vector<TC_PLUGIN_PTR<DevicePlugin>>> DevicePlugin::loadPlugins() {
+	std::vector<TC_PLUGIN_PTR<DevicePlugin>> retval;
 
 	std::string pluginPath;
 	const char *pluginPathEnv = std::getenv("TUXCLOCKER_PLUGIN_PATH");
