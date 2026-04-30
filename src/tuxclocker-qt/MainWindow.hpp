@@ -13,7 +13,10 @@ protected:
 private:
 	QMenu *createTrayMenu();
 	void restoreGeometryFromCache(QWidget *widget);
+	void saveStateToCache();
+	void restoreWindow();
 	QSystemTrayIcon *m_trayIcon;
+	bool m_startMinimized = false;
 
 	Q_OBJECT
 };

@@ -99,7 +99,7 @@ std::optional<uint64_t> readMsr(uint64_t address, uint64_t mask, uint coreIndex)
 
 std::ifstream &jumptoLine(std::ifstream &file, unsigned int num) {
 	file.seekg(std::ios::beg);
-	for (int i = 0; i < num - 1; ++i) {
+	for (unsigned int i = 0; i < num - 1; ++i) {
 		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 	return file;
@@ -316,7 +316,7 @@ std::vector<uint> utilizationsFromRange(uint minId, uint maxId) {
 				retval.push_back(utilizationPercentage(deltaStat));
 				// Save new value into hashmap
 				timeStatMap[coreId] = curStat;
-			} catch (std::out_of_range) {
+			} catch (const std::out_of_range &) {
 				return {};
 			}
 		}
@@ -700,7 +700,7 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 
 		EnumerationVec enumVec;
 		std::vector<std::string> sysFsNames;
-		int enumId = 0;
+		uint enumId = 0;
 		for (auto &word : split_words(false, *contents)) {
 			auto e = Enumeration{fromSysFsName(word), enumId};
 			enumId++;
@@ -715,7 +715,7 @@ std::vector<TreeNode<DeviceNode>> getGovernors(CPUData data) {
 			if (!string.has_value())
 				return std::nullopt;
 
-			for (int i = 0; i < enumVec.size(); i++) {
+			for (size_t i = 0; i < enumVec.size(); i++) {
 				if (string->find(sysFsNames[i]) != std::string::npos)
 					return enumVec[i].key;
 			}
@@ -788,7 +788,7 @@ std::vector<TreeNode<DeviceNode>> getEPPNodes(CPUData data) {
 			continue;
 
 		EnumerationVec enumVec;
-		for (int i = 0; i < sysFsNames.size(); i++) {
+		for (uint i = 0; i < sysFsNames.size(); i++) {
 			auto e = Enumeration{fromSysFsName(sysFsNames[i]), i};
 			enumVec.push_back(e);
 		}
@@ -802,7 +802,7 @@ std::vector<TreeNode<DeviceNode>> getEPPNodes(CPUData data) {
 			if (!string.has_value())
 				return std::nullopt;
 
-			for (int i = 0; i < enumVec.size(); i++) {
+			for (size_t i = 0; i < enumVec.size(); i++) {
 				// Comparison fails with newline
 				if (fplus::trim('\n', *string) == sysFsNames[i])
 					return enumVec[i].key;

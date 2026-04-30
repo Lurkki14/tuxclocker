@@ -43,7 +43,8 @@ public:
 	virtual void start() override {
 		m_connection =
 		    connect(&m_proxy, &DynamicReadableProxy::valueChanged, [this](auto val) {
-			    match(val)(pattern(as<ReadableValue>(arg)) = [this](auto rv) {
+			    match(val)(
+				pattern(as<ReadableValue>(arg)) = [this](auto rv) {
 				    match(rv)(
 					pattern(
 					    as<uint>(arg)) = [this](auto u) { emitTargetValue(u); },
@@ -51,7 +52,10 @@ public:
 								    int i) { emitTargetValue(i); },
 					pattern(as<double>(arg)) =
 					    [this](auto d) { emitTargetValue(d); });
-			    });
+			    },
+				pattern(as<TuxClocker::Device::ReadError>(arg)) = [](auto) {
+				    // Silently ignore read errors under load
+				});
 		    });
 	}
 	virtual void stop() override { disconnect(m_connection); }

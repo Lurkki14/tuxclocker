@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	auto ma = new MainAdaptor(&root, dbusRootNode);
+	Q_UNUSED(ma);
 	connection.registerObject("/", &root);
 
 	if (!connection.registerService("org.tuxclocker")) {

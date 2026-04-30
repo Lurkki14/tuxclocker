@@ -110,7 +110,7 @@ DragChartView::DragChartView(QWidget *parent) : QChartView(parent) {
 	chart()->setBackgroundRoundness(0);
 
 	// Set theme colors
-	chart()->setBackgroundBrush(QBrush(QPalette().color(QPalette::Background)));
+	chart()->setBackgroundBrush(QBrush(QPalette().color(QPalette::Window)));
 
 	chart()->legend()->setLabelColor(QPalette().color(QPalette::Text));
 

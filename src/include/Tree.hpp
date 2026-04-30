@@ -50,7 +50,7 @@ public:
 	std::vector<TreeNode<T>> *childrenPtr() { return &m_children; }
 	static void preorder(const TreeNode<T> node, std::function<void(const T)> func) {
 		func(node.m_value);
-		for (const auto child : node.m_children) {
+		for (const auto &child : node.m_children) {
 			preorder(child, func);
 		}
 	}

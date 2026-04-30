@@ -4,7 +4,7 @@ need_version = get_option('gui') or get_option('daemon')
 if need_version
 	# Version information
 	tuxclocker_version = '1.5.1'
-	git_commit = run_command('git', 'describe', '--always', '--dirty').stdout().strip()
+	git_commit = run_command('git', 'describe', '--always', '--dirty', check: true).stdout().strip()
 	version_string = '@0@, git commit @1@'.format(tuxclocker_version, git_commit)
 	# Used in preprocessor
 	version_string_def = '-DTUXCLOCKER_VERSION_STRING="@0@"'.format(version_string)
